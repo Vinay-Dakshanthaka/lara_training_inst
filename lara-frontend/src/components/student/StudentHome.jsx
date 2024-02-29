@@ -358,9 +358,11 @@ const StudentHome = () => {
         </div>
 
         {/* Update Profile Button */}
-        <Link to={`/updateProfile`} className="btn btn-primary">
-          Update Profile
-        </Link>
+        <div className="text-center">
+          <Link to={`/updateProfile`} className="btn btn-primary col-4 text-center">
+            Update Profile
+          </Link>
+        </div>
       </div>
                   <Toast
               style={{

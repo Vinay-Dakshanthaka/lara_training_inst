@@ -1,7 +1,7 @@
 // Import required modules
 const db = require('../models');
 const multer = require('multer');
-const upload = multer({dest: 'Images/' });
+const upload = multer({dest: 'Images/'});
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
