@@ -377,7 +377,7 @@ const sendPasswordResetEmail = async (req, res) => {
         }
 
         // Generate unique token using JWT
-        const token = jwt.sign({ studentId: user.id }, jwtSecret, { expiresIn: '10m' }); 
+        const token = jwt.sign({ studentId: user.id }, jwtSecret, { expiresIn: '30m' }); 
 
         // Define the email options
         const mailOptions = {
@@ -385,7 +385,7 @@ const sendPasswordResetEmail = async (req, res) => {
             to: email, // Recipient's email address
             subject: 'Password Reset Request', // Subject line
             text: 'Please click the following link to reset your password: http://localhost:3000/resetPassword?token=' + token, // Plain text body
-            html: '<p>Please click the following link to reset your password: <a href="http://localhost:3000/resetPassword?token=' + token + '">Reset Password</a></p>' // HTML body
+            html: '<p>We received a request to reset the password associated with your account. To proceed with the password reset, please click on Reset Password</p><p>Please click the following link to reset your password: <a href="http://localhost:3000/resetPassword?token=' + token + '">Reset Password</a></p><p>If you did not request a password reset, you can ignore this email. Please note that the link will expire after 30 minutes, so make sure to reset your password promptly</p><p>Thank You,</p><p>Lara Technologies Team</p>'
         };
 
         // Send mail with defined transport object

@@ -60,7 +60,7 @@ const UpdateProfile = () => {
           country: locationDetails.Country
         });
       } else {
-        console.log("error")
+        // console.log("error")
         setDetails(null);
       }
     } catch (error) {
@@ -94,7 +94,7 @@ const UpdateProfile = () => {
         const data = response.data || {};
         setProfileDetails(data);
       } catch (error) {
-        console.error('Failed to fetch profile details:', error);
+        // console.error('Failed to fetch profile details:', error);
         setErrorMessage('Please Fill the Form');
       }
     };
@@ -296,7 +296,7 @@ const validateYOP = (yop) => {
 
 
   return (
-    <div className="container mt-4">
+    <div className="mt-4">
     <h2 className="mb-4 text-center">Update Profile</h2>
     {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
     {showToast &&
@@ -471,10 +471,7 @@ const validateYOP = (yop) => {
     </div>
   </div>
 
-    <div className="container text-center">
-      <button type="button" className="btn btn-primary mb-4 col-4 h2 fw-bold" onClick={handleUpdateProfile}>Update Profile
-      </button>
-    </div>
+    
 
   {/* Bootstrap Toast */}
   <div className="toast" role="alert" aria-live="assertive" aria-atomic="true" style={{ position: 'fixed', bottom: '1rem', right: '1rem' }}>
@@ -482,8 +479,11 @@ const validateYOP = (yop) => {
       Profile updated successfully.
     </div>
   </div>
+  <div className="text-center">
+      <button type="button" className="btn btn-primary col-4  h2 fw-bold" onClick={handleUpdateProfile} >Update Profile
+      </button>
+    </div>
 </form>
-
 
   </div>
   
