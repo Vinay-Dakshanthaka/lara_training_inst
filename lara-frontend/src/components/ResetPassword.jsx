@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
+import { Form, Button, Alert, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import axios from 'axios';
 
 const ResetPassword = () => {
@@ -9,6 +10,17 @@ const ResetPassword = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+   const toggleNewPasswordVisibility = () => {
+    setShowNewPassword(!showNewPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
 
   const handleSubmit = async () => {
     // Validate passwords
@@ -49,25 +61,42 @@ const ResetPassword = () => {
     {error && <Alert variant="danger">{error}</Alert>}
     {success && <Alert variant="success">Password changed successfully.</Alert>}
     <Form onSubmit={handleSubmit}>
-      <Form.Group controlId="newPassword">
+    <Form.Group controlId="newPassword">
         <Form.Label>New Password</Form.Label>
-        <Form.Control
-          type="password"
-          placeholder="Enter new password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          required
-        />
+        <InputGroup>
+          <Form.Control
+            type={showNewPassword ? 'text' : 'password'}
+            placeholder="Enter new password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+          />
+          <Button
+            variant="outline-secondary"
+            onClick={toggleNewPasswordVisibility}
+          >
+            {showNewPassword ? <BsEyeSlash /> : <BsEye />}
+          </Button>
+        </InputGroup>
       </Form.Group>
+
       <Form.Group controlId="confirmPassword">
         <Form.Label>Confirm Password</Form.Label>
-        <Form.Control
-          type="password"
-          placeholder="Confirm new password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
+        <InputGroup>
+          <Form.Control
+            type={showConfirmPassword ? 'text' : 'password'}
+            placeholder="Confirm new password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+          <Button
+            variant="outline-secondary"
+            onClick={toggleConfirmPasswordVisibility}
+          >
+            {showConfirmPassword ? <BsEyeSlash /> : <BsEye />}
+          </Button>
+        </InputGroup>
       </Form.Group>
       <div className='text-center mt-4 mb-4'>
         <Button variant="primary" type="submit">

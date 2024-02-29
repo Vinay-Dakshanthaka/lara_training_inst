@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Container, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Form, Button,InputGroup, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import axios from 'axios';
 
 const LoginForm = () => {
@@ -11,6 +12,12 @@ const LoginForm = () => {
   const [success, setSuccess] = useState(false);
 
   const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,20 +90,25 @@ const LoginForm = () => {
       <div className="login-form bg-light rounded shadow p-4" style={{ maxWidth: '400px', width: '100%' }}>
         <h2 className="text-center mb-4">Login</h2>
         <Form onSubmit={handleSubmit}>
-          <Form.Group controlId="formPhoneNumber" className="mb-3">
-            <Form.Label>Phone Number / Email</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter phone number or email"
-              value={phoneNumber || email}
-              onChange={(e) => {
-                setPhoneNumber(e.target.value);
-                setEmail(e.target.value);
-              }}
-            />
-          </Form.Group>
+        <Form.Group controlId="formPhoneNumber" className="mb-3">
+        <Form.Label>Phone Number / Email</Form.Label>
+        <InputGroup>
+          {/* <InputGroup.Text>
+            <BsPhone />
+          </InputGroup.Text> */}
+          <Form.Control
+            type="text"
+            placeholder="Enter phone number or email"
+            value={phoneNumber || email}
+            onChange={(e) => {
+              setPhoneNumber(e.target.value);
+              setEmail(e.target.value);
+            }}
+          />
+        </InputGroup>
+      </Form.Group>
     
-          <Form.Group controlId="formPassword" className="mb-3">
+          {/* <Form.Group controlId="formPassword" className="mb-3">
             <Form.Label>Password</Form.Label>
             <Form.Control
               type="password"
@@ -104,7 +116,25 @@ const LoginForm = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-          </Form.Group>
+          </Form.Group> */}
+
+        <Form.Group controlId="formPassword" className="mb-3">
+              <Form.Label>Password</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <Button
+                  variant="outline-secondary"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? <BsEyeSlash /> : <BsEye />}
+                </Button>
+              </InputGroup>
+            </Form.Group>
     
           <Button variant="primary" type="submit" className="w-100 mb-3">
             Login

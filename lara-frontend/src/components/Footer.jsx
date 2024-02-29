@@ -43,12 +43,9 @@ const Footer = () => {
               </a>
               <a href="https://www.instagram.com/lara_technologies/" target="_blank" rel="noopener noreferrer" className="text-light me-3">
               <FaInstagram className="me-3" size={30} />
-              </a>
-              
+              </a><a href="https://www.youtube.com/@Faang-academy" target="_blank" rel="noopener noreferrer" className="text-light me-3">
               <FaYoutube className="me-3" size={30} />
-              
-              
-
+              </a>
             </div>
           </Col>
         </Row>

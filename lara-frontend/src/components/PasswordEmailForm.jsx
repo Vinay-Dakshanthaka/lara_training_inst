@@ -33,7 +33,9 @@ const PasswordResetForm = () => {
     return (
         <div className="mt-3 col-12 d-flex justify-content-center">
             <div className="col-md-6 mt-4 mb-4">
+                <h1 className="text-center">Enter Your Email</h1>
                 {message && <Alert variant={alertVariant}>{message}</Alert>}
+
                 <Form onSubmit={handleSubmit}>
                     <Form.Group controlId="formBasicEmail">
                         <Form.Label>Email address</Form.Label>

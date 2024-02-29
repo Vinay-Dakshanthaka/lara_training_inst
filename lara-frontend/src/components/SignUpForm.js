@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Form, Button, Container, Alert } from 'react-bootstrap';
+import { Form, Button, Container,InputGroup, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import { BsEye, BsEyeSlash,BsEnvelope,BsPhone } from 'react-icons/bs';
 import axios from 'axios';
 
 const SignUpForm = () => {
@@ -12,7 +13,16 @@ const SignUpForm = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -92,24 +102,70 @@ const SignUpForm = () => {
         </Form.Group>
 
         <Form.Group controlId="formEmail">
-          <Form.Label>Email address</Form.Label>
-          <Form.Control type="email" placeholder="Enter email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        </Form.Group>
+      <Form.Label>Email address</Form.Label>
+      <InputGroup>
+        <InputGroup.Text>
+          <BsEnvelope />
+        </InputGroup.Text>
+        <Form.Control
+          type="email"
+          placeholder="Enter email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </InputGroup>
+    </Form.Group>
 
-        <Form.Group controlId="formPhoneNumber">
-          <Form.Label>Phone Number</Form.Label>
-          <Form.Control type="text" placeholder="Enter phone number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
-        </Form.Group>
+    <Form.Group controlId="formPhoneNumber">
+      <Form.Label>Phone Number</Form.Label>
+      <InputGroup>
+        <InputGroup.Text>
+          <BsPhone />
+        </InputGroup.Text>
+        <Form.Control
+          type="text"
+          placeholder="Enter phone number"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+        />
+      </InputGroup>
+    </Form.Group>
 
         <Form.Group controlId="formPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </Form.Group>
+        <Form.Label>Password</Form.Label>
+        <InputGroup>
+          <Form.Control
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button
+            variant="outline-secondary"
+            onClick={togglePasswordVisibility}
+          >
+            {showPassword ? <BsEyeSlash /> : <BsEye />}
+          </Button>
+        </InputGroup>
+      </Form.Group>
 
-        <Form.Group controlId="formConfirmPassword">
-          <Form.Label>Confirm Password</Form.Label>
-          <Form.Control type="password" placeholder="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-        </Form.Group>
+      <Form.Group controlId="formConfirmPassword">
+        <Form.Label>Confirm Password</Form.Label>
+        <InputGroup>
+          <Form.Control
+            type={showConfirmPassword ? 'text' : 'password'}
+            placeholder="Confirm password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <Button
+            variant="outline-secondary"
+            onClick={toggleConfirmPasswordVisibility}
+          >
+            {showConfirmPassword ? <BsEyeSlash /> : <BsEye />}
+          </Button>
+        </InputGroup>
+      </Form.Group>
 
         <div className="text-center">
         <Button variant="primary" type="submit"  className="text-center m-2 ms-auto me-auto">
