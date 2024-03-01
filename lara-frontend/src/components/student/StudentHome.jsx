@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Navbar, Nav, Toast } from "react-bootstrap";
+import { Navbar, Nav, Toast, Modal, Button } from "react-bootstrap";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { BsFillEnvelopeFill, BsPhone } from "react-icons/bs";
 import defaultProfileImage from "../default-profile.png";
@@ -12,6 +12,8 @@ const StudentHome = () => {
   const  navigate  = useNavigate();
   const [imagePath, setImagePath] = useState("");
   const [image, setImage] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     const fetchProfileDetails = async () => {
@@ -80,16 +82,20 @@ const StudentHome = () => {
 
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
-    
+    setImageFile(file);
+    setShowConfirmModal(true);
+  };
+
+  const confirmImageUpload = async () => {
     // Validate image size and format
-    if (file.size > 1024 * 1024 || !['image/jpeg', 'image/png'].includes(file.type)) {
+    if (imageFile.size > 1024 * 1024 || !['image/jpeg', 'image/png'].includes(imageFile.type)) {
       // Display warning toast if image size exceeds 1MB or format is not JPEG or PNG
       setShowWarningToast(true);
       return;
     }
   
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("image", imageFile);
   
     try {
       const token = localStorage.getItem("token");
@@ -106,7 +112,7 @@ const StudentHome = () => {
       const data = response.data;
       
       // Display success toast after successful image upload
-      setShowSuccessToast(true)
+      setShowSuccessToast(true);
       window.location.reload();
       // Set the image path received from the response
       setImage(data.imagePath);
@@ -395,6 +401,23 @@ const StudentHome = () => {
           >
             <Toast.Body>Image uploaded successfully</Toast.Body>
           </Toast>
+           {/* Modal for image upload confirmation */}
+      <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Image Upload</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to upload this image?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={confirmImageUpload}>
+            Confirm Upload
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
     </div>
   );

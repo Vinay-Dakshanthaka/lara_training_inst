@@ -17,7 +17,7 @@ import Course from './components/homeComponents/Course';
 import PasswordResetForm from './components/PasswordEmailForm';
 import ResetPassword from './components/ResetPassword';
 import ChangePassword from './components/ChangePassword';
-import TermsAndCondition from './components/homeComponents/TermsAndCondition';
+import TermsAndCondition from './components/TermsAndCondition';
 
 
 const App = () => {

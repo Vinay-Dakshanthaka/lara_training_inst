@@ -53,7 +53,7 @@
           <Row>
             <Col className="text-center">
               <p className="mb-0">© 2023 Laratechnology. All rights reserved. |    
-                  <span to='terms' style={{ textDecoration: 'none', cursor: 'pointer' }}>Terms & Conditions</span>
+                  <Link to='terms' style={{ textDecoration: 'none', cursor: 'pointer' }}>Terms & Conditions</Link>
             </p>
             </Col>
           </Row>
