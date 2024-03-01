@@ -31,10 +31,10 @@ module.exports = (sequelize, DataTypes) => {
         district: DataTypes.STRING,
         state: DataTypes.STRING,
         country: DataTypes.STRING,
-        imagePath: {
-            type: DataTypes.STRING, 
-            allowNull: true, 
-          }
+        // imagePath: {
+        //     type: DataTypes.STRING, 
+        //     allowNull: true, 
+        //   }
     },{
         timestamps: false // Disable createdAt and updatedAt
     });

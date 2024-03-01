@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        imagePath: {
+            type: DataTypes.STRING, 
+            allowNull: true, 
+          },
         role: {
             type: DataTypes.ENUM('ADMIN', 'STUDENT', 'SUPER ADMIN'),
             allowNull: false

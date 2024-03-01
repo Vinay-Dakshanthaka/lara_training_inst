@@ -164,7 +164,7 @@ const saveOrUpdateProfile = async (req, res) => {
 const getProfileDetails = async (req, res) => {
     console.log("inside get profile")
     try {
-        console.log("inside get profile tyr")
+        // console.log("inside get profile tyr")
         const student_id = req.studentId;
         const profile = await Profile.findOne({ where: { student_id } });
         if (profile) {
@@ -181,11 +181,11 @@ const getProfileDetails = async (req, res) => {
 // Get profile image controller
 const getProfileImage = async (req, res) => {
     try {
-        const student_id = req.studentId;
-        const profile = await Profile.findOne({ where: { student_id } });
+        const id = req.studentId;
+        const profile = await Student.findOne({ where: { id } });
 
         if (!profile) {
-            return res.status(404).send({ message: 'Profile not found.' });
+            return res.status(404).send({ message: 'Student not found.' });
         }
 
         const imagePath = profile.imagePath;
@@ -236,7 +236,7 @@ const uploadProfileImage = async (req, res) => {
         const imagePath = req.file.path;
         console.log("path :"+imagePath);
         // Update the image path in the database
-        await Profile.update({ imagePath: imagePath }, { where: { student_id: studentId } });
+        await Student.update({ imagePath: imagePath }, { where: { id: studentId } });
 
         res.status(200).send({ message: 'Profile image uploaded successfully.', imagePath });
         console.log("Path: " + imagePath);

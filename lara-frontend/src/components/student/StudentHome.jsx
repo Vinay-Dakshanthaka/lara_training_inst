@@ -237,7 +237,7 @@ const StudentHome = () => {
                 <table className="table">
                   <tbody>
                     <tr>
-                      <th scope="row">Highest Qalification:</th>
+                      <th scope="row">Highest Qualification:</th>
                       <td>{profileDetails.highest_education}</td>
                     </tr>
                     <tr>
