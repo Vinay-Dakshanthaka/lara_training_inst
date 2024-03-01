@@ -440,31 +440,31 @@ const validateYOP = (yop) => {
 
   <div className="card mb-4">
     <div className="card-body">
-    <div className=' bg-primary rounded p-2'><h3 className="text-white">Address<sup className='text-danger fw-bolder fs-6'><b>*</b></sup></h3></div>
+    <div className=' bg-primary rounded p-2'><h3 className="text-white">Address</h3></div>
       <hr />
       <div className="mb-3">
-        <label htmlFor="address" className="form-label">Address(Street/Building No.)</label>
+        <label htmlFor="address" className="form-label">Address(Street/Building No.)<sup className='text-danger fw-bolder fs-6'><b>*</b></sup></label>
         <input type="text" className="form-control" id="address" name="address" value={profileDetails.address} onChange={handleChange} required/>
       </div>
       <div className="mb-3">
-        <label htmlFor="city" className="form-label">City:</label>
+        <label htmlFor="city" className="form-label">City:<sup className='text-danger fw-bolder fs-6'><b>*</b></sup></label>
         <input type="text" className="form-control" id="city" name="city" value={profileDetails.city} onChange={handleChange} required/>
       </div>
       <div className="mb-3">
-        <label htmlFor="pincode" className="form-label">Pincode:</label>
+        <label htmlFor="pincode" className="form-label">Pincode:<sup className='text-danger fw-bolder fs-6'><b>*</b></sup></label>
         <input type="text" className={`form-control ${pincodeError ? 'is-invalid' : ''}`} id="pincode" name="pincode" value={profileDetails.pincode} onChange={handleChange} onBlur={handlePincodeBlur}  required/>
         {pincodeError && <div className="invalid-feedback">{pincodeError}</div>}
       </div>
       <div className="mb-3">
-        <label htmlFor="district" className="form-label">District:</label>
+        <label htmlFor="district" className="form-label">District:<sup className='text-danger fw-bolder fs-6'><b>*</b></sup></label>
         <input type="text" className="form-control" id="district" name="district" value={profileDetails.district} onChange={handleChange} required/>
       </div>
       <div className="mb-3">
-        <label htmlFor="state" className="form-label">State:</label>
+        <label htmlFor="state" className="form-label">State:<sup className='text-danger fw-bolder fs-6'><b>*</b></sup></label>
         <input type="text" className="form-control" id="state" name="state" value={profileDetails.state} onChange={handleChange} required/>
       </div>
       <div className="mb-3">
-        <label htmlFor="country" className="form-label">Country:</label>
+        <label htmlFor="country" className="form-label">Country:<sup className='text-danger fw-bolder fs-6'><b>*</b></sup></label>
         <input type="text" className="form-control" id="country" name="country" value={profileDetails.country} onChange={handleChange} required/>
       </div>
       

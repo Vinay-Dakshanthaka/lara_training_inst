@@ -1,7 +1,7 @@
-import React from 'react';
-import { Container, Card, Accordion } from 'react-bootstrap';
+import React from 'react'
+import { Accordion, Card, Container } from 'react-bootstrap';
 
-const TermsAndConditions = () => {
+const TermsAndCondition = () => {
   return (
     <Container className="mt-5">
       <Accordion defaultActiveKey="0" flush>
@@ -62,6 +62,6 @@ const TermsAndConditions = () => {
       </Accordion>
     </Container>
   );
-};
+}
 
-export default TermsAndConditions;
+export default TermsAndCondition;

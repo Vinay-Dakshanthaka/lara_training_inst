@@ -92,7 +92,7 @@ function CustomNavbar() {
                 <Nav.Link as={Link} to="/">Home</Nav.Link>
                 <Nav.Link as={Link} to="about">About</Nav.Link>
                 <Nav.Link as={Link} to="course">Course</Nav.Link>
-                <div className="dropdown me-3" style={{ position: 'relative' }} onMouseLeave={handleMouseLeave} ref={dropdownRef}>
+                <div className="dropdown me-3 p-2" style={{ position: 'relative' }} onMouseLeave={handleMouseLeave} ref={dropdownRef} >
                   {image ? (
                     <img
                       src={image}
