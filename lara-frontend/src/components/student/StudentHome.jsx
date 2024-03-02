@@ -17,7 +17,7 @@ const StudentHome = () => {
 
   useEffect(() => {
     const fetchProfileDetails = async () => {
-      console.log("inside fetch profile details ");
+      // console.log("inside fetch profile details ");
       try {
 
         const token = localStorage.getItem("token"); // Retrieve token from localStorage
@@ -50,7 +50,7 @@ const StudentHome = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log("Token not found")
+          // console.log("Token not found")
           navigate('/')
           return;
         }
@@ -149,7 +149,7 @@ const StudentHome = () => {
   
         // Set the image data to state
         setImage(`data:${response.headers['content-type']};base64,${base64Image}`);
-        console.log("image "+image)
+        // console.log("image "+image)
       } catch (error) {
         console.error('Error fetching profile image:', error);
       }
@@ -159,7 +159,7 @@ const StudentHome = () => {
   }, []);
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-4 mb-4">
       <div className="card p-4">
         {errorMessage && <div className="alert alert-info">{errorMessage}</div>}
 

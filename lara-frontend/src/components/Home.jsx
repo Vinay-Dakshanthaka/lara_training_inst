@@ -5,8 +5,15 @@ import "../resources/css/home.css"
 import AboutUs from './homeComponents/AboutUs';
 import Course from './homeComponents/Course';
 import CompaniesCarousel from './homeComponents/Companies';
+import { FaWhatsapp } from 'react-icons/fa';
 const Home = () => {
   const [animationStarted, setAnimationStarted] = useState(false);
+  const [whatsappNumber] = useState('+91797593887'); 
+
+  const handleWhatsAppChat = () => {
+    const url = `https://wa.me/${whatsappNumber}`;
+    window.open(url, '_blank');
+  };
   return (
     <>
     <section className="hero-section mt-3">
@@ -85,6 +92,13 @@ const Home = () => {
       </Card>
       </Container>
     </section>
+
+    <div style={{ position: 'fixed', bottom: '30px', right: '30px', zIndex: '9999' }}>
+      <button onClick={handleWhatsAppChat} style={{ backgroundColor: '#25D366', color: '#fff', borderRadius: '50%', padding: '10px', border: 'none', cursor: 'pointer' }}>
+        <FaWhatsapp size={30} />
+      </button>
+    </div>
+
     {/* <Container>
     <CompaniesCarousel/>
     </Container> */}

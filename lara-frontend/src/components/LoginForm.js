@@ -55,7 +55,7 @@ const LoginForm = () => {
         } else if (role === "ADMIN") {
           setSuccess(true)
           setTimeout(() => {
-            console.log(" Admin Logged in")
+            // console.log(" Admin Logged in")
             navigate('/adminDashboard')
             }, 2000);
             // navigate('/adminDashboard');
@@ -63,7 +63,7 @@ const LoginForm = () => {
           setSuccess(true)
           setTimeout(() => {
             // navigate('/studentHome');
-            console.log(" Super Admin Logged in")
+            // console.log(" Super Admin Logged in")
             navigate('/superAdminDashboard');
             }, 2000);
         } else {

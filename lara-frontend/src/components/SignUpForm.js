@@ -3,6 +3,7 @@ import { Form, Button, Container,InputGroup, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { BsEye, BsEyeSlash,BsEnvelope,BsPhone } from 'react-icons/bs';
 import axios from 'axios';
+import QRCode from 'qrcode.react'
 
 const SignUpForm = () => {
   const [name, setName] = useState('');
@@ -93,6 +94,7 @@ const SignUpForm = () => {
     <Container className="d-flex justify-content-center align-items-center min-vh-100">
     <div>
       <h2 className="text-center">Sign Up</h2>
+      {/* <QRCode value='http://localhost:3000/signup' size={480}/> */}
       <Form onSubmit={handleSubmit} className="login-form bg-light rounded shadow p-4" style={{ maxWidth: '600px', width: '400px' }}>
       {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
       {successMessage && <Alert variant="success" className="mt-3">{successMessage}</Alert>}

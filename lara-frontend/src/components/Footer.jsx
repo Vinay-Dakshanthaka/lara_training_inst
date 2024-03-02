@@ -52,7 +52,7 @@
           {/* Copyright */}
           <Row>
             <Col className="text-center">
-              <p className="mb-0">© 2023 Laratechnology. All rights reserved. |    
+              <p className="mb-0">© 2024 Laratechnology. All rights reserved. |    
                   <Link to='terms' style={{ textDecoration: 'none', cursor: 'pointer' }}>Terms & Conditions</Link>
             </p>
             </Col>
