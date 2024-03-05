@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const studentController = require('../controllers/studentController');
 const searchController = require('../controllers/searchController');
+const batchController = require('../controllers/batchController')
 const verifyToken = require('../middleware/authMiddleware');
 const multer = require('multer');
 const upload = multer({dest: 'Images/' });
@@ -49,5 +50,16 @@ router.post('/sendPasswordResetEmail', studentController.sendPasswordResetEmail)
 
 router.post('/resetPassword', studentController.resetPassword);
 
+router.post('/saveBatch',verifyToken, batchController.saveBatch)
+
+router.post('/assignBatchesToStudent',verifyToken,batchController.assignBatchesToStudent)
+
+router.get('/getStudentBatches',verifyToken,batchController.getStudentBatches)
+
+router.get('/getAllStudentsWithBatches',verifyToken,batchController.getAllStudentsWithBatches)
+
+router.get('/getAllBatches',verifyToken,batchController.getAllBatches)
+
+router.post('/deassignBatchesFromStudent',verifyToken,batchController.deassignBatchesFromStudent)
 
 module.exports = router;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AllStudentsProfiles from '../superAdmin/AllStudentsProfiles';
 import StudentDetails from './StudentDetails';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');
@@ -15,6 +15,8 @@ const AdminDashboard = () => {
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
   };
+
+
 
   return (
     <div className="container">
@@ -43,7 +45,8 @@ const AdminDashboard = () => {
           />
           <label className="form-check-label">Profile Details</label>
         </div>
-      </div>
+      </div> 
+     
     </div>
 
     {selectedOption === 'studentDetails' ? <StudentDetails /> : <AllStudentsProfiles />}

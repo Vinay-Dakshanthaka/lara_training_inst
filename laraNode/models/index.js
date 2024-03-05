@@ -34,19 +34,34 @@ db.sequelize = sequelize;
 // Define models
 db.Student = require('./studentModel.js')(sequelize, DataTypes);
 db.Profile = require('./profileModel.js')(sequelize, DataTypes);
+db.Batch = require('./batchModel.js')(sequelize, DataTypes); // Import Batch model
+db.Student_Batch = require('./studentBatchModel.js')(sequelize, DataTypes); // Import Student_Batch model
 
-// Define associations for one-to-one relationship
+// Define associations
 db.Student.hasOne(db.Profile, {
     foreignKey: 'student_id',
-    as: 'profile', // Alias for the associated profile
-    onDelete: 'CASCADE' // Delete the profile if the associated student is deleted
+    as: 'profile',
+    onDelete: 'CASCADE'
 });
 
 db.Profile.belongsTo(db.Student, {
     foreignKey: 'student_id',
-    onDelete: 'CASCADE' // Cascade delete the associated profile if the student is deleted
+    onDelete: 'CASCADE'
 });
 
+// db.Student.belongsToMany(db.Batch, { through: db.Student_Batch }); // Define many-to-many association
+// db.Batch.belongsToMany(db.Student, { through: db.Student_Batch }); // Define many-to-many association
+
+db.Student.belongsToMany(db.Batch, { 
+    through: db.Student_Batch,
+    foreignKey: 'student_id',
+    otherKey: 'batch_id'
+});
+db.Batch.belongsToMany(db.Student, { 
+    through: db.Student_Batch,
+    foreignKey: 'batch_id',
+    otherKey: 'student_id'
+});
 
 // Sync models with the database
 db.sequelize.sync({ force: false })

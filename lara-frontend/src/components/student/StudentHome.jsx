@@ -9,11 +9,12 @@ const StudentHome = () => {
   const [profileDetails, setProfileDetails] = useState({});
   const [studentDetails, setStudentDetails] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
-  const  navigate  = useNavigate();
+  const navigate = useNavigate();
   const [imagePath, setImagePath] = useState("");
   const [image, setImage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [imageFile, setImageFile] = useState(null);
+  const [studentBatches, setStudentBatches] = useState([]);
 
   useEffect(() => {
     const fetchProfileDetails = async () => {
@@ -35,7 +36,7 @@ const StudentHome = () => {
           `http://localhost:8080/api/student/getProfileDetails`,
           config
         ); // Assuming endpoint to fetch profile details
-          setProfileDetails(response.data);
+        setProfileDetails(response.data);
       } catch (error) {
         console.error("Failed to fetch profile details:", error);
         setErrorMessage("Please update your profile details");
@@ -93,10 +94,10 @@ const StudentHome = () => {
       setShowWarningToast(true);
       return;
     }
-  
+
     const formData = new FormData();
     formData.append("image", imageFile);
-  
+
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
@@ -110,7 +111,7 @@ const StudentHome = () => {
         }
       );
       const data = response.data;
-      
+
       // Display success toast after successful image upload
       setShowSuccessToast(true);
       window.location.reload();
@@ -120,13 +121,13 @@ const StudentHome = () => {
       console.error("Error uploading profile image:", error);
     }
   };
-  
+
   // State for showing warning toast
   const [showWarningToast, setShowWarningToast] = useState(false);
-  
+
   // State for showing success toast
   const [showSuccessToast, setShowSuccessToast] = useState(false);
-  
+
 
   useEffect(() => {
     const fetchProfileImage = async () => {
@@ -138,7 +139,7 @@ const StudentHome = () => {
           },
           responseType: 'arraybuffer', // Receive the image as a buffer
         });
-        
+
         // Convert the received image data to Base64
         const base64Image = btoa(
           new Uint8Array(response.data).reduce(
@@ -146,7 +147,7 @@ const StudentHome = () => {
             '',
           ),
         );
-  
+
         // Set the image data to state
         setImage(`data:${response.headers['content-type']};base64,${base64Image}`);
         // console.log("image "+image)
@@ -154,9 +155,40 @@ const StudentHome = () => {
         console.error('Error fetching profile image:', error);
       }
     };
-  
+
     fetchProfileImage();
   }, []);
+
+  useEffect(() => {
+    const fetchStudentBatches = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/');
+          return;
+        }
+
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
+        const response = await axios.get(
+          `http://localhost:8080/api/student/getStudentBatches`,
+          config
+        );
+        const data = response.data || {};
+        if (data.studentBatches) {
+          setStudentBatches(data.studentBatches);
+        }
+      } catch (error) {
+        console.error('Failed to fetch student batches:', error);
+      }
+    };
+
+    fetchStudentBatches();
+  }, [studentId]);
 
   return (
     <div className="container mt-4 mb-4">
@@ -165,24 +197,24 @@ const StudentHome = () => {
 
         {/* Profile Details */}
         <div className="row mb-4">
-  <div className="col-md-12">
-    <div className="card text-center">
-      <div className="card-body row">
-        {/* Left side: Profile Image */}
-        <div className="col-md-6 text-center">
-          {/* Display profile image */}
-          {image ? (
-                  <img
-                    src={image}
-                    alt="Profile"
-                    className="profile-image img-fluid rounded-circle mt-1"
-                    style={{
-                      width: "150px",
-                      height: "150px",
-                      objectFit: "cover",
-                      cursor: "pointer",
-                    }}
-                  />
+          <div className="col-md-12">
+            <div className="card text-center">
+              <div className="card-body row">
+                {/* Left side: Profile Image */}
+                <div className="col-md-6 text-center">
+                  {/* Display profile image */}
+                  {image ? (
+                    <img
+                      src={image}
+                      alt="Profile"
+                      className="profile-image img-fluid rounded-circle mt-1"
+                      style={{
+                        width: "150px",
+                        height: "150px",
+                        objectFit: "cover",
+                        cursor: "pointer",
+                      }}
+                    />
                   ) : (
                     <img
                       src={defaultProfileImage}
@@ -196,41 +228,52 @@ const StudentHome = () => {
                       }}
                     />
                   )}
-          {/* Option to update profile picture */}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            style={{ display: "none" }}
-            id="upload"
-          />
-          <br />
-          <label
-            htmlFor="upload"
-            className="btn btn-sm btn-primary mt-2"
-          >
-            Update Profile Picture
-          </label>
+                  {/* Option to update profile picture */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: "none" }}
+                    id="upload"
+                  />
+                  <br />
+                  <p className="small">Please upload only JPG/PNG files less than 1MB</p>
+                  <label
+                    htmlFor="upload"
+                    className="btn btn-sm btn-primary mt-2"
+                  >
+                    Update Profile Picture
+                  </label>
+                </div>
+
+                {/* Right side: Name, Email, Phone Number */}
+                <div className="col-md-6 text-left mt-3">
+                  <h1 className="card-title" style={{ textTransform: "uppercase" }}>
+                    {profileDetails.name}
+                  </h1>
+                  <p className="card-text">
+                    <BsFillEnvelopeFill size={20} className="text-primary m-2" />
+                    {studentDetails.email}
+                  </p>
+                  <p className="card-text">
+                    <BsPhone size={20} className="text-primary m-2" />
+                    {studentDetails.phoneNumber}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Right side: Name, Email, Phone Number */}
-        <div className="col-md-6 text-left mt-3">
-          <h1 className="card-title" style={{ textTransform: "uppercase" }}>
-            {profileDetails.name}
-          </h1>
-          <p className="card-text">
-            <BsFillEnvelopeFill size={20} className="text-primary m-2" />
-            {studentDetails.email}
-          </p>
-          <p className="card-text">
-            <BsPhone size={20} className="text-primary m-2" />
-            {studentDetails.phoneNumber}
-          </p>
+        <div className=" mb-4 card col-md-12">
+          <h2 className="bg-primary rounded p-2 m-2">Batches</h2>
+          <ul className="m-2 row">
+            {studentBatches.map(batch => (
+              <li className="col-5 m-2" key={batch.batch_id}>{batch.batch_name}</li>
+            ))}
+          </ul>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
+        
 
         {/* Education Details */}
         <div className="row mb-4">
@@ -370,38 +413,38 @@ const StudentHome = () => {
           </Link>
         </div>
       </div>
-                  <Toast
-              style={{
-                position: 'fixed',
-                top: 10,
-                left: 10,
-              }}
-              show={showWarningToast}
-              onClose={() => setShowWarningToast(false)}
-              delay={3000}
-              autohide
-              bg="warning"
-              text="light"
-            >
-            <Toast.Body>Image must be less than 1MB and Please upload only JPEG or PNG files</Toast.Body>
-          </Toast>
+      <Toast
+        style={{
+          position: 'fixed',
+          top: 10,
+          left: 10,
+        }}
+        show={showWarningToast}
+        onClose={() => setShowWarningToast(false)}
+        delay={3000}
+        autohide
+        bg="warning"
+        text="light"
+      >
+        <Toast.Body>Image must be less than 1MB and Please upload only JPEG or PNG files</Toast.Body>
+      </Toast>
 
-          <Toast
-            style={{
-              position: 'fixed',
-              top: 10,
-              left: 10,
-            }}
-            show={showSuccessToast}
-            onClose={() => setShowSuccessToast(false)}
-            delay={3000}
-            autohide
-            bg="success"
-            text="light"
-          >
-            <Toast.Body>Image uploaded successfully</Toast.Body>
-          </Toast>
-           {/* Modal for image upload confirmation */}
+      <Toast
+        style={{
+          position: 'fixed',
+          top: 10,
+          left: 10,
+        }}
+        show={showSuccessToast}
+        onClose={() => setShowSuccessToast(false)}
+        delay={3000}
+        autohide
+        bg="success"
+        text="light"
+      >
+        <Toast.Body>Image uploaded successfully</Toast.Body>
+      </Toast>
+      {/* Modal for image upload confirmation */}
       <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Image Upload</Modal.Title>
