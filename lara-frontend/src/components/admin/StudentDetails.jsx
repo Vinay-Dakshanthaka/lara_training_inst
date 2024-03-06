@@ -2,7 +2,8 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Pagination, Modal, Button, Toast } from 'react-bootstrap';
 import { BsTrash } from 'react-icons/bs';
-import { useNavigate } from 'react-router-dom';
+import {  useNavigate } from 'react-router-dom';
+import BatchWiseStudents from './BatchWiseStudents';
 
 const StudentDetails = () => {
   const [students, setStudents] = useState([]);
@@ -14,7 +15,11 @@ const StudentDetails = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedBatches, setSelectedBatches] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const batchWiseStudents = ()=>{
+    navigate('/batchWiseStudents')
+  }
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -173,8 +178,6 @@ const StudentDetails = () => {
     }
   };
 
-
-
   const [availableBatches, setAvailableBatches] = useState([]);
 
   const fetchAvailableBatches = async () => {
@@ -263,7 +266,10 @@ const StudentDetails = () => {
           <button onClick={() => handleSearch(searchCriteria)} className="btn btn-primary">Search</button>
         </div>
         <div className="col-md-3">
-          <button onClick={createBatch} className="btn btn-primary m-2">Create New Batch</button>
+          <button onClick={createBatch} className="btn btn-warning m-2">Create New Batch</button>
+        </div>
+        <div className='col-6'>
+          <button className='btn btn-warning m-2 col-3' onClick={batchWiseStudents}>Filter By Batch</button>
         </div>
       </div>
 
@@ -284,23 +290,23 @@ const StudentDetails = () => {
               <td>{student.email}</td>
               <td>{student.phoneNumber}</td>
               <td>
-  {batchDetails
-    .filter(batchStudent => batchStudent.id === student.id)
-    .map(batchStudent => (
-      <ul key={batchStudent.id}>
-        {batchStudent.batches.map(batch => (
-          <li key={batch.batch_id}>
-            <div className="d-flex align-items-center justify-content-between">
-              <span>{batch.batch_name}</span>
-              <button className="btn btn-danger ms-2 m-1" onClick={() => deassignBatch(student.id, batch.batch_id)}>
-                <BsTrash/>
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    ))}
-</td>
+                {batchDetails
+                  .filter(batchStudent => batchStudent.id === student.id)
+                  .map(batchStudent => (
+                    <ul key={batchStudent.id}>
+                      {batchStudent.batches.map(batch => (
+                        <li key={batch.batch_id}>
+                          <div className="d-flex align-items-center justify-content-between">
+                            <span>{batch.batch_name}</span>
+                            <button className="btn btn-danger ms-2 m-1" onClick={() => deassignBatch(student.id, batch.batch_id)}>
+                              <BsTrash />
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ))}
+              </td>
 
 
               <td>

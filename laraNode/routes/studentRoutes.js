@@ -62,4 +62,11 @@ router.get('/getAllBatches',verifyToken,batchController.getAllBatches)
 
 router.post('/deassignBatchesFromStudent',verifyToken,batchController.deassignBatchesFromStudent)
 
+router.post('/getStudentsByBatches',verifyToken,batchController.getStudentsByBatches)
+
+router.delete('/deleteBatch',verifyToken,batchController.deleteBatch)
+
+router.put('/updateBatch',verifyToken,batchController.updateBatch)
+
+
 module.exports = router;

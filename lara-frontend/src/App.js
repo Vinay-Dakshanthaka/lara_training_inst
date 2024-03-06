@@ -19,6 +19,7 @@ import ResetPassword from './components/ResetPassword';
 import ChangePassword from './components/ChangePassword';
 import TermsAndCondition from './components/TermsAndCondition';
 import CreateNewBatch from './components/admin/CreateNewBatch';
+import BatchWiseStudents from './components/admin/BatchWiseStudents';
 
 
 const App = () => {
@@ -43,6 +44,7 @@ const App = () => {
             <Route path="/passwodResetForm" element={<PasswordResetForm />} />
             <Route path="/resetPassword" element={<ResetPassword />} />
             <Route path='/createNewBatch' element={<CreateNewBatch />} />
+            <Route path='/batchWiseStudents' element={<BatchWiseStudents />} />
             {/* <Route path="/profile" element={<Profile />} /> */}
             <Route path="*" element={<LoginForm />} />
           </Routes>

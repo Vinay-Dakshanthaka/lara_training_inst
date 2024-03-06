@@ -83,7 +83,7 @@ const ChangePassword = () => {
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
-        setError('Old password does not match');
+        setError('Wrong Password');
       } else {
         setError('Something went wrong. Please try again.');
       }

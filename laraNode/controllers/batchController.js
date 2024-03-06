@@ -30,6 +30,75 @@ const saveBatch = async (req, res) => {
     }
 };
 
+const deleteBatch = async (req, res) => {
+    try {
+        // Extract the batch_id from the request parameters
+        const { batch_id } = req.body;
+        const studentId = req.studentId; 
+        console.log("student id :", studentId)
+        const user = await Student.findByPk(studentId); // Fetch user from database
+        const userRole = user.role; // Get the user's role
+        console.log("role :"+userRole)
+        // Check if the user role is either "ADMIN" or "SUPER ADMIN"
+        if (userRole !== 'ADMIN') {
+            return res.status(403).json({ error: 'Access forbidden' });
+        }
+        console.log("batch id :" , batch_id)
+        const batch = await Batch.findByPk(batch_id);
+
+        // Check if the batch exists
+        if (!batch) {
+            return res.status(404).json({ error: 'Batch not found' });
+        }
+
+        // Delete the batch
+        await batch.destroy();
+
+        // Respond with success message
+        res.status(200).json({ message: 'Batch deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: error.message });
+    }
+};
+
+const updateBatch = async (req, res) => {
+    try {
+        // Extract the batch_id and batch_name from the request body
+        const { batch_id, batch_name } = req.body;
+        const studentId = req.studentId;
+        
+        // Fetch user from database
+        const user = await Student.findByPk(studentId);
+        // Get the user's role
+        const userRole = user.role;
+
+        // Check if the user role is either "ADMIN" or "SUPER ADMIN"
+        if (userRole !== 'ADMIN') {
+            return res.status(403).json({ error: 'Access forbidden' });
+        }
+
+        // Find the batch by ID
+        const batch = await Batch.findByPk(batch_id);
+        // Check if the batch exists
+        if (!batch) {
+            return res.status(404).json({ error: 'Batch not found' });
+        }
+
+        // Update the batch name
+        batch.batch_name = batch_name;
+        await batch.save();
+
+        // Respond with success message
+        res.status(200).json({ message: 'Batch updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: error.message });
+    }
+};
+
+
+
 const getAllBatches = async (req, res) => {
     try {
         // Fetch all batches from the database
@@ -187,6 +256,51 @@ const getAllStudentsWithBatches = async (req, res) => {
     }
 };
 
+//controller function to get the students by batch wise 
+const getStudentsByBatches = async (req, res) => {
+    try {
+        const studentId = req.studentId; 
+        const user = await Student.findByPk(studentId); // Fetch user from database
+        const userRole = user.role; // Get the user's role
+        console.log("role :"+userRole)
+        // Check if the user role is either "ADMIN" or "SUPER ADMIN"
+        if (userRole !== 'ADMIN') {
+            return res.status(403).json({ error: 'Access forbidden' });
+        }
+        const batchNames = req.body.batchNames; 
+        const students = await db.Student.findAll({
+            include: [{
+                model: db.Batch,
+                where: {
+                    batch_name: batchNames // Filter by batch names
+                },
+                through: {
+                    attributes: [] // Exclude any additional attributes from the join table
+                }
+            }],
+            attributes: ['id', 'name', 'email', 'phoneNumber', 'role'] // Only select necessary attributes
+        });
+
+        // Format the response data
+        const studentsInBatches = students.map(student => ({
+            id: student.id,
+            name: student.name,
+            email: student.email,
+            phoneNumber: student.phoneNumber,
+            role: student.role,
+            batches: student.Batches // Array of associated batches
+        }));
+
+        // Send the response
+        res.status(200).json({ students: studentsInBatches });
+    } catch (error) {
+        console.error('Failed to fetch students by batches:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
 
 module.exports = {
     saveBatch,
@@ -194,5 +308,8 @@ module.exports = {
     getStudentBatches,
     getAllStudentsWithBatches,
     getAllBatches,
-    deassignBatchesFromStudent
+    deassignBatchesFromStudent,
+    getStudentsByBatches,
+    deleteBatch,
+    updateBatch,
 }
