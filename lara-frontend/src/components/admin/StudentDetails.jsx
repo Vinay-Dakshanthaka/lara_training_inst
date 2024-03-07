@@ -49,57 +49,58 @@ const StudentDetails = () => {
 
   const handleSearch = async (searchCriteria) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        return;
-      }
+        const token = localStorage.getItem("token");
+        if (!token) {
+            return;
+        }
 
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        };
 
-      let searchUrl = '';
-      let searchParam = '';
+        let searchUrl = '';
+        let searchParam = '';
 
-      // Determine the search URL and parameter based on the search criteria
-      switch (searchCriteria) {
-        case 'name':
-          searchUrl = 'http://localhost:8080/api/student/searchByName';
-          searchParam = 'name';
-          break;
-        case 'email':
-          searchUrl = 'http://localhost:8080/api/student/searchByEmail';
-          searchParam = 'email';
-          break;
-        case 'phoneNumber':
-          searchUrl = 'http://localhost:8080/api/student/searchByPhoneNumber';
-          searchParam = 'phoneNumber';
-          break;
-        default:
-          return; // If invalid search criteria, exit function
-      }
+        // Determine the search URL and parameter based on the search criteria
+        switch (searchCriteria) {
+            case 'email':
+                searchUrl = 'http://localhost:8080/api/student/searchByEmail';
+                searchParam = 'email';
+                break;
+            case 'phoneNumber':
+                searchUrl = 'http://localhost:8080/api/student/searchByPhoneNumber';
+                searchParam = 'phoneNumber';
+                break;
+            case 'name':
+                searchUrl = 'http://localhost:8080/api/student/searchByName';
+                searchParam = 'name';
+                break;
+            default:
+                return; // If invalid search criteria, exit function
+        }
 
-      // Check if the search value is empty
-      if (!searchValue.trim()) {
-        // If empty, fetch all students
-        const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
-        const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
-        setStudents(filteredStudents);
-      } else {
-        // If not empty, perform the search
-        const response = await axios.get(searchUrl, {
-          ...config,
-          params: { [searchParam]: searchValue } // Pass the search value based on the search criteria
-        });
-        const filteredStudents = response.data;
-        setStudents(filteredStudents);
-      }
+        // Check if the search value is empty
+        if (!searchValue.trim()) {
+            // If empty, fetch all students
+            const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
+            const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
+            setStudents(filteredStudents);
+        } else {
+            // If not empty, perform the search
+            const response = await axios.get(searchUrl, {
+                ...config,
+                params: { [searchParam]: searchValue } // Pass the search value based on the search criteria
+            });
+            const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
+            setStudents(filteredStudents);
+        }
     } catch (error) {
-      console.error(error);
+        console.error(error);
     }
-  };
+};
+
 
   const fetchBatchDetails = async () => {
     try {
@@ -248,9 +249,9 @@ const StudentDetails = () => {
             onChange={(e) => setSearchCriteria(e.target.value)}
             className="form-select"
           >
-            <option value="name">Name</option>
             <option value="email">Email</option>
             <option value="phoneNumber">Phone Number</option>
+            <option value="name">Name</option>
           </select>
         </div>
         <div className="col-md-3">

@@ -13,13 +13,13 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             references: {
                 model: 'Batches',
-                key: 'batch_id'
+                key: 'batch_id' 
             }
-        },
-       
+        }
     }, {
         tableName: 'Student_Batch',
         timestamps: false 
     });
+
     return Student_Batch;
 };

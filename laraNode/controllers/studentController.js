@@ -289,10 +289,11 @@ const updateRole = async (req, res) => {
         const user = await Student.findByPk(studentId); // Fetch user from database
         const userRole = user.role; // Get the user's role
         console.log("role :"+userRole)
-        // Check if the user role is either "ADMIN" or "SUPER ADMIN"
-        if (userRole !== 'SUPER ADMIN') {
+        
+        if (userRole !== 'SUPER ADMIN' && userRole !== 'ADMIN' ) {
             return res.status(403).json({ error: 'Access forbidden' });
         }
+        
 
         const { id, role } = req.body; // Extract the id and role from the request body
 

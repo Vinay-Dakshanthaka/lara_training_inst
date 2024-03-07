@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Pagination } from 'react-bootstrap'; 
 
-const AllStudents = () => {
+const AssignRole = () => {
   const [students, setStudents] = useState([]);
   const [updatedRoles, setUpdatedRoles] = useState({});
   const [alertMessage, setAlertMessage] = useState('');
@@ -12,29 +12,29 @@ const AllStudents = () => {
   const [searchValue, setSearchValue] = useState('');
   const [searchCriteria, setSearchCriteria] = useState('name'); // Default search criteria
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          return;
-        }
-  
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-  
-        const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
-        // Filter out SUPER ADMIN students
-        const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
-        setStudents(filteredStudents);
-      } catch (error) {
-        console.error(error);
+  const fetchStudents = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return;
       }
-    };
-  
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
+      // Filter out SUPER ADMIN students
+      const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN" && student.role !== "ADMIN");
+      setStudents(filteredStudents);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
     fetchStudents();
   }, []);
 
@@ -129,15 +129,16 @@ const AllStudents = () => {
         config
       );
   
-      console.log("Role updated successfully for student with ID:", studentId); // Debugging
+    //   console.log("Role updated successfully for student with ID:", studentId); // Debugging
 
       showAlert('Role updated successfully', true);
-  
-      // Optionally, you can refresh the student list after the role is updated
-      // fetchStudents();
+        
+      fetchStudents();
+     
     } catch (error) {
       console.error('Error updating role:', error);
       showAlert('Something went wrong', false);
+      fetchStudents();
     }
   };
 
@@ -165,9 +166,9 @@ const AllStudents = () => {
       className="form-select"
       style={{ width: "auto" }}
     >
+      <option value="name">Name</option>
       <option value="email">Email</option>
       <option value="phoneNumber">Phone Number</option>
-      <option value="name">Name</option>
     </select>
   </div>
   <div className="col-md-6">
@@ -205,7 +206,6 @@ const AllStudents = () => {
                 <select value={updatedRoles[student.id] || student.role} onChange={(e) => handleRoleChange(student.id, e.target.value)}>
                   <option value="STUDENT">STUDENT</option>
                   <option value="TRAINER">TRAINER</option>
-                  <option value="ADMIN">ADMIN</option>
                 </select>
               </td>
               <td>
@@ -229,4 +229,4 @@ const AllStudents = () => {
   );
 };
 
-export default AllStudents;
+export default AssignRole;

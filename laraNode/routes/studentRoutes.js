@@ -68,5 +68,14 @@ router.delete('/deleteBatch',verifyToken,batchController.deleteBatch)
 
 router.put('/updateBatch',verifyToken,batchController.updateBatch)
 
+router.post('/assignTrainerToBatch',verifyToken,batchController.assignTrainerToBatch)
+
+router.get('/fetchBatchesAssignedToTrainer',verifyToken,batchController.fetchBatchesAssignedToTrainer)
+
+router.get('/fetchTrainerDetailsFromBatch',verifyToken,batchController.fetchTrainerDetailsFromBatch)
+
+router.get('/fetchTrainerAndBatchFromStudent',verifyToken,batchController.fetchTrainerAndBatchFromStudent)
+
+
 
 module.exports = router;

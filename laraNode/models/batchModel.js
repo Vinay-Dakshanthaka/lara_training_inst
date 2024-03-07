@@ -9,7 +9,23 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-    }, {
+        description: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        duration: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        price: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        trainer_id: {
+            type:DataTypes.STRING,
+            allowNull:true
+        }
+    },{
         timestamps: false 
     }
     );
