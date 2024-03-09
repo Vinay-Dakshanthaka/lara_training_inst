@@ -14,7 +14,6 @@ router.post('/verifyByEmailAndPassword', studentController.verifyByEmailAndPassw
 
 router.post('/verifyByPhoneAndPassword', studentController.verifyByPhoneAndPassword);
 
-
 // Get student details based on authenticated user's token
 router.get('/getStudentDetails', verifyToken, studentController.getStudentDetails);
 
@@ -68,14 +67,22 @@ router.delete('/deleteBatch',verifyToken,batchController.deleteBatch)
 
 router.put('/updateBatch',verifyToken,batchController.updateBatch)
 
-router.post('/assignTrainerToBatch',verifyToken,batchController.assignTrainerToBatch)
+router.post('/assignTrainersToBatch',verifyToken,batchController.assignTrainersToBatch)
 
 router.get('/fetchBatchesAssignedToTrainer',verifyToken,batchController.fetchBatchesAssignedToTrainer)
 
-router.get('/fetchTrainerDetailsFromBatch',verifyToken,batchController.fetchTrainerDetailsFromBatch)
+// router.get('/fetchTrainerDetailsFromBatch',verifyToken,batchController.fetchTrainerDetailsFromBatch)
 
 router.get('/fetchTrainerAndBatchFromStudent',verifyToken,batchController.fetchTrainerAndBatchFromStudent)
 
+router.get('/fetchAllTrainerAndBatch',verifyToken,batchController.fetchAllTrainerAndBatch)
 
+router.post('/deassignBatchFromTrainer',verifyToken,batchController.deassignBatchFromTrainer)
+
+router.get('/fetchBatchesAssignedToTrainer',verifyToken,batchController.fetchBatchesAssignedToTrainer)
+
+router.post('/assignBatchesToTrainer',verifyToken,batchController.assignBatchesToTrainer)
+
+router.get('/getStudentsByBatchId',verifyToken,batchController.getStudentsByBatchId)
 
 module.exports = router;

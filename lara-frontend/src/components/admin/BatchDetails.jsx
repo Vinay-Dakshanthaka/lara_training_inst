@@ -1,8 +1,11 @@
 import React from 'react'
+import CreateNewBatch from './CreateNewBatch'
 
 const BatchDetails = () => {
   return (
-    <div>BatchDetails</div>
+    <>
+      <CreateNewBatch/>
+    </>
   )
 }
 

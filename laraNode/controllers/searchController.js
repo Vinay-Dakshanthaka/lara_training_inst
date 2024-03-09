@@ -1,4 +1,5 @@
 const db = require('../models');
+const { Op } = require('sequelize');
 
 const Student = db.Student;
 
@@ -37,7 +38,6 @@ const searchByEmail = async (req, res) => {
 };
 
 
-const { Op } = require('sequelize');
 
 const searchByName = async (req, res) => {
     try {

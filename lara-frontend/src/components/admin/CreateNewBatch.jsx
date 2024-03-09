@@ -333,10 +333,48 @@ const CreateNewBatch = () => {
       <div onClick={handleGoBack} className=" bg-transparent fw-bolder " style={{ position: 'absolute', left: 10, top: 60 , color:"black", fontWeight:"bolder" , fontSize:"1.5rem"}}>
         <BsArrowLeftCircle/>
       </div>
-      <div className="d-flex justify-content-center align-items-center vh-100">
+     
+     <Container>
+      <h1 className='text-center m-4'>Available Batch Details</h1>
+       {/* Available Batches Table */}
+       <Table striped bordered hover className="mt-4">
+        <thead>
+          <tr>
+            <th>Batch Details</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+  {availableBatches.map((batch, index) => (
+    <tr key={batch.batch_id}>
+      <td>
+        <div>
+          <strong>Batch Name:</strong> {batch.batch_name}
+        </div>
+        <div>
+          <strong>Description:</strong> {batch.description}
+        </div>
+        <div>
+          <strong>Duration:</strong> {batch.duration}
+        </div>
+        <div>
+          <strong>Price:</strong> {batch.price}
+        </div>
+      </td>
+      <td>
+        <EditableBatch batch={batch} onUpdate={handleUpdateBatch} showSuccessToast={showSuccessToast} setShowSuccessToast={setShowSuccessToast} showErrorToast={showErrorToast} setShowErrorToast={setShowErrorToast} />
+        <Button variant="danger" onClick={() => handleDeleteBatch(batch.batch_id)}>Delete</Button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
+      </Table>
+     </Container>
+     <div className="d-flex justify-content-center align-items-center vh-100">
       <Form onSubmit={handleSubmit} className='card col-md-6 col-sm-8 col-10 shadow'>
       <div className='bg-primary col-12 card'>
-      <h1 className='text-center'>Create New Batch</h1>
+      <h1 className='text-center'>Add New Batch</h1>
       </div>
         <Form.Group className="mb-3 m-2" controlId="batchName">
           <Form.Label>Batch Name</Form.Label>
@@ -404,46 +442,6 @@ const CreateNewBatch = () => {
         </Button>
       </Form>
     </div>
-
-
-     <Container>
-      <h1 className='text-center m-4'>Available Batch Details</h1>
-       {/* Available Batches Table */}
-       <Table striped bordered hover className="mt-4">
-        <thead>
-          <tr>
-            <th>Batch Details</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-  {availableBatches.map((batch, index) => (
-    <tr key={batch.batch_id}>
-      <td>
-        <div>
-          <strong>Batch Name:</strong> {batch.batch_name}
-        </div>
-        <div>
-          <strong>Description:</strong> {batch.description}
-        </div>
-        <div>
-          <strong>Duration:</strong> {batch.duration}
-        </div>
-        <div>
-          <strong>Price:</strong> {batch.price}
-        </div>
-      </td>
-      <td>
-        <EditableBatch batch={batch} onUpdate={handleUpdateBatch} showSuccessToast={showSuccessToast} setShowSuccessToast={setShowSuccessToast} showErrorToast={showErrorToast} setShowErrorToast={setShowErrorToast} />
-        <Button variant="danger" onClick={() => handleDeleteBatch(batch.batch_id)}>Delete</Button>
-      </td>
-    </tr>
-  ))}
-</tbody>
-
-      </Table>
-     </Container>
-
       {/* Success Toast */}
       <Toast show={showSuccessToast} onClose={() => setShowSuccessToast(false)} delay={3000} autohide
         className="position-fixed top-0 end-0 mt-2 me-2" style={{ backgroundColor: 'rgba(40, 167, 69, 0.85)', color: 'white' }}>

@@ -5,17 +5,17 @@ const sequelize = new Sequelize(
     dbConfig.DB,
     dbConfig.USER,
     dbConfig.PASSWORD, {
-        host: dbConfig.HOST,
-        dialect: dbConfig.dialect,
-        operatorsAliases: false,
+    host: dbConfig.HOST,
+    dialect: dbConfig.dialect,
+    operatorsAliases: false,
 
-        pool: {
-            max: dbConfig.pool.max,
-            min: dbConfig.pool.min,
-            acquire: dbConfig.pool.acquire,
-            idle: dbConfig.pool.idle
-        }
+    pool: {
+        max: dbConfig.pool.max,
+        min: dbConfig.pool.min,
+        acquire: dbConfig.pool.acquire,
+        idle: dbConfig.pool.idle
     }
+}
 );
 
 sequelize.authenticate()
@@ -36,6 +36,7 @@ db.Student = require('./studentModel.js')(sequelize, DataTypes);
 db.Profile = require('./profileModel.js')(sequelize, DataTypes);
 db.Batch = require('./batchModel.js')(sequelize, DataTypes); // Import Batch model
 db.Student_Batch = require('./studentBatchModel.js')(sequelize, DataTypes); // Import Student_Batch model
+db.BatchTrainer = require('./batchTrainerModel.js')(sequelize, DataTypes);
 
 // Define associations
 db.Student.hasOne(db.Profile, {
@@ -52,16 +53,45 @@ db.Profile.belongsTo(db.Student, {
 // db.Student.belongsToMany(db.Batch, { through: db.Student_Batch }); // Define many-to-many association
 // db.Batch.belongsToMany(db.Student, { through: db.Student_Batch }); // Define many-to-many association
 
-db.Student.belongsToMany(db.Batch, { 
+db.Student.belongsToMany(db.Batch, {
     through: db.Student_Batch,
     foreignKey: 'student_id',
     otherKey: 'batch_id'
 });
-db.Batch.belongsToMany(db.Student, { 
-    through: db.Student_Batch,
-    foreignKey: 'batch_id',
-    otherKey: 'student_id'
+db.Batch.belongsToMany(db.Student, {
+    through: 'Student_Batch',
+    foreignKey: 'student_id',
+    otherKey: 'batch_id'
 });
+
+
+
+// Define associations for Student (Trainer) to Batch
+db.Student.belongsToMany(db.Batch, {
+    through: {
+        model: 'BatchTrainer',
+        unique: false // Allow duplicate pairs (batch_id, trainer_id)
+    },
+    foreignKey: 'trainer_id', // Foreign key in the association table pointing to trainer_id
+    otherKey: 'batch_id', // Foreign key in the association table pointing to batch_id
+    // scope: {
+    //     role: 'TRAINER' // Filter trainers based on role
+    // }
+});
+
+// Define associations for Batch to Student (Trainer)
+db.Batch.belongsToMany(db.Student, {
+    through: {
+        model: 'BatchTrainer',
+        unique: false // Allow duplicate pairs (batch_id, trainer_id)
+    },
+    foreignKey: 'batch_id', // Foreign key in the association table pointing to batch_id
+    otherKey: 'trainer_id', // Foreign key in the association table pointing to trainer_id
+    // scope: {
+    //     role: 'TRAINER' // Filter trainers based on role
+    // }
+});
+
 
 // Sync models with the database
 db.sequelize.sync({ force: false })

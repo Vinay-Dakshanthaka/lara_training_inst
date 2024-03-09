@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Pagination, Modal, Button, Toast } from 'react-bootstrap';
 import { BsTrash } from 'react-icons/bs';
-import {  useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import BatchWiseStudents from './BatchWiseStudents';
 
 const StudentDetails = () => {
@@ -15,11 +15,10 @@ const StudentDetails = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedBatches, setSelectedBatches] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [availableBatches, setAvailableBatches] = useState([]); // Define availableBatches state
   const navigate = useNavigate();
-
-  const batchWiseStudents = ()=>{
-    navigate('/batchWiseStudents')
-  }
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -36,8 +35,8 @@ const StudentDetails = () => {
         };
 
         const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
-        // Filter out SUPER ADMIN students
-        const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
+        // Filter out students whose role is not 'STUDENT'
+        const filteredStudents = response.data.filter(student => student.role === "STUDENT");
         setStudents(filteredStudents);
       } catch (error) {
         console.error(error);
@@ -46,61 +45,6 @@ const StudentDetails = () => {
 
     fetchStudents();
   }, []);
-
-  const handleSearch = async (searchCriteria) => {
-    try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            return;
-        }
-
-        const config = {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        };
-
-        let searchUrl = '';
-        let searchParam = '';
-
-        // Determine the search URL and parameter based on the search criteria
-        switch (searchCriteria) {
-            case 'email':
-                searchUrl = 'http://localhost:8080/api/student/searchByEmail';
-                searchParam = 'email';
-                break;
-            case 'phoneNumber':
-                searchUrl = 'http://localhost:8080/api/student/searchByPhoneNumber';
-                searchParam = 'phoneNumber';
-                break;
-            case 'name':
-                searchUrl = 'http://localhost:8080/api/student/searchByName';
-                searchParam = 'name';
-                break;
-            default:
-                return; // If invalid search criteria, exit function
-        }
-
-        // Check if the search value is empty
-        if (!searchValue.trim()) {
-            // If empty, fetch all students
-            const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
-            const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
-            setStudents(filteredStudents);
-        } else {
-            // If not empty, perform the search
-            const response = await axios.get(searchUrl, {
-                ...config,
-                params: { [searchParam]: searchValue } // Pass the search value based on the search criteria
-            });
-            const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
-            setStudents(filteredStudents);
-        }
-    } catch (error) {
-        console.error(error);
-    }
-};
-
 
   const fetchBatchDetails = async () => {
     try {
@@ -149,65 +93,10 @@ const StudentDetails = () => {
     }
   };
 
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
-  const [showErrorToast, setShowErrorToast] = useState(false);
-
-  const handleAdd = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      return;
-    }
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    try {
-      const response = await axios.post('http://localhost:8080/api/student/assignBatchesToStudent', {
-        studentId: selectedStudent.id,
-        batchIds: selectedBatches,
-
-      }, config);
-      console.log(response.data);
-      setShowModal(false);
-      setShowSuccessToast(true);
-      fetchBatchDetails();
-    } catch (error) {
-      console.error(error);
-      setShowErrorToast(true);
-    }
-  };
-
-  const [availableBatches, setAvailableBatches] = useState([]);
-
-  const fetchAvailableBatches = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        return;
-      }
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      const response = await axios.get('http://localhost:8080/api/student/getAllBatches', config);
-      setAvailableBatches(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    fetchAvailableBatches();
-  }, []);
-
   const createBatch = () => {
-    navigate('/createNewBatch')
-  }
+    navigate('/createNewBatch');
+  };
+
   const deassignBatch = async (studentId, batchId) => {
     try {
       const token = localStorage.getItem('token');
@@ -239,6 +128,117 @@ const StudentDetails = () => {
     }
   };
 
+  const handleSearch = async (searchCriteria) => {
+    // Define handleSearch function
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return;
+      }
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      let searchUrl = '';
+      let searchParam = '';
+
+      // Determine the search URL and parameter based on the search criteria
+      switch (searchCriteria) {
+        case 'email':
+          searchUrl = 'http://localhost:8080/api/student/searchByEmail';
+          searchParam = 'email';
+          break;
+        case 'phoneNumber':
+          searchUrl = 'http://localhost:8080/api/student/searchByPhoneNumber';
+          searchParam = 'phoneNumber';
+          break;
+        case 'name':
+          searchUrl = 'http://localhost:8080/api/student/searchByName';
+          searchParam = 'name';
+          break;
+        default:
+          return; // If invalid search criteria, exit function
+      }
+
+      // Check if the search value is empty
+      if (!searchValue.trim()) {
+        // If empty, fetch all students
+        const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
+        const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
+        setStudents(filteredStudents);
+      } else {
+        // If not empty, perform the search
+        const response = await axios.get(searchUrl, {
+          ...config,
+          params: { [searchParam]: searchValue } // Pass the search value based on the search criteria
+        });
+        const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
+        setStudents(filteredStudents);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const batchWiseStudents = () => {
+    navigate('/batchWiseStudents');
+  };
+
+  const handleAdd = async () => {
+    // Define handleAdd function
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return;
+    }
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    try {
+      const response = await axios.post('http://localhost:8080/api/student/assignBatchesToStudent', {
+        studentId: selectedStudent.id,
+        batchIds: selectedBatches,
+
+      }, config);
+      console.log(response.data);
+      setShowModal(false);
+      setShowSuccessToast(true);
+      fetchBatchDetails();
+    } catch (error) {
+      console.error(error);
+      setShowErrorToast(true);
+    }
+  };
+
+  const fetchAvailableBatches = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return;
+      }
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const response = await axios.get('http://localhost:8080/api/student/getAllBatches', config);
+      setAvailableBatches(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAvailableBatches();
+  }, []);
+
   return (
     <div>
       <h1>All Student Details</h1>
@@ -266,10 +266,7 @@ const StudentDetails = () => {
         <div className="col-md-3">
           <button onClick={() => handleSearch(searchCriteria)} className="btn btn-primary">Search</button>
         </div>
-        <div className="col-md-3">
-          <button onClick={createBatch} className="btn btn-warning m-2">Create New Batch</button>
-        </div>
-        <div className='col-6'>
+        <div className='col-md-6'>
           <button className='btn btn-warning m-2 col-3' onClick={batchWiseStudents}>Filter By Batch</button>
         </div>
       </div>
@@ -292,14 +289,14 @@ const StudentDetails = () => {
               <td>{student.phoneNumber}</td>
               <td>
                 {batchDetails
-                  .filter(batchStudent => batchStudent.id === student.id)
+                  .filter(batchStudent => batchStudent.student.id === student.id)
                   .map(batchStudent => (
-                    <ul key={batchStudent.id}>
-                      {batchStudent.batches.map(batch => (
-                        <li key={batch.batch_id}>
+                    <ul key={batchStudent.student.id}>
+                      {batchStudent.batchesDetails.map(batch => (
+                        <li key={batch.batch.batch_id}>
                           <div className="d-flex align-items-center justify-content-between">
-                            <span>{batch.batch_name}</span>
-                            <button className="btn btn-danger ms-2 m-1" onClick={() => deassignBatch(student.id, batch.batch_id)}>
+                            <span>{batch.batch.batch_name}</span>
+                            <button className="btn btn-danger ms-2 m-1" onClick={() => deassignBatch(student.id, batch.batch.batch_id)}>
                               <BsTrash />
                             </button>
                           </div>
@@ -308,8 +305,6 @@ const StudentDetails = () => {
                     </ul>
                   ))}
               </td>
-
-
               <td>
                 <button className='btn btn-primary' onClick={() => handleAddToBatch(student)}>Add to Batch</button>
               </td>
@@ -385,7 +380,6 @@ const StudentDetails = () => {
         </Toast.Header>
         <Toast.Body>Failed to assign batches</Toast.Body>
       </Toast>
-
     </div>
   );
 };

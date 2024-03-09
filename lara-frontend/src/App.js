@@ -20,6 +20,8 @@ import ChangePassword from './components/ChangePassword';
 import TermsAndCondition from './components/TermsAndCondition';
 import CreateNewBatch from './components/admin/CreateNewBatch';
 import BatchWiseStudents from './components/admin/BatchWiseStudents';
+import RenderNavbar from './components/RenderNavbar';
+import TrainerDashboard from './components/trainer/TrainerDashboard';
 
 
 const App = () => {
@@ -28,6 +30,7 @@ const App = () => {
     <Router>
       <>
         <CustomNavbar />
+        {/* <RenderNavbar /> */}
         <div className="container">
           <Routes>
             <Route path='/' element={<Home/>}/>
@@ -41,6 +44,7 @@ const App = () => {
             <Route path="/changePassword" element={<ChangePassword />} />
             <Route path="/superAdminDashboard" element={<SuperAdminDashboard />} />
             <Route path="/adminDashboard" element={<AdminDashboard />} />
+            <Route path="/trainerDashboard" element={<TrainerDashboard />} />
             <Route path="/passwodResetForm" element={<PasswordResetForm />} />
             <Route path="/resetPassword" element={<ResetPassword />} />
             <Route path='/createNewBatch' element={<CreateNewBatch />} />

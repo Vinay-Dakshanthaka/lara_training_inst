@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { NavLink, Navigate } from 'react-router-dom';
 import AllStudentsProfiles from '../superAdmin/AllStudentsProfiles';
 import StudentDetails from './StudentDetails';
 import AssignRole from './AssignRole'; 
-import { Navigate, useNavigate } from 'react-router-dom';
 import TrainerDetails from './TrainerDetails';
 import BatchDetails from './BatchDetails';
+import Tab from 'react-bootstrap/Tab';
+import Tabs from 'react-bootstrap/Tabs';
 
 const AdminDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');
@@ -16,69 +18,35 @@ const AdminDashboard = () => {
     return <Navigate to="/" replace />;
   }
 
-  const handleOptionChange = (event) => {
-    setSelectedOption(event.target.value);
+  const handleOptionChange = (option) => {
+    setSelectedOption(option);
   };
 
   return (
     <div className="container">
       <h1 className='text-center'> Admin Dashboard</h1>
-      <div className="row">
-        <div className="col-auto">
-          <div className="form-check">
-            <input
-              type="radio"
-              value="studentDetails"
-              checked={selectedOption === 'studentDetails'}
-              onChange={handleOptionChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label">Student Details</label>
-          </div>
-        </div>
-        <div className="col-auto">
-          <div className="form-check">
-            <input
-              type="radio"
-              value="profileDetails"
-              checked={selectedOption === 'profileDetails'}
-              onChange={handleOptionChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label">Profile Details</label>
-          </div>
-        </div>
-        <div className="col-auto">
-          <div className="form-check">
-            <input
-              type="radio"
-              value="assignRole"
-              checked={selectedOption === 'assignRole'}
-              onChange={handleOptionChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label">Assign Role</label>
-          </div>
-        </div>
-        <div className="col-auto">
-          <div className="form-check">
-            <input
-              type="radio"
-              value="batchDetails"
-              checked={selectedOption === 'batchDetails'}
-              onChange={handleOptionChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label">Batch Details</label>
-          </div>
-        </div>
-      </div>
-
-      {/* Render the appropriate component based on the selected option */}
-      {selectedOption === 'studentDetails' ? <StudentDetails /> : 
-       selectedOption === 'profileDetails' ? <AllStudentsProfiles /> :
-       selectedOption === 'batchDetails' ? <BatchDetails /> :
-       selectedOption === 'assignRole' ? <AssignRole /> : null}
+      <Tabs
+        defaultActiveKey="studentDetails"
+        id="dashboard-tabs"
+        onSelect={(key) => handleOptionChange(key)}
+        className="mb-3"
+      >
+        <Tab eventKey="studentDetails" title="Student Details">
+          <StudentDetails />
+        </Tab>
+        <Tab eventKey="profileDetails" title="Profile Details">
+          <AllStudentsProfiles />
+        </Tab>
+        <Tab eventKey="assignRole" title="Assign Role">
+          <AssignRole />
+        </Tab>
+        <Tab eventKey="batchDetails" title="Batch Details">
+          <BatchDetails />
+        </Tab>
+        <Tab eventKey="trainers" title="Trainers">
+          <TrainerDetails />
+        </Tab>
+      </Tabs>
     </div>
   );
 };

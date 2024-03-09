@@ -15,6 +15,7 @@ const StudentHome = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [studentBatches, setStudentBatches] = useState([]);
+  
 
   useEffect(() => {
     const fetchProfileDetails = async () => {
@@ -179,8 +180,8 @@ const StudentHome = () => {
           config
         );
         const data = response.data || {};
-        if (data.studentBatches) {
-          setStudentBatches(data.studentBatches);
+        if (data.batchesDetails) {
+          setStudentBatches(data.batchesDetails);
         }
       } catch (error) {
         console.error('Failed to fetch student batches:', error);
@@ -265,15 +266,27 @@ const StudentHome = () => {
           </div>
         </div>
 
-        <div className=" mb-4 card col-md-12">
-          <h2 className="bg-primary rounded p-2 m-2">Batches</h2>
-          <ul className="m-2 row">
-            {studentBatches.map(batch => (
-              <li className="col-5 m-2" key={batch.batch_id}>{batch.batch_name}</li>
-            ))}
-          </ul>
-        </div>
-        
+        <div className="mb-4 card col-md-12">
+  <h2 className="bg-primary rounded p-2 m-2">Batches</h2>
+  <table className="table m-2">
+        <thead>
+          <tr>
+            <th>Batch Name</th>
+            <th>Trainer Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {studentBatches.map((batchDetail, index) => (
+            <tr key={index}>
+              <td>{batchDetail.batch.batch_name}</td>
+              <td>{batchDetail.trainerDetails ? batchDetail.trainerDetails.name : ''}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+</div>
+
+
 
         {/* Education Details */}
         <div className="row mb-4">

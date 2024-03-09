@@ -133,6 +133,9 @@ function CustomNavbar() {
                       {userRole === 'SUPER ADMIN' && (
                         <Nav.Link as={Link} to="/superAdminDashboard" className="dropdown-item text-dark ms-1">Dashboard</Nav.Link>
                       )}
+                      {userRole === 'TRAINER' && (
+                        <Nav.Link as={Link} to="/trainerDashboard" className="dropdown-item text-dark ms-1">Dashboard</Nav.Link>
+                      )}
                       <button type="button" className="btn btn-danger ms-1" onClick={() => setShowModal(true)}>Logout</button>
                       <LogoutModal show={showModal} onHide={() => setShowModal(false)} onConfirm={handleLogout} />
                     </div>

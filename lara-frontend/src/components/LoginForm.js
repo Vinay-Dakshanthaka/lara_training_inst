@@ -66,15 +66,25 @@ const LoginForm = () => {
             // console.log(" Super Admin Logged in")
             navigate('/superAdminDashboard');
             }, 2000);
-        } else {
+        } else if (role === "TRAINER") {
+          setSuccess(true)
+          setTimeout(() => {
+            // navigate('/studentHome');
+            // console.log(" Super Admin Logged in")
+            navigate('/trainerDashboard');
+            }, 2000);
+          }
+         else {
             // Handle unknown role
             // console.error("Unknown role:", role);
             setError("OOP's!! \n Something went wrong!! Please try to login again")
+            
             // Redirect to a default page or display an error message
         }
     }
     } catch (error) {
       setError('Failed to login. Please check your credentials.');
+      console.log(error)
     }
 };
 
