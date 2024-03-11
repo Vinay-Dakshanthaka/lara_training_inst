@@ -4,6 +4,199 @@ import { Navbar, Nav, Toast, Modal, Button } from "react-bootstrap";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { BsFillEnvelopeFill, BsPhone } from "react-icons/bs";
 import defaultProfileImage from "../default-profile.png";
+import { BsStarFill, BsStar } from 'react-icons/bs'; // Import star icons
+
+const FeedbackButton = ({ onClick }) => {
+  return (
+    <button type="button" className="btn btn-warning" onClick={onClick}>Give Feedback</button>
+  );
+};
+
+const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
+  const [stars, setStars] = useState(0);
+  const [reviewDate, setReviewDate] = useState(getCurrentDate());
+  const [reviewTime, setReviewTime] = useState(getCurrentTime());
+  const [review, setReview] = useState('');
+  const [starsError, setStarsError] = useState('');
+  const [feedbackError, setFeedbackError] = useState('');
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+
+  const handleSubmit = async () => {
+    // Reset errors and success
+    setStarsError('');
+    setFeedbackError('');
+    setShowSuccessToast(false);
+    setShowErrorToast(false);
+
+    // Validation
+    let isValid = true;
+    if (stars === 0) {
+      setStarsError('Please rate by selecting stars');
+      isValid = false;
+    }
+    if (!review) {
+      setFeedbackError('Please write a feedback');
+      isValid = false;
+    }
+    // Date validation
+    const currentDate = new Date();
+    const selectedDate = new Date(reviewDate);
+    const differenceInTime = selectedDate.getTime() - currentDate.getTime();
+    const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+
+    if (differenceInDays < -3 || differenceInDays > 0) {
+      setStarsError('Please select a date within the last 3 days or today');
+      isValid = false;
+    }
+
+    // Time validation
+    const selectedTime = new Date(`01/01/2000 ${reviewTime}`);
+    const currentTime = new Date(`01/01/2000 ${getCurrentTime()}`);
+    if (selectedTime > currentTime) {
+      setStarsError('Please select a time before or equal to the current time');
+      isValid = false;
+    }
+
+    if (!isValid) {
+      return;
+    }
+
+    // Form data
+    const formData = {
+      batchId,
+      trainerId,
+      stars,
+      review,
+      reviewDate,
+      reviewTime
+    };
+
+    // POST request
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return;
+      }
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
+      const response = await axios.post('http://localhost:8080/api/student/saveReview', formData, config);
+
+      if (response.status === 200) {
+        onSuccess();
+        setShowSuccessToast(true);
+        // Clear form fields
+        setStars(0);
+        setReview('');
+        setReviewDate('');
+        setReviewTime('');
+      } else {
+        setShowErrorToast(true);
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      setShowErrorToast(true);
+    }
+  };
+
+
+  const renderStarIcon = (index) => {
+    const fillColor = index < stars ? 'yellow' : 'green';
+    return <BsStarFill key={index} onClick={() => setStars(index + 1)} style={{ color: fillColor, fontSize:20 }} className="m-2"/>;
+  };
+
+  return (
+    <div className={`modal fade ${show ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ display: show ? 'block' : 'none' }}>
+      <div className="modal-dialog bf-info" role="document">
+        <div className="modal-content bg-info">
+          <div className="modal-header">
+            <h5 className="modal-title bg-info">Feedback</h5>
+            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={onHide}>
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div className="modal-body bg-info">
+            <div className="form-group">
+              <label htmlFor="stars">Rate Your Experience this trainer class</label>
+              <div>
+                {[...Array(5)].map((_, index) => renderStarIcon(index))}
+                {starsError && <div className="text-danger">{starsError}</div>}
+              </div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="reviewDate">Date:</label>
+              <input type="date" className="form-control" id="reviewDate" value={reviewDate} onChange={(e) => setReviewDate(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label htmlFor="reviewTime">Time:</label>
+              <input type="time" className="form-control" id="reviewTime" value={reviewTime} onChange={(e) => setReviewTime(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label htmlFor="review">Feedback:</label>
+              <textarea className="form-control" id="review" rows="3" value={review} onChange={(e) => setReview(e.target.value)}></textarea>
+              {feedbackError && <div className="text-danger">{feedbackError}</div>}
+            </div>
+          </div>
+          <div className="modal-footer bg-info">
+            <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={onHide}>Close</button>
+            <button type="button" className="btn btn-primary" onClick={handleSubmit}>Submit</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Success toast */}
+      <Toast
+        show={showSuccessToast}
+        onClose={() => setShowSuccessToast(false)}
+        delay={3000}
+        autohide
+        style={{ position: 'absolute', top: '20px', right: '20px', backgroundColor: 'green' }}
+      >
+        <Toast.Header>
+          <strong className="mr-auto">Success</strong>
+        </Toast.Header>
+        <Toast.Body>Thanks for the Feedback</Toast.Body>
+      </Toast>
+
+      {/* Error toast */}
+      <Toast
+        show={showErrorToast}
+        onClose={() => setShowErrorToast(false)}
+        delay={3000}
+        autohide
+        style={{ position: 'absolute', top: '20px', right: '20px', backgroundColor: 'red' }}
+      >
+        <Toast.Header>
+          <strong className="mr-auto">Error</strong>
+        </Toast.Header>
+        <Toast.Body>Something went wrong</Toast.Body>
+      </Toast>
+    </div>
+  );
+};
+
+const getCurrentDate = () => {
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  let month = currentDate.getMonth() + 1;
+  month = month < 10 ? `0${month}` : month;
+  let day = currentDate.getDate();
+  day = day < 10 ? `0${day}` : day;
+  return `${year}-${month}-${day}`;
+};
+
+const getCurrentTime = () => {
+  const currentDate = new Date();
+  let hours = currentDate.getHours();
+  hours = hours < 10 ? `0${hours}` : hours;
+  let minutes = currentDate.getMinutes();
+  minutes = minutes < 10 ? `0${minutes}` : minutes;
+  return `${hours}:${minutes}`;
+};
 const StudentHome = () => {
   const { studentId } = useParams();
   const [profileDetails, setProfileDetails] = useState({});
@@ -15,7 +208,7 @@ const StudentHome = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [studentBatches, setStudentBatches] = useState([]);
-  
+
 
   useEffect(() => {
     const fetchProfileDetails = async () => {
@@ -92,6 +285,7 @@ const StudentHome = () => {
     // Validate image size and format
     if (imageFile.size > 1024 * 1024 || !['image/jpeg', 'image/png'].includes(imageFile.type)) {
       // Display warning toast if image size exceeds 1MB or format is not JPEG or PNG
+      setShowConfirmModal(false);
       setShowWarningToast(true);
       return;
     }
@@ -112,9 +306,10 @@ const StudentHome = () => {
         }
       );
       const data = response.data;
-
+      setShowConfirmModal(false);
       // Display success toast after successful image upload
       setShowSuccessToast(true);
+
       window.location.reload();
       // Set the image path received from the response
       setImage(data.imagePath);
@@ -165,7 +360,7 @@ const StudentHome = () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          navigate('/');
+          // Handle authentication error
           return;
         }
 
@@ -176,12 +371,14 @@ const StudentHome = () => {
         };
 
         const response = await axios.get(
-          `http://localhost:8080/api/student/getStudentBatches`,
+          `http://localhost:8080/api/student/fetchTrainerAndBatchFromStudent`,
           config
         );
         const data = response.data || {};
         if (data.batchesDetails) {
           setStudentBatches(data.batchesDetails);
+          // console.log("batch id ",data.batchesDetails[0].batch.batch_id)
+          // console.log("batch details ",data.batchesDetails)
         }
       } catch (error) {
         console.error('Failed to fetch student batches:', error);
@@ -190,6 +387,17 @@ const StudentHome = () => {
 
     fetchStudentBatches();
   }, [studentId]);
+
+  const [showModal, setShowModal] = useState(false);
+  const [selectedBatchId, setSelectedBatchId] = useState(null);
+  const [selectedTrainerId, setSelectedTrainerId] = useState(null);
+
+  const handleFeedbackClick = (batchId, trainerId) => {
+    setSelectedBatchId(batchId);
+    setSelectedTrainerId(trainerId);
+    setShowModal(true);
+  };
+
 
   return (
     <div className="container mt-4 mb-4">
@@ -267,26 +475,50 @@ const StudentHome = () => {
         </div>
 
         <div className="mb-4 card col-md-12">
-  <h2 className="bg-primary rounded p-2 m-2">Batches</h2>
-  <table className="table m-2">
-        <thead>
-          <tr>
-            <th>Batch Name</th>
-            <th>Trainer Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {studentBatches.map((batchDetail, index) => (
-            <tr key={index}>
-              <td>{batchDetail.batch.batch_name}</td>
-              <td>{batchDetail.trainerDetails ? batchDetail.trainerDetails.name : ''}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-</div>
+          <h2 className="bg-primary rounded p-2 m-2">Batches</h2>
+          <table className="table m-2">
+            <thead>
+              <tr>
+                <th>Batch Name</th>
+                <th>Trainer Name</th>
+                <th>Feedback</th>
+              </tr>
+            </thead>
+            <tbody>
+              {studentBatches.map((batchDetail, index) => (
+                <tr key={index}>
+                  <td>{batchDetail.batch.batch_name}</td>
+                  <td>
+                    {/* Check if trainerDetails exist */}
+                    {batchDetail.trainerDetails && batchDetail.trainerDetails.map((trainer, trainerIndex) => (
+                      <div key={trainerIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                        {/* Display trainer name */}
+                        <div style={{ marginRight: '10px' }}>{trainer.name}</div>
+                        {/* Render FeedbackButton for the trainer */}
+                        <FeedbackButton
+                          onClick={() => handleFeedbackClick(batchDetail.batch.batch_id, trainer.id)}
+                        />
+                      </div>
+                    ))}
+                  </td>
+                  <td></td>
+                </tr>
+              ))}
+            </tbody>
 
+          </table>
 
+          <FeedbackModal
+            show={showModal}
+            onHide={() => setShowModal(false)}
+            batchId={selectedBatchId}
+            trainerId={selectedTrainerId}
+            onSuccess={() => {
+              setShowModal(false);
+              // Show success toast
+            }}
+          />
+        </div>
 
         {/* Education Details */}
         <div className="row mb-4">
@@ -431,6 +663,7 @@ const StudentHome = () => {
           position: 'fixed',
           top: 10,
           left: 10,
+          zIndex: 1000,
         }}
         show={showWarningToast}
         onClose={() => setShowWarningToast(false)}

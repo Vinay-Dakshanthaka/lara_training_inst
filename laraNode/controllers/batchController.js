@@ -151,9 +151,9 @@ const assignBatchesToStudent = async (req, res) => {
             }
         });
 
-        // Ensure at least one batch is found
-        if (batches.length === 0) {
-            return res.status(404).json({ error: 'No batches found' });
+        // Ensure all batchIds exist
+        if (batches.length !== batchIds.length) {
+            return res.status(404).json({ error: 'One or more batches not found' });
         }
 
         // Associate the student with the batches
@@ -168,6 +168,7 @@ const assignBatchesToStudent = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 
 
@@ -672,7 +673,8 @@ const fetchAllTrainerAndBatch = async (req, res) => {
 
 const fetchTrainerAndBatchFromStudent = async (req, res) => {
     try {
-        const { studentId } = req.body;
+        // const { studentId } = req.body;
+        const studentId = req.studentId;
 
         // Step 1: Check if the provided studentId exists
         const student = await Student.findByPk(studentId);

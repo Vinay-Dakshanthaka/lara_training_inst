@@ -1,8 +1,12 @@
+// TrainerDashboard.js
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import StudentList from './StudentList'; // Import the StudentList component
 
 const TrainerDashboard = () => {
   const [batches, setBatches] = useState([]);
+  const [selectedBatchId, setSelectedBatchId] = useState(null); // Track selected batch ID
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -11,13 +15,13 @@ const TrainerDashboard = () => {
         if (!token) {
           return;
         }
-  
+
         const config = {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         };
-  
+
         const response = await axios.get(
           'http://localhost:8080/api/student/fetchBatchesAssignedToTrainer',
           config
@@ -27,15 +31,14 @@ const TrainerDashboard = () => {
         console.error('Failed to fetch batches:', error);
       }
     };
-  
+
     fetchBatches();
   }, []);
-  
+
   const handleViewStudents = (batchId) => {
-    // Implement the logic to view the list of students for the selected batch
-    console.log('View students for batch:', batchId);
+    setSelectedBatchId(batchId); // Set the selected batch ID
   };
-  
+
   return (
     <div>
       <h1>Batch Details</h1>
@@ -66,6 +69,7 @@ const TrainerDashboard = () => {
           ))}
         </tbody>
       </table>
+      {selectedBatchId && <StudentList batchId={selectedBatchId} />} {/* Render StudentList component when a batch is selected */}
     </div>
   );
 };

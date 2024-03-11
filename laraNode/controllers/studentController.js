@@ -177,6 +177,19 @@ const getProfileDetails = async (req, res) => {
     }
 };
 
+const getProfileDetailsById = async (req, res) => {
+    try {
+        const {student_id} = req.body;
+        const profile = await Profile.findOne({ where: { student_id } });
+        if (profile) {
+            res.status(200).send(profile);
+        } else {
+            res.status(404).send({ message: 'Profile not found.' });
+        }
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+};
 
 // Get profile image controller
 const getProfileImage = async (req, res) => {
@@ -457,6 +470,7 @@ module.exports = {
     verifyByPhoneAndPassword,
     updateRole,
     getProfileDetails,
+    getProfileDetailsById,
     saveOrUpdateProfile,
     getStudentDetails,
     uploadProfileImage,

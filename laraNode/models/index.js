@@ -37,7 +37,7 @@ db.Profile = require('./profileModel.js')(sequelize, DataTypes);
 db.Batch = require('./batchModel.js')(sequelize, DataTypes); // Import Batch model
 db.Student_Batch = require('./studentBatchModel.js')(sequelize, DataTypes); // Import Student_Batch model
 db.BatchTrainer = require('./batchTrainerModel.js')(sequelize, DataTypes);
-
+db.Review = require('./studentReviewModel.js')(sequelize, DataTypes);
 // Define associations
 db.Student.hasOne(db.Profile, {
     foreignKey: 'student_id',
@@ -50,21 +50,25 @@ db.Profile.belongsTo(db.Student, {
     onDelete: 'CASCADE'
 });
 
+
 // db.Student.belongsToMany(db.Batch, { through: db.Student_Batch }); // Define many-to-many association
 // db.Batch.belongsToMany(db.Student, { through: db.Student_Batch }); // Define many-to-many association
 
-db.Student.belongsToMany(db.Batch, {
-    through: db.Student_Batch,
-    foreignKey: 'student_id',
-    otherKey: 'batch_id'
-});
-db.Batch.belongsToMany(db.Student, {
-    through: 'Student_Batch',
-    foreignKey: 'student_id',
-    otherKey: 'batch_id'
-});
+// db.Student.belongsToMany(db.Batch, {
+//     through: db.Student_Batch,
+//     foreignKey: 'student_id',
+//     otherKey: 'batch_id'
+// });
+// db.Batch.belongsToMany(db.Student, {
+//     through: 'Student_Batch',
+//     foreignKey: 'student_id',
+//     otherKey: 'batch_id'
+// });
 
 
+// Define the association between Student and Batch
+db.Student.belongsToMany(db.Batch, { through: 'Student_Batch', foreignKey: 'student_id' });
+db.Batch.belongsToMany(db.Student, { through: 'Student_Batch', foreignKey: 'batch_id' });
 
 // Define associations for Student (Trainer) to Batch
 db.Student.belongsToMany(db.Batch, {

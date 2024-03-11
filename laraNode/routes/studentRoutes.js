@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const studentController = require('../controllers/studentController');
 const searchController = require('../controllers/searchController');
-const batchController = require('../controllers/batchController')
+const batchController = require('../controllers/batchController');
+const reviewController = require('../controllers/reviewsController');
 const verifyToken = require('../middleware/authMiddleware');
 const multer = require('multer');
 const upload = multer({dest: 'Images/' });
@@ -25,6 +26,8 @@ router.post('/saveOrUpdateProfile', verifyToken, studentController.saveOrUpdateP
 
 // Get profile details based on authenticated user's token
 router.get('/getProfileDetails', verifyToken, studentController.getProfileDetails);
+
+router.post('/getProfileDetailsById', verifyToken, studentController.getProfileDetailsById);
 
 router.post('/uploadProfileImage', verifyToken, upload.single('image'), studentController.uploadProfileImage);
 
@@ -83,6 +86,11 @@ router.get('/fetchBatchesAssignedToTrainer',verifyToken,batchController.fetchBat
 
 router.post('/assignBatchesToTrainer',verifyToken,batchController.assignBatchesToTrainer)
 
-router.get('/getStudentsByBatchId',verifyToken,batchController.getStudentsByBatchId)
+router.post('/getStudentsByBatchId',verifyToken,batchController.getStudentsByBatchId)
+
+router.post('/saveReview',verifyToken,reviewController.saveReview)
+
+router.get('/getAllReviews',verifyToken,reviewController.getAllReviews)
+
 
 module.exports = router;

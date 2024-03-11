@@ -1,5 +1,5 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Pagination, Modal, Button, Toast } from 'react-bootstrap';
 import { BsTrash } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
@@ -7,17 +7,17 @@ import BatchWiseStudents from './BatchWiseStudents';
 
 const StudentDetails = () => {
   const [students, setStudents] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1); // State to manage current page
-  const [studentsPerPage] = useState(10); // Number of students per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const [studentsPerPage] = useState(10);
   const [searchValue, setSearchValue] = useState('');
-  const [searchCriteria, setSearchCriteria] = useState('name'); // Default search criteria
+  const [searchCriteria, setSearchCriteria] = useState('name');
   const [batchDetails, setBatchDetails] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedBatches, setSelectedBatches] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
-  const [availableBatches, setAvailableBatches] = useState([]); // Define availableBatches state
+  const [availableBatches, setAvailableBatches] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,7 +35,6 @@ const StudentDetails = () => {
         };
 
         const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
-        // Filter out students whose role is not 'STUDENT'
         const filteredStudents = response.data.filter(student => student.role === "STUDENT");
         setStudents(filteredStudents);
       } catch (error) {
@@ -68,7 +67,6 @@ const StudentDetails = () => {
   };
 
   useEffect(() => {
-    // Fetch batch details when component mounts
     fetchBatchDetails();
   }, []);
 
@@ -120,32 +118,28 @@ const StudentDetails = () => {
       console.log(response.data);
       console.log('Successfully deleted');
 
-      // Update batch details after successful removal
       fetchBatchDetails();
     } catch (error) {
       console.error('Error deassigning batch:', error);
-      // Handle error (e.g., show an error message)
     }
   };
 
   const handleSearch = async (searchCriteria) => {
-    // Define handleSearch function
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         return;
       }
-
+  
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-
+  
       let searchUrl = '';
       let searchParam = '';
-
-      // Determine the search URL and parameter based on the search criteria
+  
       switch (searchCriteria) {
         case 'email':
           searchUrl = 'http://localhost:8080/api/student/searchByEmail';
@@ -160,35 +154,32 @@ const StudentDetails = () => {
           searchParam = 'name';
           break;
         default:
-          return; // If invalid search criteria, exit function
+          return;
       }
-
-      // Check if the search value is empty
+  
       if (!searchValue.trim()) {
-        // If empty, fetch all students
         const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
-        const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
+        const filteredStudents = response.data.filter(student => student.role === "STUDENT");
         setStudents(filteredStudents);
       } else {
-        // If not empty, perform the search
         const response = await axios.get(searchUrl, {
           ...config,
-          params: { [searchParam]: searchValue } // Pass the search value based on the search criteria
+          params: { [searchParam]: searchValue }
         });
-        const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
+        const filteredStudents = response.data.filter(student => student.role === "STUDENT");
         setStudents(filteredStudents);
       }
     } catch (error) {
       console.error(error);
     }
   };
+  
 
   const batchWiseStudents = () => {
     navigate('/batchWiseStudents');
   };
 
   const handleAdd = async () => {
-    // Define handleAdd function
     const token = localStorage.getItem("token");
     if (!token) {
       return;
@@ -203,9 +194,7 @@ const StudentDetails = () => {
       const response = await axios.post('http://localhost:8080/api/student/assignBatchesToStudent', {
         studentId: selectedStudent.id,
         batchIds: selectedBatches,
-
       }, config);
-      console.log(response.data);
       setShowModal(false);
       setShowSuccessToast(true);
       fetchBatchDetails();
@@ -229,15 +218,21 @@ const StudentDetails = () => {
       };
 
       const response = await axios.get('http://localhost:8080/api/student/getAllBatches', config);
-      setAvailableBatches(response.data);
+      const unassignedBatches = response.data.filter(batch => {
+        // Check if the batch is not assigned to the selected student
+        return !batchDetails.find(batchDetail => batchDetail.student.id === selectedStudent.id && batchDetail.batchesDetails.some(detail => detail.batch.batch_id === batch.batch_id))
+      });
+      setAvailableBatches(unassignedBatches);
     } catch (error) {
       console.error(error);
     }
   };
 
   useEffect(() => {
-    fetchAvailableBatches();
-  }, []);
+    if (showModal && selectedStudent) {
+      fetchAvailableBatches();
+    }
+  }, [showModal, selectedStudent]);
 
   return (
     <div>
@@ -322,7 +317,6 @@ const StudentDetails = () => {
             ))}
         </Pagination>
       </div>
-      {/* Add to Batch Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Add to Batch</Modal.Title>
@@ -345,13 +339,11 @@ const StudentDetails = () => {
             </div>
           )}
         </Modal.Body>
-
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
           <Button variant="primary" onClick={handleAdd}>Add</Button>
         </Modal.Footer>
       </Modal>
-      {/* Success Toast */}
       <Toast
         show={showSuccessToast}
         onClose={() => setShowSuccessToast(false)}
@@ -365,8 +357,6 @@ const StudentDetails = () => {
         </Toast.Header>
         <Toast.Body>Batches assigned successfully</Toast.Body>
       </Toast>
-
-      {/* Error Toast */}
       <Toast
         show={showErrorToast}
         onClose={() => setShowErrorToast(false)}
