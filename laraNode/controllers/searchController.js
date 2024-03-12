@@ -138,10 +138,70 @@ const profilePhoneNumberr = async (req, res) => {
     }
 };
 
+const searchByQualification = async (req, res) => {
+    try {
+        const studentId = req.studentId; 
+        const user = await Student.findByPk(studentId);
+        const userRole = user.role;
+
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN') {
+            return res.status(403).json({ error: 'Access forbidden' });
+        }
+
+        const { highest_education } = req.body;
+
+        const profiles = await db.Profile.findAll({ 
+            where: { 
+                highest_education: { [Op.like]: `%${highest_education}%` } 
+            }
+        });
+
+        if (profiles && profiles.length > 0) {
+            res.status(200).send(profiles);
+        } else {
+            res.status(404).send({ message: 'Profiles with the given qualification not found' });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: error.message });
+    }
+};
+
+const searchBySpecialization = async (req, res) => {
+    try {
+        const studentId = req.studentId; 
+        const user = await Student.findByPk(studentId);
+        const userRole = user.role;
+
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN') {
+            return res.status(403).json({ error: 'Access forbidden' });
+        }
+
+        const { specialization } = req.body;
+
+        const profiles = await db.Profile.findAll({ 
+            where: { 
+                specialization: { [Op.like]: `%${specialization}%` } 
+            }
+        });
+
+        if (profiles && profiles.length > 0) {
+            res.status(200).send(profiles);
+        } else {
+            res.status(404).send({ message: 'Profiles with the given qualification not found' });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: error.message });
+    }
+};
+
 // Export all controllers
 module.exports = {
     searchByEmail,
     searchByName,
     searchByPhoneNumber,
     profilePhoneNumberr,
+    searchByQualification,
+    searchBySpecialization
 }

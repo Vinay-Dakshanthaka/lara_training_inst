@@ -1,12 +1,10 @@
-// TrainerDashboard.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import StudentList from './StudentList'; // Import the StudentList component
+import StudentList from './StudentList';
 
 const TrainerDashboard = () => {
   const [batches, setBatches] = useState([]);
-  const [selectedBatchId, setSelectedBatchId] = useState(null); // Track selected batch ID
+  const [selectedBatchId, setSelectedBatchId] = useState(null);
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -36,7 +34,7 @@ const TrainerDashboard = () => {
   }, []);
 
   const handleViewStudents = (batchId) => {
-    setSelectedBatchId(batchId); // Set the selected batch ID
+    setSelectedBatchId(batchId);
   };
 
   return (
@@ -53,11 +51,11 @@ const TrainerDashboard = () => {
         </thead>
         <tbody>
           {batches.map((batch, index) => (
-            <tr key={index}>
-              <td>{batch.batch_name}</td>
-              <td>{batch.description}</td>
-              <td>{batch.duration}</td>
-              <td>
+            <tr key={index} className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>
+              <td className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>{batch.batch_name}</td>
+              <td className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>{batch.description}</td>
+              <td className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>{batch.duration}</td>
+              <td className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>
                 <button 
                   className="btn btn-primary" 
                   onClick={() => handleViewStudents(batch.batch_id)}
@@ -69,7 +67,7 @@ const TrainerDashboard = () => {
           ))}
         </tbody>
       </table>
-      {selectedBatchId && <StudentList batchId={selectedBatchId} />} {/* Render StudentList component when a batch is selected */}
+      {selectedBatchId && <StudentList batchId={selectedBatchId} />}
     </div>
   );
 };

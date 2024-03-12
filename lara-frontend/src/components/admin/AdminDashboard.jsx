@@ -47,7 +47,7 @@ const AdminDashboard = () => {
         <Tab eventKey="trainers" title="Trainers">
           <TrainerDetails />
         </Tab>
-        <Tab eventKey="studentReviews" title="studentReviews">
+        <Tab eventKey="studentReviews" title="Student Reviews">
           <StudentReviews />
         </Tab>
       </Tabs>

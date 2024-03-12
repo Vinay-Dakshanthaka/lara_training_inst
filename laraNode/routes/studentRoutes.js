@@ -4,6 +4,7 @@ const studentController = require('../controllers/studentController');
 const searchController = require('../controllers/searchController');
 const batchController = require('../controllers/batchController');
 const reviewController = require('../controllers/reviewsController');
+const assignmentController = require('../controllers/assignmentController')
 const verifyToken = require('../middleware/authMiddleware');
 const multer = require('multer');
 const upload = multer({dest: 'Images/' });
@@ -48,6 +49,10 @@ router.get('/searchByPhoneNumber', verifyToken, searchController.searchByPhoneNu
 
 router.get('/profilePhoneNumber', verifyToken, searchController.profilePhoneNumberr);
 
+router.post('/searchByQualification', verifyToken, searchController.searchByQualification);
+
+router.post('/searchBySpecialization', verifyToken, searchController.searchBySpecialization);
+
 router.post('/sendPasswordResetEmail', studentController.sendPasswordResetEmail);
 
 router.post('/resetPassword', studentController.resetPassword);
@@ -91,6 +96,8 @@ router.post('/getStudentsByBatchId',verifyToken,batchController.getStudentsByBat
 router.post('/saveReview',verifyToken,reviewController.saveReview)
 
 router.get('/getAllReviews',verifyToken,reviewController.getAllReviews)
+
+router.post('/executeJavaCodeHandler',verifyToken,assignmentController.executeJavaCodeHandler)
 
 
 module.exports = router;

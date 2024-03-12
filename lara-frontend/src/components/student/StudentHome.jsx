@@ -53,10 +53,10 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
     // Time validation
     const selectedTime = new Date(`01/01/2000 ${reviewTime}`);
     const currentTime = new Date(`01/01/2000 ${getCurrentTime()}`);
-    if (selectedTime > currentTime) {
-      setStarsError('Please select a time before or equal to the current time');
-      isValid = false;
-    }
+    // if (selectedTime > currentTime) {
+    //   setStarsError('Please select a time before or equal to the current time');
+    //   isValid = false;
+    // }
 
     if (!isValid) {
       return;
@@ -89,6 +89,7 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
       if (response.status === 200) {
         onSuccess();
         setShowSuccessToast(true);
+        alert("Thanks for the Feedback")
         // Clear form fields
         setStars(0);
         setReview('');
@@ -96,6 +97,7 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
         setReviewTime('');
       } else {
         setShowErrorToast(true);
+        alert("OOP's!! Something went wrong!!")
       }
     } catch (error) {
       console.error('Error submitting feedback:', error);
@@ -154,7 +156,7 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
         onClose={() => setShowSuccessToast(false)}
         delay={3000}
         autohide
-        style={{ position: 'absolute', top: '20px', right: '20px', backgroundColor: 'green' }}
+        style={{ position: 'fixed', top: '20px', right: '20px', backgroundColor: 'green' }}
       >
         <Toast.Header>
           <strong className="mr-auto">Success</strong>
@@ -168,7 +170,7 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
         onClose={() => setShowErrorToast(false)}
         delay={3000}
         autohide
-        style={{ position: 'absolute', top: '20px', right: '20px', backgroundColor: 'red' }}
+        style={{ position: 'fix', top: '20px', right: '20px', backgroundColor: 'red' }}
       >
         <Toast.Header>
           <strong className="mr-auto">Error</strong>
@@ -481,7 +483,7 @@ const StudentHome = () => {
               <tr>
                 <th>Batch Name</th>
                 <th>Trainer Name</th>
-                <th>Feedback</th>
+                {/* <th>Feedback</th> */}
               </tr>
             </thead>
             <tbody>
@@ -501,7 +503,7 @@ const StudentHome = () => {
                       </div>
                     ))}
                   </td>
-                  <td></td>
+                  {/* <td></td> */}
                 </tr>
               ))}
             </tbody>
