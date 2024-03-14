@@ -74,7 +74,6 @@ const searchByName = async (req, res) => {
 };
 
 
-
 const searchByPhoneNumber = async (req, res) => {
     try {
         const studentId = req.studentId; 

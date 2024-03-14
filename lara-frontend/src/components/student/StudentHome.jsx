@@ -21,6 +21,7 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
   const [feedbackError, setFeedbackError] = useState('');
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
+  const navigate = useNavigate()
 
   const handleSubmit = async () => {
     // Reset errors and success
@@ -400,6 +401,10 @@ const StudentHome = () => {
     setShowModal(true);
   };
 
+  const handleAssignQuestionsClick = (batchId) => {
+    // Redirect to the QuestionList component with the batch ID
+    navigate(`/assignment-questions/${batchId}`);
+  };
 
   return (
     <div className="container mt-4 mb-4">
@@ -479,36 +484,39 @@ const StudentHome = () => {
         <div className="mb-4 card col-md-12">
           <h2 className="bg-primary rounded p-2 m-2">Batches</h2>
           <table className="table m-2">
-            <thead>
-              <tr>
-                <th>Batch Name</th>
-                <th>Trainer Name</th>
-                {/* <th>Feedback</th> */}
-              </tr>
-            </thead>
-            <tbody>
-              {studentBatches.map((batchDetail, index) => (
-                <tr key={index}>
-                  <td>{batchDetail.batch.batch_name}</td>
-                  <td>
-                    {/* Check if trainerDetails exist */}
-                    {batchDetail.trainerDetails && batchDetail.trainerDetails.map((trainer, trainerIndex) => (
-                      <div key={trainerIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                        {/* Display trainer name */}
-                        <div style={{ marginRight: '10px' }}>{trainer.name}</div>
-                        {/* Render FeedbackButton for the trainer */}
-                        <FeedbackButton
-                          onClick={() => handleFeedbackClick(batchDetail.batch.batch_id, trainer.id)}
-                        />
-                      </div>
-                    ))}
-                  </td>
-                  {/* <td></td> */}
-                </tr>
-              ))}
-            </tbody>
+        <thead>
+          <tr>
+            <th>Batch Name</th>
+            <th>Trainer Name</th>
+            <th>Actions</th> {/* Add Actions column */}
+          </tr>
+        </thead>
+        <tbody>
+          {studentBatches.map((batchDetail, index) => (
+            <tr key={index}>
+              <td>{batchDetail.batch.batch_name}</td>
+              <td>
+                {batchDetail.trainerDetails && batchDetail.trainerDetails.map((trainer, trainerIndex) => (
+                  <div key={trainerIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                    <div style={{ marginRight: '10px' }}>{trainer.name}</div>
+                    {/* Assuming FeedbackButton is imported */}
+                    <FeedbackButton
+                      onClick={() => handleFeedbackClick(batchDetail.batch.batch_id, trainer.id)}
+                    />
+                  </div>
+                ))}
+              </td>
+              <td>
+                {/* Render buttons for actions */}
+                <button className="btn btn-primary" onClick={() => handleAssignQuestionsClick(batchDetail.batch.batch_id)}>
+                  Assignment Questions
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-          </table>
 
           <FeedbackModal
             show={showModal}

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import StudentList from './StudentList';
+import { useNavigate } from 'react-router-dom';
 
 const TrainerDashboard = () => {
   const [batches, setBatches] = useState([]);
   const [selectedBatchId, setSelectedBatchId] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -33,8 +35,12 @@ const TrainerDashboard = () => {
     fetchBatches();
   }, []);
 
-  const handleViewStudents = (batchId) => {
-    setSelectedBatchId(batchId);
+  const handleViewStudents = (batch_id) => {
+    setSelectedBatchId(batch_id);
+  };
+
+  const handleAssignQuestion = (batch_id) => {
+    navigate(`/assign-question/${batch_id}`);
   };
 
   return (
@@ -47,15 +53,16 @@ const TrainerDashboard = () => {
             <th>Description</th>
             <th>Duration</th>
             <th>Students</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {batches.map((batch, index) => (
             <tr key={index} className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>
-              <td className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>{batch.batch_name}</td>
-              <td className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>{batch.description}</td>
-              <td className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>{batch.duration}</td>
-              <td className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>
+              <td>{batch.batch_name}</td>
+              <td>{batch.description}</td>
+              <td>{batch.duration}</td>
+              <td>
                 <button 
                   className="btn btn-primary" 
                   onClick={() => handleViewStudents(batch.batch_id)}
@@ -63,11 +70,19 @@ const TrainerDashboard = () => {
                   View Students
                 </button>
               </td>
+              <td>
+                <button 
+                  className="btn btn-success" 
+                  onClick={() => handleAssignQuestion(batch.batch_id)}
+                >
+                  Assign Question
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
-      {selectedBatchId && <StudentList batchId={selectedBatchId} />}
+      {selectedBatchId && <StudentList batch_id={selectedBatchId} />}
     </div>
   );
 };

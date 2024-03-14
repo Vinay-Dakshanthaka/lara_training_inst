@@ -36,6 +36,35 @@ const saveBatch = async (req, res) => {
     }
 };
 
+const getBatchById = async (req, res) => {
+    try {
+        const studentId = req.studentId;
+        const {batch_id} = req.body; 
+        console.log("batchid ",batch_id)
+        
+        // Fetch user from database
+        const user = await Student.findByPk(studentId);
+        // const userRole = user.role; // Get the user's role
+
+        // Check if the user role is either "ADMIN" or "SUPER ADMIN"
+        // if (userRole !== 'ADMIN') {
+        //     return res.status(403).json({ error: 'Access forbidden' });
+        // }
+
+        // Find batch by ID in the database
+        const batch = await Batch.findByPk(batch_id);
+
+        if (!batch) {
+            return res.status(404).json({ error: 'Batch not found' });
+        }
+
+        res.status(200).json(batch);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 
 const deleteBatch = async (req, res) => {
     try {
@@ -847,6 +876,7 @@ const getStudentsByBatchId = async (req, res) => {
 
 module.exports = {
     saveBatch,
+    getBatchById,
     assignBatchesToStudent,
     getStudentBatches,
     getAllStudentsWithBatches,

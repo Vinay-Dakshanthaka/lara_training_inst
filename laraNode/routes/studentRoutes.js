@@ -59,6 +59,8 @@ router.post('/resetPassword', studentController.resetPassword);
 
 router.post('/saveBatch',verifyToken, batchController.saveBatch)
 
+router.get('/getBatchById',verifyToken, batchController.getBatchById)
+
 router.post('/assignBatchesToStudent',verifyToken,batchController.assignBatchesToStudent)
 
 router.get('/getStudentBatches',verifyToken,batchController.getStudentBatches)
@@ -98,6 +100,18 @@ router.post('/saveReview',verifyToken,reviewController.saveReview)
 router.get('/getAllReviews',verifyToken,reviewController.getAllReviews)
 
 router.post('/executeJavaCodeHandler',verifyToken,assignmentController.executeJavaCodeHandler)
+
+router.post('/saveQuestion',verifyToken,assignmentController.saveQuestion)
+
+router.post('/saveTestcases',verifyToken,assignmentController.saveTestcases)
+
+router.post('/saveStudentSubmission',verifyToken,assignmentController.saveStudentSubmission)
+
+router.post('/getQuestionsByBatchId',verifyToken,assignmentController.getQuestionsByBatchId)
+
+router.post('/getQuestionById',verifyToken,assignmentController.getQuestionById)
+
+
 
 
 module.exports = router;
