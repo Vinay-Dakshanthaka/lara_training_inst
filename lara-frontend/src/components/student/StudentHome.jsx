@@ -114,42 +114,43 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
 
   return (
     <div className={`modal fade ${show ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ display: show ? 'block' : 'none' }}>
-      <div className="modal-dialog bf-info" role="document">
-        <div className="modal-content bg-info">
-          <div className="modal-header">
-            <h5 className="modal-title bg-info">Feedback</h5>
-            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={onHide}>
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div className="modal-body bg-info">
-            <div className="form-group">
-              <label htmlFor="stars">Rate Your Experience this trainer class</label>
-              <div>
-                {[...Array(5)].map((_, index) => renderStarIcon(index))}
-                {starsError && <div className="text-danger">{starsError}</div>}
-              </div>
-            </div>
-            <div className="form-group">
-              <label htmlFor="reviewDate">Date:</label>
-              <input type="date" className="form-control" id="reviewDate" value={reviewDate} onChange={(e) => setReviewDate(e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label htmlFor="reviewTime">Time:</label>
-              <input type="time" className="form-control" id="reviewTime" value={reviewTime} onChange={(e) => setReviewTime(e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label htmlFor="review">Feedback:</label>
-              <textarea className="form-control" id="review" rows="3" value={review} onChange={(e) => setReview(e.target.value)}></textarea>
-              {feedbackError && <div className="text-danger">{feedbackError}</div>}
-            </div>
-          </div>
-          <div className="modal-footer bg-info">
-            <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={onHide}>Close</button>
-            <button type="button" className="btn btn-primary" onClick={handleSubmit}>Submit</button>
-          </div>
+     <div className="modal-dialog bf-info" role="document">
+  <div className="modal-content bg-info">
+    <div className="modal-header">
+      <h5 className="modal-title bg-info">Feedback</h5>
+      <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={onHide}>
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div className="modal-body bg-info">
+      <div className="form-group">
+        <label htmlFor="stars">Rate Your Experience with this trainer's class</label>
+        <div>
+          {[...Array(5)].map((_, index) => renderStarIcon(index))}
+          {starsError && <div className="text-danger">{starsError}</div>}
         </div>
       </div>
+      <div className="form-group">
+        <label htmlFor="reviewDate">Date:</label>
+        <input type="date" className="form-control" id="reviewDate" value={reviewDate} onChange={(e) => setReviewDate(e.target.value)} />
+      </div>
+      <div className="form-group">
+        <label htmlFor="reviewTime">Time:</label>
+        <input type="time" className="form-control" id="reviewTime" value={reviewTime} onChange={(e) => setReviewTime(e.target.value)} />
+      </div>
+      <div className="form-group">
+        <label htmlFor="review">Write your Feedback:</label>
+        <textarea className="form-control" id="review" rows="3" value={review} onChange={(e) => setReview(e.target.value)}></textarea>
+        {feedbackError && <div className="text-danger">{feedbackError}</div>}
+      </div>
+    </div>
+    <div className="modal-footer bg-info">
+      <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={onHide}>Close</button>
+      <button type="button" className="btn btn-primary" onClick={handleSubmit}>Submit</button>
+    </div>
+  </div>
+</div>
+
 
       {/* Success toast */}
       <Toast
@@ -488,7 +489,7 @@ const StudentHome = () => {
           <tr>
             <th>Batch Name</th>
             <th>Trainer Name</th>
-            <th>Actions</th> {/* Add Actions column */}
+            <th>Assignment Questions</th> 
           </tr>
         </thead>
         <tbody>
@@ -498,11 +499,19 @@ const StudentHome = () => {
               <td>
                 {batchDetail.trainerDetails && batchDetail.trainerDetails.map((trainer, trainerIndex) => (
                   <div key={trainerIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                  <tr>
+                    <td>
                     <div style={{ marginRight: '10px' }}>{trainer.name}</div>
+                    </td>
+                  </tr>
                     {/* Assuming FeedbackButton is imported */}
+                    <tr>
+                    <td>
                     <FeedbackButton
                       onClick={() => handleFeedbackClick(batchDetail.batch.batch_id, trainer.id)}
                     />
+                    </td>
+                    </tr>
                   </div>
                 ))}
               </td>

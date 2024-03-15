@@ -48,6 +48,79 @@ const saveQuestion = async (req, res) => {
   }
 };
 
+const updateQuestion = async (req, res) => {
+  try {
+    const studentId = req.studentId;
+    const { id, question, description } = req.body;
+
+    // Fetch student from database using studentId
+    const student = await Student.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Fetch user's role
+    const userRole = student.role;
+
+    // Check if the user role is authorized to update questions
+    if (userRole !== 'TRAINER') {
+      return res.status(403).json({ error: 'Access forbidden' });
+    }
+
+    // Find the question by ID
+    const existingQuestion = await Questions.findByPk(id);
+    if (!existingQuestion) {
+      return res.status(404).json({ error: 'Question not found' });
+    }
+
+    // Update the question
+    existingQuestion.question = question;
+    existingQuestion.description = description;
+    await existingQuestion.save();
+
+    res.status(200).send(existingQuestion);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: error.message });
+  }
+};
+
+const deleteQuestion = async (req, res) => {
+  try {
+    const studentId = req.studentId;
+    const { id } = req.body;
+
+    // Fetch student from database using studentId
+    const student = await Student.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Fetch user's role
+    const userRole = student.role;
+
+    // Check if the user role is authorized to delete questions
+    if (userRole !== 'TRAINER') {
+      return res.status(403).json({ error: 'Access forbidden' });
+    }
+
+    // Find the question by ID
+    const existingQuestion = await Questions.findByPk(id);
+    if (!existingQuestion) {
+      return res.status(404).json({ error: 'Question not found' });
+    }
+
+    // Delete the question
+    await existingQuestion.destroy();
+
+    res.status(200).json({ message: 'Question deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 const getQuestionsByBatchId = async (req, res) => {
   try {
     // const studentId = req.studentId;
@@ -175,7 +248,7 @@ async function executeCode(code, input) {
 
   return response.data.output;
 }
-
+/******************** */
 const executeJavaCodeHandler = async (req, res) => {
   try {
     const { code } = req.body;
@@ -187,7 +260,7 @@ const executeJavaCodeHandler = async (req, res) => {
       versionIndex: '3', // Specify the Java version index (e.g., '3' for Java 8)
       clientId: 'cf50f833c14a453d7b51231fe243dda6',
       clientSecret: 'bb9342a1e142f420f0a1f2345749fc7b751d32340b5906b76544cd02095c666a',
-      stdin: '', // Set stdin to empty string for simplicity
+      stdin: '', 
     };
 
     // Send POST request to Jdoodle compiler API
@@ -201,7 +274,7 @@ const executeJavaCodeHandler = async (req, res) => {
   }
 };
 
-
+// ************************************/
 
 // const executeJavaCodeHandler = async (req, res) => {
 //   try {
@@ -232,6 +305,57 @@ const executeJavaCodeHandler = async (req, res) => {
 
 
 
+// const executeJavaCodeHandler = async (req, res) => {
+//   try {
+//     const { code, testCases } = req.body;
+
+//     // Array to hold results for each test case
+//     const results = [];
+
+//     // Function to execute Java code for a single test case
+//     const executeTestCase = async (testCase) => {
+//       const requestBody = {
+//         script: code,
+//         language: 'java',
+//         versionIndex: '3', // Specify the Java version index (e.g., '3' for Java 8)
+//         clientId: 'cf50f833c14a453d7b51231fe243dda6',
+//         clientSecret: 'bb9342a1e142f420f0a1f2345749fc7b751d32340b5906b76544cd02095c666a',
+//         stdin: testCase.input,
+//       };
+
+//       // Send POST request to Jdoodle compiler API
+//       const response = await axios.post('https://api.jdoodle.com/v1/execute', requestBody);
+
+//       // Extract output from the response
+//       const output = response.data.output
+
+//       // Compare output with expected output
+//       const expectedResult = testCase.expectedOutput; // No need to trim for boolean values
+//       const testResult = output === expectedResult ? 'Pass' : 'Fail';
+
+//       // Store the result for the current test case
+//       return {
+//         input: testCase.input,
+//         output: output,
+//         expectedOutput: expectedResult,
+//         result: testResult,
+//       };
+//     };
+
+//     // Execute Java code for each test case
+//     for (const testCase of testCases) {
+//       const result = await executeTestCase(testCase);
+//       results.push(result);
+//     }
+
+//     // Send results as JSON
+//     res.json({ results });
+//   } catch (error) {
+//     console.error('Error executing Java code:', error);
+//     res.status(500).json({ error: 'Error executing Java code' });
+//   }
+// };
+
 
 module.exports = {
   executeJavaCodeHandler,
@@ -239,10 +363,7 @@ module.exports = {
   saveTestcases,
   saveStudentSubmission,
   getQuestionsByBatchId,
-  getQuestionById
+  getQuestionById,
+  updateQuestion,
+  deleteQuestion
 };
-
-
-
-
-

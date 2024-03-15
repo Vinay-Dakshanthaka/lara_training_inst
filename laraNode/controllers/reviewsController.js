@@ -93,10 +93,7 @@ const getAllReviews = async (req, res) => {
     }
 };
 
-
 module.exports = {
     saveReview,
     getAllReviews
 }
-
-

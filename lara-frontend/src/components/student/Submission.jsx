@@ -127,7 +127,7 @@ const Submission = () => {
           const response = await axios.post('http://localhost:8080/api/student/executeJavaCodeHandler', {
             code: code, // Send the Java code
           }, config);
-          
+          console.log("response from jdoodle : ",response.data)
           setOutput(response.data.output); // Set the output directly from the response
         } catch (error) {
           console.error('Error executing Java code:', error);
@@ -161,7 +161,7 @@ const Submission = () => {
     <div className="mb-4">
       <button className="btn btn-primary" onClick={executeCode} disabled={loading}>Run</button>
     </div>
-    {loading && <div>Loading...</div>}
+    {loading && <div>Compiling...</div>}
     <div className="mb-4">
       <h4>Output:</h4>
       <pre className="bg-dark text-light p-3">{output}</pre>

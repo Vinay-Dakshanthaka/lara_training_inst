@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { ToastContainer, Toast } from 'react-bootstrap'; // Import ToastContainer for positioning toasts
@@ -12,6 +12,32 @@ const AssignQuestion = () => {
     const [showErrorToast, setShowErrorToast] = useState(false);
     const [questionError, setQuestionError] = useState('');
     const [descriptionError, setDescriptionError] = useState('');
+    const [batchDetails, setBatchDetails] = useState(null);
+
+    useEffect(() => {
+        const fetchBatchDetails = async () => {
+          try {
+            const token = localStorage.getItem("token");
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+            const response = await axios.post(
+              'http://localhost:8080/api/student/getBatchById',
+              { batch_id },config
+            );
+    
+            // Assuming response.data contains the batch details
+            setBatchDetails(response.data);
+            console.log("batch details :",response.data)
+          } catch (error) {
+            console.log("Error fetching Batch Details :",error)
+          }
+        };
+    
+        fetchBatchDetails();
+      }, [batch_id]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -57,8 +83,9 @@ const AssignQuestion = () => {
 
     return (
         <div className='card m-4'>
-            <h1>Assign Question</h1>
-            <form onSubmit={handleSubmit}>
+            <h1>Give Assignment Questions</h1>
+            <h3>Batch Name : {batchDetails.batch_name}</h3>
+            <form onSubmit={handleSubmit} className='card p-2'>
                 <div className="mb-3">
                     <label htmlFor="question" className="form-label"><b>Question</b></label>
                     <textarea

@@ -40,7 +40,7 @@ const getBatchById = async (req, res) => {
     try {
         const studentId = req.studentId;
         const {batch_id} = req.body; 
-        console.log("batchid ",batch_id)
+        // console.log("batchid ",batch_id)
         
         // Fetch user from database
         const user = await Student.findByPk(studentId);

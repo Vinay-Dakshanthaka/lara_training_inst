@@ -53,7 +53,7 @@ const TrainerDashboard = () => {
             <th>Description</th>
             <th>Duration</th>
             <th>Students</th>
-            <th>Actions</th>
+            <th>Assign Questions</th>
           </tr>
         </thead>
         <tbody>
@@ -72,7 +72,7 @@ const TrainerDashboard = () => {
               </td>
               <td>
                 <button 
-                  className="btn btn-success" 
+                  className="btn btn-warning" 
                   onClick={() => handleAssignQuestion(batch.batch_id)}
                 >
                   Assign Question
@@ -82,7 +82,7 @@ const TrainerDashboard = () => {
           ))}
         </tbody>
       </table>
-      {selectedBatchId && <StudentList batch_id={selectedBatchId} />}
+      {selectedBatchId && <StudentList batchId={selectedBatchId} />}
     </div>
   );
 };
