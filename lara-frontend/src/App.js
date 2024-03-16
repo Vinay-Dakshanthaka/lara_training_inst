@@ -26,6 +26,7 @@ import AssignQuestion from './components/trainer/AssignQuestion';
 import QuestionList from './components/trainer/QuestionList';
 import AssignmentQuestions from './components/student/AssignmentQuestions';
 import Submission from './components/student/Submission';
+import AssignmentAnswer from './components/trainer/AssignmentAnswer';
 
 
 const App = () => {
@@ -55,7 +56,9 @@ const App = () => {
             <Route path='/batchWiseStudents' element={<BatchWiseStudents />} />
             <Route path="/assign-question/:batch_id" element={<AssignQuestion />} />
             <Route path="/assignment-questions/:batch_id" element={<AssignmentQuestions />} />
-            <Route path="/submission/:questionId" element={<Submission/>} />
+            {/* <Route path="/submission/:questionId" element={<Submission/>} /> */}
+            <Route path="/submission/:questionId/:batchId" element={<Submission />} />
+            <Route path="/assignment-answers/:batchId/:studentId" element={<AssignmentAnswer />} />
             {/* <Route path="/profile" element={<Profile />} /> */}
             <Route path="*" element={<LoginForm />} />
 

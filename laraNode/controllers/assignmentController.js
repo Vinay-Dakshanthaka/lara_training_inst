@@ -12,8 +12,6 @@ const Testcase = db.TestCase
 const StudentSubmission = db.StudentSubmission
 const jwtSecret = process.env.JWT_SECRET;
 
-
-
 const saveQuestion = async (req, res) => {
   try {
     const studentId = req.studentId;
@@ -195,8 +193,7 @@ const saveTestcases = async (req, res) => {
 const saveStudentSubmission = async (req, res) => {
   try {
     const studentId = req.studentId;
-    const { question_id, code, submission_time, no_testcase_passed, execution_output } = req.body;
-
+    const { question_id, code,batch_id, submission_time, no_testcase_passed, execution_output } = req.body;
 
     // Check if the question exists
     const question = await Questions.findByPk(question_id);
@@ -210,10 +207,23 @@ const saveStudentSubmission = async (req, res) => {
       return res.status(404).json({ error: 'Student not found' });
     }
 
+    // Check if the student has already submitted the code for this question
+    const existingSubmission = await StudentSubmission.findOne({
+      where: {
+        question_id: question_id,
+        student_id: studentId
+      }
+    });
+
+    if (existingSubmission) {
+      return res.status(400).json({ error: 'Student already submitted the answer for this question' });
+    }
+
     // Save the student submission
     const createdSubmission = await StudentSubmission.create({
       question_id,
       student_id: studentId,
+      batch_id,
       code,
       submission_time,
       no_testcase_passed,
@@ -221,6 +231,58 @@ const saveStudentSubmission = async (req, res) => {
     });
 
     res.status(200).json(createdSubmission);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getStudentSubmissions = async (req, res) => {
+  try {
+    const studentId = req.studentId;
+    const {batchId} = req.body;
+    console.log("batch id :", batchId)
+    // Check if the student exists
+    const student = await Student.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Retrieve all submissions for the student and batch
+    const submissions = await StudentSubmission.findAll({
+      where: {
+        student_id: studentId,
+        batch_id: batchId
+      }
+    });
+    
+    res.status(200).json(submissions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getStudentSubmissionsByBatchId = async (req, res) => {
+  try {
+    const {studentId,batchId} = req.body;
+    console.log("student Id ", studentId)
+    console.log("batch Id ", batchId)
+    // Check if the student exists
+    const student = await Student.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Retrieve all submissions for the student and batch
+    const submissions = await StudentSubmission.findAll({
+      where: {
+        student_id: studentId,
+        batch_id: batchId
+      }
+    });
+    
+    res.status(200).json(submissions);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
@@ -365,5 +427,7 @@ module.exports = {
   getQuestionsByBatchId,
   getQuestionById,
   updateQuestion,
-  deleteQuestion
+  deleteQuestion,
+  getStudentSubmissions,
+  getStudentSubmissionsByBatchId
 };

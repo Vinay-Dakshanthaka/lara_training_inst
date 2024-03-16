@@ -1,7 +1,6 @@
-// StudentList.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const StudentList = ({ batchId }) => {
   const [students, setStudents] = useState([]);
@@ -57,6 +56,7 @@ const StudentList = ({ batchId }) => {
             <th>Highest Education</th>
             <th>Year of Passout</th>
             <th>Specialization</th>
+            <th>Actions</th> {/* Add a column for actions */}
           </tr>
         </thead>
         <tbody>
@@ -66,6 +66,11 @@ const StudentList = ({ batchId }) => {
               <td>{student.profile.highest_education}</td>
               <td>{student.profile.year_of_passout}</td>
               <td>{student.profile.specialization}</td>
+              <td>
+                <Link to={`/assignment-answers/${batchId}/${student.id}`} className="btn btn-primary">
+                  Assignment Answers
+                </Link>
+              </td> {/* Create a button to redirect to AssignmentAnswers */}
             </tr>
           ))}
         </tbody>

@@ -115,5 +115,9 @@ router.post('/getQuestionsByBatchId',verifyToken,assignmentController.getQuestio
 
 router.post('/getQuestionById',verifyToken,assignmentController.getQuestionById)
 
+router.post('/getStudentSubmissions',verifyToken,assignmentController.getStudentSubmissions)
+
+router.post('/getStudentSubmissionsByBatchId',verifyToken,assignmentController.getStudentSubmissionsByBatchId)
+
 
 module.exports = router;

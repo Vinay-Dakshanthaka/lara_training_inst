@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        batch_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
         code: {
             type: DataTypes.TEXT,
             allowNull: false

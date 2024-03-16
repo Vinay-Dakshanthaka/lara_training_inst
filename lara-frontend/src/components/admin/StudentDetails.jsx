@@ -37,6 +37,7 @@ const StudentDetails = () => {
         const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
         const filteredStudents = response.data.filter(student => student.role === "STUDENT");
         setStudents(filteredStudents);
+        console.log("student details :", response.data)
       } catch (error) {
         console.error(error);
       }

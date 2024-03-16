@@ -45,7 +45,8 @@ const AssignmentQuestions = () => {
           <div>
             <h4 style={{ fontWeight: 'bold' }}>{question.question}</h4>
             <p>{question.description}</p>
-            <Link to={`/submission/${question.id}`} className="btn btn-primary">Solve</Link>
+            {/* <Link to={`/submission/${question.id}`} className="btn btn-primary">Solve</Link> */}
+            <Link to={`/submission/${question.id}/${batch_id}`} className="btn btn-primary">Solve</Link>
           </div>
         </li>
       ))}

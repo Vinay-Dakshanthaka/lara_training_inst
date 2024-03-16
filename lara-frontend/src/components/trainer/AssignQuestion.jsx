@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import { ToastContainer, Toast } from 'react-bootstrap'; // Import ToastContainer for positioning toasts
+import { ToastContainer, Toast } from 'react-bootstrap';
 import QuestionList from './QuestionList';
 
 const AssignQuestion = () => {
@@ -84,7 +84,7 @@ const AssignQuestion = () => {
     return (
         <div className='card m-4'>
             <h1>Give Assignment Questions</h1>
-            <h3>Batch Name : {batchDetails.batch_name}</h3>
+            {/* <h3>Batch Name : {batchDetails.batch_name}</h3> */}
             <form onSubmit={handleSubmit} className='card p-2'>
                 <div className="mb-3">
                     <label htmlFor="question" className="form-label"><b>Question</b></label>
@@ -123,7 +123,6 @@ const AssignQuestion = () => {
                     <Toast.Body>Something went wrong. Please try again later.</Toast.Body>
                 </Toast>
             </ToastContainer>
-
         </div>
     );
 };
