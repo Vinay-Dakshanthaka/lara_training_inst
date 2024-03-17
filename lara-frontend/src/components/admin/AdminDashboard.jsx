@@ -25,7 +25,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="container">
-      <h1 className='text-center'> Admin Dashboard</h1>
+      <h1 className='text-center'>Admin Dashboard</h1>
       <Tabs
         defaultActiveKey="studentDetails"
         id="dashboard-tabs"

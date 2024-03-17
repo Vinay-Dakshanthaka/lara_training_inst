@@ -59,6 +59,7 @@ const AssignmentAnswer = () => {
               <div className="card-body">
                 <h5 className="card-title">Question</h5>
                 <p className="card-text">{questions[index]?.question}</p>
+                {/* <p>{questions[index]?.discription}</p> */}
                 <h5 className="card-title">Code</h5>
                 <pre className="card-text bg-light p-3">{submission.code}</pre>
                 <h5 className="card-title">Output</h5>

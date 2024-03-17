@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import AllStudents from './AllStudents';
 import AllStudentsProfiles from './AllStudentsProfiles';
 import { Navigate } from 'react-router-dom';
+import AdminDashboard from '../admin/AdminDashboard';
+import { Tab, Tabs } from 'react-bootstrap';
+import BatchDetails from '../admin/BatchDetails';
+import TrainerDetails from '../admin/TrainerDetails';
+import StudentReviews from '../admin/StudentReviews';
+import StudentDetails from '../admin/StudentDetails';
 
 const StudentAdminDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');
@@ -13,14 +19,17 @@ const StudentAdminDashboard = () => {
     return <Navigate to="/" replace />;
   }
 
-  const handleOptionChange = (event) => {
-    setSelectedOption(event.target.value);
+  // const handleOptionChange = (event) => {
+  //   setSelectedOption(event.target.value);
+  // };
+  const handleOptionChange = (option) => {
+    setSelectedOption(option);
   };
 
   return (
     <div className="container">
-    <h1 className='text-center'>Super Admin Dashboard</h1>
-    <div className="row">
+    <h1 className='text-center m-4'>Dashboard</h1>
+    {/* <div className="row">
       <div className="col-auto">
         <div className="form-check">
           <input
@@ -45,9 +54,35 @@ const StudentAdminDashboard = () => {
           <label className="form-check-label">Profile Details</label>
         </div>
       </div>
-    </div>
+    </div> */}
 
-    {selectedOption === 'studentDetails' ? <AllStudents /> : <AllStudentsProfiles />}
+    <Tabs
+        defaultActiveKey="studentDetails"
+        id="dashboard-tabs"
+        onSelect={(key) => handleOptionChange(key)}
+        className="mb-3"
+      >
+        <Tab eventKey="studentDetails" title="Assign Role">
+          <AllStudents />
+        </Tab>
+        <Tab eventKey="Student Profiles" title="Profile Details">
+          <AllStudentsProfiles />
+        </Tab>
+        <Tab eventKey="batchDetails" title="Batch Details">
+          <BatchDetails />
+        </Tab>
+        <Tab eventKey="trainers" title="Trainers">
+          <TrainerDetails />
+        </Tab>
+        <Tab eventKey="studentReviews" title="Student Reviews">
+          <StudentReviews />
+        </Tab>
+        {/* <Tab eventKey="allStudents" title="Student Reviews">
+          <AllStudents />
+        </Tab> */}
+      </Tabs>
+
+    {/* {selectedOption === 'studentDetails' ? <AllStudents /> : <AllStudentsProfiles />} */}
   </div>
   );
 };

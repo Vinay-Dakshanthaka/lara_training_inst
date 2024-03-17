@@ -136,7 +136,7 @@ const Submission = () => {
       </div>
       <div className="mb-4">
         <button className="btn btn-primary mr-2" onClick={executeCode} disabled={loading}>Run</button>
-        <Button className="btn btn-success" onClick={handleShowModal} disabled={loading}>
+        <Button className="btn btn-success m-4 " onClick={handleShowModal} disabled={loading}>
           Submit Code
         </Button>
         <Modal show={showModal} onHide={handleCloseModal}>
@@ -144,7 +144,8 @@ const Submission = () => {
             <Modal.Title>Confirm Submission</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            You can submit answer for this question only once.
+            <b>Note:</b> Befor Submitting Run the code. <br />
+            And you can submit answer for this question only once.
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>
