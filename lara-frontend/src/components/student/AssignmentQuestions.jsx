@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import {baseURL}  from '../config';
 import { Link, useParams } from 'react-router-dom'; // Import useParams hook
 
 const AssignmentQuestions = () => {
@@ -22,7 +23,7 @@ const AssignmentQuestions = () => {
         };
 
         const response = await axios.post(
-          'http://localhost:8080/api/student/getQuestionsByBatchId',
+          `${baseURL}/api/student/getQuestionsByBatchId`,
           { batch_id: batch_id }, // Use batch_id from URL params
           config
         );

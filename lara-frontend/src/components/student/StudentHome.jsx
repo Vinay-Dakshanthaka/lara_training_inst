@@ -5,6 +5,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { BsFillEnvelopeFill, BsPhone } from "react-icons/bs";
 import defaultProfileImage from "../default-profile.png";
 import { BsStarFill, BsStar } from 'react-icons/bs'; // Import star icons
+import {baseURL}  from '../config';
 
 const FeedbackButton = ({ onClick }) => {
   return (
@@ -85,7 +86,7 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
         }
       };
 
-      const response = await axios.post('http://localhost:8080/api/student/saveReview', formData, config);
+      const response = await axios.post(`${baseURL}/api/student/saveReview`, formData, config);
 
       if (response.status === 200) {
         onSuccess();
@@ -231,7 +232,7 @@ const StudentHome = () => {
         };
 
         const response = await axios.get(
-          `http://localhost:8080/api/student/getProfileDetails`,
+          `${baseURL}/api/student/getProfileDetails`,
           config
         ); // Assuming endpoint to fetch profile details
         setProfileDetails(response.data);
@@ -261,7 +262,7 @@ const StudentHome = () => {
         };
 
         const response = await axios.get(
-          `http://localhost:8080/api/student/getStudentDetails`,
+          `${baseURL}/api/student/getStudentDetails`,
           config
         );
         const data = response.data || {};
@@ -300,7 +301,7 @@ const StudentHome = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:8080/api/student/uploadProfileImage",
+        `${baseURL}/api/student/uploadProfileImage`,
         formData,
         {
           headers: {
@@ -333,7 +334,7 @@ const StudentHome = () => {
     const fetchProfileImage = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:8080/api/student/profile/image', {
+        const response = await axios.get(`${baseURL}/api/student/profile/image`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -375,7 +376,7 @@ const StudentHome = () => {
         };
 
         const response = await axios.get(
-          `http://localhost:8080/api/student/fetchTrainerAndBatchFromStudent`,
+          `${baseURL}/api/student/fetchTrainerAndBatchFromStudent`,
           config
         );
         const data = response.data || {};

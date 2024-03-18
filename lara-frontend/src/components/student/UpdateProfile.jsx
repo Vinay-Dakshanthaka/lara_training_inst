@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import {baseURL}  from '../config';
 
 const UpdateProfile = () => {
   const { studentId } = useParams();
@@ -90,7 +91,7 @@ const UpdateProfile = () => {
           }
         };
 
-        const response = await axios.get(`http://localhost:8080/api/student/getProfileDetails`,config );
+        const response = await axios.get(`${baseURL}/api/student/getProfileDetails`,config );
         const data = response.data || {};
         setProfileDetails(data);
       } catch (error) {
@@ -278,7 +279,7 @@ const validateYOP = (yop) => {
         }
       };
 
-      await axios.post(`http://localhost:8080/api/student/saveOrUpdateProfile`,profileDetails,config );
+      await axios.post(`${baseURL}/api/student/saveOrUpdateProfile`,profileDetails,config );
       // If update is successful, display success message and redirect to StudentHome
       // console.log("Profile updated successfully");
       setErrorMessage('Profile updated successfully');

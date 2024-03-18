@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { ToastContainer, Toast } from 'react-bootstrap';
 import QuestionList from './QuestionList';
+import {baseURL}  from '../config';
 
 const AssignQuestion = () => {
     const { batch_id } = useParams();
@@ -24,7 +25,7 @@ const AssignQuestion = () => {
                 },
             };
             const response = await axios.post(
-              'http://localhost:8080/api/student/getBatchById',
+              `${baseURL}/api/student/getBatchById`,
               { batch_id },config
             );
     
@@ -61,7 +62,7 @@ const AssignQuestion = () => {
                 },
             };
             const formData = { batch_id, question, description };
-            const response = await axios.post('http://localhost:8080/api/student/saveQuestion', formData, config);
+            const response = await axios.post(`${baseURL}/api/student/saveQuestion`, formData, config);
             console.log('Question saved successfully:', response.data);
             // Reset form fields after successful submission
             setQuestion('');

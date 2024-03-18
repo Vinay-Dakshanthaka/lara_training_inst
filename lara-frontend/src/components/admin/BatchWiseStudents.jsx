@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Form, Table } from 'react-bootstrap';
 import { BsArrowBarLeft, BsArrowDownLeftCircleFill, BsArrowLeftCircle } from 'react-icons/bs';
 import {  useNavigate } from 'react-router-dom';
+import {baseURL}  from '../config';
 
 const BatchWiseStudents = () => {
   const [availableBatches, setAvailableBatches] = useState([]);
@@ -23,7 +24,7 @@ const BatchWiseStudents = () => {
             Authorization: `Bearer ${token}`,
           },
         };
-        const response = await axios.get('http://localhost:8080/api/student/getAllBatches', config);
+        const response = await axios.get(`${baseURL}/api/student/getAllBatches`, config);
         setAvailableBatches(response.data);
       } catch (error) {
         console.error('Error fetching batches:', error);
@@ -55,7 +56,7 @@ const BatchWiseStudents = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.post('http://localhost:8080/api/student/getStudentsByBatches', {
+      const response = await axios.post(`${baseURL}/api/student/getStudentsByBatches`, {
         batchNames: selectedBatches
       }, config);
 

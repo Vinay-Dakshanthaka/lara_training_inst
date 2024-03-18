@@ -3,6 +3,7 @@ import { Form, Button, Container,InputGroup, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { BsEye, BsEyeSlash,BsEnvelope,BsPhone } from 'react-icons/bs';
 import axios from 'axios';
+import {baseURL}  from './config';
 import QRCode from 'qrcode.react'
 
 const SignUpForm = () => {
@@ -64,7 +65,7 @@ const SignUpForm = () => {
     
     try {
       // Send data to the server
-      const response = await axios.post('http://localhost:8080/api/student/saveStudent', {
+      const response = await axios.post(`${baseURL}/api/student/saveStudent`, {
         name,
         email,
         phoneNumber,

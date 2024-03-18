@@ -4,6 +4,7 @@ import { Navbar, Nav, Toast } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import defaultProfileImage from "../default-profile.png";
 import imgSrc from "../laralogo.webp"
+import {baseURL}  from '../config';
 import LogoutModal from "../LogoutModal";
 
 function AdminNavbar() {
@@ -49,7 +50,7 @@ function AdminNavbar() {
       try {
         const token = localStorage.getItem('token');
         
-        const response = await axios.get('http://localhost:8080/api/student/profile/image', {
+        const response = await axios.get(`${baseURL}/api/student/profile/image`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

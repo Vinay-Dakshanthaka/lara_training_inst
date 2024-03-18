@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Modal, Button } from 'react-bootstrap';
+import {baseURL}  from '../config';
 
 const Submission = () => {
   const { questionId, batchId } = useParams();
@@ -31,7 +32,7 @@ const Submission = () => {
         };
 
         const response = await axios.post(
-          'http://localhost:8080/api/student/getQuestionById',
+          `${baseURL}/api/student/getQuestionById`,
           { id: questionId },
           config
         );
@@ -59,7 +60,7 @@ const Submission = () => {
       };
 
       setLoading(true);
-      const response = await axios.post('http://localhost:8080/api/student/executeJavaCodeHandler', {
+      const response = await axios.post(`${baseURL}/api/student/executeJavaCodeHandler`, {
         code: code, // Send the Java code
       }, config);
 
@@ -89,7 +90,7 @@ const Submission = () => {
       };
   
       setLoading(true);
-      const response = await axios.post('http://localhost:8080/api/student/saveStudentSubmission', {
+      const response = await axios.post(`${baseURL}/api/student/saveStudentSubmission`, {
         question_id: questionId,
         code: code,
         batch_id: batchId,

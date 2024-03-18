@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import {baseURL}  from '../config';
 
 const AssignmentAnswer = () => {
   const { batchId, studentId } = useParams(); // Get batchId and studentId from URL params
@@ -22,7 +23,7 @@ const AssignmentAnswer = () => {
         };
 
         const submissionsResponse = await axios.post(
-          'http://localhost:8080/api/student/getStudentSubmissionsByBatchId',
+          `${baseURL}/api/student/getStudentSubmissionsByBatchId`,
           { batchId, studentId },
           config
         );
@@ -30,7 +31,7 @@ const AssignmentAnswer = () => {
 
         const questionsPromises = submissionsResponse.data.map(submission => {
           return axios.post(
-            'http://localhost:8080/api/student/getQuestionById',
+            `${baseURL}/api/student/getQuestionById`,
             { id: submission.question_id },
             config
           );

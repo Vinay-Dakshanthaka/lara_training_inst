@@ -3,6 +3,7 @@ import { Form, Button, Alert, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import axios from 'axios';
+import {baseURL}  from './config';
 
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState('');
@@ -41,7 +42,7 @@ const ResetPassword = () => {
 
     // Make API call to reset password
     try {
-      const response = await axios.post(`http://localhost:8080/api/student/resetPassword?token=${token}`, { newPassword });
+      const response = await axios.post(`${baseURL}/api/student/resetPassword?token=${token}`, { newPassword });
       if (response.status === 200) {
         setSuccess(true);
         setTimeout(() => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import {baseURL}  from '../config';
 
 const StudentList = ({ batchId }) => {
   const [students, setStudents] = useState([]);
@@ -20,7 +21,7 @@ const StudentList = ({ batchId }) => {
         };
 
         const response = await axios.post(
-          'http://localhost:8080/api/student/getStudentsByBatchId',
+          `${baseURL}/api/student/getStudentsByBatchId`,
           { batchId },
           config
         );
@@ -29,7 +30,7 @@ const StudentList = ({ batchId }) => {
         // Fetch additional details for each student
         const studentsWithDetails = await Promise.all(studentsData.map(async (student) => {
           const profileResponse = await axios.post(
-            'http://localhost:8080/api/student/getProfileDetailsById',
+            `${baseURL}/api/student/getProfileDetailsById`,
             { student_id: student.id },
             config
           );

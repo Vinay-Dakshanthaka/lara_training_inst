@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Pagination, Form } from 'react-bootstrap';
+import {baseURL}  from '../config';
 
 const AllStudentsProfiles = () => {
   const [studentProfiles, setStudentProfiles] = useState([]);
@@ -31,9 +32,9 @@ const AllStudentsProfiles = () => {
       let response;
   
       if (searchType === 'specialization') {
-        response = await axios.post('http://localhost:8080/api/student/searchBySpecialization', { specialization: searchValue }, config);
+        response = await axios.post(`${baseURL}/api/student/searchBySpecialization`, { specialization: searchValue }, config);
       } else if (searchType === 'qualification') {
-        response = await axios.post('http://localhost:8080/api/student/searchByQualification', { highest_education: searchValue }, config);
+        response = await axios.post(`${baseURL}/api/student/searchByQualification`, { highest_education: searchValue }, config);
       }
   
       setStudentProfiles(response.data);
@@ -57,7 +58,7 @@ const AllStudentsProfiles = () => {
             Authorization: `Bearer ${token}`,
           },
         };
-        const response = await axios.get('http://localhost:8080/api/student/getAllStudentProfileDetails', config);
+        const response = await axios.get(`${baseURL}/api/student/getAllStudentProfileDetails`, config);
         setStudentProfiles(response.data);
       } catch (error) {
         console.error('Error fetching student profiles:', error);

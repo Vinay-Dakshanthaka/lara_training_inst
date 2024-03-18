@@ -8,6 +8,7 @@ import BatchDetails from '../admin/BatchDetails';
 import TrainerDetails from '../admin/TrainerDetails';
 import StudentReviews from '../admin/StudentReviews';
 import StudentDetails from '../admin/StudentDetails';
+import {baseURL}  from '../config';
 
 const StudentAdminDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');

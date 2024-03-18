@@ -14,3 +14,7 @@ module.exports = {
         idle: 10000
     }
 };  
+
+
+// ns1.dns-parking.com
+// ns2.dns-parking.com

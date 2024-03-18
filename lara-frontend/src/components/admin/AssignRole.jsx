@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Pagination } from 'react-bootstrap'; 
+import { Pagination } from 'react-bootstrap';
+ import {baseURL}  from '../config';
 
 const AssignRole = () => {
   const [students, setStudents] = useState([]);
@@ -25,7 +26,7 @@ const AssignRole = () => {
         },
       };
 
-      const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
+      const response = await axios.get(`${baseURL}/api/student/getAllStudentDetails`, config);
       // Filter out SUPER ADMIN students
       const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN" && student.role !== "ADMIN");
       setStudents(filteredStudents);
@@ -57,15 +58,15 @@ const AssignRole = () => {
       // Determine the search URL and parameter based on the search criteria
       switch (searchCriteria) {
         case 'name':
-          searchUrl = 'http://localhost:8080/api/student/searchByName';
+          searchUrl = `${baseURL}/api/student/searchByName`;
           searchParam = 'name';
           break;
         case 'email':
-          searchUrl = 'http://localhost:8080/api/student/searchByEmail';
+          searchUrl = `${baseURL}/api/student/searchByEmail`;
           searchParam = 'email';
           break;
         case 'phoneNumber':
-          searchUrl = 'http://localhost:8080/api/student/searchByPhoneNumber';
+          searchUrl = `${baseURL}/api/student/searchByPhoneNumber`;
           searchParam = 'phoneNumber';
           break;
         default:
@@ -75,7 +76,7 @@ const AssignRole = () => {
       // Check if the search value is empty
       if (!searchValue.trim()) {
         // If empty, fetch all students
-        const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
+        const response = await axios.get(`${baseURL}/api/student/getAllStudentDetails`, config);
         const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
         setStudents(filteredStudents);
       } else {
@@ -124,7 +125,7 @@ const AssignRole = () => {
       console.log("Updating role for student with ID:", studentId); // Debugging
   
       await axios.put(
-        `http://localhost:8080/api/student/updateRole`,
+        `${baseURL}/api/student/updateRole`,
         { id: studentId, role: updatedRoles[studentId] }, // Include both id and role in the request body
         config
       );

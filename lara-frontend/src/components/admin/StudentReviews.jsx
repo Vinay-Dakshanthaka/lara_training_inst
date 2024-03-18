@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Pagination } from 'react-bootstrap';
+import {baseURL}  from '../config';
 
 const StudentReviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -18,7 +19,7 @@ const StudentReviews = () => {
             Authorization: `Bearer ${token}`
           }
         };
-        const response = await fetch('http://localhost:8080/api/student/getAllReviews',config);
+        const response = await fetch(`${baseURL}/api/student/getAllReviews`,config);
         if (!response.ok) {
           throw new Error('Failed to fetch reviews');
         }

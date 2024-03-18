@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import StudentList from './StudentList';
 import { useNavigate } from 'react-router-dom';
+import {baseURL}  from '../config';
 
 const TrainerDashboard = () => {
   const [batches, setBatches] = useState([]);
@@ -23,7 +24,7 @@ const TrainerDashboard = () => {
         };
 
         const response = await axios.get(
-          'http://localhost:8080/api/student/fetchBatchesAssignedToTrainer',
+          `${baseURL}/api/student/fetchBatchesAssignedToTrainer`,
           config
         );
         setBatches(response.data.batches);

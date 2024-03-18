@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Alert, Button, Form } from 'react-bootstrap';
+import {baseURL}  from './config';
 
 const PasswordResetForm = () => {
     const [email, setEmail] = useState('');
@@ -12,7 +13,7 @@ const PasswordResetForm = () => {
         e.preventDefault();
         setLoading(true); // Set loading to true when submitting form
         try {
-            const response = await axios.post('http://localhost:8080/api/student/sendPasswordResetEmail', { email });
+            const response = await axios.post(`${baseURL}/api/student/sendPasswordResetEmail`, { email });
             if (response.status === 200) {
                 setMessage('Password reset email link sent successfully to your email. Please check.');
                 setAlertVariant('success');

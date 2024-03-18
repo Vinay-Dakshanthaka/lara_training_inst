@@ -3,6 +3,7 @@ import { Container, Form, Button,InputGroup, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import axios from 'axios';
+import {baseURL} from './config';
 
 const LoginForm = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -10,6 +11,7 @@ const LoginForm = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  // const baseURL= "http://localhost:8080"
 
   const navigate = useNavigate();
 
@@ -31,12 +33,12 @@ const LoginForm = () => {
     try {
       let response;
       if (email && isValidEmail(email)) {
-        response = await axios.post('http://localhost:8080/api/student/verifyByEmailAndPassword', {
+        response = await axios.post(`${baseURL}/api/student/verifyByEmailAndPassword`, {
           email,
           password
         });
       } else {
-        response = await axios.post('http://localhost:8080/api/student/verifyByPhoneAndPassword', {
+        response = await axios.post(`${baseURL}/api/student/verifyByPhoneAndPassword`, {
           phoneNumber,
           password
         });

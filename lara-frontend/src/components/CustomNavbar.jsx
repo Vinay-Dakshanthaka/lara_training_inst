@@ -5,6 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import defaultProfileImage from "../components/default-profile.png";
 import imgSrc from "../resources/images/laralogo.webp";
 import LogoutModal from "./LogoutModal";
+import {baseURL}  from './config';
 
 function CustomNavbar() {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ function CustomNavbar() {
         const token = localStorage.getItem("token");
 
         const response = await axios.get(
-          "http://localhost:8080/api/student/profile/image",
+          `${baseURL}/api/student/profile/image`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -83,6 +84,10 @@ function CustomNavbar() {
     fetchProfileImage();
   }, []);
 
+  const handleCloseNavbar = () => {
+    setIsOpen(false);
+  };
+
   return (
     <>
       <Navbar bg="light" variant="" expand="lg">
@@ -94,19 +99,22 @@ function CustomNavbar() {
             style={{ width: "80px", height: "40px" }}
           />
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
+        <Navbar.Toggle
+          aria-controls="basic-navbar-nav"
+          onClick={() => setIsOpen(!isOpen)} // Toggle the dropdown status
+        />
+        <Navbar.Collapse id="basic-navbar-nav" isOpen={isOpen}>
           <Nav className="ms-auto">
             {/* Conditionally render the logout button */}
             {isLoggedIn ? (
               <>
-                <Nav.Link as={Link} to="/">
+                <Nav.Link as={Link} to="/" onClick={handleCloseNavbar}>
                   Home
                 </Nav.Link>
-                <Nav.Link as={Link} to="about">
+                <Nav.Link as={Link} to="about" onClick={handleCloseNavbar}>
                   About
                 </Nav.Link>
-                <Nav.Link as={Link} to="course">
+                <Nav.Link as={Link} to="course" onClick={handleCloseNavbar}>
                   Course
                 </Nav.Link>
                 <div
@@ -158,6 +166,7 @@ function CustomNavbar() {
                         as={Link}
                         to="/studentHome"
                         className="dropdown-item text-dark ms-1"
+                        onClick={handleCloseNavbar}
                       >
                         Profile
                       </Nav.Link>
@@ -165,6 +174,7 @@ function CustomNavbar() {
                         as={Link}
                         to="/updateProfile"
                         className="dropdown-item text-dark ms-1"
+                        onClick={handleCloseNavbar}
                       >
                         Update Profile
                       </Nav.Link>
@@ -172,6 +182,7 @@ function CustomNavbar() {
                         as={Link}
                         to="/changePassword"
                         className="dropdown-item text-dark ms-1"
+                        onClick={handleCloseNavbar}
                       >
                         Change Password
                       </Nav.Link>
@@ -181,6 +192,7 @@ function CustomNavbar() {
                           as={Link}
                           to="/adminDashboard"
                           className="dropdown-item text-dark ms-1"
+                          onClick={handleCloseNavbar}
                         >
                           Admin Dashboard
                         </Nav.Link>
@@ -190,6 +202,7 @@ function CustomNavbar() {
                           as={Link}
                           to="/superAdminDashboard"
                           className="dropdown-item text-dark ms-1"
+                          onClick={handleCloseNavbar}
                         >
                           Dashboard
                         </Nav.Link>
@@ -199,6 +212,7 @@ function CustomNavbar() {
                           as={Link}
                           to="/trainerDashboard"
                           className="dropdown-item text-dark ms-1"
+                          onClick={handleCloseNavbar}
                         >
                           Dashboard
                         </Nav.Link>
@@ -221,13 +235,13 @@ function CustomNavbar() {
               </>
             ) : (
               <>
-                <Nav.Link as={Link} to="/">
+                <Nav.Link as={Link} to="/" onClick={handleCloseNavbar}>
                   Home
                 </Nav.Link>
-                <Nav.Link as={Link} to="about">
+                <Nav.Link as={Link} to="about" onClick={handleCloseNavbar}>
                   About
                 </Nav.Link>
-                <Nav.Link as={Link} to="course">
+                <Nav.Link as={Link} to="course" onClick={handleCloseNavbar}>
                   Course
                 </Nav.Link>
                 <button className="btn btn-primary m-1" onClick={login}>

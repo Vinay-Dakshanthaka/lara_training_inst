@@ -4,6 +4,7 @@ import { Pagination, Modal, Button, Toast } from 'react-bootstrap';
 import { BsTrash } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import BatchWiseStudents from './BatchWiseStudents';
+import {baseURL}  from '../config';
 
 const StudentDetails = () => {
   const [students, setStudents] = useState([]);
@@ -34,7 +35,7 @@ const StudentDetails = () => {
           },
         };
 
-        const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
+        const response = await axios.get(`${baseURL}/api/student/getAllStudentDetails`, config);
         const filteredStudents = response.data.filter(student => student.role === "STUDENT");
         setStudents(filteredStudents);
         console.log("student details :", response.data)
@@ -59,7 +60,7 @@ const StudentDetails = () => {
         },
       };
 
-      const response = await axios.get('http://localhost:8080/api/student/getAllStudentsWithBatches', config);
+      const response = await axios.get(`${baseURL}/api/student/getAllStudentsWithBatches`, config);
       const filteredStudents = response.data.students.filter(student => student.role !== "SUPER ADMIN");
       setBatchDetails(filteredStudents);
     } catch (error) {
@@ -109,7 +110,7 @@ const StudentDetails = () => {
         },
       };
       const response = await axios.post(
-        'http://localhost:8080/api/student/deassignBatchesFromStudent',
+        `${baseURL}/api/student/deassignBatchesFromStudent`,
         {
           studentId,
           batchIds: [batchId],
@@ -143,15 +144,15 @@ const StudentDetails = () => {
   
       switch (searchCriteria) {
         case 'email':
-          searchUrl = 'http://localhost:8080/api/student/searchByEmail';
+          searchUrl = `${baseURL}/api/student/searchByEmail`;
           searchParam = 'email';
           break;
         case 'phoneNumber':
-          searchUrl = 'http://localhost:8080/api/student/searchByPhoneNumber';
+          searchUrl = `${baseURL}/api/student/searchByPhoneNumber`;
           searchParam = 'phoneNumber';
           break;
         case 'name':
-          searchUrl = 'http://localhost:8080/api/student/searchByName';
+          searchUrl = `${baseURL}/api/student/searchByName`;
           searchParam = 'name';
           break;
         default:
@@ -159,7 +160,7 @@ const StudentDetails = () => {
       }
   
       if (!searchValue.trim()) {
-        const response = await axios.get('http://localhost:8080/api/student/getAllStudentDetails', config);
+        const response = await axios.get(`${baseURL}/api/student/getAllStudentDetails`, config);
         const filteredStudents = response.data.filter(student => student.role === "STUDENT");
         setStudents(filteredStudents);
       } else {
@@ -192,7 +193,7 @@ const StudentDetails = () => {
       },
     };
     try {
-      const response = await axios.post('http://localhost:8080/api/student/assignBatchesToStudent', {
+      const response = await axios.post(`${baseURL}/api/student/assignBatchesToStudent`, {
         studentId: selectedStudent.id,
         batchIds: selectedBatches,
       }, config);
@@ -218,7 +219,7 @@ const StudentDetails = () => {
         },
       };
 
-      const response = await axios.get('http://localhost:8080/api/student/getAllBatches', config);
+      const response = await axios.get(`${baseURL}/api/student/getAllBatches`, config);
       const unassignedBatches = response.data.filter(batch => {
         // Check if the batch is not assigned to the selected student
         return !batchDetails.find(batchDetail => batchDetail.student.id === selectedStudent.id && batchDetail.batchesDetails.some(detail => detail.batch.batch_id === batch.batch_id))

@@ -3,6 +3,7 @@ import { Alert, Button, Form } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import {baseURL}  from './config';
 
 const ChangePassword = () => {
   const [oldPassword, setOldPassword] = useState('');
@@ -64,7 +65,7 @@ const ChangePassword = () => {
         }
       };
 
-      const response = await axios.put('http://localhost:8080/api/student/updatePassword', {
+      const response = await axios.put(`${baseURL}/api/student/updatePassword`, {
         oldPassword,
         newPassword,
       }, config);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Toast } from 'react-bootstrap';
-
+import {baseURL}  from '../config';
 const FeedbackButton = ({ onClick }) => {
   return (
     <button type="button" className="btn btn-primary" onClick={onClick}>Feedback</button>
@@ -26,7 +26,7 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
     };
 
     try {
-      const response = await fetch('http://localhost:8080/api/student/saveReview', {
+      const response = await fetch(`${baseURL}/api/student/saveReview`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

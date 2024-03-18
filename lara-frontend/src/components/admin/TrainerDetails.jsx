@@ -6,6 +6,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Toast from 'react-bootstrap/Toast';
 import { BsTrash } from 'react-icons/bs';
+import {baseURL}  from '../config';
 
 const TrainerDetails = () => {
   const [trainerData, setTrainerData] = useState([]);
@@ -29,7 +30,7 @@ const TrainerDetails = () => {
       },
     };
 
-    axios.get('http://localhost:8080/api/student/fetchAllTrainerAndBatch', config)
+    axios.get(`${baseURL}/api/student/fetchAllTrainerAndBatch`, config)
       .then(response => {
         setTrainerData(response.data);
       })
@@ -54,7 +55,7 @@ const TrainerDetails = () => {
         },
       };
 
-      const response = await axios.get('http://localhost:8080/api/student/getAllBatches', config);
+      const response = await axios.get(`${baseURL}/api/student/getAllBatches`, config);
       setAvailableBatches(response.data);
     } catch (error) {
       console.error('Error fetching available batches:', error);
@@ -72,7 +73,7 @@ const TrainerDetails = () => {
 
       const trainerId = selectedTrainer.trainer.id;
       const batchIds = selectedBatches.map(batch => batch.batch_id);
-      const response = await axios.post('http://localhost:8080/api/student/assignBatchesToTrainer', { trainerId, batchIds }, config);
+      const response = await axios.post(`${baseURL}/api/student/assignBatchesToTrainer`, { trainerId, batchIds }, config);
       setToastMessage('Batches assigned successfully');
       setToastVariant('success');
       setShowToast(true);
@@ -100,7 +101,7 @@ const TrainerDetails = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.post('http://localhost:8080/api/student/deassignBatchFromTrainer', { trainerId, batchId }, config);
+      const response = await axios.post(`${baseURL}/api/student/deassignBatchFromTrainer`, { trainerId, batchId }, config);
       setToastMessage('Batch de-assigned successfully');
       setToastVariant('success');
       setShowToast(true);

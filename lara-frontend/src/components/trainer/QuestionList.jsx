@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Button, Modal, Toast, ToastContainer } from 'react-bootstrap';
+import {baseURL}  from '../config';
 
 const QuestionList = ({ batchId }) => {
   const [questions, setQuestions] = useState([]);
@@ -28,7 +29,7 @@ const QuestionList = ({ batchId }) => {
         };
 
         const response = await axios.post(
-          'http://localhost:8080/api/student/getQuestionsByBatchId',
+          `${baseURL}/api/student/getQuestionsByBatchId`,
           { batch_id: batchId },
           config
         );
@@ -72,7 +73,7 @@ const QuestionList = ({ batchId }) => {
         },
       };
       const formData = { id: questions[deleteIndex].id };
-      const response = await axios.delete('http://localhost:8080/api/student/deleteQuestion', { ...config, data: formData });
+      const response = await axios.delete(`${baseURL}/api/student/deleteQuestion`, { ...config, data: formData });
       console.log('Question deleted successfully:', response.data);
       // Remove the deleted question from the list
       const updatedQuestions = questions.filter((_, i) => i !== deleteIndex);
@@ -113,7 +114,7 @@ const QuestionList = ({ batchId }) => {
         },
       };
       const formData = { id: editedQuestion.id, question: editedQuestion.question, description: editedQuestion.description };
-      const response = await axios.put('http://localhost:8080/api/student/updateQuestion', formData, config);
+      const response = await axios.put(`${baseURL}/api/student/updateQuestion`, formData, config);
       console.log('Question updated successfully:', response.data);
       // Reset form fields after successful submission
       setEditedQuestion({});

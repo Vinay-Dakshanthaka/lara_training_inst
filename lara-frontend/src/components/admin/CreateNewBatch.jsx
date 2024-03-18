@@ -3,6 +3,7 @@ import { Form, Button, Toast, Table, Modal, Container } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { BsArrowLeftCircle } from 'react-icons/bs';
+import {baseURL}  from '../config';
 
 const EditableBatch = ({ batch, onUpdate, showSuccessToast, setShowSuccessToast, showErrorToast, setShowErrorToast }) => {
   const [batchName, setBatchName] = useState('');
@@ -32,7 +33,7 @@ const EditableBatch = ({ batch, onUpdate, showSuccessToast, setShowSuccessToast,
         },
       };
 
-      const response = await axios.put('http://localhost:8080/api/student/updateBatch', {
+      const response = await axios.put(`${baseURL}/api/student/updateBatch`, {
         batch_id: batch.batch_id,
         batch_name: batchName,
         description: description,
@@ -199,7 +200,7 @@ const CreateNewBatch = () => {
         },
       };
 
-      const response = await axios.get('http://localhost:8080/api/student/getAllBatches', config);
+      const response = await axios.get(`${baseURL}/api/student/getAllBatches`, config);
       setAvailableBatches(response.data);
     } catch (error) {
       console.error('Error fetching batches:', error);
@@ -249,7 +250,7 @@ const CreateNewBatch = () => {
         },
       };
   
-      const response = await axios.post('http://localhost:8080/api/student/saveBatch', {
+      const response = await axios.post(`${baseURL}/api/student/saveBatch`, {
         batch_name: batchName,
         description: description,
         price: parseFloat(price),
@@ -301,7 +302,7 @@ const CreateNewBatch = () => {
         },
       };
 
-      const response = await axios.delete('http://localhost:8080/api/student/deleteBatch', {
+      const response = await axios.delete(`${baseURL}/api/student/deleteBatch`, {
         ...config,
         data: { batch_id: batchIdToDelete }
       });
