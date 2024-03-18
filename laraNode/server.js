@@ -8,8 +8,14 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const corsOptions = {
+    origin: 'http://91.108.104.65',
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+  };
+  
 // Enable CORS
-app.use(cors());
+app.use(cors(corsOptions));
 
 // Routers
 const router = require('./routes/studentRoutes.js');
