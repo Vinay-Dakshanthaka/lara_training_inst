@@ -27,6 +27,7 @@ import QuestionList from './components/trainer/QuestionList';
 import AssignmentQuestions from './components/student/AssignmentQuestions';
 import Submission from './components/student/Submission';
 import AssignmentAnswer from './components/trainer/AssignmentAnswer';
+import CustomNavbars from './components/CustomNavbars';
 
 
 const App = () => {
@@ -34,7 +35,8 @@ const App = () => {
   return (
     <Router>
       <>
-        <CustomNavbar />
+        {/* <CustomNavbar /> */}
+        <CustomNavbars />
         {/* <RenderNavbar /> */}
         <div className="container">
           <Routes>

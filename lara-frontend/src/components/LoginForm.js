@@ -53,12 +53,14 @@ const LoginForm = () => {
           setSuccess(true)
           setTimeout(() => {
             navigate('/studentHome');
+            window.location.reload()
             }, 2000);
         } else if (role === "ADMIN") {
           setSuccess(true)
           setTimeout(() => {
             // console.log(" Admin Logged in")
             navigate('/adminDashboard')
+            window.location.reload()
             }, 2000);
             // navigate('/adminDashboard');
         } else if (role === "SUPER ADMIN") {
@@ -67,6 +69,7 @@ const LoginForm = () => {
             // navigate('/studentHome');
             // console.log(" Super Admin Logged in")
             navigate('/superAdminDashboard');
+            window.location.reload()
             }, 2000);
         } else if (role === "TRAINER") {
           setSuccess(true)
@@ -74,6 +77,7 @@ const LoginForm = () => {
             // navigate('/studentHome');
             // console.log(" Super Admin Logged in")
             navigate('/trainerDashboard');
+            window.location.reload()
             }, 2000);
           }
          else {

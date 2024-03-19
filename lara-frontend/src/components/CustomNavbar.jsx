@@ -84,10 +84,6 @@ function CustomNavbar() {
     fetchProfileImage();
   }, []);
 
-  const handleCloseNavbar = () => {
-    setIsOpen(false);
-  };
-
   return (
     <>
       <Navbar bg="light" variant="" expand="lg">
@@ -99,22 +95,19 @@ function CustomNavbar() {
             style={{ width: "80px", height: "40px" }}
           />
         </Navbar.Brand>
-        <Navbar.Toggle
-          aria-controls="basic-navbar-nav"
-          onClick={() => setIsOpen(!isOpen)} // Toggle the dropdown status
-        />
-        <Navbar.Collapse id="basic-navbar-nav" isOpen={isOpen}>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
             {/* Conditionally render the logout button */}
             {isLoggedIn ? (
               <>
-                <Nav.Link as={Link} to="/" onClick={handleCloseNavbar}>
+                <Nav.Link as={Link} to="/">
                   Home
                 </Nav.Link>
-                <Nav.Link as={Link} to="about" onClick={handleCloseNavbar}>
+                <Nav.Link as={Link} to="about">
                   About
                 </Nav.Link>
-                <Nav.Link as={Link} to="course" onClick={handleCloseNavbar}>
+                <Nav.Link as={Link} to="course">
                   Course
                 </Nav.Link>
                 <div
@@ -166,7 +159,6 @@ function CustomNavbar() {
                         as={Link}
                         to="/studentHome"
                         className="dropdown-item text-dark ms-1"
-                        onClick={handleCloseNavbar}
                       >
                         Profile
                       </Nav.Link>
@@ -174,7 +166,6 @@ function CustomNavbar() {
                         as={Link}
                         to="/updateProfile"
                         className="dropdown-item text-dark ms-1"
-                        onClick={handleCloseNavbar}
                       >
                         Update Profile
                       </Nav.Link>
@@ -182,7 +173,6 @@ function CustomNavbar() {
                         as={Link}
                         to="/changePassword"
                         className="dropdown-item text-dark ms-1"
-                        onClick={handleCloseNavbar}
                       >
                         Change Password
                       </Nav.Link>
@@ -192,7 +182,6 @@ function CustomNavbar() {
                           as={Link}
                           to="/adminDashboard"
                           className="dropdown-item text-dark ms-1"
-                          onClick={handleCloseNavbar}
                         >
                           Admin Dashboard
                         </Nav.Link>
@@ -202,7 +191,6 @@ function CustomNavbar() {
                           as={Link}
                           to="/superAdminDashboard"
                           className="dropdown-item text-dark ms-1"
-                          onClick={handleCloseNavbar}
                         >
                           Dashboard
                         </Nav.Link>
@@ -212,7 +200,6 @@ function CustomNavbar() {
                           as={Link}
                           to="/trainerDashboard"
                           className="dropdown-item text-dark ms-1"
-                          onClick={handleCloseNavbar}
                         >
                           Dashboard
                         </Nav.Link>
@@ -235,13 +222,13 @@ function CustomNavbar() {
               </>
             ) : (
               <>
-                <Nav.Link as={Link} to="/" onClick={handleCloseNavbar}>
+                <Nav.Link as={Link} to="/">
                   Home
                 </Nav.Link>
-                <Nav.Link as={Link} to="about" onClick={handleCloseNavbar}>
+                <Nav.Link as={Link} to="about">
                   About
                 </Nav.Link>
-                <Nav.Link as={Link} to="course" onClick={handleCloseNavbar}>
+                <Nav.Link as={Link} to="course">
                   Course
                 </Nav.Link>
                 <button className="btn btn-primary m-1" onClick={login}>
