@@ -272,7 +272,7 @@ function CustomNavbars() {
                                 </Menu>
                             </>
                         ) : (
-                            <Button color="inherit" onClick={() => window.location.href = "/login"}>Login</Button>
+                            <Button color="inherit" onClick={() => navigate("/login")}>Login</Button>
                         )}
                     </Box>
                 </Toolbar>
