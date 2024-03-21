@@ -5,6 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Modal, Button } from 'react-bootstrap';
 import {baseURL}  from '../config';
+import BackButton from '../BackButton';
 
 const Submission = () => {
   const { questionId, batchId } = useParams();
@@ -119,6 +120,7 @@ const Submission = () => {
 
   return (
     <div className="container mt-5">
+      <BackButton/>
       <h2>Submit Answer</h2>
       <div className="mb-4">
         <h4>{question.question}</h4>

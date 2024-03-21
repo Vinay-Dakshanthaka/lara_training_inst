@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Pagination } from 'react-bootstrap'; 
-import {baseURL}  from '../config';
+import { Pagination } from 'react-bootstrap';
+import { baseURL } from '../config';
 
 const AllStudents = () => {
   const [students, setStudents] = useState([]);
@@ -20,13 +20,13 @@ const AllStudents = () => {
         if (!token) {
           return;
         }
-  
+
         const config = {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         };
-  
+
         const response = await axios.get(`${baseURL}/api/student/getAllStudentDetails`, config);
         // Filter out SUPER ADMIN students
         const filteredStudents = response.data.filter(student => student.role !== "SUPER ADMIN");
@@ -35,7 +35,7 @@ const AllStudents = () => {
         console.error(error);
       }
     };
-  
+
     fetchStudents();
   }, []);
 
@@ -45,16 +45,16 @@ const AllStudents = () => {
       if (!token) {
         return;
       }
-  
+
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-  
+
       let searchUrl = '';
       let searchParam = '';
-  
+
       // Determine the search URL and parameter based on the search criteria
       switch (searchCriteria) {
         case 'name':
@@ -72,7 +72,7 @@ const AllStudents = () => {
         default:
           return; // If invalid search criteria, exit function
       }
-  
+
       // Check if the search value is empty
       if (!searchValue.trim()) {
         // If empty, fetch all students
@@ -92,7 +92,7 @@ const AllStudents = () => {
       console.error(error);
     }
   };
-  
+
 
   const indexOfLastStudent = currentPage * studentsPerPage;
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
@@ -115,25 +115,25 @@ const AllStudents = () => {
       if (!token) {
         return;
       }
-  
+
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-  
+
       console.log("Updating role for student with ID:", studentId); // Debugging
-  
+
       await axios.put(
         `${baseURL}/api/student/updateRole`,
         { id: studentId, role: updatedRoles[studentId] }, // Include both id and role in the request body
         config
       );
-  
+
       console.log("Role updated successfully for student with ID:", studentId); // Debugging
 
       showAlert('Role updated successfully', true);
-  
+
       // Optionally, you can refresh the student list after the role is updated
       // fetchStudents();
     } catch (error) {
@@ -150,7 +150,7 @@ const AllStudents = () => {
   };
 
   return (
-    <div>
+    <div className='table-responsive'>
       <h1>All Student Details</h1>
       {alertMessage && (
         <div className={`alert ${isSuccess ? 'alert-success' : 'alert-danger'} alert-dismissible fade show`} role="alert">
@@ -158,35 +158,36 @@ const AllStudents = () => {
           <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       )}
-     <div className="mb-3 row ">
-  <div className="col-md-4 mb-2 mb-md-0">
-    <select
-      value={searchCriteria}
-      onChange={(e) => setSearchCriteria(e.target.value)}
-      className="form-select"
-      style={{ width: "auto" }}
-    >
-      <option value="email">Email</option>
-      <option value="phoneNumber">Phone Number</option>
-      <option value="name">Name</option>
-    </select>
-  </div>
-  <div className="col-md-6">
-    <input
-      type="text"
-      value={searchValue}
-      onChange={(e) => setSearchValue(e.target.value)}
-      placeholder={`Search by ${searchCriteria}...`}
-      className="form-control"
-    />
-  </div>
-  <div className="col-md-2">
-    <button onClick={() => handleSearch(searchCriteria)} className="btn btn-primary">Search</button>
-  </div>
-</div>
+      <div className="mb-3 row ">
+        <div className="col-md-4 mb-2 mb-md-0">
+          <select
+            value={searchCriteria}
+            onChange={(e) => setSearchCriteria(e.target.value)}
+            className="form-select"
+            style={{ width: "auto" }}
+          >
+            <option value="email">Email</option>
+            <option value="phoneNumber">Phone Number</option>
+            <option value="name">Name</option>
+          </select>
+        </div>
+        <div className="col-md-6">
+          <input
+            type="text"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder={`Search by ${searchCriteria}...`}
+            className="form-control"
+          />
+        </div>
+        <div className="col-md-2">
+          <button onClick={() => handleSearch(searchCriteria)} className="btn btn-primary">Search</button>
+        </div>
+      </div>
 
 
-      <table className="table">
+    <div className='table-responsive'>
+    <table className='table'>
         <thead>
           <tr>
             <th>Name</th>
@@ -216,6 +217,7 @@ const AllStudents = () => {
           ))}
         </tbody>
       </table>
+    </div>
       <div className='text-center'>
         <Pagination>
           {studentsPerPage !== 0 &&

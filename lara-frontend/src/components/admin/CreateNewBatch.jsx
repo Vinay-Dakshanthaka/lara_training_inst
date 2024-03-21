@@ -179,11 +179,6 @@ const CreateNewBatch = () => {
       setDuration(value);
     }
   };
-  const navigate = useNavigate();
-
-  const handleGoBack = () => {
-    navigate(-1);
-  };
 
 
 
@@ -331,9 +326,7 @@ const CreateNewBatch = () => {
 
   return (
     <div className="container mt-4">
-      <div onClick={handleGoBack} className=" bg-transparent fw-bolder " style={{ position: 'absolute', left: 10, top: 60 , color:"black", fontWeight:"bolder" , fontSize:"1.5rem"}}>
-        <BsArrowLeftCircle/>
-      </div>
+    
      
      <Container>
       <h1 className='text-center m-4'>Available Batch Details</h1>

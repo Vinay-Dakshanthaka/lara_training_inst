@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import {baseURL}  from './config';
+import BackButton from './BackButton';
 
 const ChangePassword = () => {
   const [oldPassword, setOldPassword] = useState('');
@@ -92,8 +93,9 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100">
-      <div className="card p-1 col-6">
+    <div className="d-flex justify-content-center my-5 ">
+      <BackButton />
+      <div className="card p-1 col-8">
         <h3 className="mb-4 text-center">Change Password</h3>
         <Form onSubmit={handleSubmit} className="col-12">
           <div className="mb-3">

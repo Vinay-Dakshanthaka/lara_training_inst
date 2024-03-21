@@ -48,7 +48,7 @@ const StudentList = ({ batchId }) => {
   }, [batchId]);
 
   return (
-    <div>
+    <div className='table-responsive'>
       <h1>Students in Batch</h1>
       <table className="table m-5">
         <thead>

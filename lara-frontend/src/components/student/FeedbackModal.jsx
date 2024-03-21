@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Toast } from 'react-bootstrap';
 import {baseURL}  from '../config';
+import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 const FeedbackButton = ({ onClick }) => {
   return (
     <button type="button" className="btn btn-primary" onClick={onClick}>Feedback</button>
@@ -35,15 +37,18 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
       });
 
       if (response.ok) {
-        setShowSuccessToast(true);
+        // setShowSuccessToast(true);
+        toast.success('Thanks for Your Feedback');
         onSuccess();
       } else {
-        setShowErrorToast(true);
+        // setShowErrorToast(true);
+        toast.error('Error submitting feedback. Please try again later.')
         // Handle error
       }
     } catch (error) {
       console.error('Error submitting feedback:', error);
-      setShowErrorToast(true);
+      // setShowErrorToast(true);
+      toast.error('Error submitting feedback. Please try again later.')
       // Handle error
     }
   };
@@ -85,7 +90,7 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
         </div>
       </div>
 
-      <Toast show={showSuccessToast} onClose={() => setShowSuccessToast(false)} className="bg-success" style={{ position: 'absolute', top: 10, right: 10 }}>
+      {/* <Toast show={showSuccessToast} onClose={() => setShowSuccessToast(false)} className="bg-success" style={{ position: 'absolute', top: 10, right: 10 }}>
         <Toast.Header closeButton={false}>
           <strong className="mr-auto">Success</strong>
         </Toast.Header>
@@ -97,7 +102,8 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
           <strong className="mr-auto">Error</strong>
         </Toast.Header>
         <Toast.Body>Error submitting feedback. Please try again later.</Toast.Body>
-      </Toast>
+      </Toast> */}
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </div>
   );
 };

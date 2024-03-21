@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import {baseURL}  from '../config';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+import BackButton from '../BackButton';
+
 
 const UpdateProfile = () => {
   const { studentId } = useParams();
@@ -282,14 +286,16 @@ const validateYOP = (yop) => {
       await axios.post(`${baseURL}/api/student/saveOrUpdateProfile`,profileDetails,config );
       // If update is successful, display success message and redirect to StudentHome
       // console.log("Profile updated successfully");
-      setErrorMessage('Profile updated successfully');
+      // setErrorMessage('Profile updated successfully');
+      toast.success('Profile Updated Successfully')
       setShowToast(true); // Show the toast
       setTimeout(() => {
         navigate('/studentHome')
       }, 2000);
     } catch (error) {
       // If update fails, display error message
-      setErrorMessage('Something went wrong. Failed to update profile.');
+      // setErrorMessage('Something went wrong. Failed to update profile.');
+      toast.error('Something went wrong. Please tryain agein later');
       // console.error('Failed to update profile:', error);
     }
   };
@@ -298,15 +304,16 @@ const validateYOP = (yop) => {
 
   return (
     <div className="mt-4">
+      <BackButton />
     <h2 className="mb-4 text-center">Update Profile</h2>
     {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-    {showToast &&
+    {/* {showToast &&
         <div className="toast show success" role="alert" aria-live="assertive" aria-atomic="true" style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: '10000' }}>
         <div className="toast-body">
         Profile updated successfully.
         </div>
     </div>
-    }
+    } */}
    <form className="container-md">
   <div className="card mb-4">
     <div className="card-body">
@@ -472,14 +479,14 @@ const validateYOP = (yop) => {
     </div>
   </div>
 
-    
+  <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
 
   {/* Bootstrap Toast */}
-  <div className="toast" role="alert" aria-live="assertive" aria-atomic="true" style={{ position: 'fixed', bottom: '1rem', right: '1rem' }}>
+  {/* <div className="toast" role="alert" aria-live="assertive" aria-atomic="true" style={{ position: 'fixed', bottom: '1rem', right: '1rem' }}>
     <div className="toast-body">
       Profile updated successfully.
     </div>
-  </div>
+  </div> */}
   <div className="text-center">
       <button type="button" className="btn btn-primary col-4  h2 fw-bold" onClick={handleUpdateProfile} >Update Profile
       </button>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import {baseURL}  from '../config';
+import BackButton from '../BackButton';
 
 const AssignmentAnswer = () => {
   const { batchId, studentId } = useParams(); // Get batchId and studentId from URL params
@@ -49,6 +50,7 @@ const AssignmentAnswer = () => {
 
   return (
     <div className="container mt-5">
+      <BackButton/>
       <h2>Student Submissions</h2>
       <div className="row">
         {submissions.map((submission, index) => (

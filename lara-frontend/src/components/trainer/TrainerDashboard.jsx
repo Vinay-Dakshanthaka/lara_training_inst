@@ -45,46 +45,47 @@ const TrainerDashboard = () => {
   };
 
   return (
-    <div>
-      <h1>Batch Details</h1>
-      <table className="table m-5">
-        <thead>
-          <tr>
-            <th>Batch Name</th>
-            <th>Description</th>
-            <th>Duration</th>
-            <th>Students</th>
-            <th>Assign Questions</th>
+    <div className="table-responsive">
+    <h1>Batch Details</h1>
+    <table className="table m-5">
+      <thead>
+        <tr>
+          <th>Batch Name</th>
+          <th>Description</th>
+          <th>Duration</th>
+          <th>Students</th>
+          <th>Assign Questions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {batches.map((batch, index) => (
+          <tr key={index} className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>
+            <td>{batch.batch_name}</td>
+            <td>{batch.description}</td>
+            <td>{batch.duration}</td>
+            <td>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => handleViewStudents(batch.batch_id)}
+              >
+                View Students
+              </button>
+            </td>
+            <td>
+              <button 
+                className="btn btn-warning" 
+                onClick={() => handleAssignQuestion(batch.batch_id)}
+              >
+                Assign Question
+              </button>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {batches.map((batch, index) => (
-            <tr key={index} className={selectedBatchId === batch.batch_id ? 'bg-warning' : ''}>
-              <td>{batch.batch_name}</td>
-              <td>{batch.description}</td>
-              <td>{batch.duration}</td>
-              <td>
-                <button 
-                  className="btn btn-primary" 
-                  onClick={() => handleViewStudents(batch.batch_id)}
-                >
-                  View Students
-                </button>
-              </td>
-              <td>
-                <button 
-                  className="btn btn-warning" 
-                  onClick={() => handleAssignQuestion(batch.batch_id)}
-                >
-                  Assign Question
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {selectedBatchId && <StudentList batchId={selectedBatchId} />}
-    </div>
+        ))}
+      </tbody>
+    </table>
+    {selectedBatchId && <StudentList batchId={selectedBatchId} />}
+  </div>
+  
   );
 };
 

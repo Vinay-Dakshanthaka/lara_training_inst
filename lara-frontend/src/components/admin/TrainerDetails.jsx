@@ -114,7 +114,7 @@ const TrainerDetails = () => {
     }
   };
   return (
-    <div>
+    <div className='table-responsive'>
       <h2>Trainer Details</h2>
       <Table striped bordered hover>
         <thead>

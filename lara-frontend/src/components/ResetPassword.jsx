@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Button, Alert, InputGroup } from 'react-bootstrap';
+import { Form, Button, Alert, InputGroup, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import axios from 'axios';
@@ -14,14 +14,13 @@ const ResetPassword = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-   const toggleNewPasswordVisibility = () => {
+  const toggleNewPasswordVisibility = () => {
     setShowNewPassword(!showNewPassword);
   };
 
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,58 +56,57 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="mt-3 d-flex justify-content-center">
-  <div className="col-6">
-    <h1 className='text-center m-4'>Create New Password</h1>
-    {error && <Alert variant="danger">{error}</Alert>}
-    {success && <Alert variant="success">Password changed successfully.</Alert>}
-    <Form onSubmit={handleSubmit}>
-    <Form.Group controlId="newPassword">
-        <Form.Label>New Password</Form.Label>
-        <InputGroup>
-          <Form.Control
-            type={showNewPassword ? 'text' : 'password'}
-            placeholder="Enter new password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
-          <Button
-            variant="outline-secondary"
-            onClick={toggleNewPasswordVisibility}
-          >
-            {showNewPassword ? <BsEyeSlash /> : <BsEye />}
-          </Button>
-        </InputGroup>
-      </Form.Group>
+    <Container className="my-5">
+      <div className="col-lg-6 col-md-8 col-sm-10 mx-auto">
+        <h1 className='text-center m-4'>Create New Password</h1>
+        {error && <Alert variant="danger">{error}</Alert>}
+        {success && <Alert variant="success">Password changed successfully.</Alert>}
+        <Form onSubmit={handleSubmit}>
+          <Form.Group controlId="newPassword">
+            <Form.Label>New Password</Form.Label>
+            <InputGroup>
+              <Form.Control
+                type={showNewPassword ? 'text' : 'password'}
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+              />
+              <Button
+                variant="outline-secondary"
+                onClick={toggleNewPasswordVisibility}
+              >
+                {showNewPassword ? <BsEyeSlash /> : <BsEye />}
+              </Button>
+            </InputGroup>
+          </Form.Group>
 
-      <Form.Group controlId="confirmPassword">
-        <Form.Label>Confirm Password</Form.Label>
-        <InputGroup>
-          <Form.Control
-            type={showConfirmPassword ? 'text' : 'password'}
-            placeholder="Confirm new password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-          <Button
-            variant="outline-secondary"
-            onClick={toggleConfirmPasswordVisibility}
-          >
-            {showConfirmPassword ? <BsEyeSlash /> : <BsEye />}
-          </Button>
-        </InputGroup>
-      </Form.Group>
-      <div className='text-center mt-4 mb-4'>
-        <Button variant="primary" type="submit">
-            Change Password
-        </Button>
+          <Form.Group controlId="confirmPassword">
+            <Form.Label>Confirm Password</Form.Label>
+            <InputGroup>
+              <Form.Control
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <Button
+                variant="outline-secondary"
+                onClick={toggleConfirmPasswordVisibility}
+              >
+                {showConfirmPassword ? <BsEyeSlash /> : <BsEye />}
+              </Button>
+            </InputGroup>
+          </Form.Group>
+          <div className='text-center mt-4 mb-4'>
+            <Button variant="primary" type="submit">
+              Change Password
+            </Button>
+          </div>
+        </Form>
       </div>
-    </Form>
-  </div>
-</div>
-
+    </Container>
   );
 };
 

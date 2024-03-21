@@ -6,7 +6,10 @@ import AdbIcon from '@mui/icons-material/Adb';
 import defaultProfileImage from "../components/default-profile.png";
 import { useNavigate } from 'react-router-dom';
 import logoImage from "../resources/images/laralogo.webp";
-import {baseURL}  from './config';
+import { baseURL } from './config';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+import { Modal } from 'react-bootstrap';
 
 
 const pages = ['HOME', 'ABOUT', 'COURSE'];
@@ -19,6 +22,11 @@ function CustomNavbars() {
     const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("token"));
     const [userRole, setUserRole] = useState(localStorage.getItem("role"));
     const navigate = useNavigate();
+    const handleShowModal = () => setShowModal(true);
+
+    const handleCloseModal = () => setShowModal(false);
+    const [showModal, setShowModal] = useState(false);
+
 
 
     const handleOpenNavMenu = (event) => {
@@ -38,13 +46,24 @@ function CustomNavbars() {
     };
 
     const handleLogout = () => {
+        // Show the confirmation modal
+        handleShowModal();
+    };
+
+    const handleConfirmLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("role");
         setIsLoggedIn(null);
         setUserRole(null);
-        // Redirect to the login page or any other page after logout
-        window.location.href = "/login"; // Example: Redirect to the login page
+        // Display success message using React Toastify
+        toast.success('Logged out success!');
+        setTimeout(() => {
+            window.location.href = "/login";
+        }, 2000);
     };
+
+
+
 
     useEffect(() => {
         const fetchProfileImage = async () => {
@@ -174,7 +193,7 @@ function CustomNavbars() {
                             textDecoration: 'none',
                         }}
                     >
-                         <img src={logoImage} alt="Logo" style={{ height: '30px' }} />
+                        <img src={logoImage} alt="Logo" style={{ height: '30px' }} />
                     </Typography>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page) => (
@@ -262,7 +281,7 @@ function CustomNavbars() {
                                     {userRole === "TRAINER" && (
                                         <MenuItem onClick={() => navigate("/trainerDashboard")}>Dashboard</MenuItem>
                                     )}
-                                   
+
                                     {/* Common menu items */}
                                     <MenuItem onClick={() => navigate("/studentHome")}>Profile</MenuItem>
                                     <MenuItem onClick={() => navigate("/updateProfile")}>Update Profile</MenuItem>
@@ -276,7 +295,24 @@ function CustomNavbars() {
                         )}
                     </Box>
                 </Toolbar>
+
+                <Modal show={showModal} onHide={handleCloseModal}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Confirm Logout</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>Are you sure you want to log out?</Modal.Body>
+                    <Modal.Footer>
+                        <button onClick={handleCloseModal} className='btn btn-primary'>
+                            Cancel
+                        </button>
+                        <button  onClick={handleConfirmLogout} className='btn btn-danger'>
+                            Confirm
+                        </button>
+                    </Modal.Footer>
+                </Modal>
+
             </Container>
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
         </AppBar>
     );
 }

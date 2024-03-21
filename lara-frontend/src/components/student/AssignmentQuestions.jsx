@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {baseURL}  from '../config';
 import { Link, useParams } from 'react-router-dom'; // Import useParams hook
+import BackButton from '../BackButton';
 
 const AssignmentQuestions = () => {
   const { batch_id } = useParams(); // Get batch_id from URL params
@@ -39,6 +40,7 @@ const AssignmentQuestions = () => {
 
   return (
     <div>
+      <BackButton />
     <h2 className='m-4'>Assignment Questions</h2>
     <ul className="list-group m-4">
       {questions.map((question, index) => (
