@@ -38,7 +38,7 @@ const StudentDetails = () => {
         const response = await axios.get(`${baseURL}/api/student/getAllStudentDetails`, config);
         const filteredStudents = response.data.filter(student => student.role === "STUDENT");
         setStudents(filteredStudents);
-        console.log("student details :", response.data)
+        // console.log("student details :", response.data)
       } catch (error) {
         console.error(error);
       }
@@ -117,8 +117,8 @@ const StudentDetails = () => {
         },
         config
       );
-      console.log(response.data);
-      console.log('Successfully deleted');
+      // console.log(response.data);
+      // console.log('Successfully deleted');
 
       fetchBatchDetails();
     } catch (error) {

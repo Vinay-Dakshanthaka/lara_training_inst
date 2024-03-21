@@ -74,7 +74,7 @@ const QuestionList = ({ batchId }) => {
       };
       const formData = { id: questions[deleteIndex].id };
       const response = await axios.delete(`${baseURL}/api/student/deleteQuestion`, { ...config, data: formData });
-      console.log('Question deleted successfully:', response.data);
+      // console.log('Question deleted successfully:', response.data);
       // Remove the deleted question from the list
       const updatedQuestions = questions.filter((_, i) => i !== deleteIndex);
       setQuestions(updatedQuestions);
@@ -115,7 +115,7 @@ const QuestionList = ({ batchId }) => {
       };
       const formData = { id: editedQuestion.id, question: editedQuestion.question, description: editedQuestion.description };
       const response = await axios.put(`${baseURL}/api/student/updateQuestion`, formData, config);
-      console.log('Question updated successfully:', response.data);
+      // console.log('Question updated successfully:', response.data);
       // Reset form fields after successful submission
       setEditedQuestion({});
       // Show success toast

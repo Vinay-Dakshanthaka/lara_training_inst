@@ -31,9 +31,10 @@ const AssignQuestion = () => {
     
             // Assuming response.data contains the batch details
             setBatchDetails(response.data);
-            console.log("batch details :",response.data)
+            // console.log("batch details :",response.data)
           } catch (error) {
-            console.log("Error fetching Batch Details :",error)
+            // console.log("Error fetching Batch Details :",error)
+            console.error(error)
           }
         };
     
@@ -63,7 +64,7 @@ const AssignQuestion = () => {
             };
             const formData = { batch_id, question, description };
             const response = await axios.post(`${baseURL}/api/student/saveQuestion`, formData, config);
-            console.log('Question saved successfully:', response.data);
+            // console.log('Question saved successfully:', response.data);
             // Reset form fields after successful submission
             setQuestion('');
             setDescription('');

@@ -7,7 +7,7 @@ import BackButton from '../BackButton';
 const AssignmentQuestions = () => {
   const { batch_id } = useParams(); // Get batch_id from URL params
   const [questions, setQuestions] = useState([]);
-  console.log("batch id", batch_id)
+  // console.log("batch id", batch_id)
 
   useEffect(() => {
     const fetchQuestionsByBatchId = async () => {

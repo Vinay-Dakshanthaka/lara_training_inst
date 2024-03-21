@@ -122,7 +122,7 @@ const AllStudents = () => {
         },
       };
 
-      console.log("Updating role for student with ID:", studentId); // Debugging
+      // console.log("Updating role for student with ID:", studentId); // Debugging
 
       await axios.put(
         `${baseURL}/api/student/updateRole`,
@@ -130,7 +130,7 @@ const AllStudents = () => {
         config
       );
 
-      console.log("Role updated successfully for student with ID:", studentId); // Debugging
+      // console.log("Role updated successfully for student with ID:", studentId); // Debugging
 
       showAlert('Role updated successfully', true);
 

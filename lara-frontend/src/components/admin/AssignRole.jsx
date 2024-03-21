@@ -122,7 +122,7 @@ const AssignRole = () => {
         },
       };
   
-      console.log("Updating role for student with ID:", studentId); // Debugging
+      //console.log("Updating role for student with ID:", studentId); // Debugging
   
       await axios.put(
         `${baseURL}/api/student/updateRole`,

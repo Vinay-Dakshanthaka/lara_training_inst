@@ -14,9 +14,6 @@ const Submission = () => {
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  // const { questionId } = useParams();
-  console.log('batch id :',batchId)
-  console.log('question id :',questionId)
 
   useEffect(() => {
     const fetchQuestionById = async () => {
@@ -78,6 +75,11 @@ const Submission = () => {
   };
 
   const submitCode = async () => {
+    if (!code.trim()) {
+      toast.warn('Code should not be empty.');
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -113,7 +115,6 @@ const Submission = () => {
       handleCloseModal(); // Close the modal regardless of success or failure
     }
   };
-  
 
   const handleCloseModal = () => setShowModal(false);
   const handleShowModal = () => setShowModal(true);
@@ -134,7 +135,7 @@ const Submission = () => {
           onChange={(e) => setCode(e.target.value)}
           rows={10}
           placeholder="Write your Java code here"
-          style={{ color: '#fff', '::placeholder': { color: '#fff' } }} // Add custom styles for placeholder text
+          style={{ color: '#fff', '::placeholder': { color: '#fff' } }} 
         ></textarea>
       </div>
       <div className="mb-4">
@@ -147,8 +148,8 @@ const Submission = () => {
             <Modal.Title>Confirm Submission</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <b>Note:</b> Befor Submitting Run the code. <br />
-            And you can submit answer for this question only once.
+            <b>Note:</b> Before submitting, run the code.<br />
+            You can submit an answer for this question only once.
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>

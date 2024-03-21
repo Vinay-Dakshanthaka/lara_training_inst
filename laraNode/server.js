@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const corsOptions = {
-    origin: 'http://91.108.104.65',
+    origin: 'https://www.laragrooming.com',
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
   };
   
@@ -36,3 +36,4 @@ db.sequelize.sync({ force: false }).then(() => {
 }).catch((error) => {
     console.error('Error synchronizing database:', error);
 });
+  

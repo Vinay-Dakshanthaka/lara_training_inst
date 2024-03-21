@@ -5,7 +5,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { BsFillEnvelopeFill, BsPhone } from "react-icons/bs";
 import defaultProfileImage from "../default-profile.png";
 import { BsStarFill, BsStar } from 'react-icons/bs'; // Import star icons
-import {baseURL}  from '../config';
+import { baseURL } from '../config';
 
 const FeedbackButton = ({ onClick }) => {
   return (
@@ -110,47 +110,47 @@ const FeedbackModal = ({ show, onHide, batchId, trainerId, onSuccess }) => {
 
   const renderStarIcon = (index) => {
     const fillColor = index < stars ? 'yellow' : 'green';
-    return <BsStarFill key={index} onClick={() => setStars(index + 1)} style={{ color: fillColor, fontSize:20 }} className="m-2"/>;
+    return <BsStarFill key={index} onClick={() => setStars(index + 1)} style={{ color: fillColor, fontSize: 20 }} className="m-2" />;
   };
 
   return (
     <div className={`modal fade ${show ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ display: show ? 'block' : 'none' }}>
-     <div className="modal-dialog bf-info" role="document">
-  <div className="modal-content bg-info">
-    <div className="modal-header">
-      <h5 className="modal-title bg-info">Feedback</h5>
-      <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={onHide}>
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div className="modal-body bg-info">
-      <div className="form-group">
-        <label htmlFor="stars">Rate Your Experience with this trainer's class</label>
-        <div>
-          {[...Array(5)].map((_, index) => renderStarIcon(index))}
-          {starsError && <div className="text-danger">{starsError}</div>}
+      <div className="modal-dialog bf-info" role="document">
+        <div className="modal-content bg-info">
+          <div className="modal-header">
+            <h5 className="modal-title bg-info">Feedback</h5>
+            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={onHide}>
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div className="modal-body bg-info">
+            <div className="form-group">
+              <label htmlFor="stars">Rate Your Experience with this trainer's class</label>
+              <div>
+                {[...Array(5)].map((_, index) => renderStarIcon(index))}
+                {starsError && <div className="text-danger">{starsError}</div>}
+              </div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="reviewDate">Date:</label>
+              <input type="date" className="form-control" id="reviewDate" value={reviewDate} onChange={(e) => setReviewDate(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label htmlFor="reviewTime">Time:</label>
+              <input type="time" className="form-control" id="reviewTime" value={reviewTime} onChange={(e) => setReviewTime(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label htmlFor="review">Write your Feedback:</label>
+              <textarea className="form-control" id="review" rows="3" value={review} onChange={(e) => setReview(e.target.value)}></textarea>
+              {feedbackError && <div className="text-danger">{feedbackError}</div>}
+            </div>
+          </div>
+          <div className="modal-footer bg-info">
+            <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={onHide}>Close</button>
+            <button type="button" className="btn btn-primary" onClick={handleSubmit}>Submit</button>
+          </div>
         </div>
       </div>
-      <div className="form-group">
-        <label htmlFor="reviewDate">Date:</label>
-        <input type="date" className="form-control" id="reviewDate" value={reviewDate} onChange={(e) => setReviewDate(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label htmlFor="reviewTime">Time:</label>
-        <input type="time" className="form-control" id="reviewTime" value={reviewTime} onChange={(e) => setReviewTime(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label htmlFor="review">Write your Feedback:</label>
-        <textarea className="form-control" id="review" rows="3" value={review} onChange={(e) => setReview(e.target.value)}></textarea>
-        {feedbackError && <div className="text-danger">{feedbackError}</div>}
-      </div>
-    </div>
-    <div className="modal-footer bg-info">
-      <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={onHide}>Close</button>
-      <button type="button" className="btn btn-primary" onClick={handleSubmit}>Submit</button>
-    </div>
-  </div>
-</div>
 
 
       {/* Success toast */}
@@ -485,48 +485,40 @@ const StudentHome = () => {
 
         <div className="mb-4 card col-md-12">
           <h2 className="bg-primary rounded p-2 m-2">Batches</h2>
-          <table className="table m-2">
-        <thead>
-          <tr>
-            <th>Batch Name</th>
-            <th>Trainer Name</th>
-            <th>Assignment Questions</th> 
-          </tr>
-        </thead>
-        <tbody>
-          {studentBatches.map((batchDetail, index) => (
-            <tr key={index}>
-              <td>{batchDetail.batch.batch_name}</td>
-              <td>
-                {batchDetail.trainerDetails && batchDetail.trainerDetails.map((trainer, trainerIndex) => (
-                  <div key={trainerIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                  <tr>
+          <div className="table-responsive m-2">
+            <table className="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Batch Name</th>
+                  <th>Trainer Name</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {studentBatches.map((batchDetail, index) => (
+                  <tr key={index}>
+                    <td>{batchDetail.batch.batch_name}</td>
                     <td>
-                    <div style={{ marginRight: '10px' }}>{trainer.name}</div>
+                      {batchDetail.trainerDetails && batchDetail.trainerDetails.map((trainer, trainerIndex) => (
+                        <div key={trainerIndex} style={{ marginBottom: '5px' }}>
+                          <div>{trainer.name}</div>
+                          <FeedbackButton
+                            onClick={() => handleFeedbackClick(batchDetail.batch.batch_id, trainer.id)}
+                            size="sm"
+                          />
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      <button className="btn btn-sm btn-primary" onClick={() => handleAssignQuestionsClick(batchDetail.batch.batch_id)}>
+                        Assign Questions
+                      </button>
                     </td>
                   </tr>
-                    {/* Assuming FeedbackButton is imported */}
-                    <tr>
-                    <td>
-                    <FeedbackButton
-                      onClick={() => handleFeedbackClick(batchDetail.batch.batch_id, trainer.id)}
-                    />
-                    </td>
-                    </tr>
-                  </div>
                 ))}
-              </td>
-              <td>
-                {/* Render buttons for actions */}
-                <button className="btn btn-primary" onClick={() => handleAssignQuestionsClick(batchDetail.batch.batch_id)}>
-                  Assignment Questions
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
+              </tbody>
+            </table>
+          </div>
 
           <FeedbackModal
             show={showModal}
@@ -539,6 +531,7 @@ const StudentHome = () => {
             }}
           />
         </div>
+
 
         {/* Education Details */}
         <div className="row mb-4">

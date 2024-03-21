@@ -41,7 +41,7 @@ const EditableBatch = ({ batch, onUpdate, showSuccessToast, setShowSuccessToast,
         duration: duration,
       }, config);
 
-      console.log(response.data);
+      //console.log(response.data);
       setShowModal(false);
       onUpdate(batch.batch_id, batchName);
       setShowSuccessToast(true);
@@ -252,7 +252,7 @@ const CreateNewBatch = () => {
         duration: duration
       }, config);
   
-      console.log(response.data);
+      console.log(response.data);//
       setShowSuccessToast(true);
       
       // Clear the form and reset validation errors
@@ -302,7 +302,7 @@ const CreateNewBatch = () => {
         data: { batch_id: batchIdToDelete }
       });
 
-      console.log(response.data);
+      //console.log(response.data);//
       setShowSuccessToast(true);
       // Fetch available batches again after deleting the batch
       fetchAvailableBatches();
