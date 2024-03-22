@@ -2,7 +2,7 @@
   import { Container, Row, Col } from 'react-bootstrap';
   import { FaFacebook, FaYoutube, FaInstagram, FaLinkedin, FaTwitter } from 'react-icons/fa';
   import logo from '../resources/images/laralogo.webp';
-  import { Link, useNavigate } from 'react-router-dom';
+  import { Link } from 'react-router-dom';
 
   const Footer = () => {
     return (

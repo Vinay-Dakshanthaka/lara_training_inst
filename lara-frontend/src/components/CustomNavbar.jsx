@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Navbar, Nav, Toast, NavDropdown } from "react-bootstrap";
+import { Navbar, Nav, Toast } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import defaultProfileImage from "../components/default-profile.png";
 import imgSrc from "../resources/images/laralogo.webp";

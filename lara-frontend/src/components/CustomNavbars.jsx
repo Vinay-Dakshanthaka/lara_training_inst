@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { AppBar, Box, Container, Toolbar, IconButton, Typography, Menu, MenuItem, Button, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import AdbIcon from '@mui/icons-material/Adb';
 import defaultProfileImage from "../components/default-profile.png";
 import { useNavigate } from 'react-router-dom';
 import logoImage from "../resources/images/laralogo.webp";
@@ -101,7 +100,7 @@ function CustomNavbars() {
 
 
     return (
-        <AppBar position="static">
+        <AppBar position="static" sx={{ backgroundColor: 'white', color: 'black' }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     {/* <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} /> */}
@@ -215,7 +214,7 @@ function CustomNavbars() {
                                     }
                                     handleCloseNavMenu();
                                 }}
-                                sx={{ my: 2, color: 'white', display: 'block' }}
+                                sx={{ my: 2, color: 'black', display: 'block'  }}
                             >
                                 {page}
                             </Button>

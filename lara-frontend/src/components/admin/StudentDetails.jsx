@@ -3,7 +3,6 @@ import axios from 'axios';
 import { Pagination, Modal, Button, Toast } from 'react-bootstrap';
 import { BsTrash } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
-import BatchWiseStudents from './BatchWiseStudents';
 import {baseURL}  from '../config';
 
 const StudentDetails = () => {

@@ -7,7 +7,6 @@ import TrainerDetails from './TrainerDetails';
 import BatchDetails from './BatchDetails';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
-import {baseURL}  from '../config';
 import StudentReviews from './StudentReviews';
 
 const AdminDashboard = () => {

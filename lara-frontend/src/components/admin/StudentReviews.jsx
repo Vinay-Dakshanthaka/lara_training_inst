@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Pagination } from 'react-bootstrap';
-import {baseURL}  from '../config';
+import { baseURL } from '../config';
 
 const StudentReviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -19,7 +19,7 @@ const StudentReviews = () => {
             Authorization: `Bearer ${token}`
           }
         };
-        const response = await fetch(`${baseURL}/api/student/getAllReviews`,config);
+        const response = await fetch(`${baseURL}/api/student/getAllReviews`, config);
         if (!response.ok) {
           throw new Error('Failed to fetch reviews');
         }
@@ -70,11 +70,11 @@ const StudentReviews = () => {
             <tbody>
               {currentReviews.map((review, index) => (
                 <tr key={index}>
-                  <td>{review.student.name}</td>
-                  <td>{review.batch.batch_name}</td>
-                  <td>{review.trainer.name}</td>
+                  <td>{review.student?.name || 'N/A'}</td>
+                  <td>{review.batch?.batch_name || 'N/A'}</td>
+                  <td>{review.trainer?.name || 'N/A'}</td>
                   <td>{new Date(review.reviewDate).toLocaleDateString()}</td>
-                  <td>{renderStars(review.stars)}</td> {/* Render stars */}
+                  <td>{renderStars(review.stars)}</td>
                   <td>{review.review}</td>
                 </tr>
               ))}

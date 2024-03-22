@@ -23,8 +23,8 @@ const TermsAndCondition = () => {
               <h3>TERMS & CONDITIONS</h3>
               <h4>Purpose</h4>
               <p>
-              <a href="https://lara.co.in" target="_blank" rel="noopener noreferrer">
-                  https://lara.co.in
+              <a href="https://www.laragrooming.com" target="_blank" rel="noopener noreferrer">
+                  https://www.laragrooming.com
                 </a> is intended only to serve as a preliminary medium of Training and Placement for its
                 users / members who have a bona fide intention to contact and/or be contacted for the purposes related
                 to their career enhancement.
@@ -58,8 +58,8 @@ const TermsAndCondition = () => {
               <h4>Course Enrolment and 1 Year Access</h4>
               <p>
                 When you enroll in a course you will get access to view that course at any time anywhere on{' '}
-                <a href="https://lara.co.in" target="_blank" rel="noopener noreferrer">
-                  https://lara.co.in
+                <a href="https://www.laragrooming.com" target="_blank" rel="noopener noreferrer">
+                  https://www.laragrooming.com
                 </a>{' '}
                 only. You will not have an access to download that course because we grant you a 1 year access.
               </p>
@@ -89,14 +89,14 @@ const TermsAndCondition = () => {
 
               <h4>Security</h4>
               <p>
-                When purchasing from https://lara.co.in, your financial details are passed through a secure server
+                When purchasing from https://www.laragrooming.com, your financial details are passed through a secure server
                 using the latest 128-bit SSL (secure sockets layer) encryption technology. 128-bit SSL encryption is the
                 current industry standard.
               </p>
 
               <h4>Privacy Policy</h4>
               <p>
-                https://lara.co.in is committed to safeguarding your personal details privacy. We will use our best
+                https://www.laragrooming.com is committed to safeguarding your personal details privacy. We will use our best
                 efforts to ensure that the information you submit to us remains private. If required we will share your
                 contact to only recruiters to get hire you.
               </p>
@@ -116,8 +116,8 @@ const TermsAndCondition = () => {
 
               <h4>Lara Rights:</h4>
               <p>
-                https://lara.co.in reserves rights to revise or to modify this privacy policy. In such an event, we will
-                post a prominent notice on the application prior to the change becoming effective. https://lara.co.in
+                https://www.laragrooming.com reserves rights to revise or to modify this privacy policy. In such an event, we will
+                post a prominent notice on the application prior to the change becoming effective. https://www.laragrooming.com
                 reserves rights to delete or terminate your account if we find any misuse of our application which
                 causes harm to us or others.
               </p>

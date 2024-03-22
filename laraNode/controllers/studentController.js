@@ -398,9 +398,21 @@ const sendPasswordResetEmail = async (req, res) => {
             from: 'vinayhari789@gmail.com', // Sender address
             to: email, // Recipient's email address
             subject: 'Password Reset Request', // Subject line
-            text: 'Please click the following link to reset your password: http://localhost:3000/resetPassword?token=' + token, // Plain text body
-            html: '<p>We received a request to reset the password associated with your account. To proceed with the password reset, please click on Reset Password</p><p>Please click the following link to reset your password: <a href="http://localhost:3000/resetPassword?token=' + token + '">Reset Password</a></p><p>If you did not request a password reset, you can ignore this email. Please note that the link will expire after 30 minutes, so make sure to reset your password promptly</p><p>Thank You,</p><p>Lara Technologies Team</p>'
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <img src="https://laragrooming.com/laralogo.webp" alt="Lara Technologies Logo" style="max-width: 150px;">
+                    <h2>Password Reset Request</h2>
+                    <p>We received a request to reset the password associated with your account.</p>
+                    <p>To proceed with the password reset, please click on the button below:</p>
+                    <a href="https://www.laragrooming.com/resetPassword?token=${token}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">Reset Password</a>
+                    <p>If you did not request a password reset, you can ignore this email.</p>
+                    <p>Please note that the link will expire after 30 minutes, so make sure to reset your password promptly.</p>
+                    <p>Thank You,</p>
+                    <p>Lara Technologies Team</p>
+                </div>
+            `
         };
+        
 
         // Send mail with defined transport object
         await transporter.sendMail(mailOptions);
@@ -416,13 +428,13 @@ const sendPasswordResetEmail = async (req, res) => {
 const resetPassword = async (req, res) => {
     try {
         const { newPassword } = req.body;
-        const token = req.query.token; // Get the token from the query parameters
+        const token = req.query.token; // Get the token from the query parameters which is sent to along with the email link
 
         if (!token) {
             return res.status(400).send({ message: 'Token is missing.' });
         }
 
-        // Verify the JWT token
+        // Verify the JWT token whether it is the same token sent through email
         jwt.verify(token, jwtSecret, async (err, decoded) => {
             if (err) {
                 // Token verification failed

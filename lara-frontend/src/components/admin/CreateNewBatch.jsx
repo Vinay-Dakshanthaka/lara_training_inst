@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Button, Toast, Table, Modal, Container } from 'react-bootstrap';
+import { Form, Button, Table, Modal, Container } from 'react-bootstrap';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { BsArrowLeftCircle } from 'react-icons/bs';
-import {baseURL}  from '../config';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { baseURL } from '../config';
 
 const EditableBatch = ({ batch, onUpdate, showSuccessToast, setShowSuccessToast, showErrorToast, setShowErrorToast }) => {
   const [batchName, setBatchName] = useState('');
@@ -44,13 +44,15 @@ const EditableBatch = ({ batch, onUpdate, showSuccessToast, setShowSuccessToast,
       //console.log(response.data);
       setShowModal(false);
       onUpdate(batch.batch_id, batchName);
-      setShowSuccessToast(true);
+      // setShowSuccessToast(true);
+      toast.success("Batch Details updated")
       setTimeout(() => {
         window.location.reload()
       }, 2000);
     } catch (error) {
       console.error(error);
-      setShowErrorToast(true);
+      // setShowErrorToast(true);
+      toast.error("Something went wrong")
     }
   };
 
@@ -208,69 +210,71 @@ const CreateNewBatch = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
     // Validation
     const errors = {};
-  
+
     if (batchName.length < 3) {
       errors.batchName = 'Batch name must be at least 3 characters';
     }
-  
+
     if (!price.match(/^\d+(\.\d{1,2})?$/)) {
       errors.price = 'Price must be a number';
     }
-  
+
     if (!duration.trim()) {
       errors.duration = 'Duration is required';
     }
-  
+
     if (!description.trim()) {
       errors.description = 'Description is required';
     }
-  
+
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-  
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         return;
       }
-  
+
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-  
+
       const response = await axios.post(`${baseURL}/api/student/saveBatch`, {
         batch_name: batchName,
         description: description,
         price: parseFloat(price),
         duration: duration
       }, config);
-  
-      console.log(response.data);//
-      setShowSuccessToast(true);
-      
+
+      // console.log(response.data);
+      // setShowSuccessToast(true);
+      toast.success("Batch Added Successfully")
+
       // Clear the form and reset validation errors
       setBatchName('');
       setDescription('');
       setPrice('');
       setDuration('');
       setValidationErrors({});
-  
+
       // Fetch available batches again after adding a new batch
       fetchAvailableBatches();
     } catch (error) {
       console.error(error);
-      setShowErrorToast(true);
+      // setShowErrorToast(true);
+      toast.error("Something went wrong!!!")
     }
   };
-  
-  
+
+
 
   const handleDeleteBatch = async (batchId) => {
     try {
@@ -280,7 +284,8 @@ const CreateNewBatch = () => {
       setShowConfirmationModal(true);
     } catch (error) {
       console.error(error);
-      setShowErrorToast(true);
+      // setShowErrorToast(true);
+      toast.error("Something went wrong!!!")
     }
   };
 
@@ -326,136 +331,122 @@ const CreateNewBatch = () => {
 
   return (
     <div className="container mt-4">
-    
-     
-     <Container>
-      <h1 className='text-center m-4'>Available Batch Details</h1>
-       {/* Available Batches Table */}
-       <Table striped bordered hover className="mt-4">
-        <thead>
-          <tr>
-            <th>Batch Details</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-  {availableBatches.map((batch, index) => (
-    <tr key={batch.batch_id}>
-      <td>
-        <div>
-          <strong>Batch Name:</strong> {batch.batch_name}
-        </div>
-        <div>
-          <strong>Description:</strong> {batch.description}
-        </div>
-        <div>
-          <strong>Duration:</strong> {batch.duration}
-        </div>
-        <div>
-          <strong>Price:</strong> {batch.price}
-        </div>
-      </td>
-      <td>
-        <EditableBatch batch={batch} onUpdate={handleUpdateBatch} showSuccessToast={showSuccessToast} setShowSuccessToast={setShowSuccessToast} showErrorToast={showErrorToast} setShowErrorToast={setShowErrorToast} />
-        <Button variant="danger" onClick={() => handleDeleteBatch(batch.batch_id)}>Delete</Button>
-      </td>
-    </tr>
-  ))}
-</tbody>
 
-      </Table>
-     </Container>
-     <div className="d-flex justify-content-center align-items-center vh-100">
-      <Form onSubmit={handleSubmit} className='card col-md-6 col-sm-8 col-10 shadow'>
-      <div className='bg-primary col-12 card'>
-      <h1 className='text-center'>Add New Batch</h1>
+
+      <Container>
+        <h1 className='text-center m-4'>Available Batch Details</h1>
+        {/* Available Batches Table */}
+        <Table striped bordered hover className="mt-4">
+          <thead>
+            <tr>
+              <th>Batch Details</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {availableBatches.map((batch, index) => (
+              <tr key={batch.batch_id}>
+                <td>
+                  <div>
+                    <strong>Batch Name:</strong> {batch.batch_name}
+                  </div>
+                  <div>
+                    <strong>Description:</strong> {batch.description}
+                  </div>
+                  <div>
+                    <strong>Duration:</strong> {batch.duration}
+                  </div>
+                  <div>
+                    <strong>Price:</strong> {batch.price}
+                  </div>
+                </td>
+                <td>
+                  <EditableBatch batch={batch} onUpdate={handleUpdateBatch} showSuccessToast={showSuccessToast} setShowSuccessToast={setShowSuccessToast} showErrorToast={showErrorToast} setShowErrorToast={setShowErrorToast} />
+                  <Button variant="danger" onClick={() => handleDeleteBatch(batch.batch_id)}>Delete</Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+
+        </Table>
+      </Container>
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <Form onSubmit={handleSubmit} className='card col-md-6 col-sm-8 col-10 shadow'>
+          <div className='bg-primary col-12 card'>
+            <h1 className='text-center'>Add New Batch</h1>
+          </div>
+          <Form.Group className="mb-3 m-2" controlId="batchName">
+            <Form.Label>Batch Name</Form.Label>
+            <Form.Control
+              type="text"
+              name="batchName"
+              placeholder="Batch name"
+              value={batchName}
+              onChange={handleInputChange}
+              isInvalid={validationErrors.batchName}
+            />
+            <Form.Control.Feedback type="invalid">
+              {validationErrors.batchName}
+            </Form.Control.Feedback>
+          </Form.Group>
+
+          <Form.Group className="mb-3 m-2" controlId="description">
+            <Form.Label>Description</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              name="description"
+              placeholder="Description"
+              value={description}
+              onChange={handleInputChange}
+              isInvalid={validationErrors.description}
+            />
+            <Form.Control.Feedback type="invalid">
+              {validationErrors.description}
+            </Form.Control.Feedback>
+          </Form.Group>
+
+          <Form.Group className="mb-3 m-2" controlId="price">
+            <Form.Label>Price</Form.Label>
+            <Form.Control
+              type="text"
+              name="price"
+              placeholder="Price"
+              value={price}
+              onChange={handleInputChange}
+              isInvalid={validationErrors.price}
+            />
+            <Form.Control.Feedback type="invalid">
+              {validationErrors.price}
+            </Form.Control.Feedback>
+          </Form.Group>
+
+          <Form.Group className="mb-3 m-2" controlId="duration">
+            <Form.Label>Duration</Form.Label>
+            <Form.Control
+              type="text"
+              name="duration"
+              placeholder="Duration in months (e.g: 5 months)"
+              value={duration}
+              onChange={handleInputChange}
+              isInvalid={validationErrors.duration}
+            />
+            <Form.Control.Feedback type="invalid">
+              {validationErrors.duration}
+            </Form.Control.Feedback>
+          </Form.Group>
+
+          <Button variant="primary" type="submit" className='m-2'>
+            Add
+          </Button>
+        </Form>
       </div>
-        <Form.Group className="mb-3 m-2" controlId="batchName">
-          <Form.Label>Batch Name</Form.Label>
-          <Form.Control
-            type="text"
-            name="batchName"
-            placeholder="Batch name"
-            value={batchName}
-            onChange={handleInputChange}
-            isInvalid={validationErrors.batchName}
-          />
-          <Form.Control.Feedback type="invalid">
-            {validationErrors.batchName}
-          </Form.Control.Feedback>
-        </Form.Group>
 
-        <Form.Group className="mb-3 m-2" controlId="description">
-          <Form.Label>Description</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            name="description"
-            placeholder="Description"
-            value={description}
-            onChange={handleInputChange}
-            isInvalid={validationErrors.description}
-          />
-          <Form.Control.Feedback type="invalid">
-            {validationErrors.description}
-          </Form.Control.Feedback>
-        </Form.Group>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+      
 
-        <Form.Group className="mb-3 m-2" controlId="price">
-          <Form.Label>Price</Form.Label>
-          <Form.Control
-            type="text"
-            name="price"
-            placeholder="Price"
-            value={price}
-            onChange={handleInputChange}
-            isInvalid={validationErrors.price}
-          />
-          <Form.Control.Feedback type="invalid">
-            {validationErrors.price}
-          </Form.Control.Feedback>
-        </Form.Group>
-
-        <Form.Group className="mb-3 m-2" controlId="duration">
-          <Form.Label>Duration</Form.Label>
-          <Form.Control
-            type="text"
-            name="duration"
-            placeholder="Duration in months (e.g: 5 months)"
-            value={duration}
-            onChange={handleInputChange}
-            isInvalid={validationErrors.duration}
-          />
-          <Form.Control.Feedback type="invalid">
-            {validationErrors.duration}
-          </Form.Control.Feedback>
-        </Form.Group>
-
-        <Button variant="primary" type="submit" className='m-2'>
-          Add
-        </Button>
-      </Form>
-    </div>
-      {/* Success Toast */}
-      <Toast show={showSuccessToast} onClose={() => setShowSuccessToast(false)} delay={3000} autohide
-        className="position-fixed top-0 end-0 mt-2 me-2" style={{ backgroundColor: 'rgba(40, 167, 69, 0.85)', color: 'white' }}>
-        <Toast.Header>
-          <strong className="me-auto">Success</strong>
-        </Toast.Header>
-        <Toast.Body>Success</Toast.Body>
-      </Toast>
-
-      {/* Error Toast */}
-      <Toast show={showErrorToast} onClose={() => setShowErrorToast(false)} delay={3000} autohide
-        className="position-fixed top-0 end-0 mt-2 me-2" style={{ backgroundColor: 'rgba(220, 53, 69, 0.85)', color: 'white' }}>
-        <Toast.Header>
-          <strong className="me-auto">Error</strong>
-        </Toast.Header>
-        <Toast.Body>Something went wrong</Toast.Body>
-      </Toast>
-
-       {/* Confirmation modal to delete */}
-       <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)}>
+      {/* Confirmation modal to delete */}
+      <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Deletion</Modal.Title>
         </Modal.Header>

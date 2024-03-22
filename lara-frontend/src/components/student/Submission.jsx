@@ -133,7 +133,7 @@ const Submission = () => {
           className="form-control bg-dark text-light"
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          rows={10}
+          rows={20}
           placeholder="Write your Java code here"
           style={{ color: '#fff', '::placeholder': { color: '#fff' } }} 
         ></textarea>

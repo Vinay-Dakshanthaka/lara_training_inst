@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { Button, Form, Table } from 'react-bootstrap';
-import { BsArrowBarLeft, BsArrowDownLeftCircleFill, BsArrowLeftCircle } from 'react-icons/bs';
+import { BsArrowLeftCircle } from 'react-icons/bs';
 import {  useNavigate } from 'react-router-dom';
 import {baseURL}  from '../config';
 

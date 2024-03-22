@@ -353,7 +353,7 @@ const StudentHome = () => {
         setImage(`data:${response.headers['content-type']};base64,${base64Image}`);
         // console.log("image "+image)
       } catch (error) {
-        console.error('Error fetching profile image:', error);
+        // console.error('Error fetching profile image:', error);
       }
     };
 
@@ -410,7 +410,7 @@ const StudentHome = () => {
 
   return (
     <div className="container mt-4 mb-4">
-      <div className="card p-4">
+      <div className="card p-2">
         {errorMessage && <div className="alert alert-info">{errorMessage}</div>}
 
         {/* Profile Details */}

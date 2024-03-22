@@ -93,72 +93,75 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="d-flex justify-content-center my-5 ">
-      <BackButton />
-      <div className="card p-1 col-8">
-        <h3 className="mb-4 text-center">Change Password</h3>
-        <Form onSubmit={handleSubmit} className="col-12">
-          <div className="mb-3">
-            <label htmlFor="oldPassword" className="form-label">Old Password</label>
-            <div className="input-group">
-              <input
-                type={showOldPassword ? 'text' : 'password'}
-                className="form-control"
-                id="oldPassword"
-                name="oldPassword"
-                value={oldPassword}
-                onChange={handleChange}
-                required
-              />
-              <button className="btn btn-outline-secondary" type="button" onClick={toggleOldPasswordVisibility}>
-                {showOldPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
+    <div className="container">
+  <div className="row justify-content-center my-5">
+    <BackButton />
+    <div className="card p-1 col-lg-8 col-md-10 col-sm-12">
+      <h3 className="mb-4 text-center">Change Password</h3>
+      <Form onSubmit={handleSubmit} className="col-12">
+        <div className="mb-3">
+          <label htmlFor="oldPassword" className="form-label">Old Password</label>
+          <div className="input-group">
+            <input
+              type={showOldPassword ? 'text' : 'password'}
+              className="form-control"
+              id="oldPassword"
+              name="oldPassword"
+              value={oldPassword}
+              onChange={handleChange}
+              required
+            />
+            <button className="btn btn-outline-secondary" type="button" onClick={toggleOldPasswordVisibility}>
+              {showOldPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
-          <div className="mb-3">
-            <label htmlFor="newPassword" className="form-label">New Password</label>
-            <div className="input-group">
-              <input
-                type={showNewPassword ? 'text' : 'password'}
-                className="form-control"
-                id="newPassword"
-                name="newPassword"
-                value={newPassword}
-                onChange={handleChange}
-                required
-              />
-              <button className="btn btn-outline-secondary" type="button" onClick={toggleNewPasswordVisibility}>
-                {showNewPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
+        </div>
+        <div className="mb-3">
+          <label htmlFor="newPassword" className="form-label">New Password</label>
+          <div className="input-group">
+            <input
+              type={showNewPassword ? 'text' : 'password'}
+              className="form-control"
+              id="newPassword"
+              name="newPassword"
+              value={newPassword}
+              onChange={handleChange}
+              required
+            />
+            <button className="btn btn-outline-secondary" type="button" onClick={toggleNewPasswordVisibility}>
+              {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
-          <div className="mb-3">
-            <label htmlFor="confirmNewPassword" className="form-label">Confirm New Password</label>
-            <div className="input-group">
-              <input
-                type={showConfirmNewPassword ? 'text' : 'password'}
-                className="form-control"
-                id="confirmNewPassword"
-                name="confirmNewPassword"
-                value={confirmNewPassword}
-                onChange={handleChange}
-                required
-              />
-              <button className="btn btn-outline-secondary" type="button" onClick={toggleConfirmNewPasswordVisibility}>
-                {showConfirmNewPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
+        </div>
+        <div className="mb-3">
+          <label htmlFor="confirmNewPassword" className="form-label">Confirm New Password</label>
+          <div className="input-group">
+            <input
+              type={showConfirmNewPassword ? 'text' : 'password'}
+              className="form-control"
+              id="confirmNewPassword"
+              name="confirmNewPassword"
+              value={confirmNewPassword}
+              onChange={handleChange}
+              required
+            />
+            <button className="btn btn-outline-secondary" type="button" onClick={toggleConfirmNewPasswordVisibility}>
+              {showConfirmNewPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
-          <div className="text-center m-2">
-            <Button variant="primary" type="submit">
-              Change Password
-            </Button>
-          </div>
-        </Form>
-        {error && <Alert variant="danger">{error}</Alert>}
-        {success && <Alert variant="success">{success}</Alert>}
-      </div>
+        </div>
+        <div className="text-center m-2">
+          <Button variant="primary" type="submit">
+            Change Password
+          </Button>
+        </div>
+      </Form>
+      {error && <Alert variant="danger">{error}</Alert>}
+      {success && <Alert variant="success">{success}</Alert>}
     </div>
+  </div>
+</div>
+
   );
 };
 

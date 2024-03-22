@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { ToastContainer, Toast } from 'react-bootstrap';
 import QuestionList from './QuestionList';
 import {baseURL}  from '../config';
+import BackButton from '../BackButton';
 
 const AssignQuestion = () => {
     const { batch_id } = useParams();
@@ -85,6 +86,7 @@ const AssignQuestion = () => {
 
     return (
         <div className='card m-4'>
+            <BackButton/>
             <h1>Give Assignment Questions</h1>
             {/* <h3>Batch Name : {batchDetails.batch_name}</h3> */}
             <form onSubmit={handleSubmit} className='card p-2'>

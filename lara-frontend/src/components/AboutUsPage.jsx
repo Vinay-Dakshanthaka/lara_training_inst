@@ -5,7 +5,7 @@ const AboutUsPage = () => {
   return (
     <>
         
-    <Container>
+    <Container className='mt-5'>
     <h2 className="text-center mb-4">About Lara Technologies</h2>
     <h4 className="text-center mb-4">Its not just an Institute... Its not just a placement agency...</h4>
     <h4 className="text-center mb-4">Its more than a University... Its more than a Company...</h4>

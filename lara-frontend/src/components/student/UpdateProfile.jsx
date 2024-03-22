@@ -265,8 +265,38 @@ const validateYOP = (yop) => {
     // Check if any validation errors exist
     if (nameError || mobileNumberError || adhaarNumberError || pincodeError ||mMobileNumberError || fMobileNumberError || highPercentError || tenthPercentError || twelthPercentError || YOPError || fNameError || mNameError) {
       // If validation fails, do not update profile
+      toast.error("Please Fill all the required fields marked as *")
       return;
     }
+
+    // if(nameError || fNameError || mNameError){
+    //   toast.error("Name must contain at least 3 characters")
+    //   return;
+    // }
+    // if(mobileNumberError || mMobileNumberError || fMobileNumberError){
+    //   toast.error("Phone number must be 10 digits")
+    //   return;
+    // }
+
+    // if(adhaarNumberError){
+    //   toast.error("Invalid Adhaar Number")
+    //   return;
+    // }
+
+    // if(pincodeError){
+    //   toast.error("Invalid Pincode")
+    //   return;
+    // }
+
+    // if(highPercentError || tenthPercentError || twelthPercentError ){
+    //   toast.error("Please enter a valid percentage")
+    //   return;
+    // }
+
+    // if(YOPError){
+    //   toast.error("Please enter a valid Year of passout");
+    //   return;
+    // }
   
     try {
       // console.log("inside try block of save or update profile")
@@ -479,7 +509,7 @@ const validateYOP = (yop) => {
     </div>
   </div>
 
-  <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+  <ToastContainer position="top-right" autoClose={3000}  />
 
   {/* Bootstrap Toast */}
   {/* <div className="toast" role="alert" aria-live="assertive" aria-atomic="true" style={{ position: 'fixed', bottom: '1rem', right: '1rem' }}>
