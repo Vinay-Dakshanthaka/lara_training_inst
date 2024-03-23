@@ -16,7 +16,7 @@ const saveBatch = async (req, res) => {
         const userRole = user.role; // Get the user's role
 
         // Check if the user role is either "ADMIN" or "SUPER ADMIN"
-        if (userRole !== 'ADMIN') {
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN') {
             return res.status(403).json({ error: 'Access forbidden' });
         }
 
@@ -76,7 +76,7 @@ const deleteBatch = async (req, res) => {
         const userRole = user.role; // Get the user's role
         console.log("role :" + userRole)
         // Check if the user role is either "ADMIN" or "SUPER ADMIN"
-        if (userRole !== 'ADMIN') {
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN') {
             return res.status(403).json({ error: 'Access forbidden' });
         }
         console.log("batch id :", batch_id)
@@ -105,7 +105,7 @@ const updateBatch = async (req, res) => {
         const userRole = user.role; // Get the user's role
 
         // Check if the user role is either "ADMIN" or "SUPER ADMIN"
-        if (userRole !== 'ADMIN') {
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN') {
             return res.status(403).json({ error: 'Access forbidden' });
         }
 

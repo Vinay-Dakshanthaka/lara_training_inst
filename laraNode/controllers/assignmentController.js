@@ -193,7 +193,7 @@ const saveTestcases = async (req, res) => {
 const saveStudentSubmission = async (req, res) => {
   try {
     const studentId = req.studentId;
-    const { question_id, code,batch_id, submission_time, no_testcase_passed, execution_output } = req.body;
+    const { question_id, code, batch_id, submission_time, no_testcase_passed, execution_output } = req.body;
 
     // Check if the question exists
     const question = await Questions.findByPk(question_id);
@@ -237,11 +237,72 @@ const saveStudentSubmission = async (req, res) => {
   }
 };
 
+const saveStudentMarks = async (req, res) => {
+  try {
+    const studentId = req.studentId;
+    const { student_id, question_id, batch_id, marks } = req.body;
+
+    // Fetch student from database using studentId
+    const student = await Student.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Fetch user's role
+    const userRole = student.role;
+    if (userRole !== 'TRAINER') {
+      return res.status(403).json({ error: 'Access forbidden' });
+    }
+
+    // Check if the question exists
+    const question = await Questions.findByPk(question_id);
+    if (!question) {
+      return res.status(404).json({ error: 'Question not found' });
+    }
+
+    // Check if the student exists
+    const checkStudent = await Student.findByPk(student_id);
+    if (!checkStudent) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Check if the student has submitted the code for this question
+    const existingSubmission = await StudentSubmission.findOne({
+      where: {
+        question_id: question_id,
+        student_id: student_id
+      }
+    });
+
+    if (!existingSubmission) {
+      return res.status(400).json({ error: 'Student has not submitted the answer for this question' });
+    }
+
+    // Update the student's marks
+    await StudentSubmission.update(
+      { marks },
+      {
+        where: {
+          question_id: question_id,
+          student_id: student_id,
+          batch_id: batch_id
+        }
+      }
+    );
+
+    res.status(200).json({ message: 'Marks saved successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 const getStudentSubmissions = async (req, res) => {
   try {
     const studentId = req.studentId;
-    const {batchId} = req.body;
-    console.log("batch id :", batchId)
+    const { batchId } = req.body;
+    // console.log("batch id :", batchId)
     // Check if the student exists
     const student = await Student.findByPk(studentId);
     if (!student) {
@@ -255,7 +316,7 @@ const getStudentSubmissions = async (req, res) => {
         batch_id: batchId
       }
     });
-    
+
     res.status(200).json(submissions);
   } catch (error) {
     console.error(error);
@@ -265,7 +326,7 @@ const getStudentSubmissions = async (req, res) => {
 
 const getStudentSubmissionsByBatchId = async (req, res) => {
   try {
-    const {studentId,batchId} = req.body;
+    const { studentId, batchId } = req.body;
     console.log("student Id ", studentId)
     console.log("batch Id ", batchId)
     // Check if the student exists
@@ -281,7 +342,7 @@ const getStudentSubmissionsByBatchId = async (req, res) => {
         batch_id: batchId
       }
     });
-    
+
     res.status(200).json(submissions);
   } catch (error) {
     console.error(error);
@@ -289,6 +350,33 @@ const getStudentSubmissionsByBatchId = async (req, res) => {
   }
 };
 
+const getSResults = async (req, res) => {
+  try {
+    const studentId = req.studentId;
+    const { batch_id,question_id } = req.body;
+    console.log("student Id ", studentId)
+    console.log("batch Id ", batch_id)
+    // Check if the student exists
+    const student = await Student.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Retrieve all submissions for the student and batch
+    const submissions = await StudentSubmission.findAll({
+      where: {
+        student_id: studentId,
+        batch_id: batch_id,
+        question_id:question_id
+      }
+    });
+
+    res.status(200).json(submissions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // java versionIndex details 
 //  Version index 0 corresponds to Java 7.
@@ -322,7 +410,7 @@ const executeJavaCodeHandler = async (req, res) => {
       versionIndex: '3', // Specify the Java version index (e.g., '3' for Java 8)
       clientId: 'cf50f833c14a453d7b51231fe243dda6',
       clientSecret: 'bb9342a1e142f420f0a1f2345749fc7b751d32340b5906b76544cd02095c666a',
-      stdin: '', 
+      stdin: '',
     };
 
     // Send POST request to Jdoodle compiler API
@@ -429,5 +517,7 @@ module.exports = {
   updateQuestion,
   deleteQuestion,
   getStudentSubmissions,
-  getStudentSubmissionsByBatchId
+  getStudentSubmissionsByBatchId,
+  saveStudentMarks,
+  getSResults
 };

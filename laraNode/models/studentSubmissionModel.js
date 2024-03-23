@@ -34,10 +34,14 @@ module.exports = (sequelize, DataTypes) => {
         execution_output: {
             type: DataTypes.TEXT,
             allowNull: true
+        },
+        marks: {
+            type: DataTypes.TEXT,
+            allowNull: true
         }
     }, {
         timestamps: false
     });
-
+ 
     return StudentSubmission;
 };

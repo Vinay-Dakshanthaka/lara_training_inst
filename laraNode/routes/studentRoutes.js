@@ -119,4 +119,8 @@ router.post('/getStudentSubmissions',verifyToken,assignmentController.getStudent
 
 router.post('/getStudentSubmissionsByBatchId',verifyToken,assignmentController.getStudentSubmissionsByBatchId)
 
+router.post('/saveStudentMarks',verifyToken,assignmentController.saveStudentMarks)
+
+router.post('/getSResults',verifyToken,assignmentController.getSResults);
+
 module.exports = router;

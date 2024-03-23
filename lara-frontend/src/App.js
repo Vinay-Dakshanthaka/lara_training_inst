@@ -28,6 +28,7 @@ import AssignmentQuestions from './components/student/AssignmentQuestions';
 import Submission from './components/student/Submission';
 import AssignmentAnswer from './components/trainer/AssignmentAnswer';
 import CustomNavbars from './components/CustomNavbars';
+import Result from './components/student/Result';
 
 
 const App = () => {
@@ -60,6 +61,7 @@ const App = () => {
             <Route path="/assignment-questions/:batch_id" element={<AssignmentQuestions />} />
             {/* <Route path="/submission/:questionId" element={<Submission/>} /> */}
             <Route path="/submission/:questionId/:batchId" element={<Submission />} />
+            <Route path="/result/:questionId/:batchId" element={<Result />} />
             <Route path="/assignment-answers/:batchId/:studentId" element={<AssignmentAnswer />} />
             {/* <Route path="/profile" element={<Profile />} /> */}
             <Route path="*" element={<LoginForm />} />

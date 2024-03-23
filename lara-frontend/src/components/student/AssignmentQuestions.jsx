@@ -49,7 +49,10 @@ const AssignmentQuestions = () => {
             <h4 style={{ fontWeight: 'bold' }}>{question.question}</h4>
             <p>{question.description}</p>
             {/* <Link to={`/submission/${question.id}`} className="btn btn-primary">Solve</Link> */}
-            <Link to={`/submission/${question.id}/${batch_id}`} className="btn btn-primary">Solve</Link>
+           <div className='d-flex justify-content-between'>
+           <Link to={`/submission/${question.id}/${batch_id}`} className="btn btn-primary">Solve</Link>
+            <Link to={`/result/${question.id}/${batch_id}`} className="btn btn-warning">Result</Link>
+           </div>
           </div>
         </li>
       ))}

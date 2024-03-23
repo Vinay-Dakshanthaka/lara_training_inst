@@ -511,7 +511,7 @@ const StudentHome = () => {
                     </td>
                     <td>
                       <button className="btn btn-sm btn-primary" onClick={() => handleAssignQuestionsClick(batchDetail.batch.batch_id)}>
-                        Assign Questions
+                        Assignment Questions
                       </button>
                     </td>
                   </tr>

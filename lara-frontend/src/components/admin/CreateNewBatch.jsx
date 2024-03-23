@@ -308,12 +308,14 @@ const CreateNewBatch = () => {
       });
 
       //console.log(response.data);//
-      setShowSuccessToast(true);
+      // setShowSuccessToast(true);
+      toast.success('Batch Deleted Successfully')
       // Fetch available batches again after deleting the batch
       fetchAvailableBatches();
     } catch (error) {
       console.error(error);
-      setShowErrorToast(true);
+      // setShowErrorToast(true);
+      toast.error('Something went wrong')
     } finally {
       // Close the confirmation modal
       setShowConfirmationModal(false);
