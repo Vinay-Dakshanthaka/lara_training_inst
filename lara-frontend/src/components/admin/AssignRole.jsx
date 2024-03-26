@@ -1,6 +1,8 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Pagination } from 'react-bootstrap';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
  import {baseURL}  from '../config';
 
 const AssignRole = () => {
@@ -100,14 +102,14 @@ const AssignRole = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const showAlert = (message, success) => {
-    setAlertMessage(message);
-    setIsSuccess(success);
-    setTimeout(() => {
-      setAlertMessage('');
-      setIsSuccess(false);
-    }, 3000); // Hide the alert after 3 seconds
-  };
+  // const showAlert = (message, success) => {
+  //   setAlertMessage(message);
+  //   setIsSuccess(success);
+  //   setTimeout(() => {
+  //     setAlertMessage('');
+  //     setIsSuccess(false);
+  //   }, 3000); // Hide the alert after 3 seconds
+  // };
 
   const handleUpdateRole = async (studentId) => {
     try {
@@ -132,13 +134,15 @@ const AssignRole = () => {
   
     //   console.log("Role updated successfully for student with ID:", studentId); // Debugging
 
-      showAlert('Role updated successfully', true);
+      // showAlert('Role updated successfully', true);
+      toast.success("Role Updated Successfully")
         
       fetchStudents();
      
     } catch (error) {
       console.error('Error updating role:', error);
-      showAlert('Something went wrong', false);
+      // showAlert('Something went wrong', false);
+      toast.error("Something went wrong. Try again later")
       fetchStudents();
     }
   };
@@ -152,13 +156,14 @@ const AssignRole = () => {
 
   return (
     <div>
+       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <h1>All Student Details</h1>
-      {alertMessage && (
+      {/* {alertMessage && (
         <div className={`alert ${isSuccess ? 'alert-success' : 'alert-danger'} alert-dismissible fade show`} role="alert">
           {alertMessage}
           <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-      )}
+      )} */}
      <div className="mb-3 row ">
   <div className="col-md-4 mb-2 mb-md-0">
     <select
@@ -207,6 +212,7 @@ const AssignRole = () => {
                 <select value={updatedRoles[student.id] || student.role} onChange={(e) => handleRoleChange(student.id, e.target.value)}>
                   <option value="STUDENT">STUDENT</option>
                   <option value="TRAINER">TRAINER</option>
+                  <option value="PLACEMENT OFFICER">PLACEMENT OFFICER</option>
                 </select>
               </td>
               <td>

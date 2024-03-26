@@ -1,27 +1,19 @@
 module.exports = (sequelize, DataTypes) => {
-    const Batch = sequelize.define('Batch', {
-        batch_id: {
+    const CollegeDetails = sequelize.define('CollegeDetails', {
+        id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        batch_name: {
+        college_name: {
             type: DataTypes.STRING,
             allowNull: false
         },
-        description: {
+        place: {
             type: DataTypes.STRING,
             allowNull: false
         },
-        duration: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        price: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        trainer_id: {
+        placement_officer_id: {
             type:DataTypes.STRING,
             allowNull:true
         }
@@ -29,5 +21,5 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false 
     }
     );
-    return Batch;
+    return CollegeDetails;
 }

@@ -8,8 +8,8 @@ import 'react-toastify/dist/ReactToastify.css';
 const AllStudents = () => {
   const [students, setStudents] = useState([]);
   const [updatedRoles, setUpdatedRoles] = useState({});
-  const [alertMessage, setAlertMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false);
+  // const [alertMessage, setAlertMessage] = useState('');
+  // const [isSuccess, setIsSuccess] = useState(false);
   const [currentPage, setCurrentPage] = useState(1); // State to manage current page
   const [studentsPerPage] = useState(10); // Number of students per page
   const [searchValue, setSearchValue] = useState('');
@@ -102,14 +102,14 @@ const AllStudents = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const showAlert = (message, success) => {
-    setAlertMessage(message);
-    setIsSuccess(success);
-    setTimeout(() => {
-      setAlertMessage('');
-      setIsSuccess(false);
-    }, 3000); // Hide the alert after 3 seconds
-  };
+  // const showAlert = (message, success) => {
+  //   setAlertMessage(message);
+  //   setIsSuccess(success);
+  //   setTimeout(() => {
+  //     setAlertMessage('');
+  //     setIsSuccess(false);
+  //   }, 3000); // Hide the alert after 3 seconds
+  // };
 
   const handleUpdateRole = async (studentId) => {
     try {
@@ -136,13 +136,15 @@ const AllStudents = () => {
 
       // showAlert('Role updated successfully', true);
       toast.success("Role Updated Successfully")
+      // console.log("success")
 
       // Optionally, you can refresh the student list after the role is updated
       // fetchStudents();
     } catch (error) {
-      console.error('Error updating role:', error);
+      console.error(error);
       // showAlert('Something went wrong', false);
       toast.error("Something went wrong. Try after some time")
+      // console.log(error)
     }
   };
 
@@ -152,15 +154,16 @@ const AllStudents = () => {
       [studentId]: role
     }));
   };
-
+  
   return (
     <div className='table-responsive'>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <h1>All Student Details</h1>
       {/* {alertMessage && (
         <div className={`alert ${isSuccess ? 'alert-success' : 'alert-danger'} alert-dismissible fade show`} role="alert">
           {alertMessage}
           <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+          </div>
       )} */}
       <div className="mb-3 row ">
         <div className="col-md-4 mb-2 mb-md-0">
@@ -233,7 +236,6 @@ const AllStudents = () => {
             ))}
         </Pagination>
       </div>
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </div>
   );
 };

@@ -20,16 +20,19 @@ module.exports = (sequelize, DataTypes) => {
         imagePath: {
             type: DataTypes.STRING, 
             allowNull: true, 
-          },
+        },
         role: {
             type: DataTypes.ENUM('ADMIN','TRAINER','STUDENT', 'SUPER ADMIN','PLACEMENT OFFICER'),
             allowNull: false
+        },
+        college_id: {
+            type: DataTypes.INTEGER, 
+            allowNull: true
         }
     },
     {
         timestamps: false // Disable createdAt and updatedAt
-    }
-    );
+    });
 
     return Student;
 };

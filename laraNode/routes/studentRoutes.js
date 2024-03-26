@@ -5,6 +5,7 @@ const searchController = require('../controllers/searchController');
 const batchController = require('../controllers/batchController');
 const reviewController = require('../controllers/reviewsController');
 const assignmentController = require('../controllers/assignmentController')
+const collegeController = require('../controllers/collegeController')
 const verifyToken = require('../middleware/authMiddleware');
 const multer = require('multer');
 const upload = multer({dest: 'Images/' });
@@ -122,5 +123,25 @@ router.post('/getStudentSubmissionsByBatchId',verifyToken,assignmentController.g
 router.post('/saveStudentMarks',verifyToken,assignmentController.saveStudentMarks)
 
 router.post('/getSResults',verifyToken,assignmentController.getSResults);
+
+router.post('/saveCollegeDetails',verifyToken,collegeController.saveCollegeDetails);
+
+router.post('/assignPlacementOfficerToCollege',verifyToken,collegeController.assignPlacementOfficerToCollege);
+
+router.get('/getAllCollegeDetails',verifyToken,collegeController.getAllCollegeDetails);
+
+router.post('/assignStudentsToColleges',verifyToken,upload.single('file'),collegeController.assignStudentsToColleges);
+
+router.post('/deleteCollegeDetails',verifyToken,collegeController.deleteCollegeDetails);
+
+router.post('/updateCollegeDetails',verifyToken,collegeController.updateCollegeDetails);
+
+router.post('/getAllStudentsByCollegeId',verifyToken,collegeController.getAllStudentsByCollegeId);
+
+router.post('/deassignPlacementOfficerFromCollege',verifyToken,collegeController.deassignPlacementOfficerFromCollege);
+
+router.get('/getAllCollegeDetailsForPlacemmentOfficer',verifyToken,collegeController.getAllCollegeDetailsForPlacemmentOfficer);
+
+router.get('/getReviewsByStudentId/:studentId', verifyToken, reviewController.getReviewsByStudentId);
 
 module.exports = router;

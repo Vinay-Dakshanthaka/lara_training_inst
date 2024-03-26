@@ -93,7 +93,43 @@ const getAllReviews = async (req, res) => {
     }
 };
 
+const getReviewsByStudentId = async (req, res) => {
+    try {
+        const { studentId } = req.params; // Extract studentId from URL parameters
+
+        // Retrieve reviews associated with the specified student ID
+        const reviews = await Review.findAll({
+            where: { studentId }
+        });
+
+        // Fetch associated data for each review
+        const reviewDetails = await Promise.all(reviews.map(async (review) => {
+            const student = await Student.findByPk(review.studentId, { attributes: ['id', 'name', 'email'] });
+            const batch = await Batch.findByPk(review.batchId, { attributes: ['batch_id', 'batch_name', 'description', 'duration'] });
+            const trainer = await Student.findByPk(review.trainerId, { attributes: ['id', 'name', 'email'] }); // Assuming Trainer details are also stored in the Student table
+            
+            return {
+                id: review.id,
+                student,
+                batch,
+                trainer,
+                reviewDate: review.reviewDate,
+                reviewTime: review.reviewTime,
+                stars: review.stars,
+                review: review.review
+            };
+        }));
+
+        // Send the reviews with associated data as a response
+        res.status(200).json(reviewDetails);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+};
+
 module.exports = {
     saveReview,
-    getAllReviews
+    getAllReviews,
+    getReviewsByStudentId
 }

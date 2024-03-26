@@ -69,6 +69,12 @@ const LoginForm = () => {
             navigate('/trainerDashboard');
             window.location.reload();
           }, 2000);
+        }else if (role === 'PLACEMENT OFFICER') {
+            toast.success('Login successful. Redirecting...');
+            setTimeout(() => {
+              navigate('/placementOfficerDashboard');
+              window.location.reload();
+            }, 2000);
         } else {
           toast.error("Oops!! Something went wrong. Please try to login again");
         }

@@ -29,6 +29,9 @@ import Submission from './components/student/Submission';
 import AssignmentAnswer from './components/trainer/AssignmentAnswer';
 import CustomNavbars from './components/CustomNavbars';
 import Result from './components/student/Result';
+import AssignStudentsToCollege from './components/admin/AssignStudentsToCollege';
+import PlacementOfficerDashboard from './components/placementOfficer/PlacementOfficerDashboard';
+import StudentReviewsByStudentId from './components/placementOfficer/StudentReviewsByStudentId';
 
 
 const App = () => {
@@ -53,6 +56,7 @@ const App = () => {
             <Route path="/superAdminDashboard" element={<SuperAdminDashboard />} />
             <Route path="/adminDashboard" element={<AdminDashboard />} />
             <Route path="/trainerDashboard" element={<TrainerDashboard />} />
+            <Route path="/placementOfficerDashboard" element={<PlacementOfficerDashboard />} />
             <Route path="/passwodResetForm" element={<PasswordResetForm />} />
             <Route path="/resetPassword" element={<ResetPassword />} />
             <Route path='/createNewBatch' element={<CreateNewBatch />} />
@@ -62,7 +66,9 @@ const App = () => {
             {/* <Route path="/submission/:questionId" element={<Submission/>} /> */}
             <Route path="/submission/:questionId/:batchId" element={<Submission />} />
             <Route path="/result/:questionId/:batchId" element={<Result />} />
+            {/* <Route path="/reviews/:batchId" element={<StudentReviewsByStudentId />} /> */}
             <Route path="/assignment-answers/:batchId/:studentId" element={<AssignmentAnswer />} />
+            <Route path="/assignStudentsToCollege" element={<AssignStudentsToCollege />} />
             {/* <Route path="/profile" element={<Profile />} /> */}
             <Route path="*" element={<LoginForm />} />
 
