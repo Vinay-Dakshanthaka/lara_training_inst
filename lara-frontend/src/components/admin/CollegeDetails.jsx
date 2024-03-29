@@ -161,7 +161,7 @@ const CollegeDetails = () => {
         <div>
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
             <Button onClick={() => setShowAddModal(true)} className='m-2'>Add College</Button>
-            <Button onClick={() => navigate('/assignStudentsToCollege')} className='m-2'>Group Students by College</Button>
+            <Button onClick={() => navigate('/assignStudentsToCollege')} className='m-2'>Upload Students</Button>
             
             <table className="table table-striped">
     <thead>

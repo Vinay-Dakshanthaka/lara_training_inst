@@ -254,19 +254,19 @@ const upload = multer({ dest: 'uploads/' }); // Set destination folder for file 
 // Endpoint to assign students to colleges
 const assignStudentsToColleges = async (req, res) => {
     try {
+        const { collegeName } = req.body;
+        const file = req.file;
+
+        console.log("college name :", collegeName);
         console.log("inside assign students to college ");
-        
+
         // Check if a file is uploaded
-        if (!req.file) {
+        if (!file) {
             throw new Error('No file uploaded.');
         }
 
-        // console.log("file is uploaded ");
-        // console.log("file ", req.file);
-
         // Parse the uploaded Excel sheet
-        const workbook = xlsx.readFile(req.file.path); // Use file path instead of buffer
-        // console.log("workbook: ", workbook);
+        const workbook = xlsx.readFile(file.path);
 
         // Check if workbook and SheetNames are defined
         if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
@@ -274,25 +274,30 @@ const assignStudentsToColleges = async (req, res) => {
         }
 
         const sheetName = workbook.SheetNames[0];
-        // console.log("sheet name :", sheetName);
         const sheet = workbook.Sheets[sheetName];
 
-        // Extract college names and student email IDs from the Excel sheet
+        // Extract student email IDs from the Excel sheet
         const data = xlsx.utils.sheet_to_json(sheet);
-        // console.log("data :", data);
 
         // Logic to assign college names to students
         for (const row of data) {
-            const collegeName = row.collegeName;
             const studentEmail = row.email;
 
-            // Find student and college details from the database
+            // Find student details from the database using the email
             const student = await Student.findOne({ where: { email: studentEmail } });
-            const college = await CollegeDetails.findOne({ where: { college_name: collegeName } });
 
-            if (student && college) {
-                // Update student's college_id
-                await Student.update({ college_id: college.id }, { where: { id: student.id } });
+            if (student) {
+                // Find college details from the database using the provided college name
+                const college = await CollegeDetails.findOne({ where: { college_name: collegeName } });
+
+                if (college) {
+                    // Update student's college_id
+                    await Student.update({ college_id: college.id }, { where: { id: student.id } });
+                } else {
+                    console.error(`College with name ${collegeName} not found.`);
+                }
+            } else {
+                console.error(`Student with email ${studentEmail} not found.`);
             }
         }
 
@@ -302,6 +307,7 @@ const assignStudentsToColleges = async (req, res) => {
         res.status(500).json({ error: error.message || 'Internal server error' });
     }
 };
+
 
 const getAllStudentsByCollegeId = async (req, res) => {
     try {

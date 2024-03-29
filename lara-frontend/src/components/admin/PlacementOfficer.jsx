@@ -8,7 +8,6 @@ import 'react-toastify/dist/ReactToastify.css';
 const PlacementOfficer = () => {
     const [students, setStudents] = useState([]);
     const [colleges, setColleges] = useState([]);
-    const [selectedCollegeId, setSelectedCollegeId] = useState('');
 
     const fetchStudents = async () => {
         try {
@@ -23,9 +22,21 @@ const PlacementOfficer = () => {
                 },
             };
 
-            const response = await axios.get(`${baseURL}/api/student/getAllStudentDetails`, config);
-            const filteredStudents = response.data.filter(student => student.role === "PLACEMENT OFFICER");
-            setStudents(filteredStudents);
+            const studentResponse = await axios.get(`${baseURL}/api/student/getAllStudentDetails`, config);
+            const collegeResponse = await axios.get(`${baseURL}/api/student/getAllCollegeDetails`, config);
+
+            const collegesData = collegeResponse.data.reduce((acc, college) => {
+                acc[college.placement_officer_id] = college.college_name;
+                return acc;
+            }, {});
+
+            const filteredStudents = studentResponse.data.filter(student => student.role === "PLACEMENT OFFICER");
+            const studentsWithColleges = filteredStudents.map(student => ({
+                ...student,
+                college_name: collegesData[student.id] || 'N/A' // Assign college name or 'N/A' if not found
+            }));
+
+            setStudents(studentsWithColleges.map(student => ({ ...student, selectedCollegeId: '' }))); // Add selectedCollegeId property to each student
         } catch (error) {
             console.error(error);
         }
@@ -50,19 +61,19 @@ const PlacementOfficer = () => {
             console.error(error);
         }
     };
+
     useEffect(() => {
         fetchStudents();
         fetchColleges();
     }, []);
 
-    const handleAssign = async (studentId) => {
+    const handleAssign = async (studentId, collegeId) => {
         try {
             const token = localStorage.getItem("token");
             if (!token) {
                 return;
             }
 
-            const collegeId = selectedCollegeId;
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -77,7 +88,7 @@ const PlacementOfficer = () => {
                 console.log("Success: Placement officer assigned to college.");
                 fetchStudents();
                 fetchColleges();
-            } 
+            }
             else if (response.status === 409) {
                 toast.warning("Already assigned to a college.")
                 console.log("Error: Already assigned to a college.");
@@ -99,13 +110,13 @@ const PlacementOfficer = () => {
             if (!token) {
                 return;
             }
-    
+
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             };
-    
+
             const response = await axios.post(`${baseURL}/api/student/deassignPlacementOfficerFromCollege`, { college_id: collegeId }, config);
             toast.success("De-assigned successfully")
             console.log(response.data.message); // Log success message
@@ -116,7 +127,15 @@ const PlacementOfficer = () => {
             // Handle error
         }
     };
-    
+
+    const handleCollegeChange = (e, studentId) => {
+        const collegeId = e.target.value;
+        setStudents(prevStudents => 
+            prevStudents.map(student => 
+                student.id === studentId ? { ...student, selectedCollegeId: collegeId } : student
+            )
+        );
+    };
 
     return (
         <Container className='table-responsive'>
@@ -128,6 +147,7 @@ const PlacementOfficer = () => {
                         <th>Email</th>
                         <th>Phone Number</th>
                         <th>Role</th>
+                        <th>Assigned College</th>
                         <th>Colleges</th>
                     </tr>
                 </thead>
@@ -139,30 +159,31 @@ const PlacementOfficer = () => {
                                 <td>{student.email}</td>
                                 <td>{student.phoneNumber}</td>
                                 <td>{student.role}</td>
+                                <td>{student.college_name}</td>
                                 <td>
-                                    <select value={selectedCollegeId} onChange={(e) => setSelectedCollegeId(e.target.value)}>
-                                    <option>Select</option>
+                                    <select value={student.selectedCollegeId} onChange={(e) => handleCollegeChange(e, student.id)}>
+                                        <option value="">Select</option>
                                         {colleges.map(college => (
                                             <option key={college.id} value={college.id}>{college.college_name}</option>
                                         ))}
                                     </select>
                                 </td>
                                 <td>
-                                    <Button variant="success" onClick={() => handleAssign(student.id)}>Assign</Button>
+                                    <Button variant="success" onClick={() => handleAssign(student.id, student.selectedCollegeId)}>Assign</Button>
                                 </td>
                                 <td>
-                                    <Button variant="danger" onClick={() => handleDeassign(student.id)}>De-assign</Button>
+                                    <Button variant="danger" onClick={() => handleDeassign(student.selectedCollegeId)}>De-assign</Button>
                                 </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="7">N/A</td>
+                            <td colSpan="8">N/A</td>
                         </tr>
                     )}
                 </tbody>
-
             </Table>
+
         </Container>
     );
 }

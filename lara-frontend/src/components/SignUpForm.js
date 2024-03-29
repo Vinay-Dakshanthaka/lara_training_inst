@@ -143,7 +143,7 @@ const SignUpForm = () => {
             {confirmPassword.length > 0 && password !== confirmPassword && <span className="text-danger">Passwords do not match</span>}
           </Form.Group>
 
-          <div className="text-center">
+          <div className="text-center row my-2">
             <Button variant="primary" type="submit" className="text-center m-2">Sign Up</Button>
           </div>
 

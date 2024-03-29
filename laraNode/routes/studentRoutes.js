@@ -86,6 +86,8 @@ router.get('/fetchBatchesAssignedToTrainer',verifyToken,batchController.fetchBat
 
 router.get('/fetchTrainerAndBatchFromStudent',verifyToken,batchController.fetchTrainerAndBatchFromStudent)
 
+router.post('/fetchTrainerAndBatchFromStudentId',verifyToken,batchController.fetchTrainerAndBatchFromStudentId)
+
 router.get('/fetchAllTrainerAndBatch',verifyToken,batchController.fetchAllTrainerAndBatch)
 
 router.post('/deassignBatchFromTrainer',verifyToken,batchController.deassignBatchFromTrainer)
@@ -95,6 +97,8 @@ router.get('/fetchBatchesAssignedToTrainer',verifyToken,batchController.fetchBat
 router.post('/assignBatchesToTrainer',verifyToken,batchController.assignBatchesToTrainer)
 
 router.post('/getStudentsByBatchId',verifyToken,batchController.getStudentsByBatchId)
+
+router.post('/getBatchsByStudentId',verifyToken,batchController.getBatchsByStudentId)
 
 router.post('/saveReview',verifyToken,reviewController.saveReview)
 

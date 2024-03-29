@@ -93,6 +93,7 @@ const getAllReviews = async (req, res) => {
     }
 };
 
+
 const getReviewsByStudentId = async (req, res) => {
     try {
         const { studentId } = req.params; // Extract studentId from URL parameters

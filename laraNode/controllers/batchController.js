@@ -336,6 +336,67 @@ const getStudentBatches = async (req, res) => {
     }
 };
 
+const getBatchsByStudentId = async (req, res) => {
+    try {
+        const { studentId } = req.body; // Extract studentId from the request body
+
+        if (!studentId) {
+            return res.status(400).json({ error: 'Missing studentId in the request body' });
+        }
+
+        // Fetch the student details
+        const student = await Student.findOne({
+            where: {
+                id: studentId
+            },
+            attributes: ['id', 'name', 'email'] // Include only required attributes
+        });
+
+        // Ensure the student exists
+        if (!student) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+
+        // Fetch all batch details associated with the student
+        const studentBatches = await StudentBatch.findAll({
+            where: {
+                student_id: studentId
+            }
+        });
+
+        // Ensure the student is associated with at least one batch
+        if (studentBatches.length === 0) {
+            return res.status(404).json({ error: 'Student is not associated with any batch' });
+        }
+
+        // Fetch all batch details and their respective trainer details
+        const batchesDetails = await Promise.all(studentBatches.map(async (studentBatch) => {
+            const batchId = studentBatch.batch_id;
+            const batch = await Batch.findOne({
+                where: {
+                    batch_id: batchId
+                }
+            });
+
+            // Fetch the trainer details associated with the batch
+            const trainerDetails = await Student.findOne({
+                where: {
+                    id: batch.trainer_id
+                },
+                attributes: ['id', 'name', 'email'] // Include only required attributes
+            });
+
+            return { batch, trainerDetails };
+        }));
+
+        res.status(200).json({ student, batchesDetails });
+    } catch (error) {
+        console.error('Failed to fetch student, batch, and trainer details.', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
 
 const getAllStudentsWithBatches = async (req, res) => {
     try {
@@ -771,6 +832,77 @@ const fetchTrainerAndBatchFromStudent = async (req, res) => {
     }
 };
 
+const fetchTrainerAndBatchFromStudentId = async (req, res) => {
+    try {
+        const { studentId } = req.body;
+        // const studentId = req.studentId;
+
+        // Step 1: Check if the provided studentId exists
+        const student = await Student.findByPk(studentId);
+        if (!student) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+
+        // Step 2: Fetch all batch details associated with the student
+        const studentBatches = await StudentBatch.findAll({
+            where: { student_id: studentId },
+            attributes: ['batch_id']
+        });
+
+        // Step 3: Extract batch IDs
+        const batchIds = studentBatches.map(studentBatch => studentBatch.batch_id);
+
+        // Step 4: Retrieve all batches with the extracted batch IDs
+        const batches = await Batch.findAll({
+            where: { batch_id: batchIds }
+        });
+
+        // Step 5: Fetch all trainer IDs associated with the batches from BatchTrainer table
+        const batchTrainers = await BatchTrainer.findAll({
+            where: { batch_id: batchIds },
+            attributes: ['batch_id', 'trainer_id']
+        });
+
+        // Step 6: Map trainer IDs to batches
+        const trainerIdsMap = {};
+        batchTrainers.forEach(batchTrainer => {
+            const batchId = batchTrainer.batch_id;
+            const trainerId = batchTrainer.trainer_id;
+            if (!trainerIdsMap[batchId]) {
+                trainerIdsMap[batchId] = [];
+            }
+            trainerIdsMap[batchId].push(trainerId);
+        });
+
+        // Step 7: Fetch trainer details for each batch
+        const batchesDetails = await Promise.all(batches.map(async batch => {
+            const trainersForBatch = trainerIdsMap[batch.batch_id] || [];
+            if (trainersForBatch.length > 0) {
+                // Fetch trainer details using Promise.all
+                const trainers = await Student.findAll({
+                    where: { id: trainersForBatch },
+                    attributes: ['id', 'name', 'email']
+                });
+                return {
+                    batch,
+                    trainerDetails: trainers
+                };
+            } else {
+                return {
+                    batch,
+                    trainerDetails: null
+                };
+            }
+        }));
+
+
+        res.status(200).json({ batchesDetails });
+    } catch (error) {
+        console.error('Failed to fetch student, batch, and trainer details.', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 const getStudentsByBatchId = async (req, res) => {
     try {
         const { batchId } = req.body; // Extract batchId from the request parameters
@@ -889,9 +1021,11 @@ module.exports = {
     deassignBatchFromTrainer,
     fetchBatchesAssignedToTrainer,
     // fetchTrainerDetailsFromBatch,
-    fetchTrainerAndBatchFromStudent,
+    fetchTrainerAndBatchFromStudent, //studentId from token 
+    fetchTrainerAndBatchFromStudentId, //studentId as body 
     fetchAllTrainerAndBatch,
     // fetchStudentsAndBatchFromTrainer,
     assignBatchesToTrainer,
-    getStudentsByBatchId
+    getStudentsByBatchId,
+    getBatchsByStudentId
 }
