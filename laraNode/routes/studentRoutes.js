@@ -6,6 +6,7 @@ const batchController = require('../controllers/batchController');
 const reviewController = require('../controllers/reviewsController');
 const assignmentController = require('../controllers/assignmentController')
 const collegeController = require('../controllers/collegeController')
+const attendanceController = require('../controllers/attendanceController')
 const verifyToken = require('../middleware/authMiddleware');
 const multer = require('multer');
 const upload = multer({dest: 'Images/' });
@@ -147,5 +148,13 @@ router.post('/deassignPlacementOfficerFromCollege',verifyToken,collegeController
 router.get('/getAllCollegeDetailsForPlacemmentOfficer',verifyToken,collegeController.getAllCollegeDetailsForPlacemmentOfficer);
 
 router.get('/getReviewsByStudentId/:studentId', verifyToken, reviewController.getReviewsByStudentId);
+
+router.post('/saveAttendance', verifyToken, attendanceController.saveAttendance);
+
+router.post('/getAttendanceByDate/:date', verifyToken, attendanceController.getAttendanceByDate);
+
+router.get('/getAllAttendance', verifyToken, attendanceController.getAllAttendance);
+
+router.post('/getAttendanceByYearAndMonth/:year/:month', attendanceController.getAttendanceByYearAndMonth);
 
 module.exports = router;

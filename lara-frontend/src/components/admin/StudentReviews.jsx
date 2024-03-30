@@ -33,7 +33,7 @@ const StudentReviews = () => {
           reviewTime: review.reviewTime.substring(0, 5) // Extract HH:mm format from reviewTime
         }));
         setReviews(formattedReviews);
-        setFilteredReviews(formattedReviews);
+        setFilteredReviews(formattedReviews); // Initially set to all reviews
         setTrainerReviews(calculateTrainerReviews(formattedReviews));
       } catch (error) {
         console.error('Error fetching reviews:', error);
@@ -75,7 +75,7 @@ const StudentReviews = () => {
   };
 
   const handleViewAllReviews = () => {
-    setFilteredReviews(reviews);
+    setFilteredReviews(reviews); // Display all reviews
     setCurrentPage(1);
   };
 
@@ -90,6 +90,11 @@ const StudentReviews = () => {
     setSelectedDate(e.target.value);
   };
 
+    // Sort filtered reviews by reviewDate in descending order
+    const sortedReviews = filteredReviews.slice().sort((a, b) => {
+      return new Date(b.reviewDate) - new Date(a.reviewDate);
+    });
+
   return (
     <div className="container mt-4">
       <h2>Student Reviews</h2>
@@ -97,7 +102,6 @@ const StudentReviews = () => {
         <p>No reviews available</p>
       ) : (
         <>
-
           <div className="mb-3 row">
             <div className="col-md-6 mb-3 mb-md-0">
               <Button variant="primary" onClick={handleViewAllReviews}>View All Reviews</Button>
@@ -141,12 +145,12 @@ const StudentReviews = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredReviews.length === 0 ? (
+              {sortedReviews.length === 0 ? (
                 <tr>
                   <td colSpan="7">N/A</td>
                 </tr>
               ) : (
-                filteredReviews.map((review, index) => (
+                sortedReviews.map((review, index) => (
                   <tr key={index}>
                     <td>{review.student?.name || 'N/A'}</td>
                     <td>{review.batch?.batch_name || 'N/A'}</td>
@@ -161,7 +165,7 @@ const StudentReviews = () => {
             </tbody>
           </Table>
           <Pagination>
-            {Array.from({ length: Math.ceil(filteredReviews.length / reviewsPerPage) }).map((_, index) => (
+            {Array.from({ length: Math.ceil(sortedReviews.length / reviewsPerPage) }).map((_, index) => (
               <Pagination.Item key={index} active={index + 1 === currentPage} onClick={() => paginate(index + 1)}>
                 {index + 1}
               </Pagination.Item>

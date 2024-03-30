@@ -54,7 +54,7 @@ const BatchesOfStudents = () => {
 
   return (
     <div className='table-responsive'>
-      <h1>College Name: {collegeDetails.college_name}</h1>
+      <h1>{collegeDetails.college_name}</h1>
       <h2>Students</h2>
       <table className="table">
         <thead>
@@ -63,7 +63,7 @@ const BatchesOfStudents = () => {
             <th>Name</th>
             <th>Email</th>
             <th>Phone Number</th>
-            <th>Batches</th>
+            <th>Batch / Trainers </th>
           </tr>
         </thead>
         <tbody>
@@ -112,20 +112,22 @@ const BatchesList = ({ studentId }) => {
   }, [studentId]);
 
   return (
-    <ul>
+    <tbody>
       {batches.map((batch, index) => (
-        <li key={index}>
-          <strong>Batch Name:</strong> {batch.batch.batch_name}<br />
-          {batch.trainerDetails && (
-            <div>
-              <strong>Trainer(s):</strong> {batch.trainerDetails.map((trainer, i) => (
-                <span key={i}>{trainer.name}{i !== batch.trainerDetails.length - 1 ? ', ' : ''}</span>
-              ))}
-            </div>
-          )}
-        </li>
+        <tr key={index}>
+          <td>{batch.batch ? batch.batch.batch_name : 'N/A'}</td>
+          <td>
+            {batch.trainerDetails && batch.trainerDetails.length > 0 ? (
+              <ul>
+                {batch.trainerDetails.map((trainer, i) => (
+                  <li key={i}>{trainer.name}</li>
+                ))}
+              </ul>
+            ) : 'N/A'}
+          </td>
+        </tr>
       ))}
-    </ul>
+    </tbody>
   );
 };
 

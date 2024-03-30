@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import BatchesOfStudents from './BatchesOfStudents';
 import { Tab, Tabs } from 'react-bootstrap';
 import ReviewsByStudents from './ReviewsByStudents';
+import StudentAttendance from './StudentAttendance';
 
 const PlacementOfficerDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('batchesOfStudents');
@@ -14,6 +15,7 @@ const PlacementOfficerDashboard = () => {
 
   return (
     <div className='m-5'>
+      <h1 className='text-center display-4'>Dashboard</h1>
       <Tabs
         defaultActiveKey="batchesOfStudents"
         id="dashboard-tabs"
@@ -25,6 +27,9 @@ const PlacementOfficerDashboard = () => {
         </Tab>
         <Tab eventKey="reviews" title="Reviews By Students">
           <ReviewsByStudents />
+        </Tab>
+        <Tab eventKey="studentAttendance" title="Attendance">
+          <StudentAttendance />
         </Tab>
       </Tabs>
 

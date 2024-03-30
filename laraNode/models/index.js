@@ -42,6 +42,7 @@ db.Questions = require('./questionsModel.js')(sequelize, DataTypes);
 db.TestCase = require('./testCaseModel.js')(sequelize, DataTypes); 
 db.StudentSubmission = require('./studentSubmissionModel.js')(sequelize, DataTypes); 
 db.CollegeDetails = require('./CollegeDetailsModel.js')(sequelize, DataTypes); 
+db.Attendance = require('./attendanceModel.js')(sequelize, DataTypes); 
 // Define associations
 db.Student.hasOne(db.Profile, {
     foreignKey: 'student_id',

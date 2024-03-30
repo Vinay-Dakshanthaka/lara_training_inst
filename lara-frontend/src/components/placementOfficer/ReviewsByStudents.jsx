@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { baseURL } from '../config';
-import StudentReviewsByStudentId from './StudentReviewsByStudentId';
-import BatchesOfStudents from './BatchesOfStudents';
-import { Tab, Tabs } from 'react-bootstrap';
+import moment from 'moment';
 
 const ReviewsByStudents = () => {
   const [collegeDetails, setCollegeDetails] = useState({});
   const [students, setStudents] = useState([]);
-
+  const [reviews, setReviews] = useState([]);
+  const [trainerReviews, setTrainerReviews] = useState([]);
+  const [filteredReviews, setFilteredReviews] = useState([]);
+  const [searchDate, setSearchDate] = useState('');
 
   useEffect(() => {
     const fetchCollegeDetails = async () => {
@@ -17,13 +18,11 @@ const ReviewsByStudents = () => {
         if (!token) {
           return;
         }
-  
         const config = {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         };
-  
         const response = await axios.get(`${baseURL}/api/student/getAllCollegeDetailsForPlacemmentOfficer`, config);
         setCollegeDetails(response.data[0]); 
         const collegeId = response.data[0].id; 
@@ -32,20 +31,18 @@ const ReviewsByStudents = () => {
         console.error('Error fetching college details:', error);
       }
     };
-  
+
     const fetchStudentsByCollegeId = async (collegeId) => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
           return;
         }
-  
         const config = {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         };
-  
         const response = await axios.post(`${baseURL}/api/student/getAllStudentsByCollegeId`, { collegeId }, config);
         setStudents(response.data);
       } catch (error) {
@@ -56,43 +53,139 @@ const ReviewsByStudents = () => {
     fetchCollegeDetails();
   }, []);
 
-    // State variable to manage the visibility of reviews for each student
-    const [showReviews, setShowReviews] = useState({});
-
-    // Function to toggle the visibility of reviews for a specific student
-    const toggleReviews = (studentId) => {
-      setShowReviews((prev) => ({
-        ...prev,
-        [studentId]: !prev[studentId] // Toggle visibility for the specific student
-      }));
+  useEffect(() => {
+    const fetchReviews = async (studentIds) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error('Token not found');
+        }
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        };
+        const response = await fetch(`${baseURL}/api/student/getAllReviews`, config);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch reviews: ${response.statusText}`);
+        }
+        const data = await response.json();
+  
+        // Convert reviewDate and extract reviewTime
+        const formattedReviews = data.map(review => ({
+          ...review,
+          reviewDate: moment(review.reviewDate).format('YYYY-MM-DD'), // Convert to simple format
+          reviewTime: moment(review.reviewTime, 'HH:mm:ss').format('HH:mm') // Extract HH:mm format from reviewTime
+        }));
+  
+        // Filter reviews based on student IDs
+        const filteredReviews = formattedReviews.filter(review => studentIds.includes(review.student.id));
+        setReviews(filteredReviews);
+        setFilteredReviews(filteredReviews);
+        setTrainerReviews(calculateTrainerReviews(filteredReviews));
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+        // Handle error here (e.g., show error message to user)
+      }
     };
+  
+    // Extract student IDs from fetched student data
+    const studentIds = students.map(student => student.id);
+    fetchReviews(studentIds);
+  }, [students]);
+  
+
+  const calculateTrainerReviews = (reviews) => {
+    const trainers = {};
+    reviews.forEach(review => {
+      const trainerName = review.trainer?.name || 'N/A';
+      const stars = review.stars || 0;
+      if (!trainers[trainerName]) {
+        trainers[trainerName] = { totalStars: stars, reviewCount: 1 };
+      } else {
+        trainers[trainerName].totalStars += stars;
+        trainers[trainerName].reviewCount++;
+      }
+    });
+
+    return Object.keys(trainers).map(trainerName => ({
+      name: trainerName,
+      averageStars: trainers[trainerName].totalStars / trainers[trainerName].reviewCount
+    }));
+  };
+  
+  const handleSearch = () => {
+    if (!searchDate) {
+      setFilteredReviews(reviews);
+      return;
+    }
+  
+    const formattedSearchDate = moment(searchDate).format('YYYY-MM-DD');
+    const filteredByDate = reviews.filter(review => review.reviewDate === formattedSearchDate);
+  
+    setFilteredReviews(filteredByDate);
+  };
+
+  const resetFilter = () => {
+    setSearchDate('');
+    setFilteredReviews(reviews);
+  };
+
+  const renderStars = (numStars) => {
+    const stars = [];
+    for (let i = 0; i < numStars; i++) {
+      stars.push(
+        <span key={i} className="text-success">&#9733;</span>
+      );
+    }
+    return stars;
+  };
 
   return (
     <div>
-      <h1>College Name: {collegeDetails.college_name}</h1>
-      <h2>Students</h2>
-      <table className="table">
+      <h1>{collegeDetails.college_name}</h1>
+      <table className="table my-4">
         <thead>
           <tr>
-            <th>SI NO</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone Number</th>
-            <th>Reviews</th>
+            <th>Trainer Name</th>
+            <th>Average Rating</th>
           </tr>
         </thead>
         <tbody>
-          {students.map((student, index) => (
+          {trainerReviews.map((trainer, index) => (
             <tr key={index}>
-              <td>{index + 1}</td>
-              <td>{student.name}</td>
-              <td>{student.email}</td>
-              <td>{student.phoneNumber}</td>
-              <td>
-                <button onClick={() => toggleReviews(student.id)} className='btn btn-info'>Student opinion  on Trainers</button>
-                {showReviews[student.id] && <StudentReviewsByStudentId studentId={student.id} />}
-              </td>
-             
+              <td>{trainer.name}</td>
+              <td>{trainer.averageStars.toFixed(1)} {renderStars(trainer.averageStars)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      
+      <div className="mt-4">
+        <input type="date" value={searchDate} onChange={(e) => setSearchDate(e.target.value)} />
+        <button className="btn btn-primary mx-2" onClick={handleSearch}>Search</button>
+        <button className="btn btn-secondary mx-2" onClick={resetFilter}>Reset Filter</button>
+      </div>
+
+      <h2>Student Reviews</h2>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Batch Name</th>
+            <th>Trainer Name</th>
+            <th>Review Date</th>
+            <th>Stars</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredReviews.map((review, index) => (
+            <tr key={index}>
+              <td>{review.student.name}</td>
+              <td>{review.batch ? review.batch.batch_name : 'N/A'}</td>
+              <td>{review.trainer.name}</td>
+              <td>{moment(review.reviewDate).format('DD/MM/YYYY')}</td>
+              <td>{renderStars(review.stars)}</td>
             </tr>
           ))}
         </tbody>

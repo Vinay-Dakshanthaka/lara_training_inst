@@ -11,6 +11,7 @@ import StudentReviews from './StudentReviews';
 import AssignStudentsToCollege from './AssignStudentsToCollege';
 import CollegeDetails from './CollegeDetails';
 import PlacementOfficer from './PlacementOfficer';
+import Attendance from './Attendance';
 
 const AdminDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');
@@ -58,6 +59,9 @@ const AdminDashboard = () => {
         </Tab>
         <Tab eventKey="placementOfficer" title="Placement Officer">
           <PlacementOfficer />
+        </Tab>
+        <Tab eventKey="attendance" title="Attendance">
+          <Attendance />
         </Tab>
       </Tabs>
     </div>
