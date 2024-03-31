@@ -6,6 +6,9 @@ import { Tab, Tabs } from 'react-bootstrap';
 import BatchDetails from '../admin/BatchDetails';
 import TrainerDetails from '../admin/TrainerDetails';
 import StudentReviews from '../admin/StudentReviews';
+import CollegeDetails from '../admin/CollegeDetails'
+import PlacementOfficer from '../admin/PlacementOfficer'
+import Attendance from '../admin/Attendance';
 
 const StudentAdminDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');
@@ -74,6 +77,15 @@ const StudentAdminDashboard = () => {
         </Tab>
         <Tab eventKey="studentReviews" title="Student Reviews">
           <StudentReviews />
+        </Tab>
+        <Tab eventKey="collegeDetails" title="College Details">
+          <CollegeDetails />
+        </Tab>
+        <Tab eventKey="placementOfficer" title="Placement Officer">
+          <PlacementOfficer />
+        </Tab>
+        <Tab eventKey="attendance" title="Attendance">
+          <Attendance />
         </Tab>
         {/* <Tab eventKey="allStudents" title="Student Reviews">
           <AllStudents />

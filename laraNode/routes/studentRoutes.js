@@ -7,6 +7,7 @@ const reviewController = require('../controllers/reviewsController');
 const assignmentController = require('../controllers/assignmentController')
 const collegeController = require('../controllers/collegeController')
 const attendanceController = require('../controllers/attendanceController')
+const homeContentController = require('../controllers/homeContentController')
 const verifyToken = require('../middleware/authMiddleware');
 const multer = require('multer');
 const upload = multer({dest: 'Images/' });
@@ -35,6 +36,8 @@ router.post('/getProfileDetailsById', verifyToken, studentController.getProfileD
 router.post('/uploadProfileImage', verifyToken, upload.single('image'), studentController.uploadProfileImage);
 
 router.get('/profile/image', verifyToken, studentController.getProfileImage);
+
+router.post('/getProfileImageFor', studentController.getProfileImageFor);
 
 // Get all student details
 router.get('/getAllStudentDetails', verifyToken, studentController.getAllStudentDetails);
@@ -156,5 +159,13 @@ router.post('/getAttendanceByDate/:date', verifyToken, attendanceController.getA
 router.get('/getAllAttendance', verifyToken, attendanceController.getAllAttendance);
 
 router.post('/getAttendanceByYearAndMonth/:year/:month', attendanceController.getAttendanceByYearAndMonth);
+
+router.post('/saveOrUpdateHomeContent', verifyToken, homeContentController.saveOrUpdateHomeContent);
+
+router.get('/fetchHomeContent', homeContentController.fetchHomeContent);
+
+router.post('/saveOrUpdateBestPerformer', verifyToken, homeContentController.saveOrUpdateBestPerformer);
+
+router.get('/getBestPerformerByDate',  homeContentController.getBestPerformerByDate);
 
 module.exports = router;

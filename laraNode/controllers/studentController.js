@@ -162,7 +162,6 @@ const saveOrUpdateProfile = async (req, res) => {
 
 // Get profile details controller
 const getProfileDetails = async (req, res) => {
-    console.log("inside get profile")
     try {
         // console.log("inside get profile tyr")
         const student_id = req.studentId;
@@ -176,6 +175,8 @@ const getProfileDetails = async (req, res) => {
         res.status(500).send({ message: error.message });
     }
 };
+
+
 
 const getProfileDetailsById = async (req, res) => {
     try {
@@ -226,7 +227,39 @@ const getProfileImage = async (req, res) => {
     }
 };
 
+const getProfileImageFor = async (req, res) => {
+    try {
+        const {id} = req.body;
+        const profile = await Student.findOne({ where: { id } });
 
+        if (!profile) {
+            return res.status(404).send({ message: 'Student not found.' });
+        }
+
+        const imagePath = profile.imagePath;
+
+        // Check if imagePath exists
+        if (!imagePath) {
+            return res.status(404).send({ message: 'Image not found.' });
+        }
+
+        // Read the image file
+        fs.readFile(imagePath, (err, data) => {
+            if (err) {
+                return res.status(500).send({ message: 'Error reading image file.' });
+            }
+
+            // Set the appropriate content type
+            res.setHeader('Content-Type', 'image/jpeg'); // Adjust content type based on your image format
+
+            // Send the image file as response
+            // console.log(data)
+            res.status(200).send(data);
+        });
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+};
 
 const validFileFormats = ['jpeg', 'jpg', 'png'];
 
@@ -280,7 +313,7 @@ const getAllStudentDetails = async (req, res) => {
         const userRole = user.role; // Get the user's role
         console.log("role :"+userRole)
         // Check if the user role is either "ADMIN" or "SUPER ADMIN"
-        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN') {
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
             return res.status(403).json({ error: 'Access forbidden' });
         }
 
@@ -486,6 +519,7 @@ module.exports = {
     saveOrUpdateProfile,
     getStudentDetails,
     uploadProfileImage,
+    getProfileImageFor,
     upload,
     getProfileImage,
     getAllStudentDetails,

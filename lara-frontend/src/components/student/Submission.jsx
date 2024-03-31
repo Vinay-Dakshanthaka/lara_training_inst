@@ -119,6 +119,25 @@ const Submission = () => {
   const handleCloseModal = () => setShowModal(false);
   const handleShowModal = () => setShowModal(true);
 
+  const handleTabKeyPress = (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault(); // Prevent default tab behavior
+  
+      // Get current cursor position
+      const { selectionStart, selectionEnd, value } = e.target;
+  
+      // Insert four spaces at the current cursor position
+      const newValue =
+        value.substring(0, selectionStart) +
+        '    ' +
+        value.substring(selectionEnd);
+  
+      // Update the textarea value and cursor position
+      setCode(newValue);
+      e.target.selectionStart = e.target.selectionEnd = selectionStart + 4;
+    }
+  };
+  
   return (
     <div className="container mt-5">
       <BackButton/>
@@ -133,6 +152,7 @@ const Submission = () => {
           className="form-control bg-dark text-light"
           value={code}
           onChange={(e) => setCode(e.target.value)}
+          onKeyDown={(e) => handleTabKeyPress(e)}
           rows={20}
           placeholder="Write your Java code here"
           style={{ color: '#fff', '::placeholder': { color: '#fff' } }} 
