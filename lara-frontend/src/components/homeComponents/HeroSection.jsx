@@ -84,7 +84,7 @@
           {/* Best Performer Section */}
           <Col md={6}>
           <div className="best-performer-section d-flex align-items-center justify-content-center flex-column p-3">
-  <h2>Best Performer</h2>
+  <h2>Yesterday’s Best Performer</h2>
   {bestPerformer ? (
     <div className="text-center mt-4">
       <img src={image || defaultProfileImage} alt="Best Performer" className="rounded-circle mb-3" style={{ width: '200px', height: '200px' }} />
