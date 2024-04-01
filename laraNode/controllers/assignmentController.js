@@ -424,6 +424,30 @@ const executeJavaCodeHandler = async (req, res) => {
   }
 };
 
+const executeJavaCodeHandler2 = async (req, res) => {
+  try {
+    const { code } = req.body;
+
+    // Construct the request body
+    const requestBody = {
+      script: code,
+      language: 'java',
+      versionIndex: '3', // Specify the Java version index (e.g., '3' for Java 8)
+      clientId: 'ee5fa68e27a29f2bf81554d5bedc3868',
+      clientSecret: 'b7bfe6bd794890421f7e777a672e074e5a232b0c1ca8c49672c49b18636c5308',
+      stdin: '',
+    };
+
+    // Send POST request to Jdoodle compiler API
+    const response = await axios.post('https://api.jdoodle.com/v1/execute', requestBody);
+
+    // Extract the output from the response and send it as JSON
+    res.json({ output: response.data.output });
+  } catch (error) {
+    console.error('Error executing Java code:', error);
+    res.status(500).json({ error: 'Error executing Java code' });
+  }
+};
 // ************************************/
 
 // const executeJavaCodeHandler = async (req, res) => {
@@ -509,6 +533,7 @@ const executeJavaCodeHandler = async (req, res) => {
 
 module.exports = {
   executeJavaCodeHandler,
+  executeJavaCodeHandler2,
   saveQuestion,
   saveTestcases,
   saveStudentSubmission,

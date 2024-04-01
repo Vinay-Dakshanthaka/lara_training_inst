@@ -78,23 +78,24 @@ const saveOrUpdateBestPerformer = async (req, res) => {
             return res.status(404).json({ error: 'Student not found' });
         }
 
-        // Check if a BestPerformer record already exists for the provided date
-        let bestPerformer = await BestPerformer.findOne({ where: { date: date } });
+        // Check if a record already exists for the provided date and studentId
+        const existingRecord = await BestPerformer.findOne({
+            where: {
+                date,
+                studentId: student.id
+            }
+        });
 
-        // If a BestPerformer record exists, update it; otherwise, create a new one
-        if (bestPerformer) {
-            // Update the BestPerformer
-            bestPerformer = await bestPerformer.update({
-                date,
-                studentId: student.id
-            });
-        } else {
-            // Create a new BestPerformer record
-            bestPerformer = await BestPerformer.create({
-                date,
-                studentId: student.id
-            });
+        // If a record already exists, return an error
+        if (existingRecord) {
+            return res.status(400).json({ error: 'Record already exists for the same date and student' });
         }
+
+        // Save the BestPerformer record for the provided date and student
+        const bestPerformer = await BestPerformer.create({
+            date,
+            studentId: student.id
+        });
 
         res.status(200).send(bestPerformer);
     } catch (error) {
@@ -104,51 +105,50 @@ const saveOrUpdateBestPerformer = async (req, res) => {
 };
 
 
-const getBestPerformerByDate = async (req, res) => {
-    try {
-        // Find the nearest date to the present date
-        const nearestDate = await BestPerformer.findOne({
-            order: [['date', 'DESC']], // Order by date descending to get the nearest date
-            attributes: ['date'], // Select only the date column
-            raw: true // Retrieve the result as a plain object
-        });
 
-        if (!nearestDate) {
+
+const getBestPerformersByDate = async (req, res) => {
+    try {
+        // Find the latest date
+        const latestDate = await BestPerformer.max('date');
+
+        if (!latestDate) {
             return res.status(404).json({ error: 'No best performer found' });
         }
 
-        // Retrieve the best performer for the nearest date
-        const bestPerformer = await BestPerformer.findOne({
-            where: { date: nearestDate.date }
+        // Retrieve all best performers for the latest date
+        const bestPerformers = await BestPerformer.findAll({
+            where: { date: latestDate }
         });
 
-        if (!bestPerformer) {
-            return res.status(404).json({ error: 'Best performer not found for the nearest date' });
+        if (!bestPerformers || bestPerformers.length === 0) {
+            return res.status(404).json({ error: 'Best performers not found for the latest date' });
         }
 
-        // Fetch student details
-        const student = await Student.findByPk(bestPerformer.studentId, {
-            attributes: { exclude: ['password'] }
-        });
+        // Fetch details for each best performer
+        const performersDetails = await Promise.all(bestPerformers.map(async (performer) => {
+            // Fetch student details
+            const student = await Student.findByPk(performer.studentId, {
+                attributes: { exclude: ['password'] }
+            });
 
-        if (!student) {
-            return res.status(404).json({ error: 'Student not found' });
-        }
+            // Fetch profile details
+            const profile = await Profile.findOne({ where: { student_id: performer.studentId } });
 
-        // Fetch profile details
-        const profile = await Profile.findOne({ where: { student_id: bestPerformer.studentId } });
-
-        // Fetch college details
-        let collegeName = null;
-        if (student.college_id) {
-            const collegeDetails = await CollegeDetails.findByPk(student.college_id);
-            if (collegeDetails) {
-                collegeName = collegeDetails.college_name;
+            // Fetch college details
+            let collegeName = null;
+            if (student.college_id) {
+                const collegeDetails = await CollegeDetails.findByPk(student.college_id);
+                if (collegeDetails) {
+                    collegeName = collegeDetails.college_name;
+                }
             }
-        }
 
-        // Return student, profile, and college details along with best performer data
-        res.status(200).json({ bestPerformer, student, profile: profile || null, collegeName });
+            return { bestPerformer: performer, student, profile: profile || null, collegeName };
+        }));
+
+        // Return best performers details
+        res.status(200).json(performersDetails);
     } catch (error) {
         console.log(error);
         res.status(500).send({ message: error.message });
@@ -160,5 +160,5 @@ module.exports = {
     saveOrUpdateHomeContent,
     saveOrUpdateBestPerformer,
     fetchHomeContent,
-    getBestPerformerByDate
+    getBestPerformersByDate
 }

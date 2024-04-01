@@ -14,7 +14,7 @@ const PlacementOfficerDashboard = () => {
 
 
   return (
-    <div className='m-5'>
+    <div className='m-2'>
       <h1 className='text-center display-4'>Dashboard</h1>
       <Tabs
         defaultActiveKey="batchesOfStudents"

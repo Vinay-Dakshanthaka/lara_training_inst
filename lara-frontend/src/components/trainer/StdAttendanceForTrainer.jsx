@@ -241,7 +241,7 @@ const StdAttendanceForTrainer = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container table-responsive">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <h1>Attendance Sheet</h1>
       <div className="row mb-3">

@@ -49,7 +49,7 @@ const BatchDetails = () => {
     <>
         <div className="table-responsive">
       <h1>Batch Details</h1>
-      <table className="table m-5">
+      <table className="table ">
         <thead>
           <tr>
             <th>Batch Name</th>

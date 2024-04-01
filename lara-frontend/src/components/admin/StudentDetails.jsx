@@ -236,7 +236,7 @@ const StudentDetails = () => {
   }, [showModal, selectedStudent]);
 
   return (
-    <div>
+    <div className='table-responsive'>
       <h1>All Student Details</h1>
       <div className="mb-3 row align-items-center">
         <div className="col-md-3 mb-2 mb-md-0">

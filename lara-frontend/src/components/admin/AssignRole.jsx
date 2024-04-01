@@ -155,7 +155,7 @@ const AssignRole = () => {
   };
 
   return (
-    <div>
+    <div className='table-responsive'>
        <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <h1>All Student Details</h1>
       {/* {alertMessage && (

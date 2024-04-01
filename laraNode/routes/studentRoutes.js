@@ -110,6 +110,8 @@ router.get('/getAllReviews',verifyToken,reviewController.getAllReviews)
 
 router.post('/executeJavaCodeHandler',verifyToken,assignmentController.executeJavaCodeHandler)
 
+router.post('/executeJavaCodeHandler2',assignmentController.executeJavaCodeHandler2)
+
 router.post('/saveQuestion',verifyToken,assignmentController.saveQuestion)
 
 router.put('/updateQuestion',verifyToken,assignmentController.updateQuestion)
@@ -166,6 +168,6 @@ router.get('/fetchHomeContent', homeContentController.fetchHomeContent);
 
 router.post('/saveOrUpdateBestPerformer', verifyToken, homeContentController.saveOrUpdateBestPerformer);
 
-router.get('/getBestPerformerByDate',  homeContentController.getBestPerformerByDate);
+router.get('/getBestPerformersByDate',  homeContentController.getBestPerformersByDate);
 
 module.exports = router;

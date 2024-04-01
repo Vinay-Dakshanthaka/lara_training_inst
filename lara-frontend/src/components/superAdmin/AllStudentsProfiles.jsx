@@ -69,7 +69,7 @@ const AllStudentsProfiles = () => {
   }, []);
 
   return (
-    <div className="container">
+    <div className="container table-responsive">
       <h1>All Students Profile Details</h1>
       <div className="row">
         <div className="col-md-4">

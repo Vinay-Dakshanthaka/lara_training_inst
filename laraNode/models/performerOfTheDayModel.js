@@ -8,7 +8,6 @@ module.exports = (sequelize, DataTypes) => {
         date: {
             type: DataTypes.DATEONLY,
             allowNull: false,
-            unique: true 
         },
         studentId: {
             type: DataTypes.INTEGER,

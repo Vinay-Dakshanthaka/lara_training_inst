@@ -96,7 +96,7 @@ const StudentReviews = () => {
     });
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-4 table-responsive">
       <h2>Student Reviews</h2>
       {reviews.length === 0 ? (
         <p>No reviews available</p>
