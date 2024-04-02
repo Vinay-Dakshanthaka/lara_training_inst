@@ -11,7 +11,7 @@ const Course = () => {
           <Card.Body>
             <Row className="mb-3 text-center">
               <Col sm={4}>
-                <h6>Duration : 1 Month</h6>
+                <h6>Duration : 2 Months</h6>
               </Col>
               <Col sm={4}>
                 <h6>Course Hours : 120</h6>
