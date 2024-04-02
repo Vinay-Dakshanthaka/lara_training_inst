@@ -130,6 +130,8 @@ router.post('/getStudentSubmissions',verifyToken,assignmentController.getStudent
 
 router.post('/getStudentSubmissionsByBatchId',verifyToken,assignmentController.getStudentSubmissionsByBatchId)
 
+router.post('/getStudentSubmissionsByStudentId',verifyToken,assignmentController.getStudentSubmissionsByStudentId)
+
 router.post('/saveStudentMarks',verifyToken,assignmentController.saveStudentMarks)
 
 router.post('/getSResults',verifyToken,assignmentController.getSResults);

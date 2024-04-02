@@ -162,6 +162,54 @@ const getQuestionById = async (req, res) => {
   }
 };
 
+const getStudentSubmissionsByStudentId = async (req, res) => {
+  try {
+    const { studentId } = req.body; // Retrieve student ID from request body
+
+    // Check if the student exists
+    const student = await Student.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Retrieve all submissions for the student
+    const submissions = await StudentSubmission.findAll({
+      where: {
+        student_id: studentId
+      }
+    });
+
+    // If no submissions found, return an empty response
+    if (!submissions || submissions.length === 0) {
+      return res.status(200).json({ message: 'No submissions found for the student' });
+    }
+
+    // Retrieve student details
+    const studentDetails = {
+      id: student.id,
+      name: student.name,
+      email: student.email
+      // Add other details as needed
+    };
+
+    // Retrieve question and batch details for each submission
+    const submissionDetails = await Promise.all(submissions.map(async (submission) => {
+      const { question_id, batch_id } = submission;
+      const question = await Questions.findByPk(question_id);
+      const batch = await Batch.findByPk(batch_id);
+      return { submission, question, batch };
+    }));
+
+    // Return student details along with submission details
+    res.status(200).json({ student: studentDetails, submissions: submissionDetails });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
 const saveTestcases = async (req, res) => {
   try {
     const { question_id, testcases } = req.body;
@@ -542,6 +590,7 @@ module.exports = {
   updateQuestion,
   deleteQuestion,
   getStudentSubmissions,
+  getStudentSubmissionsByStudentId,
   getStudentSubmissionsByBatchId,
   saveStudentMarks,
   getSResults

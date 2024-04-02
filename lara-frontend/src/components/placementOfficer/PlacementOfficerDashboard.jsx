@@ -3,6 +3,7 @@ import BatchesOfStudents from './BatchesOfStudents';
 import { Tab, Tabs } from 'react-bootstrap';
 import ReviewsByStudents from './ReviewsByStudents';
 import StudentAttendance from './StudentAttendance';
+import StudentsAssignment from './StudentsAssignment';
 
 const PlacementOfficerDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('batchesOfStudents');
@@ -30,6 +31,9 @@ const PlacementOfficerDashboard = () => {
         </Tab>
         <Tab eventKey="studentAttendance" title="Attendance">
           <StudentAttendance />
+        </Tab>
+        <Tab eventKey="studentsAssignment" title="Assignment">
+          <StudentsAssignment />
         </Tab>
       </Tabs>
 

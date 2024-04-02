@@ -32,6 +32,7 @@ import Result from './components/student/Result';
 import AssignStudentsToCollege from './components/admin/AssignStudentsToCollege';
 import PlacementOfficerDashboard from './components/placementOfficer/PlacementOfficerDashboard';
 import StudentReviewsByStudentId from './components/placementOfficer/StudentReviewsByStudentId';
+import Answers from './components/placementOfficer/Answers';
 
 
 const App = () => {
@@ -68,6 +69,8 @@ const App = () => {
             <Route path="/result/:questionId/:batchId" element={<Result />} />
             {/* <Route path="/reviews/:batchId" element={<StudentReviewsByStudentId />} /> */}
             <Route path="/assignment-answers/:batchId/:studentId" element={<AssignmentAnswer />} />
+            {/* to view assignment submission for placementOfficer  */}
+            <Route path="/answers/:studentId" element={<Answers />} />
             <Route path="/assignStudentsToCollege" element={<AssignStudentsToCollege />} />
             {/* <Route path="/profile" element={<Profile />} /> */}
             <Route path="*" element={<LoginForm />} />

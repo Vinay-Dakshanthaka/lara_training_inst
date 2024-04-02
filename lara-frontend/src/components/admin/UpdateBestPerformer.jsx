@@ -73,7 +73,7 @@ const UpdateBestPerformer = () => {
         </div>
         <div className="mb-3">
           <label htmlFor="emailInput" className="form-label">Email</label>
-          <input type="email" className="form-control" id="emailInput" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <input type="email" className="form-control" id="emailInput" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder='Enter email id of the Best performer'/>
         </div>
         <button type="submit" className="btn btn-primary">Update</button>
       </form>

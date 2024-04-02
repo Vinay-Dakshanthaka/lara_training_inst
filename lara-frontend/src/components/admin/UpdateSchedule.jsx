@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { baseURL } from '../config';
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const UpdateSchedule = () => {
     const [id, setId] = useState('');
     const [todaySchedule, setTodaySchedule] = useState('');
     const [tomorrowSchedule, setTomorrowSchedule] = useState('');
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
 
     useEffect(() => {
         const fetchHomeContent = async () => {
             try {
                 const response = await axios.get(`${baseURL}/api/student/fetchHomeContent`);
-                const data = response.data[0]; // Assuming there's only one object
+                const data = response.data[0]; 
                 setId(data.id);
                 setTodaySchedule(formatSchedule(data.today_schedule));
                 setTomorrowSchedule(formatSchedule(data.tomorrow_schedule));
@@ -33,7 +32,6 @@ const UpdateSchedule = () => {
         // Join the URLs with newline character
         return urls.join('\n');
     };
-    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -52,17 +50,16 @@ const UpdateSchedule = () => {
                 today_schedule: todaySchedule,
                 tomorrow_schedule: tomorrowSchedule
             }, config);
-            console.log(" success")
-            toast.success("Schedule Updated Successfully ")
+            alert("Schedule Updated Successfully");
+            console.log("Success");
         } catch (error) {
             console.error('Error updating home content:', error);
-            toast.error("Something went wrong")
+            alert("Something went wrong");
         }
     };
 
     return (
         <div className="container my-4">
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
             <h1 className='my-4'>Update Schedule</h1>
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">
@@ -75,6 +72,22 @@ const UpdateSchedule = () => {
                 </div>
                 <button type="submit" className="btn btn-primary my-3">Update Schedule</button>
             </form>
+            <div className="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div className="d-flex">
+                    <div className="toast-body">
+                        Schedule Updated Successfully
+                    </div>
+                    <button type="button" className="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+            <div className="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div className="d-flex">
+                    <div className="toast-body">
+                        Something went wrong
+                    </div>
+                    <button type="button" className="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
         </div>
     );
 };
