@@ -6,18 +6,18 @@ const Course = () => {
   return (
     <>
       <Container className="my-5">
-        <h2 className="text-center">JAVA DATA STRUCTURES AND ALGORITHMS (LEET CODE) COURSE</h2>
+        <h2 className="text-center">JAVA DATA STRUCTURES AND ALGORITHMS (LEETCODE) COURSE</h2>
         <Card className="shadow mt-4">
           <Card.Body>
             <Row className="mb-3 text-center">
               <Col sm={4}>
-                <h6>Duration : 2 Months</h6>
+                <h6>Duration : 1.5 Months</h6>
               </Col>
               <Col sm={4}>
                 <h6>Course Hours : 120</h6>
               </Col>
               <Col sm={4}>
-                <h6>Prerequisites : CORE JAVA</h6>
+                <h6>Prerequisites : CORE JAVA BASICS</h6>
               </Col>
             </Row>
             <Container>
