@@ -13,6 +13,7 @@ const StdAttendanceForTrainer = () => {
   const [selectedYear, setSelectedYear] = useState(moment().year()); // Current year
   const [selectedDate, setSelectedDate] = useState(1); // Default to the 1st day of the month
   const [searchEmail, setSearchEmail] = useState('');
+  const [searchName, setSearchName] = useState('');
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -40,7 +41,7 @@ const StdAttendanceForTrainer = () => {
 
   useEffect(() => {
     fetchAttendanceByYearAndMonth();
-  }, [selectedYear, selectedMonth, searchEmail]);
+  }, [selectedYear, selectedMonth, searchEmail, searchName]);
 
   const fetchAttendanceByYearAndMonth = async () => {
     try {
@@ -83,13 +84,19 @@ const StdAttendanceForTrainer = () => {
       headerDates.push(moment().set({ 'year': selectedYear, 'month': selectedMonth - 1, 'date': i }).format('D'));
     }
 
-    const filteredStudent = searchEmail ? students.find(student => student.email === searchEmail) : null;
-    if (filteredStudent) {
-      const email = filteredStudent.email;
+    const filteredStudents = students.filter(student => {
+      const emailMatch = searchEmail ? student.email.toLowerCase().includes(searchEmail.toLowerCase()) : true;
+      const nameMatch = searchName ? student.name.toLowerCase().includes(searchName.toLowerCase()) : true;
+      return emailMatch && nameMatch;
+    });
+
+    filteredStudents.forEach(student => {
+      const email = student.email;
+      const name = student.name;
       const attendanceCells = [];
       for (let i = 1; i <= daysInMonth; i++) {
         const date = moment().set({ 'year': selectedYear, 'month': selectedMonth - 1, 'date': i }).format('YYYY-MM-DD');
-        const present = attendanceData[date] && attendanceData[date][filteredStudent.id] === 'P';
+        const present = attendanceData[date] && attendanceData[date][student.id] === 'P';
         attendanceCells.push(
           <td
             key={`${date}-${email}`}
@@ -101,34 +108,12 @@ const StdAttendanceForTrainer = () => {
       }
       attendanceSheet.push(
         <tr key={email}>
+          <td>{name}</td>
           <td>{email}</td>
           {attendanceCells}
         </tr>
       );
-    } else {
-      students.forEach(student => {
-        const email = student.email;
-        const attendanceCells = [];
-        for (let i = 1; i <= daysInMonth; i++) {
-          const date = moment().set({ 'year': selectedYear, 'month': selectedMonth - 1, 'date': i }).format('YYYY-MM-DD');
-          const present = attendanceData[date] && attendanceData[date][student.id] === 'P';
-          attendanceCells.push(
-            <td
-              key={`${date}-${email}`}
-              className={present ? 'present' : 'absent'}
-            >
-              {present ? '✔' : ''}
-            </td>
-          );
-        }
-        attendanceSheet.push(
-          <tr key={email}>
-            <td>{email}</td>
-            {attendanceCells}
-          </tr>
-        );
-      });
-    }
+    });
 
     const headerRow = headerDates.map((date, index) => (
       <th key={index}>{date}</th>
@@ -137,7 +122,8 @@ const StdAttendanceForTrainer = () => {
     return (
       <React.Fragment>
         <tr>
-          <th></th>
+          <th>Name</th>
+          <th>Email</th>
           {headerRow}
         </tr>
         {attendanceSheet}
@@ -147,6 +133,10 @@ const StdAttendanceForTrainer = () => {
 
   const handleEmailChange = (event) => {
     setSearchEmail(event.target.value);
+  };
+
+  const handleNameChange = (event) => {
+    setSearchName(event.target.value);
   };
 
   const handleMonthChange = (event) => {
@@ -167,77 +157,6 @@ const StdAttendanceForTrainer = () => {
 
   const handleDateChange = (event) => {
     setSelectedDate(parseInt(event.target.value));
-  };
-
-  const handleExcelUpload = async (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 'A' });
-
-      const excelEmails = excelData.map(row => row['A']);
-      const studentEmails = students.map(student => student.email);
-
-      const matchedEmails = excelEmails.filter(email => studentEmails.includes(email));
-
-      const updatedAttendanceData = { ...attendanceData };
-      const selectedDateFormatted = moment().set({ 'year': selectedYear, 'month': selectedMonth - 1, 'date': selectedDate }).format('YYYY-MM-DD');
-
-      matchedEmails.forEach(email => {
-        if (!updatedAttendanceData[selectedDateFormatted]) {
-          updatedAttendanceData[selectedDateFormatted] = {};
-        }
-        updatedAttendanceData[selectedDateFormatted][email] = 'P';
-      });
-
-      setAttendanceData(updatedAttendanceData);
-    };
-
-    reader.readAsArrayBuffer(file);
-  };
-
-  const handleProcessAttendance = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        return;
-      }
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      const attendanceArray = [];
-      Object.keys(attendanceData).forEach(date => {
-        Object.keys(attendanceData[date]).forEach(email => {
-          const status = attendanceData[date][email];
-          // Find the student with the matching email to get the student ID
-          const student = students.find(student => student.email === email);
-          if (student) {
-            attendanceArray.push({
-              date: date,
-              status: status,
-              student_id: student.id // Use student ID instead of email
-            });
-          }
-        });
-      });
-
-      const response = await axios.post(`${baseURL}/api/student/saveAttendance`, { attendanceData: attendanceArray }, config);
-      toast.success("Attendance uploaded Successfully");
-      renderAttendanceSheet();
-      fetchAttendanceByYearAndMonth();
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong");
-    }
   };
 
   return (
@@ -273,15 +192,16 @@ const StdAttendanceForTrainer = () => {
           <label htmlFor="emailSearch" className="form-label">Search by Email:</label>
           <input type="text" id="emailSearch" className="form-control" value={searchEmail} onChange={handleEmailChange} />
         </div>
-        {/* <div className='my-4'>
-          <input id="excelFile" type="file" onChange={handleExcelUpload} accept=".xlsx, .xls" />
-          <button onClick={handleProcessAttendance} className='btn btn-primary'>Upload Attendance</button>
-        </div> */}
+        <div className="col">
+          <label htmlFor="nameSearch" className="form-label">Search by Name:</label>
+          <input type="text" id="nameSearch" className="form-control" value={searchName} onChange={handleNameChange} />
+        </div>
       </div>
       <div className="table-responsive">
         <table className="table">
           <thead>
             <tr>
+              <th></th>
               <th></th>
               {moment().set({ 'year': selectedYear, 'month': selectedMonth - 1 }).format('MMMM')}
             </tr>

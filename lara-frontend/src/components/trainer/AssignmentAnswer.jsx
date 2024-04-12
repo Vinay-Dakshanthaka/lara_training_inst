@@ -30,9 +30,13 @@ const AssignmentAnswer = () => {
         { batchId, studentId },
         config
       );
-      setSubmissions(submissionsResponse.data);
 
-      const questionsPromises = submissionsResponse.data.map(submission => {
+      // Sort submissions by date in descending order
+      const sortedSubmissions = submissionsResponse.data.sort((a, b) => new Date(b.submission_time) - new Date(a.submission_time));
+
+      setSubmissions(sortedSubmissions);
+
+      const questionsPromises = sortedSubmissions.map(submission => {
         return axios.post(
           `${baseURL}/api/student/getQuestionById`,
           { id: submission.question_id },
@@ -43,7 +47,7 @@ const AssignmentAnswer = () => {
       const questionsData = questionsResponses.map(response => response.data);
       setQuestions(questionsData);
       // Initialize marks array with default marks for each submission
-      setMarks(submissionsResponse.data.map(() => 0));
+      setMarks(sortedSubmissions.map(() => 0));
     } catch (error) {
       console.error('Failed to fetch data:', error);
     }
@@ -83,7 +87,7 @@ const AssignmentAnswer = () => {
       );
 
       toast.success("Marks Assigned Successfully");
-        fetchData();
+      fetchData();
       // Optionally, you may want to update UI to reflect successful assignment
       // For example, you can display a success message or change the style of the submission card
       
@@ -101,9 +105,9 @@ const AssignmentAnswer = () => {
       <div className="row">
         {submissions.map((submission, index) => (
           <div key={index} className="col-md-6">
-            <div className="card mb-4">
-              <div className="card-header">
-                Submission {index + 1}
+            <div className={`card mb-4 ${submission.marks !== null && submission.marks !== 0 ? 'border-success' : ''}`}>
+              <div className={`card-header ${submission.marks !== null && submission.marks !== 0 ? 'bg-success text-white' : ''}`}>
+                Submitted on - {new Date(submission.submission_time).toLocaleString()}
               </div>
               <div className="card-body">
                 <h5 className="card-title">Question</h5>

@@ -13,6 +13,7 @@ const Attendance = () => {
   const [selectedYear, setSelectedYear] = useState(moment().year()); // Current year
   const [selectedDate, setSelectedDate] = useState(1); // Default to the 1st day of the month
   const [searchEmail, setSearchEmail] = useState('');
+  const [searchName, setSearchName] = useState('');
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -40,7 +41,7 @@ const Attendance = () => {
 
   useEffect(() => {
     fetchAttendanceByYearAndMonth();
-  }, [selectedYear, selectedMonth, searchEmail]);
+  }, [selectedYear, selectedMonth, searchEmail, searchName]);
 
   const fetchAttendanceByYearAndMonth = async () => {
     try {
@@ -83,13 +84,22 @@ const Attendance = () => {
       headerDates.push(moment().set({ 'year': selectedYear, 'month': selectedMonth - 1, 'date': i }).format('D'));
     }
 
-    const filteredStudent = searchEmail ? students.find(student => student.email === searchEmail) : null;
-    if (filteredStudent) {
-      const email = filteredStudent.email;
+    let filteredStudents = [];
+    if (searchEmail) {
+      filteredStudents = students.filter(student => student.email.toLowerCase().includes(searchEmail.toLowerCase()));
+    } else if (searchName) {
+      filteredStudents = students.filter(student => student.name.toLowerCase().includes(searchName.toLowerCase()));
+    } else {
+      filteredStudents = students;
+    }
+
+    filteredStudents.forEach(student => {
+      const email = student.email;
+      const name = student.name;
       const attendanceCells = [];
       for (let i = 1; i <= daysInMonth; i++) {
         const date = moment().set({ 'year': selectedYear, 'month': selectedMonth - 1, 'date': i }).format('YYYY-MM-DD');
-        const present = attendanceData[date] && attendanceData[date][filteredStudent.id] === 'P';
+        const present = attendanceData[date] && attendanceData[date][student.id] === 'P';
         attendanceCells.push(
           <td
             key={`${date}-${email}`}
@@ -101,34 +111,12 @@ const Attendance = () => {
       }
       attendanceSheet.push(
         <tr key={email}>
+          <td>{name}</td>
           <td>{email}</td>
           {attendanceCells}
         </tr>
       );
-    } else {
-      students.forEach(student => {
-        const email = student.email;
-        const attendanceCells = [];
-        for (let i = 1; i <= daysInMonth; i++) {
-          const date = moment().set({ 'year': selectedYear, 'month': selectedMonth - 1, 'date': i }).format('YYYY-MM-DD');
-          const present = attendanceData[date] && attendanceData[date][student.id] === 'P';
-          attendanceCells.push(
-            <td
-              key={`${date}-${email}`}
-              className={present ? 'present' : 'absent'}
-            >
-              {present ? '✔' : ''}
-            </td>
-          );
-        }
-        attendanceSheet.push(
-          <tr key={email}>
-            <td>{email}</td>
-            {attendanceCells}
-          </tr>
-        );
-      });
-    }
+    });
 
     const headerRow = headerDates.map((date, index) => (
       <th key={index}>{date}</th>
@@ -137,7 +125,8 @@ const Attendance = () => {
     return (
       <React.Fragment>
         <tr>
-          <th></th>
+          <th>Name</th>
+          <th>Email</th>
           {headerRow}
         </tr>
         {attendanceSheet}
@@ -147,6 +136,12 @@ const Attendance = () => {
 
   const handleEmailChange = (event) => {
     setSearchEmail(event.target.value);
+    setSearchName('');
+  };
+
+  const handleNameChange = (event) => {
+    setSearchName(event.target.value);
+    setSearchEmail('');
   };
 
   const handleMonthChange = (event) => {
@@ -273,6 +268,10 @@ const Attendance = () => {
           <label htmlFor="emailSearch" className="form-label">Search by Email:</label>
           <input type="text" id="emailSearch" className="form-control" value={searchEmail} onChange={handleEmailChange} />
         </div>
+        <div className="col">
+          <label htmlFor="nameSearch" className="form-label">Search by Name:</label>
+          <input type="text" id="nameSearch" className="form-control" value={searchName} onChange={handleNameChange} />
+        </div>
         <div className='my-4'>
           <input id="excelFile" type="file" onChange={handleExcelUpload} accept=".xlsx, .xls" />
           <button onClick={handleProcessAttendance} className='btn btn-primary'>Upload Attendance</button>
@@ -282,7 +281,8 @@ const Attendance = () => {
         <table className="table">
           <thead>
             <tr>
-              <th></th>
+              <th>Name</th>
+              <th>Email</th>
               {moment().set({ 'year': selectedYear, 'month': selectedMonth - 1 }).format('MMMM')}
             </tr>
           </thead>

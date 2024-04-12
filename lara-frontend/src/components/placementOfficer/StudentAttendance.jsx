@@ -13,7 +13,8 @@ const StudentAttendance = () => {
     const [selectedYear, setSelectedYear] = useState(moment().year()); // Current year
     const [selectedDate, setSelectedDate] = useState(1); // Default to the 1st day of the month
     const [collegeDetails, setCollegeDetails] = useState({});
-    const [searchEmail, setSearchEmail] = useState('');
+    const [searchType, setSearchType] = useState('email'); // Default search type
+    const [searchValue, setSearchValue] = useState('');
 
     useEffect(() => {
         const fetchCollegeDetails = async () => {
@@ -102,19 +103,26 @@ const StudentAttendance = () => {
         const currentDate = moment().set({ 'year': selectedYear, 'month': selectedMonth - 1, 'date': selectedDate });
         const daysInMonth = currentDate.daysInMonth();
         const attendanceSheet = [];
-
+    
         const headerDates = [];
         for (let i = 1; i <= daysInMonth; i++) {
             headerDates.push(moment().set({ 'year': selectedYear, 'month': selectedMonth - 1, 'date': i }).format('D'));
         }
-
-        const filteredStudent = searchEmail ? students.find(student => student.email === searchEmail) : null;
-        if (filteredStudent) {
-            const email = filteredStudent.email;
+    
+        let filteredStudents = [];
+        if (searchType === 'name') {
+            filteredStudents = students.filter(student => student.name.toLowerCase().includes(searchValue.toLowerCase()));
+        } else {
+            filteredStudents = searchValue ? students.filter(student => student.email.toLowerCase().includes(searchValue.toLowerCase())) : students;
+        }
+        
+        filteredStudents.forEach(student => {
+            const email = student.email;
+            const name = student.name; 
             const attendanceCells = [];
             for (let i = 1; i <= daysInMonth; i++) {
                 const date = moment().set({ 'year': selectedYear, 'month': selectedMonth - 1, 'date': i }).format('YYYY-MM-DD');
-                const present = attendanceData[date] && attendanceData[date][filteredStudent.id] === 'P';
+                const present = attendanceData[date] && attendanceData[date][student.id] === 'P';
                 attendanceCells.push(
                     <td
                         key={`${date}-${email}`}
@@ -126,42 +134,21 @@ const StudentAttendance = () => {
             }
             attendanceSheet.push(
                 <tr key={email}>
-                    <td>{email}</td>
+                    <td className="fixed-column">{name}</td> 
+                    <td className="fixed-column">{email}</td>
                     {attendanceCells}
                 </tr>
             );
-        } else {
-            students.forEach(student => {
-                const email = student.email;
-                const attendanceCells = [];
-                for (let i = 1; i <= daysInMonth; i++) {
-                    const date = moment().set({ 'year': selectedYear, 'month': selectedMonth - 1, 'date': i }).format('YYYY-MM-DD');
-                    const present = attendanceData[date] && attendanceData[date][student.id] === 'P';
-                    attendanceCells.push(
-                        <td
-                            key={`${date}-${email}`}
-                            className={present ? 'present' : 'absent'}
-                        >
-                            {present ? '✔' : ''}
-                        </td>
-                    );
-                }
-                attendanceSheet.push(
-                    <tr key={email}>
-                        <td>{email}</td>
-                        {attendanceCells}
-                    </tr>
-                );
-            });
-        }
-
+        });
+    
         const headerRow = headerDates.map((date, index) => (
             <th key={index}>{date}</th>
         ));
-
+    
         return (
             <React.Fragment>
                 <tr>
+                    <th></th>
                     <th></th>
                     {headerRow}
                 </tr>
@@ -169,9 +156,15 @@ const StudentAttendance = () => {
             </React.Fragment>
         );
     };
-    const handleEmailChange = (event) => {
-        setSearchEmail(event.target.value);
+    
+    const handleSearchTypeChange = (event) => {
+        setSearchType(event.target.value);
     };
+    
+    const handleSearchValueChange = (event) => {
+        setSearchValue(event.target.value);
+    };
+    
     const handleMonthChange = (event) => {
         const selectedMonth = parseInt(event.target.value);
         if (selectedYear === moment().year() && selectedMonth > moment().month() + 1) {
@@ -191,11 +184,23 @@ const StudentAttendance = () => {
     const handleDateChange = (event) => {
         setSelectedDate(parseInt(event.target.value));
     };
+    
     return (
         <div className="container">
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
             <h1>Attendance Sheet</h1>
             <div className="row mb-3">
+                <div className="col">
+                    <label htmlFor="searchTypeSelect" className="form-label">Search by:</label>
+                    <select id="searchTypeSelect" className="form-select" value={searchType} onChange={handleSearchTypeChange}>
+                        <option value="email">Email</option>
+                        <option value="name">Name</option>
+                    </select>
+                </div>
+                <div className="col">
+                    <label htmlFor="searchValue" className="form-label">Search Value:</label>
+                    <input type="text" id="searchValue" className="form-control" value={searchValue} onChange={handleSearchValueChange} />
+                </div>
                 <div className="col">
                     <label htmlFor="monthSelect" className="form-label">Select Month:</label>
                     <select id="monthSelect" className="form-select" value={selectedMonth} onChange={handleMonthChange}>
@@ -220,15 +225,12 @@ const StudentAttendance = () => {
                         ))}
                     </select>
                 </div>
-                <div className="col">
-                    <label htmlFor="emailSearch" className="form-label">Search by Email:</label>
-                    <input type="text" id="emailSearch" className="form-control" value={searchEmail} onChange={handleEmailChange} />
-                </div>
             </div>
             <div className="table-responsive">
                 <table className="table">
                     <thead>
                         <tr>
+                            <th></th>
                             <th></th>
                             {moment().set({ 'year': selectedYear, 'month': selectedMonth - 1 }).format('MMMM')}
                         </tr>
