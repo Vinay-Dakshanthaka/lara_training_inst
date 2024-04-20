@@ -18,6 +18,7 @@ function CustomNavbars() {
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
     const [image, setImage] = useState(null);
+    const [studentDetails, setStudentDetails] = useState({});
     const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("token"));
     const [userRole, setUserRole] = useState(localStorage.getItem("role"));
     const navigate = useNavigate();
@@ -26,6 +27,25 @@ function CustomNavbars() {
     const handleCloseModal = () => setShowModal(false);
     const [showModal, setShowModal] = useState(false);
 
+    useEffect(()=>{
+        const fetchStudentDetails = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${baseURL}/api/student/getStudentDetails`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+      
+            // Assuming the response data contains student details, set it to state
+            setStudentDetails(response.data);
+          } catch (error) {
+            console.error('Error fetching student details:', error);
+          }
+        };
+    
+        fetchStudentDetails();
+      }, [])
 
 
     const handleOpenNavMenu = (event) => {
@@ -60,8 +80,6 @@ function CustomNavbars() {
             window.location.href = "/login";
         }, 2000);
     };
-
-
 
 
     useEffect(() => {
@@ -119,7 +137,9 @@ function CustomNavbars() {
                             textDecoration: 'none',
                         }}
                     >
-                        <img src={logoImage} alt="Logo" style={{ height: '30px' }} />
+                        <Tooltip title="Lara Technologies">
+                             <img src={logoImage} alt="Logo" style={{ height: '30px' }} />
+                        </Tooltip>
                     </Typography>
 
 
@@ -225,7 +245,7 @@ function CustomNavbars() {
                     <Box sx={{ flexGrow: 0 }}>
                         {isLoggedIn ? (
                             <>
-                                <Tooltip title="Profile">
+                                <Tooltip title={studentDetails.email}>
                                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                                         {image ? (
                                             <img

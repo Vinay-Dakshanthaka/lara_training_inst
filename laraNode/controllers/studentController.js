@@ -10,6 +10,7 @@ const nodemailer = require('nodemailer')
 // Import models
 const Student = db.Student;
 const Profile = db.Profile;
+const CollegeDetails = db.CollegeDetails;
 
 // Number of salt rounds for hashing
 const saltRounds = 10;
@@ -56,6 +57,38 @@ const getStudentDetails = async (req, res) => {
         res.status(500).send({ message: error.message });
     }
 };
+
+const getStudentDetailsById = async (req, res) => {
+    try {
+        const { id } = req.body;
+
+        // Find student details by student ID
+        const student = await Student.findByPk(id, {
+            attributes: { exclude:['password'] }
+        });
+
+        if (!student) {
+            return res.status(404).send({ message: 'Student not found' });
+        }
+
+        // Get college ID from student table
+        const collegeId = student.college_id;
+
+        // Find college details by college ID
+        const collegeDetails = await CollegeDetails.findByPk(collegeId);
+
+        // Combine student and college details
+        const response = {
+            student,
+            collegeDetails: collegeDetails || null
+        };
+
+        res.status(200).send(response);
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+};
+
 
 // Verify by email and password controller
 const verifyByEmailAndPassword = async (req, res) => {
@@ -518,6 +551,7 @@ module.exports = {
     getProfileDetailsById,
     saveOrUpdateProfile,
     getStudentDetails,
+    getStudentDetailsById,
     uploadProfileImage,
     getProfileImageFor,
     upload,

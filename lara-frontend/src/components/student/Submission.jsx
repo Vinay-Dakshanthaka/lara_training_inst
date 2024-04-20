@@ -4,12 +4,12 @@ import { useParams } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Modal, Button } from 'react-bootstrap';
-import {baseURL}  from '../config';
+import { baseURL } from '../config';
 import BackButton from '../BackButton';
 
 const Submission = () => {
   const { questionId, batchId } = useParams();
-  const [question, setQuestion] = useState({ question: '', description: '' });
+  const [question, setQuestion] = useState({ question: '', description: '', image: '' }); // Added 'image' to store question image
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,6 +42,45 @@ const Submission = () => {
     };
 
     fetchQuestionById();
+  }, [questionId]);
+
+  // Function to fetch question image
+  useEffect(() => {
+    const fetchQuestionImage = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: 'arraybuffer', // Receive the image as a buffer
+        };
+
+        const response = await axios.post(
+          `${baseURL}/api/student/getQuestionImage`,
+          { id: questionId },
+          config
+        );
+
+        // Convert the received image data to Base64
+        const base64Image = btoa(
+          new Uint8Array(response.data).reduce(
+            (data, byte) => data + String.fromCharCode(byte),
+            ''
+          )
+        );
+
+        // Set the image in the question state
+        setQuestion((prevQuestion) => ({
+          ...prevQuestion,
+          image: `data:${response.headers['content-type']};base64,${base64Image}`,
+        }));
+      } catch (error) {
+        console.error('Error fetching question image:', error);
+      }
+    };
+
+    fetchQuestionImage();
   }, [questionId]);
 
   const executeCode = async () => {
@@ -143,8 +182,16 @@ const Submission = () => {
       <BackButton/>
       <h2>Submit Answer</h2>
       <div className="mb-4">
-        <h4>{question.question}</h4>
-        <p>{question.description}</p>
+        <h4>{question.id} - {question.question}</h4>
+        <pre>{question.description}</pre>
+        {/* Display the question image if available */}
+        {question.image && (
+          <img
+            src={question.image}
+            alt="Question Image"
+            style={{ maxWidth: '100%', height: 'auto', marginTop: '10px' }}
+          />
+        )}
       </div>
       <div className="mb-4">
         <h5>Write your code in the below editor</h5>

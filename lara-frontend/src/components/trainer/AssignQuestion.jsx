@@ -3,13 +3,15 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { ToastContainer, Toast } from 'react-bootstrap';
 import QuestionList from './QuestionList';
-import {baseURL}  from '../config';
+import { baseURL } from '../config';
 import BackButton from '../BackButton';
 
 const AssignQuestion = () => {
     const { batch_id } = useParams();
     const [question, setQuestion] = useState('');
     const [description, setDescription] = useState('');
+    const [image, setImage] = useState(null); // New state for image
+    const [imagePreview, setImagePreview] = useState(null); // New state for image preview
     const [showSuccessToast, setShowSuccessToast] = useState(false);
     const [showErrorToast, setShowErrorToast] = useState(false);
     const [questionError, setQuestionError] = useState('');
@@ -18,36 +20,31 @@ const AssignQuestion = () => {
 
     useEffect(() => {
         const fetchBatchDetails = async () => {
-          try {
-            const token = localStorage.getItem("token");
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            };
-            const response = await axios.post(
-              `${baseURL}/api/student/getBatchById`,
-              { batch_id },config
-            );
-    
-            // Assuming response.data contains the batch details
-            setBatchDetails(response.data);
-            // console.log("batch details :",response.data)
-          } catch (error) {
-            // console.log("Error fetching Batch Details :",error)
-            console.error(error)
-          }
+            try {
+                const token = localStorage.getItem("token");
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                };
+                const response = await axios.post(
+                    `${baseURL}/api/student/getBatchById`,
+                    { batch_id }, config
+                );
+                setBatchDetails(response.data);
+            } catch (error) {
+                console.error(error);
+            }
         };
-    
+
         fetchBatchDetails();
-      }, [batch_id]);
+    }, [batch_id]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Reset error messages
         setQuestionError('');
         setDescriptionError('');
-        // Validate textarea fields
+
         if (!question.trim()) {
             setQuestionError('Question is required');
             return;
@@ -56,39 +53,46 @@ const AssignQuestion = () => {
             setDescriptionError('Description is required');
             return;
         }
+
         try {
             const token = localStorage.getItem("token");
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data', // Set content type for file upload
                 },
             };
-            const formData = { batch_id, question, description };
+            const formData = new FormData();
+            formData.append('batch_id', batch_id);
+            formData.append('question', question);
+            formData.append('description', description);
+            formData.append('image', image); // Append image to form data
+
             const response = await axios.post(`${baseURL}/api/student/saveQuestion`, formData, config);
-            // console.log('Question saved successfully:', response.data);
-            // Reset form fields after successful submission
             setQuestion('');
             setDescription('');
-            // Show success toast
+            setImage(null); // Reset image state
+            setImagePreview(null); // Reset image preview state
             setShowSuccessToast(true);
-            // Hide success toast after 3 seconds
             setTimeout(() => setShowSuccessToast(false), 3000);
-            // Reload QuestionList component to show newly added question
             window.location.reload();
         } catch (error) {
             console.error('Failed to save question:', error);
-            // Show error toast
             setShowErrorToast(true);
-            // Hide error toast after 3 seconds
             setTimeout(() => setShowErrorToast(false), 3000);
         }
     };
 
+    const handleImageChange = (e) => {
+        const selectedImage = e.target.files[0];
+        setImage(selectedImage);
+        setImagePreview(URL.createObjectURL(selectedImage)); // Create image preview URL
+    };
+
     return (
         <div className='card m-4'>
-            <BackButton/>
+            <BackButton />
             <h1>Give Assignment Questions</h1>
-            {/* <h3>Batch Name : {batchDetails.batch_name}</h3> */}
             <form onSubmit={handleSubmit} className='card p-2'>
                 <div className="mb-3">
                     <label htmlFor="question" className="form-label"><b>Question</b></label>
@@ -114,8 +118,20 @@ const AssignQuestion = () => {
                     ></textarea>
                     {descriptionError && <div className="invalid-feedback">{descriptionError}</div>}
                 </div>
+                <div className="mb-3">
+                    <label htmlFor="image" className="form-label"><b>Question Image</b></label>
+                    <input
+                        type="file"
+                        className="form-control"
+                        id="image"
+                        onChange={handleImageChange} // Call handleImageChange on file selection
+                    />
+                </div>
+                {imagePreview && (
+                    <img src={imagePreview} alt="Question Preview" style={{ width:'300px', height:'300px', marginBottom: '10px' }} />
+                )}
                 <div className='text-center'>
-                <button type="submit" className="btn btn-primary">Add Question</button>
+                    <button type="submit" className="btn btn-primary">Add Question</button>
                 </div>
             </form>
             <QuestionList batchId={batch_id} />

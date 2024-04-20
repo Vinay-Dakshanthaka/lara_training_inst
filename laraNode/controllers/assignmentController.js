@@ -1,6 +1,9 @@
 const db = require('../models');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const upload = multer({ dest: 'questionImages/' });
 const axios = require('axios');
+const fs = require('fs');
 
 const Student = db.Student;
 const Profile = db.Profile;
@@ -11,6 +14,40 @@ const Questions = db.Questions
 const Testcase = db.TestCase
 const StudentSubmission = db.StudentSubmission
 const jwtSecret = process.env.JWT_SECRET;
+
+// const saveQuestion = async (req, res) => {
+//   try {
+//     const studentId = req.studentId;
+//     const { batch_id, question, description } = req.body;
+
+//     // Fetch student from database using studentId
+//     const student = await Student.findByPk(studentId);
+//     if (!student) {
+//       return res.status(404).json({ error: 'Student not found' });
+//     }
+
+//     // Fetch user's role
+//     const userRole = student.role;
+
+//     // Check if the user role is authorized to save questions
+//     if (userRole !== 'TRAINER') {
+//       return res.status(403).json({ error: 'Access forbidden' });
+//     }
+
+//     // Create the question
+//     const createdQuestion = await Questions.create({
+//       trainer_id: studentId,
+//       batch_id,
+//       question,
+//       description
+//     });
+
+//     res.status(200).send(createdQuestion);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ message: error.message });
+//   }
+// };
 
 const saveQuestion = async (req, res) => {
   try {
@@ -31,12 +68,28 @@ const saveQuestion = async (req, res) => {
       return res.status(403).json({ error: 'Access forbidden' });
     }
 
+    // Initialize imagePath to null
+    let imagePath = null;
+
+    // Check if file was uploaded
+    if (req.file) {
+      // Check if the file format is valid
+      const fileFormat = req.file.originalname.split('.').pop().toLowerCase();
+      if (!validFileFormats.includes(fileFormat)) {
+        throw new Error('Invalid file format. Supported formats: JPEG, JPG, PNG.');
+      }
+
+      // Construct the full path for saving the image
+      imagePath = req.file.path;
+    }
+
     // Create the question
     const createdQuestion = await Questions.create({
       trainer_id: studentId,
       batch_id,
       question,
-      description
+      description,
+      question_image: imagePath // Assign imagePath or null to question_image field
     });
 
     res.status(200).send(createdQuestion);
@@ -46,10 +99,11 @@ const saveQuestion = async (req, res) => {
   }
 };
 
+
 const updateQuestion = async (req, res) => {
   try {
     const studentId = req.studentId;
-    const { id, question, description } = req.body;
+    const { id, question, description, solution } = req.body;
 
     // Fetch student from database using studentId
     const student = await Student.findByPk(studentId);
@@ -71,9 +125,26 @@ const updateQuestion = async (req, res) => {
       return res.status(404).json({ error: 'Question not found' });
     }
 
-    // Update the question
+    // Initialize imagePath to the existing question's image path
+    let imagePath = existingQuestion.question_image;
+
+    // Check if a new image file was uploaded
+    if (req.file) {
+      // Check if the file format is valid
+      const fileFormat = req.file.originalname.split('.').pop().toLowerCase();
+      if (!validFileFormats.includes(fileFormat)) {
+        throw new Error('Invalid file format. Supported formats: JPEG, JPG, PNG.');
+      }
+
+      // Construct the full path for saving the image
+      imagePath = req.file.path;
+    }
+
+    // Update the question, description, solution, and question image
     existingQuestion.question = question;
     existingQuestion.description = description;
+    existingQuestion.solution = solution; // Adding solution update
+    existingQuestion.question_image = imagePath; // Assign updated imagePath
     await existingQuestion.save();
 
     res.status(200).send(existingQuestion);
@@ -82,6 +153,136 @@ const updateQuestion = async (req, res) => {
     res.status(500).send({ message: error.message });
   }
 };
+
+
+const validFileFormats = ['jpeg', 'jpg', 'png'];
+
+const uploadQuestionImage = async (req, res) => {
+  try {
+    const { id } = req.body;
+    // console.log("id :", id)
+    if (id === undefined) {
+      throw new Error('ID parameter is missing or undefined.');
+    }
+    // Check if file was uploaded
+    if (!req.file) {
+      throw new Error('No image file uploaded.');
+    }
+
+    // Check if the file format is valid
+    const fileFormat = req.file.originalname.split('.').pop().toLowerCase();
+    if (!validFileFormats.includes(fileFormat)) {
+      throw new Error('Invalid file format. Supported formats: JPEG, JPG, PNG.');
+    }
+
+    // Construct the full path for saving the image
+    const imagePath = req.file.path;
+
+    // Update the image path in the database
+    await Questions.update({ question_image: imagePath }, { where: { id } });
+
+    res.status(200).send({ message: 'Question image uploaded successfully.', imagePath });
+  } catch (error) {
+    console.error('Error uploading question image:', error);
+    res.status(500).send({ message: error.message });
+  }
+};
+
+const getQuestionImage = async (req, res) => {
+  try {
+      const { id } = req.body;
+      // console.log("id   ----",id)
+      // Find the question by ID
+      const question = await Questions.findOne({ where: { id } });
+
+      if (!question) {
+          return res.status(404).send({ message: 'Question not found.' });
+      }
+
+      const imagePath = question.question_image;
+
+      // Check if imagePath exists
+      if (!imagePath) {
+          return res.status(404).send({ message: 'Image not found.' });
+      }
+
+      // Read the image file
+      fs.readFile(imagePath, (err, data) => {
+          if (err) {
+              return res.status(500).send({ message: 'Error reading image file.' });
+          }
+
+          // Set the appropriate content type
+          res.setHeader('Content-Type', 'image/jpeg'); // Adjust content type based on your image format
+
+          // Send the image file as response
+          res.status(200).send(data);
+      });
+  } catch (error) {
+      res.status(500).send({ message: error.message });
+  }
+};
+
+
+
+
+// const validFileFormats = ['jpeg', 'jpg', 'png'];
+
+// const updateQuestion = async (req, res) => {
+//   try {
+//     const studentId = req.studentId;
+//     const { id, question, description, solution } = req.body;
+
+//     // Fetch student from database using studentId
+//     const student = await Student.findByPk(studentId);
+//     if (!student) {
+//       return res.status(404).json({ error: 'Student not found' });
+//     }
+
+//     // Fetch user's role
+//     const userRole = student.role;
+
+//     // Check if the user role is authorized to update questions
+//     if (userRole !== 'TRAINER') {
+//       return res.status(403).json({ error: 'Access forbidden' });
+//     }
+
+//     // Find the question by ID
+//     const existingQuestion = await Questions.findByPk(id);
+//     if (!existingQuestion) {
+//       return res.status(404).json({ error: 'Question not found' });
+//     }
+
+//     // Update the question, description, and solution
+//     existingQuestion.question = question;
+//     existingQuestion.description = description;
+//     existingQuestion.solution = solution; // Adding solution update
+
+//     // Check if a question image file was uploaded
+//     if (req.file) {
+//       // Check if the file format is valid
+//       const fileFormat = req.file.originalname.split('.').pop().toLowerCase();
+//       if (!validFileFormats.includes(fileFormat)) {
+//         throw new Error('Invalid file format. Supported formats: JPEG, JPG, PNG.');
+//       }
+
+//       // Construct the full path for saving the image
+//       const imagePath = req.file.path;
+
+//       // Update the image path in the question entity
+//       existingQuestion.questionImage = imagePath;
+//     }
+
+//     // Save the updated question entity
+//     await existingQuestion.save();
+
+//     res.status(200).send(existingQuestion);
+//   } catch (error) {
+//     console.error('Error updating question:', error);
+//     res.status(500).send({ message: error.message });
+//   }
+// };
+
 
 const deleteQuestion = async (req, res) => {
   try {
@@ -121,28 +322,43 @@ const deleteQuestion = async (req, res) => {
 
 const getQuestionsByBatchId = async (req, res) => {
   try {
-    // const studentId = req.studentId;
-
     const { batch_id } = req.body;
-    // Fetch user's role
-    // const student = await Student.findByPk(studentId)
-    // const userRole = student.role;
 
-    // // Check if the user role is authorized to save questions
-    // if (userRole !== 'TRAINER') {
-    //   return res.status(403).json({ error: 'Access forbidden' });
-    // }
     // Fetch questions from the database based on batch_id
     const questions = await Questions.findAll({
       where: { batch_id },
     });
 
-    res.status(200).json(questions);
+    // Iterate through each question to append image data
+    const questionsWithImageData = await Promise.all(
+      questions.map(async (question) => {
+        try {
+          // Read the image file asynchronously
+          const data = await fs.promises.readFile(question.imagePath);
+
+          // Encode the image data to Base64
+          const base64Image = Buffer.from(data).toString('base64');
+
+          // Append the Base64 image data to the question object
+          return {
+            ...question.toJSON(),
+            question_image: base64Image,
+          };
+        } catch (error) {
+          console.error('Error reading image file:', error);
+          // If there's an error reading the image file, return the question without image data
+          return question.toJSON();
+        }
+      })
+    );
+
+    res.status(200).json(questionsWithImageData);
   } catch (error) {
     console.error('Failed to fetch questions:', error);
     res.status(500).json({ message: 'Failed to fetch questions' });
   }
 };
+
 
 const getQuestionById = async (req, res) => {
   try {
@@ -401,7 +617,7 @@ const getStudentSubmissionsByBatchId = async (req, res) => {
 const getSResults = async (req, res) => {
   try {
     const studentId = req.studentId;
-    const { batch_id,question_id } = req.body;
+    const { batch_id, question_id } = req.body;
     console.log("student Id ", studentId)
     console.log("batch Id ", batch_id)
     // Check if the student exists
@@ -415,7 +631,7 @@ const getSResults = async (req, res) => {
       where: {
         student_id: studentId,
         batch_id: batch_id,
-        question_id:question_id
+        question_id: question_id
       }
     });
 
@@ -588,6 +804,8 @@ module.exports = {
   getQuestionsByBatchId,
   getQuestionById,
   updateQuestion,
+  uploadQuestionImage,
+  getQuestionImage,
   deleteQuestion,
   getStudentSubmissions,
   getStudentSubmissionsByStudentId,

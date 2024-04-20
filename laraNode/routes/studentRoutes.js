@@ -11,6 +11,7 @@ const homeContentController = require('../controllers/homeContentController')
 const verifyToken = require('../middleware/authMiddleware');
 const multer = require('multer');
 const upload = multer({dest: 'Images/' });
+const uploadQuestionImage = multer({dest: 'questionImages/' });
 
 // Route to save a new student
 router.post('/saveStudent', studentController.saveStudent);
@@ -21,6 +22,8 @@ router.post('/verifyByPhoneAndPassword', studentController.verifyByPhoneAndPassw
 
 // Get student details based on authenticated user's token
 router.get('/getStudentDetails', verifyToken, studentController.getStudentDetails);
+
+router.post('/getStudentDetailsById', verifyToken, studentController.getStudentDetailsById);
 
 // Update student details based on authenticated user's token
 router.put('/updateRole', verifyToken, studentController.updateRole);
@@ -112,9 +115,13 @@ router.post('/executeJavaCodeHandler',verifyToken,assignmentController.executeJa
 
 router.post('/executeJavaCodeHandler2',assignmentController.executeJavaCodeHandler2)
 
-router.post('/saveQuestion',verifyToken,assignmentController.saveQuestion)
+router.post('/saveQuestion',verifyToken,uploadQuestionImage.single('image'),assignmentController.saveQuestion)
 
-router.put('/updateQuestion',verifyToken,assignmentController.updateQuestion)
+router.put('/updateQuestion',verifyToken,uploadQuestionImage.single('image'),assignmentController.updateQuestion)
+
+router.post('/uploadQuestionImage',verifyToken,uploadQuestionImage.single('image'),assignmentController.uploadQuestionImage)
+
+router.post('/getQuestionImage',verifyToken,assignmentController.getQuestionImage)
 
 router.delete('/deleteQuestion',verifyToken,assignmentController.deleteQuestion)
 

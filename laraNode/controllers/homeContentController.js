@@ -62,7 +62,7 @@ const fetchHomeContent = async (req, res) => {
 
 const saveOrUpdateBestPerformer = async (req, res) => {
     try {
-        const { date, email } = req.body;
+        const { date, email, question_no } = req.body; // Added question_no
         const loggedInStudentId = req.studentId;
         const loggedInUser = await Student.findByPk(loggedInStudentId);
         const userRole = loggedInUser.role;
@@ -91,10 +91,11 @@ const saveOrUpdateBestPerformer = async (req, res) => {
             return res.status(400).json({ error: 'Record already exists for the same date and student' });
         }
 
-        // Save the BestPerformer record for the provided date and student
+        // Save the BestPerformer record for the provided date, student, and question_no
         const bestPerformer = await BestPerformer.create({
             date,
-            studentId: student.id
+            studentId: student.id,
+            question_no // Include question_no in the creation
         });
 
         res.status(200).send(bestPerformer);
@@ -103,6 +104,7 @@ const saveOrUpdateBestPerformer = async (req, res) => {
         res.status(500).send({ message: error.message });
     }
 };
+
 
 
 
@@ -124,7 +126,7 @@ const getBestPerformersByDate = async (req, res) => {
         if (!bestPerformers || bestPerformers.length === 0) {
             return res.status(404).json({ error: 'Best performers not found for the latest date' });
         }
-
+        console.log(" best performers :", bestPerformers)
         // Fetch details for each best performer
         const performersDetails = await Promise.all(bestPerformers.map(async (performer) => {
             // Fetch student details
@@ -144,7 +146,7 @@ const getBestPerformersByDate = async (req, res) => {
                 }
             }
 
-            return { bestPerformer: performer, student, profile: profile || null, collegeName };
+            return { bestPerformers:bestPerformers, bestPerformer: performer, student, profile: profile || null, collegeName };
         }));
 
         // Return best performers details

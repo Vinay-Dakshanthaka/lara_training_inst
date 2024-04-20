@@ -14,7 +14,7 @@ const CollegeDetails = () => {
     const [newCollege, setNewCollege] = useState({ college_name: '', place: '' });
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [collegeIdToDelete, setCollegeIdToDelete] = useState(null);
-    const [studentsList,setStudentsList] = useState({})
+    const [studentsList, setStudentsList] = useState({})
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -140,13 +140,13 @@ const CollegeDetails = () => {
             if (!token) {
                 return;
             }
-    
+
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             };
-    
+
             const response = await axios.post(`${baseURL}/api/student/getAllStudentsByCollegeId`, { collegeId }, config);
             setStudentsList(response.data);
             console.log("student list :", response.data)
@@ -155,61 +155,59 @@ const CollegeDetails = () => {
             toast.error('Something went wrong');
         }
     };
-    
+
 
     return (
         <div>
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
             <Button onClick={() => setShowAddModal(true)} className='m-2'>Add College</Button>
             <Button onClick={() => navigate('/assignStudentsToCollege')} className='m-2'>Upload Students</Button>
-            
+
             <table className="table table-striped">
-    <thead>
-        <tr>
-            <th>College Name</th>
-            <th>Place</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {collegeDetails.map(college => (
-            <tr key={college.id}>
-                <td>{college.college_name}</td>
-                <td>{college.place}</td>
-                <td>
-                    <Button onClick={() => handleEditModalShow(college)} className='btn-primary m-2'>Edit</Button>
-                    <Button onClick={() => handleDeleteCollege(college.id)} className='btn-danger m-2'>Delete</Button>
-                    <Button onClick={() => handleGetStudentsByCollegeId(college.id)} className='btn-secondary m-2'>Students List</Button>
-                </td>
-            </tr>
-        ))}
-    </tbody>
-</table>
-<hr />
-{studentsList.length > 0 ? (
-    <table className="table table-striped m-3">
-        <thead>
-            <tr>
-                <th>Student Name</th>
-                <th>Email</th>
-                <th>Phone Number</th>
-            </tr>
-        </thead>
-        <tbody>
-            {studentsList.map(student => (
-                <tr key={student.id}>
-                    <td>{student.name}</td>
-                    <td>{student.email}</td>
-                    <td>{student.phoneNumber}</td>
-                </tr>
-            ))}
-        </tbody>
-    </table>
-) : (
-    <p>No students found for this college.</p>
-)}
-
-
+                <thead>
+                    <tr>
+                        <th>College Name</th>
+                        <th>Place</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {collegeDetails.map(college => (
+                        <tr key={college.id}>
+                            <td>{college.college_name}</td>
+                            <td>{college.place}</td>
+                            <td>
+                                <Button onClick={() => handleEditModalShow(college)} className='btn-primary m-2'>Edit</Button>
+                                <Button onClick={() => handleDeleteCollege(college.id)} className='btn-danger m-2'>Delete</Button>
+                                <Button onClick={() => handleGetStudentsByCollegeId(college.id)} className='btn-secondary m-2'>Students List</Button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            <hr />
+            {studentsList.length > 0 ? (
+                <table className="table table-striped m-3">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Email</th>
+                            <th>Phone Number</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {studentsList.map(student => (
+                            <tr key={student.id}>
+                                <td>{student.name}</td>
+                                <td>{student.email}</td>
+                                <td>{student.phoneNumber}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            ) : (
+                <p>No students found for this college.</p>
+            )}
 
             {/* Add College Modal */}
             <Modal show={showAddModal} onHide={handleAddModalClose}>

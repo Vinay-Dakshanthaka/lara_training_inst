@@ -30,6 +30,8 @@ const HeroSection = () => {
       const response = await axios.get(`${baseURL}/api/student/getBestPerformersByDate`);
       const data = response.data;
       setBestPerformer(data);
+      console.log(" best performer : ", bestPerformer)
+      console.log("data :",data)
 
       const performerImages = await Promise.all(data.map(async (performer) => {
         try {
@@ -82,11 +84,12 @@ const HeroSection = () => {
         {/* Best Performer Section */}
         <Col md={6}>
           <div className="best-performer-section d-flex align-items-center justify-content-center flex-column p-3">
-            <h2>Yesterday’s Best Performer</h2>
+            <h2>Best Performers</h2>
             {bestPerformer.length > 0 ? (
             <Carousel nextIcon={<span className="carousel-control-next-icon mt-5" style={{ backgroundColor: '#C0C0C0' }} />} prevIcon={<span className="carousel-control-prev-icon mt-5" style={{ backgroundColor: '#C0C0C0' }} />}>
             {bestPerformer.map((performer, index) => (
               <Carousel.Item key={index}>
+                <p className='text-center'> Assignement No : {performer.bestPerformers[index].question_no || ' '}</p>
                 <div className="text-center mt-4">
                   <img src={images[index] || defaultProfileImage} alt="Best Performer" className="rounded-circle mb-3" style={{ width: '200px', height: '200px' }} />
                   {performer.profile ? (

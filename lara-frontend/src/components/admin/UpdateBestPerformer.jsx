@@ -7,6 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 const UpdateBestPerformer = () => {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [email, setEmail] = useState('');
+  const [questionNo, setQuestionNo] = useState('');
   const [bestPerformerData, setBestPerformerData] = useState(null);
 
   useEffect(() => {
@@ -28,8 +29,8 @@ const UpdateBestPerformer = () => {
 
       const response = await axios.get(`${baseURL}/api/student/getBestPerformersByDate`);
       const data = response.data;
-      // console.log("data : ",data)
       setBestPerformerData(data);
+      // console.log(bestPerformerData)
     } catch (error) {
       console.error('Error fetching best performer:', error);
     }
@@ -51,10 +52,10 @@ const UpdateBestPerformer = () => {
 
       await axios.post(`${baseURL}/api/student/saveOrUpdateBestPerformer`, {
         date: date,
-        email: email
+        email: email,
+        question_no: questionNo // Include question_no in the request
       }, config);
       toast.success('Updated Successfully')
-      // After updating, fetch the updated best performer
       fetchBestPerformer();
     } catch (error) {
       console.error('Error updating best performer:', error);
@@ -75,13 +76,17 @@ const UpdateBestPerformer = () => {
           <label htmlFor="emailInput" className="form-label">Email</label>
           <input type="email" className="form-control" id="emailInput" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder='Enter email id of the Best performer'/>
         </div>
+        <div className="mb-3">
+          <label htmlFor="questionNoInput" className="form-label">Question Number</label>
+          <input type="text" className="form-control" id="questionNoInput" value={questionNo} onChange={(e) => setQuestionNo(e.target.value)} required placeholder='Enter question number'/>
+        </div>
         <button type="submit" className="btn btn-primary">Update</button>
       </form>
       {bestPerformerData && (
   <div className='my-3'>
-    <h3>Best Performer Details</h3>
     {bestPerformerData.map((performer, index) => (
       <div key={index}>
+        <h5>Best Performer's for Question Number :{performer.bestPerformer.question_no ? performer.bestPerformer.question_no : 'N/A'}</h5>
         <p className='display-5'>Student Name: {performer.student ? performer.student.name || 'N/A' : 'N/A'}</p>
         <table className="table">
           <thead>
