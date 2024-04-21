@@ -38,6 +38,12 @@ module.exports = (sequelize, DataTypes) => {
         marks: {
             type: DataTypes.TEXT,
             allowNull: true
+        },
+        // executed this query in sql to add the column "comment"
+        // ALTER TABLE laradb.studentsubmission ADD COLUMN comment TEXT;
+        comment: {
+            type: DataTypes.TEXT,
+            allowNull: true
         }
     }, {
         timestamps: false

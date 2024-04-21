@@ -215,7 +215,7 @@ const QuestionList = ({ batchId }) => {
             <img
               src={questionImages[question.id]}
               alt="Question Image"
-              style={{ maxWidth: '100%', height: 'auto' }}
+              style={{ maxWidth: '300px', height: '300px' }}
             />
           )}
         </div>
@@ -294,7 +294,7 @@ const QuestionList = ({ batchId }) => {
               <img
                 src={questionImages[editedQuestion.id]}
                 alt="Question Image"
-                style={{ maxWidth: '100%', height: 'auto', marginTop: '10px' }}
+                style={{ maxWidth: '300px', maxHeight: '300px', marginTop: '10px' }}
               />
             )}
           </div>

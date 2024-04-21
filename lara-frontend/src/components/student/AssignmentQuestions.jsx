@@ -110,7 +110,7 @@ const AssignmentQuestions = () => {
                   src={questionImages[question.id]}
                   alt="Question Image"
                   className='responsive-image'
-                  style={{ maxWidth: '100%', height: 'auto', marginTop: '10px' }}
+                  style={{ maxWidth: '300px', maxHeight: '300px', marginTop: '10px' }}
                 />
               )}
             </div>

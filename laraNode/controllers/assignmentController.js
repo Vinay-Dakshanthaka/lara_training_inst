@@ -504,7 +504,7 @@ const saveStudentSubmission = async (req, res) => {
 const saveStudentMarks = async (req, res) => {
   try {
     const studentId = req.studentId;
-    const { student_id, question_id, batch_id, marks } = req.body;
+    const { student_id, question_id, batch_id, marks, comment } = req.body;
 
     // Fetch student from database using studentId
     const student = await Student.findByPk(studentId);
@@ -542,9 +542,9 @@ const saveStudentMarks = async (req, res) => {
       return res.status(400).json({ error: 'Student has not submitted the answer for this question' });
     }
 
-    // Update the student's marks
+    // Update the student's marks and comment
     await StudentSubmission.update(
-      { marks },
+      { marks, comment }, // Update marks and comment for the student's submission
       {
         where: {
           question_id: question_id,
@@ -554,12 +554,13 @@ const saveStudentMarks = async (req, res) => {
       }
     );
 
-    res.status(200).json({ message: 'Marks saved successfully' });
+    res.status(200).json({ message: 'Marks and comment saved successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
 const getStudentSubmissions = async (req, res) => {

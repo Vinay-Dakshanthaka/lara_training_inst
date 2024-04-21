@@ -34,7 +34,7 @@ const Answers = () => {
 
         // Sort submissions by submission_time in descending order
         const sortedSubmissions = submissions.sort((a, b) => new Date(b.submission.submission_time) - new Date(a.submission.submission_time));
-        
+
         setStudentDetails(student);
         setSubmissions(sortedSubmissions);
 
@@ -132,14 +132,21 @@ const Answers = () => {
                       src={questionImages[submission.question.id]}
                       alt="Question Image"
                       className='responsive-image'
-                      style={{ maxWidth: '100%', height: 'auto', marginTop: '10px' }}
+                      style={{ maxWidth: '300px', maxHeight: '300px', marginTop: '10px' }}
                     />
                   ) : (
-                    <div/>
+                    <div />
                   )}
                   <pre className="card-text bg-light p-3">{submission.submission.code}</pre>
                   <pre className="card-text bg-light p-3">Output: {submission.submission.execution_output}</pre>
                   <h4 className="card-text">Marks: {submission.submission.marks}</h4>
+                  <pre className="card-text">
+                    Trainer's comment - {submission.submission.comment ? (
+                      <pre className="bg-light p-3">{submission.submission.comment}</pre>
+                    ) : (
+                      <span>N/A</span>
+                    )}
+                  </pre>
                  
                 </div>
               </Accordion.Body>

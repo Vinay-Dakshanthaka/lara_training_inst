@@ -122,13 +122,20 @@ const Result = () => {
                   <img
                     src={questionImages[questions[index]?.id] || ' '}
                     alt="Question Image"
-                    style={{ maxWidth: '100%', height: 'auto' }}
+                    style={{ maxWidth: '300px', maxHeight: '300px' }}
                   />
                   <h5 className="card-title">Code</h5>
                   <pre className="card-text bg-light p-3">{submission.code || 'Submit your answer to see the results'}</pre>
                   <h5 className="card-title">Output</h5>
                   <pre className="card-text bg-light p-3">{submission.execution_output || ' '}</pre>
                   <h4 className='card-text'>Marks : {submission.marks || 'Your answer is yet to be evaluated'}</h4>
+                  <h6 className='card-text'>
+                    Trainer's comment - {submission.comment ? (
+                      <pre className="bg-light p-3">{submission.comment}</pre>
+                    ) : (
+                      <span>N/A</span>
+                    )}
+                  </h6>
                 </div>
               </div>
             ))

@@ -18,6 +18,7 @@ const AssignmentAnswer = () => {
   const [openAccordion, setOpenAccordion] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [submissionsPerPage] = useState(10);
+  const [comments, setComments] = useState([]);
 
   const getStudentDetailsById = async (studentId) => {
     try {
@@ -105,6 +106,11 @@ const AssignmentAnswer = () => {
     newMarks[index] = parseInt(event.target.value);
     setMarks(newMarks);
   };
+  const handleCommentChange = (index, event) => {
+    const newComments = [...comments];
+    newComments[index] = event.target.value;
+    setComments(newComments);
+  };
 
   const assignMarks = async (index) => {
     try {
@@ -122,14 +128,15 @@ const AssignmentAnswer = () => {
       const submission = submissions[index];
       const { question_id } = submission;
       const marksToAssign = marks[index];
+      const commentToAdd = comments[index];
 
       await axios.post(
         `${baseURL}/api/student/saveStudentMarks`,
-        { student_id: studentId, question_id, batch_id: batchId, marks: marksToAssign },
+        { student_id: studentId, question_id, batch_id: batchId, marks: marksToAssign, comment: commentToAdd },
         config
       );
 
-      toast.success("Marks Assigned Successfully");
+      toast.success("Marks and comment added Successfully");
       fetchData();
 
     } catch (error) {
@@ -152,13 +159,6 @@ const AssignmentAnswer = () => {
   return (
     <div className="container mt-5">
       <BackButton />
-      {/* <div style={{ position: 'fixed', top: '20px', left: '20px', zIndex: '9999' }}>
-      <Link to="/assignment-answer" className="btn btn-primary">
-        <BsArrowLeft style={{ fontSize: '24px' }} /> Back to Assignment Answer
-      </Link>
-    </div> */}
-      {/* <h2>{studentDetails.name}'s Assignment Submissions</h2> */}
-      {/* <p className='h4'>Name : {studentDetails.name}</p> */}
       {studentDetails && studentDetails.student ? (
         <>
           <h2> Assignment Submissions</h2>
@@ -187,6 +187,11 @@ const AssignmentAnswer = () => {
               <pre className="bg-light p-3">{submission.code}</pre>
               <h5>Output</h5>
               <pre className="bg-light p-3">{submission.execution_output}</pre>
+              <pre className="bg-light p-3">Trainer's comment - {submission.comment ? (
+                <pre className="bg-light p-3">{submission.comment}</pre>
+              ) : (
+                <span>&nbsp;</span>
+              )}</pre>
               <h4>Marks : {submission.marks}</h4>
               {submission.marks === null || submission.marks === 0 ?
                 <div className="form-group">
@@ -198,6 +203,14 @@ const AssignmentAnswer = () => {
                     value={marks[indexOfFirstSubmission + index]}
                     onChange={(event) => handleMarkChange(indexOfFirstSubmission + index, event)}
                   />
+                  {/* Add textarea for comment */}
+                  <label htmlFor={`comment${index}`} className="mt-2">Comment:</label>
+                  <textarea
+                    className="form-control"
+                    id={`comment${index}`}
+                    value={comments[indexOfFirstSubmission + index] || ''}
+                    onChange={(event) => handleCommentChange(indexOfFirstSubmission + index, event)}
+                  ></textarea>
                   <button className="btn btn-primary mt-2" onClick={() => assignMarks(indexOfFirstSubmission + index)}>
                     Assign Marks
                   </button>
