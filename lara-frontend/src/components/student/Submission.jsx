@@ -189,7 +189,7 @@ const Submission = () => {
           <img
             src={question.image}
             alt="Question Image"
-            style={{ maxWidth: '100%', height: 'auto', marginTop: '10px' }}
+            style={{ maxWidth: '300px', height: '300px', marginTop: '10px' }}
           />
         )}
       </div>

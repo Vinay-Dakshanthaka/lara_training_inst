@@ -16,7 +16,7 @@ const corsOptions = {
   };
   
 // Enable CORS 
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); 
 // app.use(cors()); 
 
 // Routers

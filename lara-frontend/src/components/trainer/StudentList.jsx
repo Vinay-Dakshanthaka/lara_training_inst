@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { baseURL } from '../config';
+import { Tooltip } from '@mui/material';
 
 const StudentList = ({ batchId }) => {
   const [students, setStudents] = useState([]);
@@ -74,9 +75,29 @@ const StudentList = ({ batchId }) => {
               <td>{student.profile ? student.profile.year_of_passout : 'N/A'}</td>
               <td>{student.profile ? student.profile.specialization : 'N/A'}</td>
               <td>
-                <Link to={`/assignment-answers/${batchId}/${student.id}`} className="btn btn-primary">
+                <Link
+                  to={`/assignment-answers/${batchId}/${student.id}`}
+                  className={`btn ${student.marksBoolean ? 'btn-primary' : 'btn-primary'}`}
+                  style={{ position: "relative", display: "inline-block" }}
+                >
                   Assignment Answers
+                  {student.marksBoolean && (
+                    <Tooltip title="Evaluation Pending">
+                      <span
+                      className="badge bg-danger"
+                      style={{
+                        position: "absolute",
+                        top: "-5px",
+                        right: "-5px",
+                        transform: "translate(50%, -50%)",
+                      }}
+                    >
+                      !
+                    </span>
+                    </Tooltip>
+                  )}
                 </Link>
+
               </td>
             </tr>
           ))}

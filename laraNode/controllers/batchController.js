@@ -5,6 +5,7 @@ const Student = db.Student;
 const Profile = db.Profile;
 const Batch = db.Batch;
 const StudentBatch = db.Student_Batch
+const StudentSubmission = db.StudentSubmission
 const BatchTrainer = db.BatchTrainer
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -903,6 +904,47 @@ const fetchTrainerAndBatchFromStudentId = async (req, res) => {
     }
 };
 
+// const getStudentsByBatchId = async (req, res) => {
+//     try {
+//         const { batchId } = req.body; // Extract batchId from the request parameters
+
+//         if (!batchId) {
+//             return res.status(400).json({ error: 'Missing batchId' });
+//         }
+
+//         // Fetch all student IDs associated with the batch ID from the studentBatch table
+//         const studentBatchIds = await StudentBatch.findAll({
+//             where: {
+//                 batch_id: batchId
+//             }
+//         });
+
+//         // Ensure at least one student is associated with the batch
+//         if (studentBatchIds.length === 0) {
+//             return res.status(404).json({ error: 'No students found for the provided batch ID' });
+//         }
+
+//         // Extract student IDs from the fetched studentBatchIds
+//         const studentIds = studentBatchIds.map(studentBatch => studentBatch.student_id);
+
+//         // Fetch student details for each student ID
+//         const students = await Promise.all(studentIds.map(async (studentId) => {
+//             const student = await Student.findOne({
+//                 where: {
+//                     id: studentId
+//                 },
+//                 attributes: ['id', 'name', 'email'] // Include only required attributes
+//             });
+//             return student;
+//         }));
+
+//         res.status(200).json({ students });
+//     } catch (error) {
+//         console.error('Failed to fetch students by batch ID.', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
+
 const getStudentsByBatchId = async (req, res) => {
     try {
         const { batchId } = req.body; // Extract batchId from the request parameters
@@ -934,6 +976,18 @@ const getStudentsByBatchId = async (req, res) => {
                 },
                 attributes: ['id', 'name', 'email'] // Include only required attributes
             });
+
+            // Check if any submission record exists for this student with null marks
+            const marksBoolean = await StudentSubmission.findOne({
+                where: {
+                    student_id: studentId,
+                    marks: null
+                }
+            });
+
+            // If marksBoolean is not null, set it to true; otherwise, false
+            student.dataValues.marksBoolean = marksBoolean ? true : false;
+
             return student;
         }));
 
@@ -943,6 +997,7 @@ const getStudentsByBatchId = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 
 

@@ -6,7 +6,7 @@ import BackButton from '../BackButton';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Accordion from 'react-bootstrap/Accordion';
-import { BsArrowLeft, BsChevronDown } from 'react-icons/bs';
+// import { BsArrowLeft, BsChevronDown } from 'react-icons/bs';
 import { Tooltip } from '@mui/material';
 
 const AssignmentAnswer = () => {
@@ -49,8 +49,6 @@ const AssignmentAnswer = () => {
     }
   };
 
-
-
   const fetchData = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -72,8 +70,8 @@ const AssignmentAnswer = () => {
 
       const studentDetails = await getStudentDetailsById(studentId);
       setStudentDetails(studentDetails);
-      console.log("student id ", studentId)
-      console.log("student details ", studentDetails)
+      // console.log("student id ", studentId)
+      // console.log("student details ", studentDetails)
 
       // Sort submissions by date in descending order
       const sortedSubmissions = submissionsResponse.data.sort((a, b) => new Date(b.submission_time) - new Date(a.submission_time));
