@@ -974,7 +974,7 @@ const getStudentsByBatchId = async (req, res) => {
                 where: {
                     id: studentId
                 },
-                attributes: ['id', 'name', 'email'] // Include only required attributes
+                attributes: ['id', 'name', 'email'] 
             });
 
             // Check if any submission record exists for this student with null marks
