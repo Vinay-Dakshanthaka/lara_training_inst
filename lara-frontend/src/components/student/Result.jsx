@@ -118,10 +118,9 @@ const Result = () => {
                   <p className="card-text">{questions[index]?.question}</p> {/* Display question */}
                   <h5 className="card-title">Description</h5>
                   <pre className="card-text">{questions[index]?.description}</pre> {/* Display description */}
-                  <h5 className="card-title">Question Image</h5>
+                 {/* <h5 className="card-title">Question Image</h5> */}
                   <img
                     src={questionImages[questions[index]?.id] || ' '}
-                    alt="Question Image"
                     style={{ maxWidth: '300px', maxHeight: '300px' }}
                   />
                   <h5 className="card-title">Code</h5>

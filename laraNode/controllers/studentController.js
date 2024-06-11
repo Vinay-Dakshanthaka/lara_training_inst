@@ -440,8 +440,8 @@ const updatePassword = async (req, res) => {
 const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
-        user: 'vinayhari789@gmail.com', // Your email address
-        pass: 'cchprxipjwvmryes' // Your app password
+        user: 'lara.placementcell@gmail.com', // Your email address
+        pass: 'kphhcgeglahzzixb' // Your app password
     }
 });
 
@@ -461,7 +461,7 @@ const sendPasswordResetEmail = async (req, res) => {
 
         // Define the email options
         const mailOptions = {
-            from: 'vinayhari789@gmail.com', // Sender address
+            from: 'kphhcgeglahzzixb', // Sender address
             to: email, // Recipient's email address
             subject: 'Password Reset Request', // Subject line
             html: `

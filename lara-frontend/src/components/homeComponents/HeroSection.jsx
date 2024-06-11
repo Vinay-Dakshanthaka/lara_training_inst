@@ -30,8 +30,6 @@ const HeroSection = () => {
       const response = await axios.get(`${baseURL}/api/student/getBestPerformersByDate`);
       const data = response.data;
       setBestPerformer(data);
-      console.log(" best performer : ", bestPerformer)
-      console.log("data :",data)
 
       const performerImages = await Promise.all(data.map(async (performer) => {
         try {
