@@ -175,6 +175,7 @@ db.CollegeDetails = require('./CollegeDetailsModel.js')(sequelize, DataTypes);
 db.Attendance = require('./attendanceModel.js')(sequelize, DataTypes); 
 db.HomeContent = require('./homeContentModel.js')(sequelize, DataTypes); 
 db.BestPerformer = require('./performerOfTheDayModel.js')(sequelize, DataTypes);
+db.TestResults = require('./testResultModel.js')(sequelize, DataTypes)
 
 // cumulative test models 
 db.CumulativeQuestion = require('./cumulativeQuestionModel.js')(sequelize, DataTypes);

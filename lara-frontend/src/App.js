@@ -33,6 +33,10 @@ import AssignStudentsToCollege from './components/admin/AssignStudentsToCollege'
 import PlacementOfficerDashboard from './components/placementOfficer/PlacementOfficerDashboard';
 import StudentReviewsByStudentId from './components/placementOfficer/StudentReviewsByStudentId';
 import Answers from './components/placementOfficer/Answers';
+import StudentCumulativeTest from './components/student/StudentCumulativeTest';
+import StartTest from './components/student/StartTest';
+import AllTestResults from './components/student/AllTestResults';
+import DetailedResult from './components/student/DetailedResult';
 
 
 const App = () => {
@@ -72,6 +76,10 @@ const App = () => {
             {/* to view assignment submission for placementOfficer  */}
             <Route path="/answers/:studentId" element={<Answers />} />
             <Route path="/assignStudentsToCollege" element={<AssignStudentsToCollege />} />
+            <Route path="/studentCumulativeTest" element={<StudentCumulativeTest />} />
+            <Route path="/start-test" element={<StartTest />} />
+            <Route path="/all-test-results" element={<AllTestResults />} />
+            <Route path="/all-test-results/:test_id" element={<DetailedResult />} />
             {/* <Route path="/profile" element={<Profile />} /> */}
             <Route path="*" element={<LoginForm />} />
 

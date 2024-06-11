@@ -305,6 +305,7 @@ function CustomNavbars() {
                                     )}
                                     {/* Common menu items */}
                                     <MenuItem onClick={() => navigate("/studentHome")}>Profile</MenuItem>
+                                    <MenuItem onClick={() => navigate("/studentCumulativeTest")}>Cumulative Test</MenuItem>
                                     <MenuItem onClick={() => navigate("/updateProfile")}>Update Profile</MenuItem>
                                     <MenuItem onClick={() => navigate("/changePassword")}>Change Password</MenuItem>
                                     <MenuItem onClick={handleLogout}>Logout</MenuItem>

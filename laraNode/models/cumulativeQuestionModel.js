@@ -46,12 +46,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         correct_option: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            validate: {
-                min: 1,
-                max: 4
-            }
+            type: DataTypes.TEXT,
+            allowNull: false 
         }
     }, {
         timestamps: true // Enabling timestamps for tracking purposes
