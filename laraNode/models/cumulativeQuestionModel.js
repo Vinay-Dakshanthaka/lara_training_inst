@@ -31,19 +31,19 @@ module.exports = (sequelize, DataTypes) => {
         },
         option_1: {
             type: DataTypes.TEXT,
-            allowNull: false
+            allowNull: true
         },
         option_2: {
             type: DataTypes.TEXT,
-            allowNull: false
+            allowNull: true
         },
         option_3: {
             type: DataTypes.TEXT,
-            allowNull: false
+            allowNull: true
         },
         option_4: {
             type: DataTypes.TEXT,
-            allowNull: false
+            allowNull: true
         },
         correct_option: {
             type: DataTypes.TEXT,
