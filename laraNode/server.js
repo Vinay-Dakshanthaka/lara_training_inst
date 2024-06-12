@@ -30,7 +30,7 @@ app.use('/api/cumulative-test',cumulativeTestRouter)
 app.use('/Images', express.static('./Images'));
 
 // Port
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5000;
 
 // Synchronize database and start server
 db.sequelize.sync({ force: false }).then(() => {

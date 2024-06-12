@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
@@ -8,13 +8,19 @@ import { baseURL } from '../config';
 import BackButton from '../BackButton';
 
 const Submission = () => {
+  const initialCode = `public class Solution {
+    public static void main(String[] args) {
+        // Write your code here
+    }
+}`;
   const { questionId, batchId } = useParams();
   const [question, setQuestion] = useState({ question: '', description: '', image: '' }); // Added 'image' to store question image
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(initialCode);
+ // const textareaRef = useRef(null);
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-
+  const textareaRef = useRef(null);
   useEffect(() => {
     const fetchQuestionById = async () => {
       try {
@@ -158,24 +164,37 @@ const Submission = () => {
   const handleCloseModal = () => setShowModal(false);
   const handleShowModal = () => setShowModal(true);
 
-  const handleTabKeyPress = (e) => {
-    if (e.key === 'Tab') {
-      e.preventDefault(); // Prevent default tab behavior
+    //Moving the cursor in the main method after loading
+    useEffect(() => {
+      const setCursorPosition = () => {
+        const mainMethodStart = initialCode.indexOf('// Write your code here');
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(mainMethodStart, mainMethodStart);
+        }
+      };
   
-      // Get current cursor position
-      const { selectionStart, selectionEnd, value } = e.target;
+      setCursorPosition();
+    }, [initialCode]);
   
-      // Insert four spaces at the current cursor position
-      const newValue =
-        value.substring(0, selectionStart) +
-        '    ' +
-        value.substring(selectionEnd);
+    const handleTabKeyPress = (event) => {
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        const textarea = textareaRef.current;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
   
-      // Update the textarea value and cursor position
-      setCode(newValue);
-      e.target.selectionStart = e.target.selectionEnd = selectionStart + 4;
-    }
-  };
+        // Insert four spaces at the cursor's current position
+        const value = code;
+        const newValue = value.substring(0, start) + '    ' + value.substring(end);
+        setCode(newValue);
+  
+        // Move the cursor to after the inserted spaces
+        setTimeout(() => {
+          textarea.selectionStart = textarea.selectionEnd = start + 4;
+        }, 0);
+      }
+    };
   
   return (
     <div className="container mt-5">
@@ -196,7 +215,8 @@ const Submission = () => {
       <div className="mb-4">
         <h5>Write your code in the below editor</h5>
         <textarea
-          className="form-control bg-dark text-light"
+          ref={textareaRef}
+          className="form-control bg-light text-dark"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           onKeyDown={(e) => handleTabKeyPress(e)}
