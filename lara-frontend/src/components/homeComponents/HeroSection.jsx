@@ -71,12 +71,13 @@ const HeroSection = () => {
                 <ListGroup.Item key={index}><a href={url} target='_blank'>{url}</a></ListGroup.Item>
               ))}
             </ListGroup>
-            <h2 className="mt-5 mb-4 display-6">Tomorrow's Schedule</h2>
+            {/*<h2 className="mt-5 mb-4 display-6">Tomorrow's Schedule</h2>
             <ListGroup>
               {homeContent && splitBySingleSpace(homeContent.tomorrow_schedule).map((url, index) => (
                 <ListGroup.Item key={index}><a href={url} target='_blank'>{url}</a></ListGroup.Item>
               ))}
             </ListGroup>
+            */}
           </div>
         </Col>
         {/* Best Performer Section */}
