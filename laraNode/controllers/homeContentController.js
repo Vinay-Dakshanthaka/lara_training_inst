@@ -6,9 +6,48 @@ const BestPerformer = db.BestPerformer
 const Profile = db.Profile
 const CollegeDetails = db.CollegeDetails;
 
+//Previous Code for Updating Todays and Tomorrow Schedule
+// const saveOrUpdateHomeContent = async (req, res) => {
+//     try {
+//         const { today_schedule, tomorrow_schedule } = req.body;
+//         const studentId = req.studentId;
+//         const user = await Student.findByPk(studentId); // Fetch user from database
+//         const userRole = user.role; // Get the user's role
+
+//         // Check if the user role is either "ADMIN" or "SUPER ADMIN"
+//         if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN') {
+//             return res.status(403).json({ error: 'Access forbidden' });
+//         }
+
+//         // Check if there's existing data in HomeContent
+//         let homeContent = await HomeContent.findOne();
+
+//         // If no existing data, create a new entry
+//         if (!homeContent) {
+//             homeContent = await HomeContent.create({
+//                 today_schedule,
+//                 tomorrow_schedule
+//             });
+//         } else {
+//             // If data exists, update it
+//             homeContent = await homeContent.update({
+//                 today_schedule,
+//                 tomorrow_schedule
+//             });
+//         }
+
+//         res.status(200).send(homeContent);
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send({ message: error.message });
+//     }
+// };
+
+
+//Updating Schedule According To Batches
 const saveOrUpdateHomeContent = async (req, res) => {
     try {
-        const { today_schedule, tomorrow_schedule } = req.body;
+        const { batchSchedules } = req.body; // expecting an array of objects { batch_id, schedule }
         const studentId = req.studentId;
         const user = await Student.findByPk(studentId); // Fetch user from database
         const userRole = user.role; // Get the user's role
@@ -18,29 +57,34 @@ const saveOrUpdateHomeContent = async (req, res) => {
             return res.status(403).json({ error: 'Access forbidden' });
         }
 
-        // Check if there's existing data in HomeContent
-        let homeContent = await HomeContent.findOne();
+        // Iterate over batchSchedules and update each batch's schedule
+        for (const batchSchedule of batchSchedules) {
+            const { batch_id, schedule } = batchSchedule;
 
-        // If no existing data, create a new entry
-        if (!homeContent) {
-            homeContent = await HomeContent.create({
-                today_schedule,
-                tomorrow_schedule
-            });
-        } else {
-            // If data exists, update it
-            homeContent = await homeContent.update({
-                today_schedule,
-                tomorrow_schedule
-            });
+            let homeContent = await HomeContent.findOne({ where: { batch_id } });
+
+            if (!homeContent) {
+                // If no existing data for the batch, create a new entry
+                await HomeContent.create({
+                    batch_id,
+                    today_schedule: schedule
+                });
+            } else {
+                // If data exists, update it
+                await homeContent.update({
+                    today_schedule: schedule
+                });
+            }
         }
 
-        res.status(200).send(homeContent);
+        res.status(200).send({ message: 'Schedules updated successfully' });
     } catch (error) {
         console.log(error);
         res.status(500).send({ message: error.message });
     }
-};
+}
+
+
 
 
 const fetchHomeContent = async (req, res) => {
@@ -162,5 +206,5 @@ module.exports = {
     saveOrUpdateHomeContent,
     saveOrUpdateBestPerformer,
     fetchHomeContent,
-    getBestPerformersByDate
+    getBestPerformersByDate,
 }

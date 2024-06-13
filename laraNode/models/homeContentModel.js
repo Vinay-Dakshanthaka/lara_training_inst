@@ -13,6 +13,12 @@ module.exports = (sequelize, DataTypes) => {
         tomorrow_schedule: {
             type: DataTypes.TEXT,
             allowNull: true
+        },
+        //Execute this Query in mySQl
+        //ALTER TABLE laradb.homecontents ADD COLUMN batch_id Integer not null; 
+        batch_id : {
+            type: DataTypes.INTEGER,
+            allowNull: false
         }
     },{
         timestamps: false 

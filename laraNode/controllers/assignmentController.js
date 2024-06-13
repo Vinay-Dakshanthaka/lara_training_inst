@@ -479,27 +479,57 @@ const saveStudentSubmission = async (req, res) => {
       }
     });
 
-    if (existingSubmission) {
-      return res.status(400).json({ error: 'Student already submitted the answer for this question' });
+    if (!existingSubmission) {
+      //return res.status(400).json({ error: 'Student already submitted the answer for this question' });
+      // Save the student submission
+      const createdSubmission = await StudentSubmission.create({
+        question_id,
+        student_id: studentId,
+        batch_id,
+        code,
+        submission_time,
+        no_testcase_passed,
+        execution_output
+      });
+      res.status(200).json(createdSubmission);
     }
+    const updatedSubmission = await StudentSubmission.findBypK(createdSubmission.id);
+    
+    if (updatedSubmission) {
+      code = code,
+      submission_time = submission_time,
+      execution_output = execution_output
 
-    // Save the student submission
-    const createdSubmission = await StudentSubmission.create({
-      question_id,
-      student_id: studentId,
-      batch_id,
-      code,
-      submission_time,
-      no_testcase_passed,
-      execution_output
-    });
+      await updatedSubmission.save();
 
-    res.status(200).json(createdSubmission);
+      console.log('Submission updated:', updatedSubmission.toJSON());
+      return updatedSubmission;
+    } 
+    else {
+      throw new Error(`Submission with ID ${submissionId} not found.`);
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    console.error('Error updating submission:', error);
+    throw error; // Handle error appropriately
   }
-};
+}
+
+    // const createdSubmission = await StudentSubmission.create({
+    //   question_id,
+    //   student_id: studentId,
+    //   batch_id,
+    //   code,
+    //   submission_time,
+    //   no_testcase_passed,
+    //   execution_output
+    // });
+
+//     res.status(200).json(createdSubmission);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 const saveStudentMarks = async (req, res) => {
   try {
@@ -531,16 +561,16 @@ const saveStudentMarks = async (req, res) => {
     }
 
     // Check if the student has submitted the code for this question
-    const existingSubmission = await StudentSubmission.findOne({
-      where: {
-        question_id: question_id,
-        student_id: student_id
-      }
-    });
+    // const existingSubmission = await StudentSubmission.findOne({
+    //   where: {
+    //     question_id: question_id,
+    //     student_id: student_id
+    //   }
+    // });
 
-    if (!existingSubmission) {
-      return res.status(400).json({ error: 'Student has not submitted the answer for this question' });
-    }
+    // if (!existingSubmission) {
+    //   return res.status(400).json({ error: 'Student has not submitted the answer for this question' });
+    // }
 
     // Update the student's marks and comment
     await StudentSubmission.update(
@@ -688,6 +718,7 @@ const executeJavaCodeHandler = async (req, res) => {
     res.status(500).json({ error: 'Error executing Java code' });
   }
 };
+
 
 const executeJavaCodeHandler2 = async (req, res) => {
   try {
