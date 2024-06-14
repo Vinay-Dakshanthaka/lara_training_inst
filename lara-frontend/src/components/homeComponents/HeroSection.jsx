@@ -9,21 +9,66 @@ const HeroSection = () => {
   const [homeContent, setHomeContent] = useState(null);
   const [bestPerformer, setBestPerformer] = useState([]);
   const [images, setImages] = useState([]);
+  const [batchSchedules, setBatchSchedules] = useState([]);
+  const [todaySchedule, setTodaySchedule] = useState({});
+  const [availableBatches, setAvailableBatches] = useState([]);
+
+    // Fetching Available Batches
+    const fetchAvailableBatches = async () => {
+      try {
+          const token = localStorage.getItem("token");
+          if (!token) {
+              return;
+          }
+
+          const config = {
+              headers: {
+                  Authorization: `Bearer ${token}`,
+              },
+          };
+
+          const response = await axios.get(`${baseURL}/api/student/getAllBatches`, config);
+          setAvailableBatches(response.data);
+      } catch (error) {
+          console.error('Error fetching batches:', error);
+      }
+  };
+
+  useEffect(() => {
+      fetchAvailableBatches();
+  }, []);
+
+
+    const fetchHomeContent = async () => {
+        try {
+            const response = await axios.get(`${baseURL}/api/student/fetchHomeContent`);
+            const data = response.data;
+            const schedules = {};
+            data.forEach(item => {
+                schedules[item.batch_id] = item.today_schedule;
+            });
+            setTodaySchedule(schedules);
+            setBatchSchedules(data);
+        } catch (error) {
+            console.error('Error fetching home content:', error);
+        }
+    }
+  
+
+  // const fetchHomeContent = async () => {
+  //   try {
+  //     const response = await axios.get(`${baseURL}/api/student/fetchHomeContent`);
+  //     const data = response.data[0];
+  //     setHomeContent(data);
+  //   } catch (error) {
+  //     console.error('Error fetching home content:', error);
+  //   }
+  // };
 
   useEffect(() => {
     fetchHomeContent();
     fetchBestPerformer();
   }, []);
-
-  const fetchHomeContent = async () => {
-    try {
-      const response = await axios.get(`${baseURL}/api/student/fetchHomeContent`);
-      const data = response.data[0];
-      setHomeContent(data);
-    } catch (error) {
-      console.error('Error fetching home content:', error);
-    }
-  };
 
   const fetchBestPerformer = async () => {
     try {
@@ -65,12 +110,23 @@ const HeroSection = () => {
         {/* Schedule Section */}
         <Col md={6} >
           <div className="schedule-section card p-3">
-            <h2 className="display-6">Today's Schedule</h2>
-            <ListGroup>
+            {/* <h2 className="display-6">Today's Schedule</h2> */}
+            <div className="container my-4">
+              <h2 className='my-4'>Today's Schedules</h2>
+              {batchSchedules.map((batch) => (
+                  <div key={batch.batch_id}>
+                      <div className='card m-4 px-2 py-2'>
+                        <h5>{availableBatches.find(b => b.batch_id === batch.batch_id)?.batch_name}</h5>
+                        <pre className='fs-6'>{todaySchedule[batch.batch_id]}</pre>
+                      </div>
+                  </div>
+              ))}
+            </div>
+            {/* <ListGroup>
               {homeContent && splitBySingleSpace(homeContent.today_schedule).map((url, index) => (
                 <ListGroup.Item key={index}><a href={url} target='_blank'>{url}</a></ListGroup.Item>
               ))}
-            </ListGroup>
+            </ListGroup> */}
             {/*<h2 className="mt-5 mb-4 display-6">Tomorrow's Schedule</h2>
             <ListGroup>
               {homeContent && splitBySingleSpace(homeContent.tomorrow_schedule).map((url, index) => (

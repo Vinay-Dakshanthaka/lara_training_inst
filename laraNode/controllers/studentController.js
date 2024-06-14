@@ -150,6 +150,7 @@ const verifyByPhoneAndPassword = async (req, res) => {
 const saveOrUpdateProfile = async (req, res) => {
     try {
         const student_id = req.studentId;
+        console.log("student id :",req.studentId)
         const profileInfo = {
             name: req.body.name,
             gender: req.body.gender,

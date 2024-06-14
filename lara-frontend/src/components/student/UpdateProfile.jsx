@@ -326,7 +326,7 @@ const validateYOP = (yop) => {
       // If update fails, display error message
       // setErrorMessage('Something went wrong. Failed to update profile.');
       toast.error('Something went wrong. Please tryain agein later');
-      // console.error('Failed to update profile:', error);
+      console.error('Failed to update profile:', error);
     }
   };
   

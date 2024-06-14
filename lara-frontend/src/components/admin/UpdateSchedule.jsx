@@ -329,11 +329,11 @@ const UpdateSchedule = () => {
 
     return (
         <div className="container my-4">
-            <h2 className='my-4'>Today's Schedules</h2>
+            {/* <h2 className='my-4'>Today's Schedules</h2> */}
             {batchSchedules.map((batch) => (
                 <div key={batch.batch_id}>
                     <h5>{availableBatches.find(b => b.batch_id === batch.batch_id)?.batch_name}</h5>
-                    <pre>{todaySchedule[batch.batch_id]}</pre>
+                    <pre className='fs-6'>{todaySchedule[batch.batch_id]}</pre>
                 </div>
             ))}
             

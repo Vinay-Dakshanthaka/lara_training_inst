@@ -47,7 +47,7 @@ const CollegeDetails = db.CollegeDetails;
 //Updating Schedule According To Batches
 const saveOrUpdateHomeContent = async (req, res) => {
     try {
-        const { batchSchedules } = req.body; // expecting an array of objects { batch_id, schedule }
+        const { batchSchedules } = req.body;  // expecting an array of objects { batch_id, schedule }
         const studentId = req.studentId;
         const user = await Student.findByPk(studentId); // Fetch user from database
         const userRole = user.role; // Get the user's role
@@ -64,13 +64,13 @@ const saveOrUpdateHomeContent = async (req, res) => {
             let homeContent = await HomeContent.findOne({ where: { batch_id } });
 
             if (!homeContent) {
-                // If no existing data for the batch, create a new entry
+                // If  there is no existing data(Schedule) for the batch, create a new entry
                 await HomeContent.create({
                     batch_id,
                     today_schedule: schedule
                 });
             } else {
-                // If data exists, update it
+                // If data(Schedule) exists, update it
                 await homeContent.update({
                     today_schedule: schedule
                 });
@@ -177,10 +177,11 @@ const getBestPerformersByDate = async (req, res) => {
             const student = await Student.findByPk(performer.studentId, {
                 attributes: { exclude: ['password'] }
             });
+            console.log("Performrwr" +  performer.studentId);
 
             // Fetch profile details
             const profile = await Profile.findOne({ where: { student_id: performer.studentId } });
-
+            console.log("profile"+profile);
             // Fetch college details
             let collegeName = null;
             if (student.college_id) {

@@ -1,4 +1,3 @@
-
 module.exports = (sequelize, DataTypes) => {
     const Profile = sequelize.define("Profile", {
         name: {
@@ -42,9 +41,7 @@ module.exports = (sequelize, DataTypes) => {
     Profile.associate = (models) => {
         // Define association with the Students table
         Profile.belongsTo(models.Student, {
-            foreignKey: {
-                allowNull: false // Ensures a profile cannot exist without a corresponding student
-            },
+            foreignKey: 'student_id', // Explicitly specify the foreign key field
             onDelete: 'CASCADE' // Delete the profile if the associated student is deleted
         });
     };
