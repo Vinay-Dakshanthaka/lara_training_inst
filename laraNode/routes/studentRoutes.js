@@ -179,4 +179,6 @@ router.post('/saveOrUpdateBestPerformer', verifyToken, homeContentController.sav
 
 router.get('/getBestPerformersByDate',  homeContentController.getBestPerformersByDate);
 
+router.get('/nameSuggestions',  homeContentController.getStudentNameSuggestions)
+
 module.exports = router;

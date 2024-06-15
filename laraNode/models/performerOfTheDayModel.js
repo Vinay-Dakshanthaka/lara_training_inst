@@ -22,9 +22,13 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT, 
             allowNull: true
         },
+        name: {
+            type: DataTypes.STRING, // Added name field
+            allowNull: true
+        }
         // executed this query directly in the database to add a new column question_no
         // ALTER TABLE laradb.bestperformers ADD COLUMN question_no VARCHAR(255);
-
+            
     },{
         timestamps: false 
     });
