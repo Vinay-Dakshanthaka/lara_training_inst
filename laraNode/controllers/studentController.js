@@ -272,6 +272,7 @@ const getProfileImageFor = async (req, res) => {
 
         const imagePath = profile.imagePath;
 
+        console.log("Imageeeeeeeee"+imagePath);
         // Check if imagePath exists
         if (!imagePath) {
             return res.status(404).send({ message: 'Image not found.' });

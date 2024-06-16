@@ -181,4 +181,6 @@ router.get('/getBestPerformersByDate',  homeContentController.getBestPerformersB
 
 router.get('/nameSuggestions',  homeContentController.getStudentNameSuggestions)
 
+router.post('/getStudentSubmissionByQuestion', verifyToken, assignmentController.getStudentSubmissionByQuestion)
+
 module.exports = router;

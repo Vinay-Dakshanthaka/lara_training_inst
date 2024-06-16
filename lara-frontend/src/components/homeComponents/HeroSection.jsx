@@ -262,34 +262,41 @@ const HeroSection = () => {
   };
 
   const fetchBestPerformer = async () => {
+    console.log("1");
     try {
-      const response = await axios.get(`${baseURL}/api/student/getBestPerformersByDate`);
-      const data = response.data;
-      setBestPerformer(data);
+        console.log("inside try");
+        const response = await axios.get(`${baseURL}/api/student/getBestPerformersByDate`);
+        console.log("data:", response);
+        const data = response.data;
+        setBestPerformer(data);
+        console.log("Start");
 
-      const performerImages = await Promise.all(data.map(async (performer) => {
-        try {
-          const response = await axios.post(`${baseURL}/api/student/getProfileImageFor`, { id: performer.student.id }, {
-            responseType: 'arraybuffer',
-          });
-          const base64Image = btoa(
-            new Uint8Array(response.data).reduce(
-              (data, byte) => data + String.fromCharCode(byte),
-              '',
-            ),
-          );
-          return `data:${response.headers['content-type']};base64,${base64Image}`;
-        } catch (error) {
-          console.error('Error fetching profile image:', error);
-          return defaultProfileImage;
-        }
-      }));
+        const performerImages = await Promise.all(data.map(async (performer) => {
+            console.log("performer:", JSON.stringify(performer));
+            try {
+                const response = await axios.post(`${baseURL}/api/student/getProfileImageFor`, { id: performer.student.id }, {
+                    responseType: 'arraybuffer',
+                });
+                console.log("Response:", response);
+                const base64Image = btoa(
+                    new Uint8Array(response.data).reduce(
+                        (data, byte) => data + String.fromCharCode(byte),
+                        '',
+                    ),
+                );
+                return `data:${response.headers['content-type']};base64,${base64Image}`;
+            } catch (error) {
+                console.error('Error fetching profile image:', error);
+                return defaultProfileImage;
+            }
+        }));
 
         setImages(performerImages);
     } catch (error) {
-      console.error('Error fetching best performer:', error);
+        console.error('Error fetching best performer:', error);
     }
-  };
+};
+
 
   const splitBySingleSpace = (text) => {
     return text.split(/\s+/).filter(Boolean);

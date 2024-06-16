@@ -269,8 +269,8 @@ const getStudentNameSuggestions = async (req, res) => {
 
 const getBestPerformersByDate = async (req, res) => {
     try {
-        const { date } = req.query;
-
+        const date  =  await BestPerformer.max('date')
+        console.log("date ", date)
         // Validate date parameter
         if (!date) {
             return res.status(400).json({ error: 'Date parameter is required' });

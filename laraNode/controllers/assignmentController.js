@@ -454,6 +454,84 @@ const saveTestcases = async (req, res) => {
   }
 };
 
+// const saveStudentSubmission = async (req, res) => {
+//   try {
+//     const studentId = req.studentId;
+//     const { question_id, code, batch_id, submission_time, no_testcase_passed, execution_output } = req.body;
+
+//     // Check if the question exists
+//     const question = await Questions.findByPk(question_id);
+//     if (!question) {
+//       return res.status(404).json({ error: 'Question not found' });
+//     }
+
+//     // Check if the student exists
+//     const student = await Student.findByPk(studentId);
+//     if (!student) {
+//       return res.status(404).json({ error: 'Student not found' });
+//     }
+
+//     // Check if the student has already submitted the code for this question
+//     const existingSubmission = await StudentSubmission.findOne({
+//       where: {
+//         question_id: question_id,
+//         student_id: studentId
+//       }
+//     });
+
+//     if (!existingSubmission) {
+//       //return res.status(400).json({ error: 'Student already submitted the answer for this question' });
+//       // Save the student submission
+//       const createdSubmission = await StudentSubmission.create({
+//         question_id,
+//         student_id: studentId,
+//         batch_id,
+//         code,
+//         submission_time,
+//         no_testcase_passed,
+//         execution_output
+//       });
+//       res.status(200).json(createdSubmission);
+//     }
+//     const updatedSubmission = await StudentSubmission.findBypK(createdSubmission.id);
+    
+//     if (updatedSubmission) {
+//       code = code,
+//       submission_time = submission_time,
+//       execution_output = execution_output
+
+//       await updatedSubmission.save();
+
+//       console.log('Submission updated:', updatedSubmission.toJSON());
+//       return updatedSubmission;
+//     } 
+//     else {
+//       throw new Error(`Submission with ID ${submissionId} not found.`);
+//     }
+//   } catch (error) {
+//     console.error('Error updating submission:', error);
+//     throw error; // Handle error appropriately
+//   }
+// }
+
+    // const createdSubmission = await StudentSubmission.create({
+    //   question_id,
+    //   student_id: studentId,
+    //   batch_id,
+    //   code,
+    //   submission_time,
+    //   no_testcase_passed,
+    //   execution_output
+    // });
+
+//     res.status(200).json(createdSubmission);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
+
 const saveStudentSubmission = async (req, res) => {
   try {
     const studentId = req.studentId;
@@ -480,7 +558,6 @@ const saveStudentSubmission = async (req, res) => {
     });
 
     if (!existingSubmission) {
-      //return res.status(400).json({ error: 'Student already submitted the answer for this question' });
       // Save the student submission
       const createdSubmission = await StudentSubmission.create({
         question_id,
@@ -491,46 +568,24 @@ const saveStudentSubmission = async (req, res) => {
         no_testcase_passed,
         execution_output
       });
-      res.status(200).json(createdSubmission);
-    }
-    const updatedSubmission = await StudentSubmission.findBypK(createdSubmission.id);
-    
-    if (updatedSubmission) {
-      code = code,
-      submission_time = submission_time,
-      execution_output = execution_output
+      return res.status(200).json(createdSubmission);
+    } else {
+      // Update the existing submission
+      existingSubmission.code = code;
+      existingSubmission.submission_time = submission_time;
+      existingSubmission.no_testcase_passed = no_testcase_passed;
+      existingSubmission.execution_output = execution_output;
 
-      await updatedSubmission.save();
+      await existingSubmission.save();
 
-      console.log('Submission updated:', updatedSubmission.toJSON());
-      return updatedSubmission;
-    } 
-    else {
-      throw new Error(`Submission with ID ${submissionId} not found.`);
+      console.log('Submission updated:', existingSubmission.toJSON());
+      return res.status(200).json(existingSubmission);
     }
   } catch (error) {
-    console.error('Error updating submission:', error);
-    throw error; // Handle error appropriately
+    console.error('Error saving submission:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
-}
-
-    // const createdSubmission = await StudentSubmission.create({
-    //   question_id,
-    //   student_id: studentId,
-    //   batch_id,
-    //   code,
-    //   submission_time,
-    //   no_testcase_passed,
-    //   execution_output
-    // });
-
-//     res.status(200).json(createdSubmission);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: error.message });
-//   }
-// };
-
+};
 const saveStudentMarks = async (req, res) => {
   try {
     const studentId = req.studentId;
@@ -618,6 +673,39 @@ const getStudentSubmissions = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+//Fetching individual Student Submission for Displaying in Text area
+const getStudentSubmissionByQuestion = async (req, res) => {
+  try {
+    const studentId = req.studentId;
+    const { questionId } = req.body;
+
+    // Check if the student exists
+    const student = await Student.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Retrieve the submission for the student and question
+    const submission = await StudentSubmission.findOne({
+      where: {
+        student_id: studentId,
+        question_id: questionId
+      }
+    });
+
+    if (!submission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    res.status(200).json(submission);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 
 const getStudentSubmissionsByBatchId = async (req, res) => {
   try {
@@ -843,5 +931,6 @@ module.exports = {
   getStudentSubmissionsByStudentId,
   getStudentSubmissionsByBatchId,
   saveStudentMarks,
-  getSResults
+  getSResults,
+  getStudentSubmissionByQuestion,
 };
