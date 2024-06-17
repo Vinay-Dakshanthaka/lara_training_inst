@@ -262,22 +262,22 @@ const HeroSection = () => {
   };
 
   const fetchBestPerformer = async () => {
-    console.log("1");
+    // console.log("1");
     try {
-        console.log("inside try");
+        // console.log("inside try");
         const response = await axios.get(`${baseURL}/api/student/getBestPerformersByDate`);
-        console.log("data:", response);
+        // console.log("data:", response);
         const data = response.data;
         setBestPerformer(data);
-        console.log("Start");
+        // console.log("Start");
 
         const performerImages = await Promise.all(data.map(async (performer) => {
-            console.log("performer:", JSON.stringify(performer));
+            // console.log("performer:", JSON.stringify(performer));
             try {
                 const response = await axios.post(`${baseURL}/api/student/getProfileImageFor`, { id: performer.student.id }, {
                     responseType: 'arraybuffer',
                 });
-                console.log("Response:", response);
+                // console.log("Response:", response);
                 const base64Image = btoa(
                     new Uint8Array(response.data).reduce(
                         (data, byte) => data + String.fromCharCode(byte),
@@ -369,15 +369,15 @@ const HeroSection = () => {
     <Container className="my-4">
       <Row>
         {/* Schedule Section */}
-        <Col md={6}>
-          <div className="schedule-section card p-3">
+        <Col md={7}>
+          <div className="schedule-section card p-1">
             <div className="container my-4">
               <h2 className='my-4'>Today's Schedules</h2>
               {batchSchedules.map((batch) => (
                 <div key={batch.batch_id}>
-                  <div className='card m-4 px-2 py-2'>
+                  <div className=' py-2'>
                     <div className='text-center text-decoration-underline'><span className='fw-400'>Batch Name : </span> <span className='fw-bolder fs-4'>{availableBatches.find(b => b.batch_id === batch.batch_id)?.batch_name}</span></div>
-                    <pre className='fs-6'>{todaySchedule[batch.batch_id]}</pre>
+                    <pre className='py-2'>{todaySchedule[batch.batch_id]} <br /></pre>
                   </div>
                 </div>
               ))}
@@ -385,14 +385,14 @@ const HeroSection = () => {
           </div>
         </Col>
         {/* Best Performer Section */}
-        <Col md={6}>
+        <Col md={5}>
           <div className="best-performer-section d-flex align-items-center justify-content-center flex-column p-3">
             <h2>Best Performers</h2>
             {bestPerformerData.length > 0 ? (
               <Carousel nextIcon={<span className="carousel-control-next-icon mt-5" style={{ backgroundColor: '#C0C0C0' }} />} prevIcon={<span className="carousel-control-prev-icon mt-5" style={{ backgroundColor: '#C0C0C0' }} />}>
                 {bestPerformerData.map((performer, index) => (
                   <Carousel.Item key={index}>
-                    {console.log(performer.date)}
+                    {/* {console.log(performer.date)} */}
                     <p className='text-center'> For Date: {performer.bestPerformer.date}</p>
                     <div className="text-center mt-4">
                       <img src={images[index] || defaultProfileImage} alt="Best Performer" className="rounded-circle mb-3" style={{ width: '200px', height: '200px' }} />
