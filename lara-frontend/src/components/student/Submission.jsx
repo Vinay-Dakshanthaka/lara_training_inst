@@ -807,7 +807,7 @@ const Submission = () => {
           </Modal.Header>
           <Modal.Body>
             <b>Note:</b> Before submitting, run the code.<br />
-            You can submit an answer for this question only once.
+            {/* You can submit an answer for this question only once. */}
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>
