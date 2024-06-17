@@ -376,7 +376,7 @@ const HeroSection = () => {
               {batchSchedules.map((batch) => (
                 <div key={batch.batch_id}>
                   <div className='card m-4 px-2 py-2'>
-                    <h5>{availableBatches.find(b => b.batch_id === batch.batch_id)?.batch_name}</h5>
+                    <div className='text-center text-decoration-underline'><span className='fw-400'>Batch Name : </span> <span className='fw-bolder fs-4'>{availableBatches.find(b => b.batch_id === batch.batch_id)?.batch_name}</span></div>
                     <pre className='fs-6'>{todaySchedule[batch.batch_id]}</pre>
                   </div>
                 </div>

@@ -321,11 +321,11 @@
   import { Modal, Button } from 'react-bootstrap';
   import { baseURL } from '../config';
   import BackButton from '../BackButton';
-  import AceEditor from 'react-ace';
+  // import AceEditor from 'react-ace';
 
 
-  import 'ace-builds/src-noconflict/mode-java';
-  import 'ace-builds/src-noconflict/theme-gruvbox_light_hard';
+  // import 'ace-builds/src-noconflict/mode-java';
+  // import 'ace-builds/src-noconflict/theme-gruvbox_light_hard';
 
 
 // const Submission = () => {

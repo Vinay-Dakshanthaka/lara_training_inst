@@ -146,9 +146,9 @@ const getAllBatches = async (req, res) => {
         const userRole = user.role; // Get the user's role
         console.log("role :" + userRole)
         // Check if the user role is either "ADMIN" or 
-        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN') {
-            return res.status(403).json({ error: 'Access forbidden' });
-        }
+        // if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN') {
+        //     return res.status(403).json({ error: 'Access forbidden' });
+        // }
         // Send the batches as a response
         res.status(200).json(batches);
     } catch (error) {
