@@ -156,8 +156,8 @@ sequelize.authenticate()
         console.error('Error connecting to the database:', err);
     });
 
-const db = {};
 
+const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 

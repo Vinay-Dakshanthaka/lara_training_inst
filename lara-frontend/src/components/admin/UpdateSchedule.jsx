@@ -305,6 +305,8 @@ const UpdateSchedule = () => {
             setShowSuccessToast(true);
             setTimeout(() => setShowSuccessToast(false), 3000);
             console.log("Schedule Updated Successfully");
+
+            
         } catch (error) {
             console.error('Error updating home content:', error);
             setShowErrorToast(true);
