@@ -156,7 +156,7 @@ const StartTest = () => {
                 if (String(selectedOption) === String(question.correct_option)) {
                     return sum + question.no_of_marks_allocated;
                 }
-                console.log('selected option ', selectedOption)
+                // console.log('selected option ', selectedOption)
                 return sum;
             }, 0);
 
@@ -258,7 +258,7 @@ const StartTest = () => {
                                             <p>{index + 1}. {question.question_description}</p>
                                             <p className={`text-${isCorrect ? 'success' : 'danger'}`}>Your Answer: {selectedOption ? selectedOption : "Not Attempted"}</p>
                                             {!isCorrect && (
-                                                <p className="text-success">Correct Answer: {question[question.correct_option]}</p>
+                                                <p className="text-success">Correct Answer:  {question.correct_option}</p>
                                             )}
                                         </div>
                                     );
