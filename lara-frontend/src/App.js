@@ -37,6 +37,11 @@ import StudentCumulativeTest from './components/student/StudentCumulativeTest';
 import StartTest from './components/student/StartTest';
 import AllTestResults from './components/student/AllTestResults';
 import DetailedResult from './components/student/DetailedResult';
+import PlacementTest from './components/student/PlacementTest';
+import PlacementTestError from './components/placementTest/PlacementTestError';
+import CreateTestLink from './components/placementTest/CreateTestLink';
+import NotFound from './components/NotFound';
+import FetchResultsByTestId from './components/placementTest/FetchResultsByTestId';
 
 
 const App = () => {
@@ -80,6 +85,12 @@ const App = () => {
             <Route path="/start-test" element={<StartTest />} />
             <Route path="/all-test-results" element={<AllTestResults />} />
             <Route path="/all-test-results/:test_id" element={<DetailedResult />} />
+            <Route path="/test/:test_id" element={<PlacementTest />} />
+            <Route path="/malpractice-detected" element={<PlacementTestError />} />
+            <Route path="/create-test-link" element={<CreateTestLink />} />
+            <Route path="/not-found" element={<NotFound />} /> 
+            <Route path="/get-result/:test_id" element={<FetchResultsByTestId />} />
+
             {/* <Route path="/profile" element={<Profile />} /> */}
             <Route path="*" element={<LoginForm />} />
 

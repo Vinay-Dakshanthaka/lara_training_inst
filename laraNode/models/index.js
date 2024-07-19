@@ -176,7 +176,10 @@ db.Attendance = require('./attendanceModel.js')(sequelize, DataTypes);
 db.HomeContent = require('./homeContentModel.js')(sequelize, DataTypes); 
 db.BestPerformer = require('./performerOfTheDayModel.js')(sequelize, DataTypes);
 db.TestResults = require('./testResultModel.js')(sequelize, DataTypes)
-
+db.PlacementTest = require('./placementTestModel.js')(sequelize, DataTypes)
+db.PlacementTestTopic = require('./placementTestTopicModel.js')(sequelize, DataTypes)
+db.PlacementTestResult = require('./placementTestResultModel.js')(sequelize, DataTypes)
+db.PlacementTestStudent = require('./placementTestStudentsModel.js')(sequelize, DataTypes)
 // cumulative test models 
 db.CumulativeQuestion = require('./cumulativeQuestionModel.js')(sequelize, DataTypes);
 db.Topic = require('./topicModel.js')(sequelize,DataTypes);
@@ -186,7 +189,7 @@ db.Subject = require('./subjectModel.js')(sequelize, DataTypes);
 db.Student.hasOne(db.Profile, {
     foreignKey: 'student_id',
     as: 'profile',
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE'  
 });
 
 db.Profile.belongsTo(db.Student, {
@@ -238,6 +241,48 @@ db.Batch.belongsToMany(db.Student, {
     // scope: {
     //     role: 'TRAINER' // Filter trainers based on role
     // }
+});
+
+// Associations
+db.PlacementTest.hasMany(db.PlacementTestTopic, {
+    foreignKey: 'placement_test_id',
+    // as: 'topics'
+    as: 'Topics'
+});
+
+db.PlacementTestTopic.belongsTo(db.PlacementTest, {
+    foreignKey: 'placement_test_id',
+    onDelete: 'CASCADE'
+});
+
+db.Topic.hasMany(db.PlacementTestTopic, {
+    foreignKey: 'topic_id',
+});
+
+db.PlacementTestTopic.belongsTo(db.Topic, {
+    foreignKey: 'topic_id',
+    onDelete: 'CASCADE'
+});
+
+db.PlacementTest.hasMany(db.PlacementTestResult, {
+    foreignKey: 'placement_test_id',
+    as: 'results'
+});
+
+db.PlacementTestResult.belongsTo(db.PlacementTest, {
+    foreignKey: 'placement_test_id',
+    onDelete: 'CASCADE'
+});
+
+// Define associations for PlacementTestStudent
+db.PlacementTestStudent.hasMany(db.PlacementTestResult, {
+    foreignKey: 'placement_test_student_id',
+    as: 'results'
+});
+
+db.PlacementTestResult.belongsTo(db.PlacementTestStudent, {
+    foreignKey: 'placement_test_student_id',
+    onDelete: 'CASCADE'
 });
 
 Object.keys(db).forEach(modelName => {

@@ -20,7 +20,7 @@ cumulativeTestRouter.get('/getSubjectById',verifyToken,cumulativeTestController.
 
 cumulativeTestRouter.get('/getTopicsBySubjectId',verifyToken,cumulativeTestController.getTopicsBySubjectId );
 
-cumulativeTestRouter.post('/getQuestionsByTopicIds',verifyToken,cumulativeTestController.getQuestionsByTopicIds );
+cumulativeTestRouter.post('/getQuestionsByTopicIds',cumulativeTestController.getQuestionsByTopicIds );
 
 cumulativeTestRouter.post('/getQuestionCountsByTopicIds',verifyToken,cumulativeTestController.getQuestionCountsByTopicIds );
 

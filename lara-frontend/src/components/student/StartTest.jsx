@@ -134,14 +134,10 @@ const StartTest = () => {
     };
 
     const handleAnswerChange = (questionId, selectedOption) => {
-        setAnswers(prevAnswers => {
-            const newAnswers = {
-                ...prevAnswers,
-                [questionId]: selectedOption,
-            };
-            // console.log('Updated answers:', newAnswers); 
-            return newAnswers;
-        });
+        setAnswers(prevAnswers => ({
+            ...prevAnswers,
+            [questionId]: selectedOption, // Store the selected option value directly
+        }));
     };
 
 
@@ -156,9 +152,11 @@ const StartTest = () => {
 
             const obtained_marks = questions.reduce((sum, question) => {
                 const selectedOption = answers[question.cumulative_question_id];
-                if (selectedOption === question.correct_option) {
+                // Convert both selectedOption and correctOption to strings for comparison
+                if (String(selectedOption) === String(question.correct_option)) {
                     return sum + question.no_of_marks_allocated;
                 }
+                console.log('selected option ', selectedOption)
                 return sum;
             }, 0);
 
@@ -170,7 +168,6 @@ const StartTest = () => {
                 question_ans_data[question.cumulative_question_id] = selectedOption;
             });
 
-            // console.log('Submitting answers:', question_ans_data); 
             const token = localStorage.getItem("token");
             if (!token) {
                 throw new Error("No token provided.");
@@ -190,7 +187,6 @@ const StartTest = () => {
                 question_ans_data,
             }, config);
 
-            // console.log('Test results saved successfully:', response.data);
             setTestResults({
                 ...response.data,
                 question_ans_data,
@@ -202,6 +198,7 @@ const StartTest = () => {
             setLoading(false); // Set loading state to false after submission
         }
     };
+
 
 
 
@@ -259,7 +256,7 @@ const StartTest = () => {
                                         <div key={question.cumulative_question_id} ref={el => questionRefs.current[index] = el} className={`p-2 mb-2 border position-relative ${isCorrect ? 'border-success' : 'border-danger'}`}>
                                             <span className="position-absolute top-0 end-0">Marks: {question.no_of_marks_allocated}</span>
                                             <p>{index + 1}. {question.question_description}</p>
-                                            <p className={`text-${isCorrect ? 'success' : 'danger'}`}>Your Answer: {selectedOption ? question[selectedOption] : "Not Attempted"}</p>
+                                            <p className={`text-${isCorrect ? 'success' : 'danger'}`}>Your Answer: {selectedOption ? selectedOption : "Not Attempted"}</p>
                                             {!isCorrect && (
                                                 <p className="text-success">Correct Answer: {question[question.correct_option]}</p>
                                             )}
@@ -283,8 +280,8 @@ const StartTest = () => {
                                                     label={question.option_1}
                                                     name={`question-${index}`}
                                                     id={`question-${index}-option-1`}
-                                                    value="option_1"
-                                                    checked={answers[question.cumulative_question_id] === 'option_1'}
+                                                    value={question.option_1}
+                                                    checked={answers[question.cumulative_question_id] === question.option_1}
                                                     onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value)}
                                                 />
                                                 <Form.Check
@@ -292,8 +289,8 @@ const StartTest = () => {
                                                     label={question.option_2}
                                                     name={`question-${index}`}
                                                     id={`question-${index}-option-2`}
-                                                    value="option_2"
-                                                    checked={answers[question.cumulative_question_id] === 'option_2'}
+                                                    value={question.option_2}
+                                                    checked={answers[question.cumulative_question_id] === question.option_2}
                                                     onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value)}
                                                 />
                                                 <Form.Check
@@ -301,8 +298,8 @@ const StartTest = () => {
                                                     label={question.option_3}
                                                     name={`question-${index}`}
                                                     id={`question-${index}-option-3`}
-                                                    value="option_3"
-                                                    checked={answers[question.cumulative_question_id] === 'option_3'}
+                                                    value={question.option_3}
+                                                    checked={answers[question.cumulative_question_id] === question.option_3}
                                                     onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value)}
                                                 />
                                                 <Form.Check
@@ -310,10 +307,11 @@ const StartTest = () => {
                                                     label={question.option_4}
                                                     name={`question-${index}`}
                                                     id={`question-${index}-option-4`}
-                                                    value="option_4"
-                                                    checked={answers[question.cumulative_question_id] === 'option_4'}
+                                                    value={question.option_4}
+                                                    checked={answers[question.cumulative_question_id] === question.option_4}
                                                     onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value)}
                                                 />
+
                                             </Col>
                                         </Form.Group>
                                     </Form>

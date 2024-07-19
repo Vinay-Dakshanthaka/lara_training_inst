@@ -11,6 +11,8 @@ import PlacementOfficer from '../admin/PlacementOfficer'
 import Attendance from '../admin/Attendance';
 import UpdateSchedule from '../admin/UpdateSchedule';
 import UpdateBestPerformer from '../admin/UpdateBestPerformer';
+import CumulativeTest from '../cumulativeTest/CumulativeTest';
+import CreateTestLink from '../placementTest/CreateTestLink';
 
 const StudentAdminDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');
@@ -94,6 +96,12 @@ const StudentAdminDashboard = () => {
         </Tab>
         <Tab eventKey="updateBestPerformer" title="Best Performer">
           <UpdateBestPerformer />
+        </Tab>
+        <Tab eventKey="cumulativeTest" title="Cumulative Test">
+          <CumulativeTest />
+        </Tab>
+        <Tab eventKey="create-test-link" title="Create Test Link">
+          <CreateTestLink />
         </Tab>
         {/* <Tab eventKey="allStudents" title="Student Reviews">
           <AllStudents />

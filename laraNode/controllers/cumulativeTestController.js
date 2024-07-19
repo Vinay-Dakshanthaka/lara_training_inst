@@ -447,10 +447,53 @@ const getQuestionCountsByTopicIds = async (req, res) => {
 //     }
 // };
 
+// const processExcel = async (filePath, topic_id) => {
+//     const workbook = xlsx.readFile(filePath);
+//     const sheet = workbook.Sheets[workbook.SheetNames[0]];
+//     const rows = xlsx.utils.sheet_to_json(sheet);
+
+//     for (const row of rows) {
+//         const [
+//             questionText,
+//             difficulty,
+//             marks,
+//             option1,
+//             option2,
+//             option3,
+//             option4,
+//             correctOptionIndex
+//         ] = [
+//             row["Question Text"],
+//             row.Difficulty,
+//             row.Marks,
+//             row["Option 1"],
+//             row["Option 2"],
+//             row["Option 3"],
+//             row["Option 4"],
+//             row["Correct Option"]
+//         ];
+
+//         // Create the cumulative question
+//         await CumulativeQuestion.create({
+//             question_description: questionText,
+//             topic_id: topic_id,
+//             difficulty_level: difficulty,
+//             no_of_marks_allocated: marks,
+//             option_1: option1,
+//             option_2: option2,
+//             option_3: option3,
+//             option_4: option4,
+//             correct_option: correctOptionIndex
+//         });
+//     }
+// };
+
 const processExcel = async (filePath, topic_id) => {
     const workbook = xlsx.readFile(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows = xlsx.utils.sheet_to_json(sheet);
+
+    const cleanString = (value) => (value != null ? String(value).trim().replace(/\s+/g, ' ') : '');
 
     for (const row of rows) {
         const [
@@ -461,16 +504,16 @@ const processExcel = async (filePath, topic_id) => {
             option2,
             option3,
             option4,
-            correctOptionIndex
+            correctOptionValue
         ] = [
-            row["Question Text"],
-            row.Difficulty,
-            row.Marks,
-            row["Option 1"],
-            row["Option 2"],
-            row["Option 3"],
-            row["Option 4"],
-            row["Correct Option"]
+            cleanString(row["Question Text"]),
+            cleanString(row.Difficulty),
+            cleanString(row.Marks),
+            cleanString(row["Option 1"]),
+            cleanString(row["Option 2"]),
+            cleanString(row["Option 3"]),
+            cleanString(row["Option 4"]),
+            cleanString(row["Correct Option"])
         ];
 
         // Create the cumulative question
@@ -483,11 +526,10 @@ const processExcel = async (filePath, topic_id) => {
             option_2: option2,
             option_3: option3,
             option_4: option4,
-            correct_option: correctOptionIndex
+            correct_option: correctOptionValue
         });
     }
 };
-
 
 const saveTestResults = async (req, res) => {
     try {

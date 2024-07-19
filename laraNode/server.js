@@ -22,9 +22,13 @@ app.use(cors(corsOptions));
 // Routers
 const router = require('./routes/studentRoutes.js');
 const cumulativeTestRouter = require('./routes/cumulativeTestRoutes.js')
+const placementTestRoute = require('./routes/placementTestRoutes.js')
+
 
 app.use('/api/student', router);
 app.use('/api/cumulative-test',cumulativeTestRouter)
+app.use('/api/placement-test', placementTestRoute);
+
 
 // Static Images Folder
 app.use('/Images', express.static('./Images'));
