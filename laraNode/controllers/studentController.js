@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const nodemailer = require('nodemailer')
+const {baseURL} = require('./baseURLConfig')
 
 // Import models
 const Student = db.Student;
@@ -475,7 +476,7 @@ const sendPasswordResetEmail = async (req, res) => {
                     <h2>Password Reset Request</h2>
                     <p>We received a request to reset the password associated with your account.</p>
                     <p>To proceed with the password reset, please click on the button below:</p>
-                    <a href="https://www.laragrooming.com/resetPassword?token=${token}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">Reset Password</a>
+                    <a href="${baseURL}/resetPassword?token=${token}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">Reset Password</a>
                     <p>If you did not request a password reset, you can ignore this email.</p>
                     <p>Please note that the link will expire after 30 minutes, so make sure to reset your password promptly.</p>
                     <p>Thank You,</p>
