@@ -29,7 +29,7 @@ const PlacementTest = () => {
     const [remainingTime, setRemainingTime] = useState(0); // Timer state
     const [autoSubmit, setAutoSubmit] = useState(false); // Auto-submit state
     const timerRef = useRef(null); // Timer reference
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     useEffect(() => {
         const handleVisibilityChange = async () => {
@@ -64,15 +64,12 @@ const PlacementTest = () => {
             cleanupListeners();
         };
     }, [navigate, showSummary]);
-     
     
-    
-
     useEffect(() => {
         const fetchTestDetails = async () => {
             try {
                 const response1 = await axios.post(`${baseURL}/api/placement-test/fetchTestTopicIdsAndQnNums`, {
-                    encrypted_test_id:test_id
+                    encrypted_test_id: test_id
                 });
 
                 const { topic_ids, number_of_questions, show_result } = response1.data;
@@ -84,19 +81,17 @@ const PlacementTest = () => {
                     setShowSummary(false); // Do not show detailed summary
                 }
 
-                const response2 = await axios.post(`${baseURL}/api/cumulative-test/getQuestionsByTopicIds`, {
-                    topic_ids,
-                    numberOfQuestions: number_of_questions
+                const response2 = await axios.post(`${baseURL}/api/cumulative-test/fetchQuestionsByTestId`, {
+                    placement_test_id:test_id
                 });
 
                 const questionsWithOptions = response2.data.map(question => ({
                     ...question,
-                    options: [
-                        question.option_1,
-                        question.option_2,
-                        question.option_3,
-                        question.option_4,
-                    ]
+                    options: question.QuestionOptions.map(opt => ({
+                        option_id: opt.option_id,
+                        option_description: opt.option_description
+                    })),
+                    correct_answers: question.CorrectAnswers.map(ans => ans.answer_description)
                 }));
 
                 setQuestions(questionsWithOptions);
@@ -110,13 +105,13 @@ const PlacementTest = () => {
 
                 setLoading(false);
             } catch (error) {
-                if(error.response){
-                    if(error.response.status === 403){
+                if (error.response) {
+                    if (error.response.status === 403) {
                         navigate('/not-found')
-                    }else if(error.response.status === 404){
+                    } else if (error.response.status === 404) {
                         navigate('/not-found')
                     }
-                }else{
+                } else {
                     console.error('Error fetching test details:', error);
                     setLoading(false);
                 }
@@ -152,11 +147,21 @@ const PlacementTest = () => {
         }, 1000);
     };
 
-    const handleAnswerChange = (questionId, selectedOption) => {
-        setAnswers(prevAnswers => ({
-            ...prevAnswers,
-            [questionId]: selectedOption,
-        }));
+    const handleAnswerChange = (questionId, selectedOption, checked) => {
+        setAnswers(prevAnswers => {
+            const questionAnswers = prevAnswers[questionId] || [];
+            if (checked) {
+                return {
+                    ...prevAnswers,
+                    [questionId]: [...questionAnswers, selectedOption]
+                };
+            } else {
+                return {
+                    ...prevAnswers,
+                    [questionId]: questionAnswers.filter(option => option !== selectedOption)
+                };
+            }
+        });
     };
 
     const handleSubmitTest = async () => {
@@ -166,8 +171,14 @@ const PlacementTest = () => {
             const completedDateTime = new Date().toISOString();
 
             const obtainedMarks = questions.reduce((sum, question) => {
-                const selectedOption = answers[question.cumulative_question_id];
-                if (String(selectedOption) === String(question.correct_option)) {
+                const selectedOptions = answers[question.cumulative_question_id] || [];
+                const correctOptions = question.correct_answers;
+
+                // Check if the selected options match the correct answers
+                const isCorrect = correctOptions.length === selectedOptions.length &&
+                    correctOptions.every(answer => selectedOptions.includes(answer));
+
+                if (isCorrect) {
                     return sum + question.no_of_marks_allocated;
                 }
                 return sum;
@@ -177,8 +188,8 @@ const PlacementTest = () => {
 
             const questionAnsData = {};
             questions.forEach(question => {
-                const selectedOption = answers[question.cumulative_question_id] || null;
-                questionAnsData[question.cumulative_question_id] = selectedOption;
+                const selectedOptions = answers[question.cumulative_question_id] || [];
+                questionAnsData[question.cumulative_question_id] = selectedOptions;
             });
 
             const response = await axios.post(`${baseURL}/api/placement-test/savePlacementTestResults`, {
@@ -257,13 +268,14 @@ const PlacementTest = () => {
                 setSaveError('Failed to save student data. Please try again.');
             }
         } catch (error) {
-            if(error.response){
-                if(error.response.status === 403){
+            if (error.response) {
+                if (error.response.status === 403) {
                     alert("You have already completed this test.")
+                   
                     setSaveError('You have already completed this test.');
-                    navigate('/not-found')
+                    navigate('/not-found');
                 }
-            }else{
+            } else {
                 console.error('Error saving student data:', error);
                 setSaveError('Failed to save student data. Please try again.');
             }
@@ -281,17 +293,21 @@ const PlacementTest = () => {
     };
 
     const getAnsweredQuestionsCount = () => {
-        return questions.filter(question => answers[question.cumulative_question_id]).length;
+        return questions.filter(question => answers[question.cumulative_question_id] && answers[question.cumulative_question_id].length > 0).length;
     };
 
     const getUnansweredQuestionsCount = () => {
-        return questions.filter(question => !answers[question.cumulative_question_id]).length;
+        return questions.filter(question => !answers[question.cumulative_question_id] || answers[question.cumulative_question_id].length === 0).length;
     };
 
     const getWrongAnswersCount = () => {
         return questions.filter(question => {
-            const selectedOption = answers[question.cumulative_question_id];
-            return selectedOption && selectedOption !== question.correct_option;
+            const selectedOptions = answers[question.cumulative_question_id] || [];
+            const correctOptions = question.correct_answers;
+
+            // Check if the selected options match the correct answers
+            return !(correctOptions.length === selectedOptions.length &&
+                correctOptions.every(answer => selectedOptions.includes(answer)));
         }).length;
     };
 
@@ -319,12 +335,12 @@ const PlacementTest = () => {
                                     {question.options.map((option, idx) => (
                                         <Form.Check
                                             key={idx}
-                                            type="radio"
-                                            label={option}
+                                            type="checkbox"
+                                            label={option.option_description}
                                             name={`question-${index}`}
-                                            value={option}
-                                            checked={answers[question.cumulative_question_id] === option}
-                                            onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value)}
+                                            value={option.option_description}
+                                            checked={answers[question.cumulative_question_id]?.includes(option.option_description)}
+                                            onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value, e.target.checked)}
                                         />
                                     ))}
                                 </Col>
@@ -437,4 +453,3 @@ const PlacementTest = () => {
 };
 
 export default PlacementTest;
-

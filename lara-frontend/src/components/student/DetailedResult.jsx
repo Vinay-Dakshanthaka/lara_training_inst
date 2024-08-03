@@ -27,6 +27,7 @@ const DetailedResult = () => {
 
                 const response = await axios.post(`${baseURL}/api/cumulative-test/getTestResultsByTestId`, { test_id }, config);
                 setTestResult(response.data);
+                console.log(response.data)
             } catch (error) {
                 console.error('Error fetching test result:', error);
             } finally {

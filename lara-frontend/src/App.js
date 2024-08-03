@@ -42,6 +42,10 @@ import PlacementTestError from './components/placementTest/PlacementTestError';
 import CreateTestLink from './components/placementTest/CreateTestLink';
 import NotFound from './components/NotFound';
 import FetchResultsByTestId from './components/placementTest/FetchResultsByTestId';
+import AddQuestion from './components/admin/AddQuestion';
+import AddQuestionsToLink from './components/placementTest/AddQuestionsToLink';
+import UploadQuestionsToLink from './components/placementTest/UploadQuestionsToLink';
+import AllPlacementTests from './components/placementTest/AllPlacementTests';
 
 
 const App = () => {
@@ -90,7 +94,11 @@ const App = () => {
             <Route path="/create-test-link" element={<CreateTestLink />} />
             <Route path="/not-found" element={<NotFound />} /> 
             <Route path="/get-result/:test_id" element={<FetchResultsByTestId />} />
-
+            <Route path="/add-questions-tolink/:test_id" element={<AddQuestionsToLink />} />
+            <Route path="/add-new-questions/:test_id" element={<AddQuestion />} />
+            <Route path="/upload-excel-link/:test_id" element={<UploadQuestionsToLink />} />
+            <Route path="/test-links" element={<AllPlacementTests />} />
+            {/* <Route path="/add-question" element={<AddQuestion />} /> */}
             {/* <Route path="/profile" element={<Profile />} /> */}
             <Route path="*" element={<LoginForm />} />
 

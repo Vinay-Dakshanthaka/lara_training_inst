@@ -35,9 +35,17 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: false
         }
     }, {
-        timestamps: true, // Enabling timestamps for tracking purposes
-        tableName: 'Placementtests' // Specify the actual table name
+        timestamps: true,
+        tableName: 'Placementtests'
     });
 
+    PlacementTest.associate = (models) => {
+        PlacementTest.belongsToMany(models.CumulativeQuestion, {
+            through: 'CQPlacementTest',
+            foreignKey: 'placement_test_id',
+            as: 'CumulativeQuestions'
+        });
+    };
+
     return PlacementTest;
-}; 
+};

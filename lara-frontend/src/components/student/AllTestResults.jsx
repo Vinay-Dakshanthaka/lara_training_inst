@@ -74,31 +74,33 @@ const AllTestResults = () => {
                     <Typography variant="body1">No test results available.</Typography>
                 ) : (
                     <Table style={{ width: '100%' }}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell><strong>Date</strong></TableCell>
-                                <TableCell><strong>Total Marks</strong></TableCell>
-                                <TableCell><strong>Obtained Marks</strong></TableCell>
-                                <TableCell><strong>View Details</strong></TableCell>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell><strong>#</strong></TableCell>
+                            <TableCell><strong>Date</strong></TableCell>
+                            <TableCell><strong>Total Marks</strong></TableCell>
+                            <TableCell><strong>Obtained Marks</strong></TableCell>
+                            {/* <TableCell><strong>View Details</strong></TableCell> */}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {testResults.map((result, index) => (
+                            <TableRow key={result.testResult_id}>
+                                <TableCell>{index + 1}</TableCell> {/* Serial number */}
+                                <TableCell>{formatDate(result.completed_date_time)}</TableCell>
+                                <TableCell>{result.total_marks}</TableCell>
+                                <TableCell>{result.obtained_marks}</TableCell>
+                                {/* <TableCell>
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        style={{ marginTop: '20px' }}
+                                        onClick={() => handleNavigate(result.testResult_id)} >View Details</Button>
+                                </TableCell> */}
                             </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {testResults.map((result) => (
-                                <TableRow key={result.testResult_id}>
-                                    <TableCell>{formatDate(result.completed_date_time)}</TableCell>
-                                    <TableCell>{result.total_marks}</TableCell>
-                                    <TableCell>{result.obtained_marks}</TableCell>
-                                    <TableCell>
-                                        <Button
-                                            variant="contained"
-                                            color="secondary"
-                                            style={{ marginTop: '20px' }}
-                                            onClick={() => handleNavigate(result.testResult_id)} >View Details</Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                        ))}
+                    </TableBody>
+                </Table>
                 )}
             </div>
         </div>

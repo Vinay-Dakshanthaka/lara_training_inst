@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { baseURL } from '../config';
 import AllPlacementTests from './AllPlacementTests';
@@ -19,6 +19,7 @@ const CreateTestLink = () => {
     const [endTime, setEndTime] = useState('');
     const [description, setDescription] = useState('');
     const [showResult, setShowResult] = useState(true);
+    const [newTestLink, setNewTestLink] = useState(''); // New state for test link
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -87,7 +88,12 @@ const CreateTestLink = () => {
 
             setTopics(topicsWithCounts);
         } catch (error) {
-            console.error('Error fetching topics:', error);
+            if(error.response && error.response.status === 404){
+                toast.info('No Topics Available for this Subject')
+            }else{
+                toast.error('Something went wrong')
+                console.error('Error fetching topics:', error);
+            }
         }
     };
 
@@ -175,21 +181,32 @@ const CreateTestLink = () => {
                 topic_ids: selectedTopics
             }, config);
 
-            // console.log('Link created successfully:', response.data);
-            toast.success('Link Created ')
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
+            setNewTestLink(response.data.newTest.test_link); // Set the test link in state
+            toast.success('Link Created');
         } catch (error) {
             console.error('Error creating test link:', error);
-            toast.error('Something went wrong!!')
+            toast.error('Something went wrong!!');
         }
     };
 
+
     return (
         <div className="container mt-5">
+            {newTestLink && (
+                <div className="mt-4 p-3 card " style={{ border: '1px solid #007bff', borderRadius: '5px', backgroundColor: '#e9ecef' }}>
+                    <h5> Link Created Successfully :</h5>
+                    <p style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#007bff' }}>
+                        {/* <a href={newTestLink} target="_blank" rel="noopener noreferrer">{newTestLink}</a> */}
+                        {newTestLink}
+                    </p>
+                    <p className="fw-bolder">
+                   To add questions to this link
+                   <Link to="/test-links">  click here</Link>
+                   </p>
+                </div>
+            )}
+
             <h3 className="text-center">Create Test Link</h3>
-            {/* <p className="text-center"></p> */}
             <Form.Group controlId="formSubject" className="mt-4" style={{ maxWidth: '300px' }}>
                 <Form.Label>Select Subject</Form.Label>
                 <Form.Control as="select" value={selectedSubject} onChange={handleSubjectChange} required>
@@ -234,11 +251,15 @@ const CreateTestLink = () => {
                     onChange={handleNumQuestionsChange}
                     required
                 />
-                {errorMessage && (
+                <p className="my-2" style={{width:'80vw'}}>
+                    <span><sup className='text-danger h5'>*</sup></span>
+                You can specify the number of questions for the test. If you add fewer questions than specified, only those will appear in the test. If you add more questions, random questions will be selected from the extras during the test, ensuring each student receives a unique set of questions.
+                </p>
+                {/* {errorMessage && (
                     <Form.Text className="text-danger">
                         {errorMessage}
                     </Form.Text>
-                )}
+                )} */}
             </Form.Group>
 
             <Form.Group controlId="formDescription" className="mt-4" style={{ maxWidth: '300px' }}>
@@ -284,7 +305,20 @@ const CreateTestLink = () => {
                 Create Test Link
             </Button>
             <ToastContainer />
-            <AllPlacementTests />
+
+            {/* Display the newly created test link */}
+            {newTestLink && (
+                <div className="mt-4">
+                    <h5>Link Created successfully {newTestLink}</h5>
+                   <p className="fw-bolder">
+                   To add questions to this link
+                   <Link to="/test-links">  click here</Link>
+                   </p>
+                    
+                </div>
+            )}
+
+            {/* <AllPlacementTests /> */}
         </div>
     );
 };

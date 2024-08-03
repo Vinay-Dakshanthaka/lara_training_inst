@@ -3,3 +3,5 @@ laraNode/node_modules
 lara-frontend/node_modules
 
 laraNode/.env
+
+laraNode/cumulative_questions

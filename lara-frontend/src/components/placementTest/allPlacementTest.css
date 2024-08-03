@@ -1,0 +1,26 @@
+.test-link-cell {
+    display: flex;
+    align-items: center;
+}
+
+.test-link-text {
+    max-width: 200px; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    margin-right: 5px; /* Space between link text and icon */
+}
+
+.btn-link {
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: underline;
+}
+
+.btn-link:hover {
+    color: #0056b3;
+}

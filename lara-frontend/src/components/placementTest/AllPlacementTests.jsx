@@ -3,9 +3,10 @@ import axios from 'axios';
 import { baseURL } from '../config';
 import { Link } from 'react-router-dom';
 import { BsCopy } from 'react-icons/bs';
-import { ToastContainer } from 'react-bootstrap';
+import { OverlayTrigger, ToastContainer, Tooltip } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './allPlacementTest.css'
 
 const AllPlacementTests = () => {
     const [placementTests, setPlacementTests] = useState([]);
@@ -63,11 +64,14 @@ const AllPlacementTests = () => {
                             <th>ID</th>
                             <th>Test Link</th>
                             <th>Number of Questions</th>
-                            <th>Description</th>
+                            {/* <th>Description</th>
                             <th>Start Time</th>
                             <th>End Time</th>
-                            <th>Show Result</th>
+                            <th>Show Result</th> */}
                             <th>Results</th>
+                            <th>Add Existing Questions</th>
+                            <th>Add New Questions</th>
+                            <th>Upload Questions</th>
                             <th>Activate Link</th>
                         </tr>
                     </thead>
@@ -75,26 +79,45 @@ const AllPlacementTests = () => {
                         {placementTests.map(test => (
                             <tr key={test.placement_test_id} className={test.is_Active ? 'table-success' : ''}>
                                 <td>{test.placement_test_id}</td>
-                                <td>
-                                    {test.test_link}
+                                <td className="test-link-cell">
+                                    <OverlayTrigger
+                                        placement="top"
+                                        overlay={<Tooltip id={`tooltip-${test.placement_test_id}`}>{test.test_link}</Tooltip>}
+                                    >
+                                        <span className="test-link-text">{test.test_link}</span>
+                                    </OverlayTrigger>
                                     {test.is_Active && (
                                         <button
                                             className="btn btn-link"
                                             onClick={() => copyTestLinkToClipboard(test.test_link)}
-                                            style={{ marginLeft: '10px' }}
                                         >
                                             <BsCopy />
                                         </button>
                                     )}
                                 </td>
                                 <td>{test.number_of_questions}</td>
-                                <td>{test.description}</td>
+                                {/* <td>{test.description}</td>
                                 <td>{test.start_time}</td>
                                 <td>{test.end_time}</td>
-                                <td>{test.show_result ? 'Yes' : 'No'}</td>
+                                <td>{test.show_result ? 'Yes' : 'No'}</td> */}
                                 <td>
                                     <Link to={`/get-result/${test.placement_test_id}`}>
                                         Results
+                                    </Link>
+                                </td>
+                                <td>
+                                    <Link to={`/add-questions-tolink/${test.placement_test_id}`}>
+                                        Add Existing Questions 
+                                    </Link>
+                                </td>
+                                <td>
+                                    <Link to={`/add-new-questions/${test.placement_test_id}`}>
+                                        Add New Questions 
+                                    </Link>
+                                </td>
+                                <td>
+                                    <Link to={`/upload-excel-link/${test.placement_test_id}`}>
+                                        Upload Questions
                                     </Link>
                                 </td>
                                 <td>

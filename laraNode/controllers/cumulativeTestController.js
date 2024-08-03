@@ -9,75 +9,90 @@ const CumulativeQuestion = db.CumulativeQuestion;
 const Topic = db.Topic;
 const Student = db.Student;
 const TestResults = db.TestResults;
+const Option = db.Option;
+const CorrectAnswer = db.CorrectAnswer;
 
 
-const saveSubject = async (req, res)=>{
-    try{
+const saveSubject = async (req, res) => {
+    try {
+        const studentId = req.studentId;
+        const user = await Student.findByPk(studentId);
+        const userRole = user.role;
 
-        // Fetch the user's role from the database using the user's ID
-        const studentId = req.studentId; 
-        const user = await Student.findByPk(studentId); // Fetch user from database
-        const userRole = user.role; // Get the user's role
-        console.log("role :"+userRole)
-        // Check if the user role is either "ADMIN" or "SUPER ADMIN"
+        // Check if the user role is authorized
         if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
             return res.status(403).json({ error: 'Access forbidden' });
         }
 
-        const {subject_name} = req.body
+        // Trim and retrieve subject_name from request body
+        const subject_name = req.body.subject_name.trim();
 
+        // Check if subject_name already exists in the database
         let subject = await Subject.findOne({ where: { name: subject_name } });
-        if (!subject) {
+
+        if (subject) {
+            // If subject exists, return appropriate message and status code
+            return res.status(400).json({ error: 'Subject already exists' });
+        } else {
+            // If subject does not exist, create a new subject
             subject = await Subject.create({ name: subject_name });
+            return res.status(200).send(subject);
         }
 
-        // const subject = await Subject.create({
-        //     subject_name
-        // });
-
-
-
-        res.status(200).send(subject);
-
-    }catch(error){
+    } catch (error) {
         console.log(error);
-        res.status(500).send({ message: error.message });
+        return res.status(500).send({ message: error.message });
     }
 }
 
-const updateSubject = async (req, res)=>{
-    try{
 
-         // Fetch the user's role from the database using the user's ID
-         const studentId = req.studentId; 
-         const user = await Student.findByPk(studentId); // Fetch user from database
-         const userRole = user.role; // Get the user's role
-         console.log("role :"+userRole)
-         // Check if the user role is either "ADMIN" or "SUPER ADMIN"
-         if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
-             return res.status(403).json({ error: 'Access forbidden' });
-         }
+const updateSubject = async (req, res) => {
+    try {
+        // Fetch the user's role from the database using the user's ID
+        const studentId = req.studentId; 
+        const user = await Student.findByPk(studentId); // Fetch user from database
+        const userRole = user.role; // Get the user's role
 
-        const {subject_id,subject_name} = req.body
+        // Check if the user role is either "ADMIN" or "SUPER ADMIN" or "TRAINER"
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
+            return res.status(403).json({ error: 'Access forbidden' });
+        }
 
+        // Retrieve and trim the subject_name from the request body
+        const { subject_id, subject_name } = req.body;
+        const trimmedName = subject_name.trim();
+
+        // Find the subject by ID
         let subject = await Subject.findByPk(subject_id);
 
+        // If subject not found, return 404
         if (!subject) {
             return res.status(404).json({ error: 'No Subject found' });
         }
 
-        // update the subject 
-        subject.name = subject_name;
+        // Check if the new subject name already exists in the database
+        let existingSubject = await Subject.findOne({ where: { name: trimmedName } });
 
-        await subject.save(subject)
+        // If a different subject with the same name exists, return an error
+        if (existingSubject && existingSubject.id !== subject_id) {
+            return res.status(400).json({ error: 'Subject name already exists' });
+        }
 
+        // Update the subject name
+        subject.name = trimmedName;
+
+        // Save the updated subject
+        await subject.save();
+
+        // Return the updated subject
         res.status(200).send(subject);
 
-    }catch(error){
+    } catch (error) {
         console.log(error);
         res.status(500).send({ message: error.message });
     }
 }
+
 
 const deleteSubject = async (req, res)=>{
     try{
@@ -111,71 +126,91 @@ const deleteSubject = async (req, res)=>{
 }
 
 
-const saveTopic = async (req, res)=>{
-    try{
+const saveTopic = async (req, res) => {
+    try {
+        // Fetch the user's role from the database using the user's ID
+        const studentId = req.studentId;
+        const user = await Student.findByPk(studentId);
+        const userRole = user.role;
 
-         // Fetch the user's role from the database using the user's ID
-         const studentId = req.studentId; 
-         const user = await Student.findByPk(studentId); // Fetch user from database
-         const userRole = user.role; // Get the user's role
-         console.log("role :"+userRole)
-         // Check if the user role is either "ADMIN" or "SUPER ADMIN"
-         if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
-             return res.status(403).json({ error: 'Access forbidden' });
-         }
+        // Check if the user role is either "ADMIN", "SUPER ADMIN", or "TRAINER"
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
+            return res.status(403).json({ error: 'Access forbidden' });
+        }
 
-        const {topic_name,subject_id} = req.body
-         console.log(" topic name ", topic_name, " : subject id ", subject_id)
-         // Check if the subject_id exists
-         const subject = await Subject.findByPk(subject_id);
-         if (!subject) {
-             return res.status(400).send({ message: "Subject not found." });
-         }
+        // Retrieve and trim topic_name and subject_id from the request body
+        const { topic_name, subject_id } = req.body;
+        const trimmedTopicName = topic_name.trim();
 
-         // Ensure the topic exists
-         let topic = await Topic.findOne({ where: { name: topic_name, subject_id: subject.subject_id } });
-         if (!topic) {
-             topic = await Topic.create({ name: topic_name, subject_id: subject.subject_id });
-         }
+        // Check if the subject_id exists
+        const subject = await Subject.findByPk(subject_id);
+        if (!subject) {
+            return res.status(400).send({ message: "Subject not found." });
+        }
+
+        // Check if the topic already exists for the given subject_id
+        let topic = await Topic.findOne({ where: { name: trimmedTopicName, subject_id } });
+        if (topic) {
+            return res.status(400).json({ error: 'Topic already exists for this subject.' });
+        }
+
+        // Create new topic if it doesn't exist
+        topic = await Topic.create({ name: trimmedTopicName, subject_id });
 
         res.status(200).send(topic);
-
-    }catch(error){
+    } catch (error) {
         console.log(error);
         res.status(500).send({ message: error.message });
     }
 }
 
+
 const updateTopic = async (req, res) => {
     try {
         const { topic_id, topic_name } = req.body;
 
-         // Fetch the user's role from the database using the user's ID
-         const studentId = req.studentId; 
-         const user = await Student.findByPk(studentId); // Fetch user from database
-         const userRole = user.role; // Get the user's role
-         console.log("role :"+userRole)
-         // Check if the user role is either "ADMIN" or "SUPER ADMIN"
-         if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
-             return res.status(403).json({ error: 'Access forbidden' });
-         }
+        // Fetch the user's role from the database using the user's ID
+        const studentId = req.studentId; 
+        const user = await Student.findByPk(studentId); // Fetch user from database
+        const userRole = user.role; // Get the user's role
+        console.log("role :" + userRole);
 
+        // Check if the user role is either "ADMIN", "SUPER ADMIN", or "TRAINER"
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
+            return res.status(403).json({ error: 'Access forbidden' });
+        }
+
+        // Ensure both topic_id and topic_name are provided
         if (!topic_id || !topic_name) {
             return res.status(400).send({ message: "Both topic_id and topic_name are required." });
         }
 
+        // Fetch the topic by ID
         let topic = await Topic.findByPk(topic_id);
 
+        // If topic not found, return 404
         if (!topic) {
             return res.status(404).send({ message: `No topic found with id ${topic_id}` });
         }
 
-        topic.name = topic_name;
+        // Trim the topic_name
+        const trimmedTopicName = topic_name.trim();
+
+        // Check if another topic with the same name exists under the same subject
+        let existingTopic = await Topic.findOne({ where: { name: trimmedTopicName, subject_id: topic.subject_id } });
+
+        // If a different topic with the same name exists, return an error
+        if (existingTopic && existingTopic.id !== topic_id) {
+            return res.status(400).json({ error: 'Topic name already exists for this subject.' });
+        }
+
+        // Update the topic name
+        topic.name = trimmedTopicName;
         await topic.save();
 
         res.status(200).send({
-            message:"Update Success!!",
-            topic:topic
+            message: "Update Success!",
+            topic: topic
         });
 
     } catch (error) {
@@ -183,6 +218,7 @@ const updateTopic = async (req, res) => {
         res.status(500).send({ message: error.message });
     }
 }
+
 
 const deleteTopic = async (req, res)=>{
     try{
@@ -311,9 +347,53 @@ const getAllSubjectsAndTopics = async (req, res) => {
     }
 }
 
+// const getQuestionsByTopicIds = async (req, res) => {
+//     try {
+//         // Get topic_ids and number of questions from the request body
+//         const { topic_ids, numberOfQuestions } = req.body;
+//         console.log("topic ids ", topic_ids, "number of questions", numberOfQuestions);
+
+//         if (!topic_ids || topic_ids.length === 0 || !numberOfQuestions) {
+//             return res.status(400).send({ message: "Invalid input data" });
+//         }
+
+//         // Calculate the number of questions per topic
+//         const questionsPerTopic = Math.floor(numberOfQuestions / topic_ids.length);
+//         const remainderQuestions = numberOfQuestions % topic_ids.length;
+
+//         let allQuestions = [];
+
+//         for (let i = 0; i < topic_ids.length; i++) {
+//             const topicId = topic_ids[i];
+//             let questionsToFetch = questionsPerTopic;
+
+//             // Distribute remainder questions
+//             if (i < remainderQuestions) {
+//                 questionsToFetch += 1;
+//             }
+
+//             const questions = await CumulativeQuestion.findAll({
+//                 where: { topic_id: topicId },
+//                 limit: questionsToFetch,
+//                 order: Sequelize.literal('RAND()') // Fetch random questions
+//             });
+
+//             allQuestions = allQuestions.concat(questions);
+//         }
+
+//         if (allQuestions.length > 0) {
+//             res.status(200).json(allQuestions);
+//         } else {
+//             res.status(404).send({ message: "Questions not found" });
+//         }
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send({ message: error.message });
+//     }
+// };
+
 const getQuestionsByTopicIds = async (req, res) => {
     try {
-        // Get topic_ids and number of questions from the request body
         const { topic_ids, numberOfQuestions } = req.body;
         console.log("topic ids ", topic_ids, "number of questions", numberOfQuestions);
 
@@ -321,7 +401,6 @@ const getQuestionsByTopicIds = async (req, res) => {
             return res.status(400).send({ message: "Invalid input data" });
         }
 
-        // Calculate the number of questions per topic
         const questionsPerTopic = Math.floor(numberOfQuestions / topic_ids.length);
         const remainderQuestions = numberOfQuestions % topic_ids.length;
 
@@ -331,7 +410,6 @@ const getQuestionsByTopicIds = async (req, res) => {
             const topicId = topic_ids[i];
             let questionsToFetch = questionsPerTopic;
 
-            // Distribute remainder questions
             if (i < remainderQuestions) {
                 questionsToFetch += 1;
             }
@@ -339,7 +417,19 @@ const getQuestionsByTopicIds = async (req, res) => {
             const questions = await CumulativeQuestion.findAll({
                 where: { topic_id: topicId },
                 limit: questionsToFetch,
-                order: Sequelize.literal('RAND()') // Fetch random questions
+                order: Sequelize.literal('RAND()'),
+                include: [
+                    {
+                        model: Option,
+                        as: 'QuestionOptions',
+                        attributes: ['option_id', 'option_description']
+                    },
+                    {
+                        model: CorrectAnswer,
+                        as: 'CorrectAnswers',
+                        attributes: ['correct_answer_id', 'answer_description']
+                    }
+                ]
             });
 
             allQuestions = allQuestions.concat(questions);
@@ -355,6 +445,124 @@ const getQuestionsByTopicIds = async (req, res) => {
         res.status(500).send({ message: error.message });
     }
 };
+ 
+const fetchQuestionsByTestId = async (req, res) => {
+    try {
+        const { placement_test_id } = req.body;
+        console.log("Placement Test ID:", placement_test_id);
+
+        if (!placement_test_id) {
+            return res.status(400).send({ message: "Placement Test ID is required" });
+        }
+
+        // Fetch the number of questions from the PlacementTest table
+        const placementTest = await db.PlacementTest.findByPk(placement_test_id, {
+            attributes: ['number_of_questions']
+        });
+
+        if (!placementTest) {
+            return res.status(404).send({ message: "Placement test not found" });
+        }
+
+        const numberOfQuestions = placementTest.number_of_questions;
+
+        // Fetch cumulative_question_ids from CumulativeQuestionPlacementTest table
+        const questionPlacements = await db.CumulativeQuestionPlacementTest.findAll({
+            where: { placement_test_id },
+            attributes: ['cumulative_question_id']
+        });
+
+        if (!questionPlacements.length) {
+            return res.status(404).send({ message: "No questions found for this test" });
+        }
+
+        const questionIds = questionPlacements.map(q => q.cumulative_question_id);
+
+        // Shuffle the question IDs and limit to the number of questions specified in the placement test
+        const shuffledQuestionIds = questionIds.sort(() => 0.5 - Math.random());
+        const limitedQuestionIds = shuffledQuestionIds.slice(0, Math.min(numberOfQuestions, questionIds.length));
+
+        // Fetch questions based on the shuffled and limited question IDs
+        const questions = await CumulativeQuestion.findAll({
+            where: { cumulative_question_id: limitedQuestionIds },
+            include: [
+                {
+                    model: Option,
+                    as: 'QuestionOptions',
+                    attributes: ['option_id', 'option_description']
+                },
+                {
+                    model: CorrectAnswer,
+                    as: 'CorrectAnswers',
+                    attributes: ['correct_answer_id', 'answer_description']
+                }
+            ]
+        });
+
+        if (questions.length > 0) {
+            res.status(200).json(questions);
+        } else {
+            res.status(404).send({ message: "No questions found for the given test ID" });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: error.message });
+    }
+};
+
+
+const getPracticeQuestionsByTopicIds = async (req, res) => {
+    try {
+        const { topic_ids, numberOfQuestions } = req.body;
+        if (!topic_ids || topic_ids.length === 0 || !numberOfQuestions) {
+            return res.status(400).send({ message: "Invalid input data" });
+        }
+
+        const questionsPerTopic = Math.floor(numberOfQuestions / topic_ids.length);
+        const remainderQuestions = numberOfQuestions % topic_ids.length;
+
+        let allQuestions = [];
+
+        for (let i = 0; i < topic_ids.length; i++) {
+            const topicId = topic_ids[i];
+            let questionsToFetch = questionsPerTopic;
+
+            if (i < remainderQuestions) {
+                questionsToFetch += 1;
+            }
+
+            const questions = await CumulativeQuestion.findAll({
+                where: { topic_id: topicId, test_id: null }, // test_id will be set as null for practice questions
+                limit: questionsToFetch,
+                order: Sequelize.literal('RAND()'),
+                include: [
+                    {
+                        model: Option,
+                        as: 'QuestionOptions',
+                        attributes: ['option_id', 'option_description']
+                    },
+                    {
+                        model: CorrectAnswer,
+                        as: 'CorrectAnswers',
+                        attributes: ['correct_answer_id', 'answer_description']
+                    }
+                ]
+            });
+
+            allQuestions = allQuestions.concat(questions);
+        }
+
+        if (allQuestions.length > 0) {
+            res.status(200).json(allQuestions);
+        } else {
+            res.status(404).send({ message: "Questions not found" });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: error.message });
+    }
+};
+
 
 
 const getQuestionCountsByTopicIds = async (req, res) => {
@@ -388,6 +596,118 @@ const getQuestionCountsByTopicIds = async (req, res) => {
         res.status(500).send({ message: error.message });
     }
 };
+
+// const addQuestion = async (req, res) => {
+//     try {
+//         // Extract required fields from the request body
+//         const { topic_id, question_description, no_of_marks_allocated, difficulty_level, option_1, option_2, option_3, option_4, correct_option } = req.body;
+
+//         // Create the cumulative question
+//         const newQuestion = await CumulativeQuestion.create({
+//             topic_id,
+//             question_description,
+//             no_of_marks_allocated,
+//             difficulty_level,
+//             option_1,
+//             option_2,
+//             option_3,
+//             option_4,
+//             correct_option
+//         });
+
+//         return res.status(201).send(newQuestion);
+//     } catch (error) {
+//         console.error('Error saving question:', error);
+//         return res.status(500).send({ message: 'Failed to save question', error: error.message });
+//     }
+// };
+
+// const addQuestion = async (req, res) => {
+//     try {
+//         // Extract required fields from the request body
+//         const { topic_id, question_description, no_of_marks_allocated, difficulty_level, options, correct_options } = req.body;
+
+//         // Create the cumulative question
+//         const newQuestion = await CumulativeQuestion.create({
+//             topic_id,
+//             question_description,
+//             no_of_marks_allocated,
+//             difficulty_level,
+//         });
+
+//         // Extract the question ID
+//         const questionId = newQuestion.cumulative_question_id;
+
+//         // Create the options
+//         const optionList = options.map((optionDescription) => ({
+//             cumulative_question_id: questionId,
+//             option_description: optionDescription.trim()
+//         }));
+        
+//         await Option.bulkCreate(optionList);
+
+//         // Create the correct answers
+//         const correctOptionList = correct_options.map((correctOption) => ({
+//             cumulative_question_id: questionId,
+//             answer_description: correctOption.trim()
+//         }));
+
+//         await CorrectAnswer.bulkCreate(correctOptionList);
+
+//         // Send the response with the newly created question details
+//         return res.status(201).send({
+//             message: 'Question created successfully',
+//             question: newQuestion
+//         });
+//     } catch (error) {
+//         console.error('Error saving question:', error);
+//         return res.status(500).send({ message: 'Failed to save question', error: error.message });
+//     }
+// };
+
+const addQuestion = async (req, res) => {
+    try {
+        // Extract required fields from the request body
+        const { topic_id, question_description, no_of_marks_allocated, difficulty_level, options, correct_options, test_id } = req.body;
+
+        // Create the cumulative question with an optional test_id
+        const newQuestion = await CumulativeQuestion.create({
+            topic_id,
+            question_description,
+            no_of_marks_allocated,
+            difficulty_level,
+        });
+
+        // Extract the question ID
+        const questionId = newQuestion.cumulative_question_id;
+
+        // Create the options
+        const optionList = options.map((optionDescription) => ({
+            cumulative_question_id: questionId,
+            option_description: optionDescription.trim()
+        }));
+        
+        await Option.bulkCreate(optionList);
+
+        // Create the correct answers
+        const correctOptionList = correct_options.map((correctOption) => ({
+            cumulative_question_id: questionId,
+            answer_description: correctOption.trim()
+        }));
+
+        await CorrectAnswer.bulkCreate(correctOptionList);
+
+        // Send the response with the newly created question details
+        return res.status(201).send({
+            message: 'Question created successfully',
+            question: newQuestion
+        });
+    } catch (error) {
+        console.error('Error saving question:', error);
+        return res.status(500).send({ message: 'Failed to save question', error: error.message });
+    }
+};
+
 
 
 // const processExcel = async (filePath) => {
@@ -488,7 +808,113 @@ const getQuestionCountsByTopicIds = async (req, res) => {
 //     }
 // };
 
-const processExcel = async (filePath, topic_id) => {
+// const processExcel = async (filePath, topic_id) => {
+//     const workbook = xlsx.readFile(filePath);
+//     const sheet = workbook.Sheets[workbook.SheetNames[0]];
+//     const rows = xlsx.utils.sheet_to_json(sheet);
+
+//     const cleanString = (value) => (value != null ? String(value).trim().replace(/\s+/g, ' ') : '');
+
+//     for (const row of rows) {
+//         const [
+//             questionText,
+//             difficulty,
+//             marks,
+//             option1,
+//             option2,
+//             option3,
+//             option4,
+//             correctOptionValue
+//         ] = [
+//             cleanString(row["Question Text"]),
+//             cleanString(row.Difficulty),
+//             cleanString(row.Marks),
+//             cleanString(row["Option 1"]),
+//             cleanString(row["Option 2"]),
+//             cleanString(row["Option 3"]),
+//             cleanString(row["Option 4"]),
+//             cleanString(row["Correct Option"])
+//         ];
+
+//         // Create the cumulative question
+//         await CumulativeQuestion.create({
+//             question_description: questionText,
+//             topic_id: topic_id,
+//             difficulty_level: difficulty,
+//             no_of_marks_allocated: marks,
+//             option_1: option1,
+//             option_2: option2,
+//             option_3: option3,
+//             option_4: option4,
+//             correct_option: correctOptionValue
+//         });
+//     }
+// };
+
+// const processExcel = async (filePath, topic_id) => {
+//     const workbook = xlsx.readFile(filePath);
+//     const sheet = workbook.Sheets[workbook.SheetNames[0]];
+//     const rows = xlsx.utils.sheet_to_json(sheet);
+
+//     const cleanString = (value) => (value != null ? String(value).trim().replace(/\s+/g, ' ') : '');
+
+//     for (const row of rows) {
+//         const [
+//             questionText,
+//             difficulty,
+//             marks,
+//             option1,
+//             option2,
+//             option3,
+//             option4,
+//             correctOptionValue
+//         ] = [
+//             cleanString(row["Question Text"]),
+//             cleanString(row.Difficulty),
+//             cleanString(row.Marks),
+//             cleanString(row["Option 1"]),
+//             cleanString(row["Option 2"]),
+//             cleanString(row["Option 3"]),
+//             cleanString(row["Option 4"]),
+//             cleanString(row["Correct Option"])
+//         ];
+
+//         // Create the cumulative question
+//         const question = await CumulativeQuestion.create({
+//             question_description: questionText,
+//             topic_id: topic_id,
+//             difficulty_level: difficulty,
+//             no_of_marks_allocated: marks,
+//         });
+
+//         // Extracting the question ID
+//         const questionId = question.cumulative_question_id;
+
+//         // Creating the options
+//         const options = [option1, option2, option3, option4];
+//         for (const optionText of options) {
+//             if (optionText) {
+//                 await Option.create({
+//                     cumulative_question_id: questionId,
+//                     option_description: optionText
+//                 });
+//             }
+//         }
+
+//         // Creating the correct answers
+//         const correctOptions = correctOptionValue.split(',').map(opt => opt.trim());
+//         for (const correctOption of correctOptions) {
+//             if (correctOption) {
+//                 await CorrectAnswer.create({
+//                     cumulative_question_id: questionId,
+//                     answer_description: correctOption
+//                 });
+//             }
+//         }
+//     }
+// };
+
+const processExcel = async (filePath, topic_id, test_id = null) => {
     const workbook = xlsx.readFile(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows = xlsx.utils.sheet_to_json(sheet);
@@ -516,20 +942,43 @@ const processExcel = async (filePath, topic_id) => {
             cleanString(row["Correct Option"])
         ];
 
-        // Create the cumulative question
-        await CumulativeQuestion.create({
+        // Create the cumulative question with an optional test_id
+        const question = await CumulativeQuestion.create({
             question_description: questionText,
             topic_id: topic_id,
             difficulty_level: difficulty,
             no_of_marks_allocated: marks,
-            option_1: option1,
-            option_2: option2,
-            option_3: option3,
-            option_4: option4,
-            correct_option: correctOptionValue
+            test_id // This will be null for practice questions
         });
+
+        // Extract the question ID
+        const questionId = question.cumulative_question_id;
+
+        // Create the options
+        const options = [option1, option2, option3, option4];
+        for (const optionText of options) {
+            if (optionText) {
+                await Option.create({
+                    cumulative_question_id: questionId,
+                    option_description: optionText
+                });
+            }
+        }
+
+        // Create the correct answers
+        const correctOptions = correctOptionValue.split(',').map(opt => opt.trim());
+        for (const correctOption of correctOptions) {
+            if (correctOption) {
+                await CorrectAnswer.create({
+                    cumulative_question_id: questionId,
+                    answer_description: correctOption
+                });
+            }
+        }
     }
 };
+
+
 
 const saveTestResults = async (req, res) => {
     try {
@@ -646,8 +1095,11 @@ module.exports = {
     getTopicsBySubjectId,
     getAllSubjectsAndTopics,
     getQuestionsByTopicIds,
+    getPracticeQuestionsByTopicIds,
     getQuestionCountsByTopicIds,
     saveTestResults,
     getTestResultsByTestId,
     getTestResultsByStudentId,
+    addQuestion,
+    fetchQuestionsByTestId,
 }

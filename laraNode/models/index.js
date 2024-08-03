@@ -184,8 +184,11 @@ db.PlacementTestStudent = require('./placementTestStudentsModel.js')(sequelize, 
 db.CumulativeQuestion = require('./cumulativeQuestionModel.js')(sequelize, DataTypes);
 db.Topic = require('./topicModel.js')(sequelize,DataTypes);
 db.Subject = require('./subjectModel.js')(sequelize, DataTypes);  
+db.Option = require('./optionModel.js')(sequelize, DataTypes);  
+db.CorrectAnswer = require('./correctAnswerModel.js')(sequelize, DataTypes);  
+db.CumulativeQuestionPlacementTest = require('./CQPlacementTestModel.js')(sequelize, DataTypes);  
 
-// Define associations 
+// Define associations  
 db.Student.hasOne(db.Profile, {
     foreignKey: 'student_id',
     as: 'profile',
@@ -243,11 +246,103 @@ db.Batch.belongsToMany(db.Student, {
     // }
 });
 
-// Associations
+// db.CumulativeQuestion.belongsTo(db.Topic, {
+//     foreignKey: 'topic_id',
+//     as: 'Topics'
+// });
+// db.CumulativeQuestion.hasMany(db.Option, {
+//     foreignKey: 'cumulative_question_id',
+//     as: 'options'
+// });
+// db.CumulativeQuestion.hasMany(db.CorrectAnswer, {
+//     foreignKey: 'cumulative_question_id',
+//     as: 'correct_answers'
+// });
+
+// // Associations
+// db.PlacementTest.hasMany(db.PlacementTestTopic, {
+//     foreignKey: 'placement_test_id',
+//     // as: 'topics'
+//     as: 'Topics'
+// });
+
+// db.PlacementTestTopic.belongsTo(db.PlacementTest, {
+//     foreignKey: 'placement_test_id',
+//     onDelete: 'CASCADE'
+// });
+
+// db.Topic.hasMany(db.PlacementTestTopic, {
+//     foreignKey: 'topic_id',
+// });
+
+// db.PlacementTestTopic.belongsTo(db.Topic, {
+//     foreignKey: 'topic_id',
+//     onDelete: 'CASCADE'
+// });
+
+// db.PlacementTest.hasMany(db.PlacementTestResult, {
+//     foreignKey: 'placement_test_id',
+//     as: 'results'
+// });
+
+// db.PlacementTestResult.belongsTo(db.PlacementTest, {
+//     foreignKey: 'placement_test_id',
+//     onDelete: 'CASCADE'
+// });
+
+// // Define associations for PlacementTestStudent
+// db.PlacementTestStudent.hasMany(db.PlacementTestResult, {
+//     foreignKey: 'placement_test_student_id',
+//     as: 'results'
+// });
+
+// db.PlacementTestResult.belongsTo(db.PlacementTestStudent, {
+//     foreignKey: 'placement_test_student_id',
+//     onDelete: 'CASCADE'
+// });
+
+// Object.keys(db).forEach(modelName => {
+//     if (db[modelName].associate) {
+//         db[modelName].associate(db);
+//     }
+// });
+
+
+// Corrected Associations
+db.CumulativeQuestion.belongsTo(db.Topic, {
+    foreignKey: 'topic_id',
+    as: 'QuestionTopic' // Unique alias for the association
+});
+db.CumulativeQuestion.belongsTo(db.PlacementTest, {
+    foreignKey: 'test_id',
+    as: 'QuestionForPlacementTest'
+});
+db.CumulativeQuestion.hasMany(db.Option, {
+    foreignKey: 'cumulative_question_id',
+    as: 'QuestionOptions' // Unique alias for the association
+});
+db.CumulativeQuestion.hasMany(db.CorrectAnswer, {
+    foreignKey: 'cumulative_question_id',
+    as: 'CorrectAnswers' // Unique alias for the association
+});
+
+db.CumulativeQuestion.belongsToMany(db.PlacementTest, {
+    through: 'CQPlacementTest', // Use the consistent table name
+    foreignKey: 'cumulative_question_id',
+    as: 'PlacementTestsCumulativeQuestions'
+});
+
+db.PlacementTest.belongsToMany(db.CumulativeQuestion, {
+    through: 'CQPlacementTest', // Use the consistent table name
+    foreignKey: 'placement_test_id',
+    as: 'CumulativeQuestionsPlacementTest'
+});
+
+
+// Associations for PlacementTest
 db.PlacementTest.hasMany(db.PlacementTestTopic, {
     foreignKey: 'placement_test_id',
-    // as: 'topics'
-    as: 'Topics'
+    as: 'TestTopics' // Unique alias for the association
 });
 
 db.PlacementTestTopic.belongsTo(db.PlacementTest, {
@@ -257,39 +352,45 @@ db.PlacementTestTopic.belongsTo(db.PlacementTest, {
 
 db.Topic.hasMany(db.PlacementTestTopic, {
     foreignKey: 'topic_id',
+    as: 'TopicPlacementTests' // Unique alias for the association
 });
 
 db.PlacementTestTopic.belongsTo(db.Topic, {
     foreignKey: 'topic_id',
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
+    as: 'PlacementTestTopic' // Unique alias for the association
 });
 
 db.PlacementTest.hasMany(db.PlacementTestResult, {
     foreignKey: 'placement_test_id',
-    as: 'results'
+    as: 'TestResults' // Unique alias for the association
 });
 
 db.PlacementTestResult.belongsTo(db.PlacementTest, {
     foreignKey: 'placement_test_id',
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
+    as: 'PlacementTest' // Unique alias for the association
 });
 
 // Define associations for PlacementTestStudent
 db.PlacementTestStudent.hasMany(db.PlacementTestResult, {
     foreignKey: 'placement_test_student_id',
-    as: 'results'
+    as: 'StudentResults' // Unique alias for the association
 });
 
 db.PlacementTestResult.belongsTo(db.PlacementTestStudent, {
     foreignKey: 'placement_test_student_id',
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
+    as: 'TestResultStudent' // Unique alias for the association
 });
 
+// Call associate method for each model if defined
 Object.keys(db).forEach(modelName => {
     if (db[modelName].associate) {
         db[modelName].associate(db);
     }
 });
+
 
 // Sync models with the database
 db.sequelize.sync({ force: false })

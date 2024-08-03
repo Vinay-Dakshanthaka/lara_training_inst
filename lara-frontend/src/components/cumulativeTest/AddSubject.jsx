@@ -192,8 +192,16 @@ const AddSubject = () => {
             fetchSubjects();
             handleCloseModals();
         } catch (error) {
-            console.error('Error:', error);
-            toast.error("Something went wrong");
+            if(error.response){
+                if(error.response.status === 400){
+                    toast.warn('Entered subject already exist');
+                    handleCloseModals();
+                }else{
+                    console.error('Error:', error);
+                    handleCloseModals();
+                    toast.error("Something went wrong");
+                }
+            }
         }
     };
 
@@ -232,8 +240,16 @@ const AddSubject = () => {
             fetchSubjects();
             handleCloseModals();
         } catch (error) {
-            console.error('Error:', error);
-            toast.error("Something went wrong");
+            if(error.response){
+                if(error.response.status === 400){
+                    toast.warn('Topic already exist for this subject');
+                    handleCloseModals();
+                }else{
+                    console.error('Error:', error);
+                    handleCloseModals();
+                    toast.error("Something went wrong");
+                }
+            }
         }
     };
 
@@ -262,6 +278,7 @@ const AddSubject = () => {
 
     return (
         <>
+             <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
             <Button className="btn btn-primary" onClick={handleAddSubject}>
                 Add Subject
             </Button>
@@ -421,7 +438,7 @@ const AddSubject = () => {
                 </Modal.Footer>
             </Modal>
 
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+       
         </>
     );
 };

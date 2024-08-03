@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Form, Button, Container, Row, Col, Modal } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import image from './excel-sheet-example.png'
+import { Link } from 'react-router-dom';
 
 const UploadQuestions = () => {
     const [subjects, setSubjects] = useState([]);
@@ -60,9 +61,21 @@ const UploadQuestions = () => {
                 ...config,
             });
 
-            setTopics(response.data);
+            if (response.data.length === 0) {
+                setTopics([]);
+                toast.info("No topics available for this subject. Please add topics.");
+            } else {
+                setTopics(response.data);
+            }
         } catch (error) {
-            console.error('Error fetching topics:', error);
+            if(error.response && error.response.status === 404 ){
+                toast.info("No topics available for this subject. Please add topics.");
+                setTopics([]);
+            }else{
+                console.error('Error fetching topics:', error);
+                setTopics([]);
+                toast.error("Failed to fetch topics. Please try again.");
+            }
         }
     };
 
@@ -126,6 +139,7 @@ const UploadQuestions = () => {
     return (
         <Container>
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+            {/* <Link to="/add-question">Add Questions Manually</Link> */}
             <Row>
                 <Col md={6}>
                     <Form onSubmit={handleUpload}>
@@ -164,8 +178,6 @@ const UploadQuestions = () => {
                             Upload
                         </Button>
                     </Form>
-
-
                 </Col>
             </Row>
 

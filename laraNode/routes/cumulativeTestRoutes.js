@@ -22,6 +22,8 @@ cumulativeTestRouter.get('/getTopicsBySubjectId',verifyToken,cumulativeTestContr
 
 cumulativeTestRouter.post('/getQuestionsByTopicIds',cumulativeTestController.getQuestionsByTopicIds );
 
+cumulativeTestRouter.post('/getPracticeQuestionsByTopicIds',cumulativeTestController.getPracticeQuestionsByTopicIds );
+
 cumulativeTestRouter.post('/getQuestionCountsByTopicIds',verifyToken,cumulativeTestController.getQuestionCountsByTopicIds );
 
 cumulativeTestRouter.get('/getTopicById',verifyToken,cumulativeTestController.getTopicById );
@@ -38,7 +40,9 @@ cumulativeTestRouter.post('/getTestResultsByTestId',verifyToken,cumulativeTestCo
 
 cumulativeTestRouter.get('/getTestResultsByStudentId',verifyToken,cumulativeTestController.getTestResultsByStudentId );
 
+cumulativeTestRouter.post('/add-question', verifyToken, cumulativeTestController.addQuestion)
 
+cumulativeTestRouter.post('/fetchQuestionsByTestId',  cumulativeTestController.fetchQuestionsByTestId)
 
 
 
