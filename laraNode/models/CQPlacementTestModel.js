@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
         indexes: [
             {
                 name: 'uq_cq_pt_unique',
-                unique: true,
+                // unique: true,
                 fields: ['cumulative_question_id', 'placement_test_id']
             }
         ]
