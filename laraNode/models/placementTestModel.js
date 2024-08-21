@@ -33,7 +33,14 @@ module.exports = (sequelize, DataTypes) => {
         is_Active: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
+        },
+        // ALTER TABLE laradb.placementtests
+        // ADD COLUMN is_Monitored BOOLEAN DEFAULT false;
+        is_Monitored: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
         }
+
     }, {
         timestamps: true,
         tableName: 'Placementtests'

@@ -24,3 +24,12 @@
 .btn-link:hover {
     color: #0056b3;
 }
+
+.table tbody tr.table-success {
+    transition: transform 0.3s ease-in-out;
+}
+
+.table tbody tr.table-success.animate-to-top {
+    transform: translateY(-10px); /* Adjust the distance as needed */
+}
+

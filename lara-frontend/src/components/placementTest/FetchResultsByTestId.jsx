@@ -5,6 +5,7 @@ import { Table, FormControl, InputGroup, Button } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { baseURL } from '../config';
+import * as XLSX from 'xlsx';
 
 const FetchResultsByTestId = () => {
   const { test_id } = useParams();
@@ -65,6 +66,24 @@ const FetchResultsByTestId = () => {
     return filteredResults;
   };
 
+  const downloadExcel = () => {
+    const sortedResults = [...results].sort((a, b) => b.marks_obtained - a.marks_obtained);
+
+    const dataToExport = sortedResults.map(result => ({
+      'Student Name': result.student_details.student_name,
+      'Email': result.student_details.email,
+      'Phone ': result.student_details.phone_number,
+      'Marks Obtained': result.marks_obtained,
+      'Total Marks': result.total_marks,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
+
+    XLSX.writeFile(workbook, `Test_${test_id}_Results.xlsx`);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -78,6 +97,9 @@ const FetchResultsByTestId = () => {
           value={filterName}
           onChange={(e) => setFilterName(e.target.value)}
         />
+        <Button variant="primary" onClick={downloadExcel}>
+          Download Results as Excel
+        </Button>
       </InputGroup>
       <Table striped bordered hover>
         <thead>

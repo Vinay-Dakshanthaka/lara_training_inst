@@ -75,7 +75,7 @@ const jwtSecret = process.env.JWT_SECRET;
 
 const createPlacementTestLink = async (req, res) => {
     try {
-        const { number_of_questions, description, start_time, end_time, show_result, topic_ids } = req.body;
+        const { number_of_questions, description, start_time, end_time, show_result, topic_ids,is_Monitored } = req.body;
 
         if (!number_of_questions || !start_time || !end_time || !Array.isArray(topic_ids) || topic_ids.length === 0) {
             return res.status(400).send({ message: 'Required fields are missing or invalid' });
@@ -99,7 +99,8 @@ const createPlacementTestLink = async (req, res) => {
             description,
             start_time, // Store as string
             end_time, // Store as string
-            show_result: show_result !== undefined ? show_result : true // Default to true if not provided
+            show_result: show_result !== undefined ? show_result : true ,// Default to true if not provided
+            is_Monitored: is_Monitored !== undefined ? is_Monitored : false // Default to false if not provided
         });
 
         // Generate the test link with the placement_test_id
@@ -209,7 +210,7 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
 
         // Fetch number_of_questions from PlacementTest table
         const placementTest = await PlacementTest.findByPk(encrypted_test_id, {
-            attributes: ['number_of_questions', 'show_result'] // Only fetch number_of_questions
+            attributes: ['number_of_questions', 'show_result','is_Monitored'] // Only fetch number_of_questions
         });
 
         if (!placementTest) {
@@ -223,6 +224,7 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
             topic_ids,
             number_of_questions: placementTest.number_of_questions,
             show_result: placementTest.show_result,
+            is_Monitored:placementTest.is_Monitored
             // start_time: PlacementTest.start_time,
             // end_time: PlacementTest.end_time
         });
@@ -443,6 +445,7 @@ const savePlacementTestResults = async (req, res) => {
             created_at: test.createdAt,
             updated_at: test.updatedAt,
             is_Active: test.is_Active,
+            is_Monitored:test.is_Monitored,
             topics: test.TestTopics.map(testTopic => ({
                 topic_id: testTopic.PlacementTestTopic.topic_id,
                 createdAt: testTopic.PlacementTestTopic.createdAt,
@@ -602,6 +605,41 @@ const disableLink = async (req, res) => {
         res.status(500).send({ message: 'An error occurred while updating test link status' });
     }
 };
+
+const updateNumberOfQuestions = async (req, res) => {
+    try {
+        const { test_id, number_of_questions } = req.body;
+        console.log("Number of Questions:", number_of_questions, "Test ID:", test_id);
+
+        // Step 1: Update the number of questions for the specified test
+        await PlacementTest.update({ number_of_questions }, {
+            where: { placement_test_id: test_id }
+        });
+
+        res.status(200).send({ message: 'Number of questions updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'An error occurred while updating the number of questions' });
+    }
+};
+
+const updateIsMonitored = async (req, res) => {
+    try {
+        const { test_id, is_Monitored } = req.body;
+        console.log("Is Monitored:", is_Monitored, "Test ID:", test_id);
+
+        // Step 1: Update the is_Monitored status for the specified test
+        await PlacementTest.update({ is_Monitored }, {
+            where: { placement_test_id: test_id }
+        });
+
+        res.status(200).send({ message: 'Monitoring status updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'An error occurred while updating the monitoring status' });
+    }
+};
+
     
 
 const assignQuestionsToPlacementTest = async (req, res) => {
@@ -999,6 +1037,8 @@ module.exports = {
     getAllResults,
     getAllResultsByTestId,
     disableLink,
+    updateNumberOfQuestions,
+    updateIsMonitored,
     fetchQuestionsByTopicIds,
     fetchQuestionsUsingTopicId,
     assignQuestionsToPlacementTest,

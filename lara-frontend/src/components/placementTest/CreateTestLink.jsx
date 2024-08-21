@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { baseURL } from '../config';
-import AllPlacementTests from './AllPlacementTests';
-import { toast, ToastContainer } from 'react-toastify';
 
 const CreateTestLink = () => {
     const [subjects, setSubjects] = useState([]);
@@ -19,7 +17,10 @@ const CreateTestLink = () => {
     const [endTime, setEndTime] = useState('');
     const [description, setDescription] = useState('');
     const [showResult, setShowResult] = useState(true);
+    const [isMonitored, setIsMonitored] = useState(false); // State for isMonitored
     const [newTestLink, setNewTestLink] = useState(''); // New state for test link
+    const [alert, setAlert] = useState({ show: false, message: '', variant: '' }); // State for Bootstrap alerts
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -88,10 +89,10 @@ const CreateTestLink = () => {
 
             setTopics(topicsWithCounts);
         } catch (error) {
-            if(error.response && error.response.status === 404){
-                toast.info('No Topics Available for this Subject')
-            }else{
-                toast.error('Something went wrong')
+            if (error.response && error.response.status === 404) {
+                setAlert({ show: true, message: 'No Topics Available for this Subject', variant: 'info' });
+            } else {
+                setAlert({ show: true, message: 'Something went wrong', variant: 'danger' });
                 console.error('Error fetching topics:', error);
             }
         }
@@ -178,31 +179,36 @@ const CreateTestLink = () => {
                 start_time: startTime,
                 end_time: endTime,
                 show_result: showResult,
-                topic_ids: selectedTopics
+                topic_ids: selectedTopics,
+                is_Monitored: isMonitored, // Send isMonitored to the backend
             }, config);
 
             setNewTestLink(response.data.newTest.test_link); // Set the test link in state
-            toast.success('Link Created');
+            setAlert({ show: true, message: 'Link Created Successfully', variant: 'success' });
         } catch (error) {
             console.error('Error creating test link:', error);
-            toast.error('Something went wrong!!');
+            setAlert({ show: true, message: 'Something went wrong!!', variant: 'danger' });
         }
     };
 
-
     return (
         <div className="container mt-5">
+            {alert.show && (
+                <Alert variant={alert.variant} onClose={() => setAlert({ ...alert, show: false })} dismissible>
+                    {alert.message}
+                </Alert>
+            )}
+
             {newTestLink && (
                 <div className="mt-4 p-3 card " style={{ border: '1px solid #007bff', borderRadius: '5px', backgroundColor: '#e9ecef' }}>
                     <h5> Link Created Successfully :</h5>
                     <p style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#007bff' }}>
-                        {/* <a href={newTestLink} target="_blank" rel="noopener noreferrer">{newTestLink}</a> */}
                         {newTestLink}
                     </p>
                     <p className="fw-bolder">
-                   To add questions to this link
-                   <Link to="/test-links">  click here</Link>
-                   </p>
+                        To add questions to this link
+                        <Link to="/test-links"> click here</Link>
+                    </p>
                 </div>
             )}
 
@@ -243,32 +249,24 @@ const CreateTestLink = () => {
                 </Form.Group>
             </div>
 
-            <Form.Group controlId="formNumQuestions" className="mt-4" style={{ maxWidth: '300px' }}>
+            <Form.Group controlId="formNumQuestions" className="mt-4" style={{ maxWidth: '200px' }}>
                 <Form.Label>Number of Questions</Form.Label>
                 <Form.Control
                     type="number"
                     value={numQuestions}
                     onChange={handleNumQuestionsChange}
-                    required
+                    isInvalid={!!errorMessage}
                 />
-                <p className="my-2" style={{width:'80vw'}}>
-                    <span><sup className='text-danger h5'>*</sup></span>
-                You can specify the number of questions for the test. If you add fewer questions than specified, only those will appear in the test. If you add more questions, random questions will be selected from the extras during the test, ensuring each student receives a unique set of questions.
-                </p>
-                {/* {errorMessage && (
-                    <Form.Text className="text-danger">
-                        {errorMessage}
-                    </Form.Text>
-                )} */}
+                <Form.Control.Feedback type="invalid">{errorMessage}</Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group controlId="formDescription" className="mt-4" style={{ maxWidth: '300px' }}>
-                <Form.Label>Description</Form.Label>
+            <Form.Group controlId="formDescription" className="mt-4">
+                <Form.Label>Test Description</Form.Label>
                 <Form.Control
-                    type="text"
+                    as="textarea"
+                    rows={3}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    required
                 />
             </Form.Group>
 
@@ -278,7 +276,6 @@ const CreateTestLink = () => {
                     type="datetime-local"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    required
                 />
             </Form.Group>
 
@@ -288,37 +285,30 @@ const CreateTestLink = () => {
                     type="datetime-local"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                    required
                 />
             </Form.Group>
 
             <Form.Group controlId="formShowResult" className="mt-4">
                 <Form.Check
                     type="checkbox"
-                    label="Show Result"
+                    label="Show Result After Test"
                     checked={showResult}
                     onChange={() => setShowResult(!showResult)}
                 />
             </Form.Group>
 
-            <Button variant="primary" className="mt-4" onClick={handleCreateLink}>
-                Create Test Link
+            <Form.Group controlId="formIsMonitored" className="mt-4">
+                <Form.Check
+                    type="checkbox"
+                    label="Is Monitored"
+                    checked={isMonitored}
+                    onChange={() => setIsMonitored(!isMonitored)}
+                />
+            </Form.Group>
+
+            <Button className="mt-4" onClick={handleCreateLink}>
+                Create Link
             </Button>
-            <ToastContainer />
-
-            {/* Display the newly created test link */}
-            {newTestLink && (
-                <div className="mt-4">
-                    <h5>Link Created successfully {newTestLink}</h5>
-                   <p className="fw-bolder">
-                   To add questions to this link
-                   <Link to="/test-links">  click here</Link>
-                   </p>
-                    
-                </div>
-            )}
-
-            {/* <AllPlacementTests /> */}
         </div>
     );
 };

@@ -5,6 +5,7 @@ import { Button, Form, Modal, Row, Col, Card, Table, Alert } from 'react-bootstr
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { baseURL } from '../config';
+import OnlineTestMonitoring from '../placementTest/OnlineTestMonitoring';
 
 const PlacementTest = () => {
     const [loading, setLoading] = useState(true);
@@ -30,10 +31,18 @@ const PlacementTest = () => {
     const [autoSubmit, setAutoSubmit] = useState(false); // Auto-submit state
     const timerRef = useRef(null); // Timer reference
     const navigate = useNavigate();
+    const [isCameraOn, setIsCameraOn] = useState(true);
+    const [isMonitored, setIsMonitored] = useState(false);
+
+    const showAlert = ()=>{
+        alert("Allow camera and microphone access inorder to attend the test")
+    }
 
     useEffect(() => {
         const handleVisibilityChange = async () => {
             if (!showSummary && document.hidden) {
+                setIsCameraOn(false);
+                setIsMonitored(false);
                 setAutoSubmit(true);
                 await handleSubmitTest();
                 navigate('/malpractice-detected');
@@ -71,11 +80,13 @@ const PlacementTest = () => {
                 const response1 = await axios.post(`${baseURL}/api/placement-test/fetchTestTopicIdsAndQnNums`, {
                     encrypted_test_id: test_id
                 });
+                console.log('response 1 ', response1)
 
-                const { topic_ids, number_of_questions, show_result } = response1.data;
+                const { topic_ids, number_of_questions, show_result,is_Monitored } = response1.data;
 
                 setShowResult(show_result); // Set the showResult state based on API response
-
+                setIsMonitored(is_Monitored);
+                console.log('is monitored ', is_Monitored)
                 if (!show_result) {
                     // If show_result is false, load questions but do not show summary
                     setShowSummary(false); // Do not show detailed summary
@@ -204,7 +215,8 @@ const PlacementTest = () => {
                 ...response.data,
                 question_ans_data: questionAnsData,
             });
-
+            setIsMonitored(false);
+            setIsCameraOn(false);
             setShowSummary(true);
             if (!showResult) {
                 // Display a message for pending results
@@ -317,6 +329,8 @@ const PlacementTest = () => {
 
     return (
         <div className="container mt-5">
+            {/* <OnlineTestMonitoring isCameraOn={isCameraOn} style={{ marginLeft: '80%', marginTop: '-8rem', position: 'fixed' }}  /> */}
+            {isMonitored && <OnlineTestMonitoring isCameraOn={isMonitored} style={{ marginLeft: '80%', marginTop: '-8rem', position: 'fixed' }} />}
             <h2>Test</h2>
             <div className="d-flex justify-content-between">
                 <div>Total Marks: {totalMarks}</div>
@@ -432,11 +446,24 @@ const PlacementTest = () => {
                             {savingStudent ? 'Saving...' : 'Submit'}
                         </Button>
                     </Form>
+                        <Alert variant="info" className="mt-4">
+                            <Alert.Heading>Info</Alert.Heading>
+                            <p>
+                            Please Allow the camera and microphone inorder to attend the test
+                            </p>
+                        </Alert>
                         <Alert variant="danger" className="mt-4">
                             <Alert.Heading>Warning</Alert.Heading>
-                            <p>
-                                Please be aware that any form of malpractice during the test, such as switching to a different tab or leaving the test window, will result in immediate termination of the test. Ensure that you stay within the test environment at all times to avoid disqualification.
-                            </p>
+                            <div>
+                                Please be aware that any form of malpractice during the test, such as
+                                <ul>
+                                    <li>Switching to a different tab or leaving the test window </li>
+                                    <li>Your Face should always facing towards the screen</li>
+                                    <li>Ensure that you stay within the test environment until you submit test</li>
+                                </ul> 
+                                The test will be monitered by the system if any malpractice is found the test will be TERMINATED!!!
+                                 Adhere to the rules at all times to avoid disqualification.
+                            </div>
                         </Alert>
                 </Modal.Body>
             </Modal>

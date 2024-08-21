@@ -23,6 +23,10 @@ placementTestRoute.post('/getAllResultsByTestId', placementTestContoller.getAllR
 
 placementTestRoute.post('/disable-link', placementTestContoller.disableLink);
 
+placementTestRoute.post('/updateNumberOfQuestions', placementTestContoller.updateNumberOfQuestions);
+
+placementTestRoute.post('/updateIsMonitored', placementTestContoller.updateIsMonitored);
+
 placementTestRoute.post('/fetchQuestionsByTopicIds', placementTestContoller.fetchQuestionsByTopicIds);
 
 placementTestRoute.post('/fetchQuestionsUsingTopicId', placementTestContoller.fetchQuestionsUsingTopicId);

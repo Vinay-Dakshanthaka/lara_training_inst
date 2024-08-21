@@ -25,17 +25,15 @@ const AddQuestion = () => {
                 `${baseURL}/api/placement-test/getPlacementTestById`,
                 { placement_test_id: test_id },
             );
-            // console.log("data ",response.data)
-                setPlacementTestDetails(response.data);
-                // console.log('placement test link ', placementTestDetails.test_link)
+            setPlacementTestDetails(response.data);
         } catch (error) {
             if (error.response && error.response.status === 404) {
-                toast.info('No Test details found')
-            }else{
-                toast.error('Something went wrong')
+                toast.info('No Test details found');
+            } else {
+                toast.error('Something went wrong');
             }
         }
-    }
+    };
 
     useEffect(() => {
         const fetchSubjectsAndTopics = async () => {
@@ -157,10 +155,14 @@ const AddQuestion = () => {
                 },
             };
 
+            // Filter out empty options before sending to backend
+            const filteredOptions = questionData.options.filter(option => option.trim() !== "");
+
             const response = await axios.post(
                 `${baseURL}/api/placement-test/saveOneQuestionAndAddToLink`,
                 {
                     ...questionData,
+                    options: filteredOptions,
                     topic_id: selectedTopic,
                     placement_test_id: test_id
                 },
@@ -293,8 +295,7 @@ const AddQuestion = () => {
                                 </div>
                             </Form.Group>
                         </Row>
-
-                        <div className="text-center my-4">
+                        <div className="text-center">
                             <Button variant="primary" type="submit" className="col-6">
                                 Add Question
                             </Button>
@@ -304,6 +305,6 @@ const AddQuestion = () => {
             </div>
         </>
     );
-}
+};
 
 export default AddQuestion;
