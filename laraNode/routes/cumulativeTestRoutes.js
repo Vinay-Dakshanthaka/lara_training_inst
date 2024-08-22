@@ -22,6 +22,10 @@ cumulativeTestRouter.get('/getTopicsBySubjectId',verifyToken,cumulativeTestContr
 
 cumulativeTestRouter.post('/getQuestionsByTopicIds',cumulativeTestController.getQuestionsByTopicIds );
 
+cumulativeTestRouter.post('/updateQuestionById',cumulativeTestController.updateQuestionById );
+
+cumulativeTestRouter.delete('/deleteQuestionById/:cumulative_question_id',cumulativeTestController.deleteQuestionById );
+
 cumulativeTestRouter.post('/getPracticeQuestionsByTopicIds',cumulativeTestController.getPracticeQuestionsByTopicIds );
 
 cumulativeTestRouter.post('/getQuestionCountsByTopicIds',verifyToken,cumulativeTestController.getQuestionCountsByTopicIds );

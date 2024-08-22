@@ -116,6 +116,7 @@ const AllPlacementTests = () => {
                             <th>Add Existing Questions</th>
                             <th>Add New Questions</th>
                             <th>Upload Questions</th>
+                            <th>Edit Questions</th>
                             <th>Activate Link</th>
                         </tr>
                     </thead>
@@ -170,6 +171,11 @@ const AllPlacementTests = () => {
                                 <td>
                                     <Link to={`/upload-excel-link/${test.placement_test_id}`}>
                                         Upload Questions
+                                    </Link>
+                                </td>
+                                <td>
+                                    <Link to={`/edit-quesitons/${test.placement_test_id}`}>
+                                        Edit Questions
                                     </Link>
                                 </td>
                                 <td>

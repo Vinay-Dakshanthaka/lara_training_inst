@@ -34,7 +34,7 @@ const PlacementTest = () => {
     const [isCameraOn, setIsCameraOn] = useState(true);
     const [isMonitored, setIsMonitored] = useState(false);
 
-    const showAlert = ()=>{
+    const showAlert = () => {
         alert("Allow camera and microphone access inorder to attend the test")
     }
 
@@ -48,7 +48,7 @@ const PlacementTest = () => {
                 navigate('/malpractice-detected');
             }
         };
-    
+
         const handlePopState = async () => {
             if (!showSummary) {
                 setAutoSubmit(true);
@@ -56,44 +56,44 @@ const PlacementTest = () => {
                 navigate('/malpractice-detected');
             }
         };
-    
+
         const setupListeners = () => {
             document.addEventListener("visibilitychange", handleVisibilityChange);
             window.addEventListener("popstate", handlePopState);
         };
-    
+
         const cleanupListeners = () => {
             document.removeEventListener("visibilitychange", handleVisibilityChange);
             window.removeEventListener("popstate", handlePopState);
         };
-    
+
         setupListeners();
-    
+
         return () => {
             cleanupListeners();
         };
     }, [navigate, showSummary]);
-    
+
     useEffect(() => {
         const fetchTestDetails = async () => {
             try {
                 const response1 = await axios.post(`${baseURL}/api/placement-test/fetchTestTopicIdsAndQnNums`, {
                     encrypted_test_id: test_id
                 });
-                console.log('response 1 ', response1)
+                // console.log('response 1 ', response1)
 
-                const { topic_ids, number_of_questions, show_result,is_Monitored } = response1.data;
+                const { topic_ids, number_of_questions, show_result, is_Monitored } = response1.data;
 
                 setShowResult(show_result); // Set the showResult state based on API response
                 setIsMonitored(is_Monitored);
-                console.log('is monitored ', is_Monitored)
+                // console.log('is monitored ', is_Monitored)
                 if (!show_result) {
                     // If show_result is false, load questions but do not show summary
                     setShowSummary(false); // Do not show detailed summary
                 }
 
                 const response2 = await axios.post(`${baseURL}/api/cumulative-test/fetchQuestionsByTestId`, {
-                    placement_test_id:test_id
+                    placement_test_id: test_id
                 });
 
                 const questionsWithOptions = response2.data.map(question => ({
@@ -283,7 +283,7 @@ const PlacementTest = () => {
             if (error.response) {
                 if (error.response.status === 403) {
                     alert("You have already completed this test.")
-                   
+
                     setSaveError('You have already completed this test.');
                     navigate('/not-found');
                 }
@@ -329,13 +329,18 @@ const PlacementTest = () => {
 
     return (
         <div className="container mt-5">
-            {/* <OnlineTestMonitoring isCameraOn={isCameraOn} style={{ marginLeft: '80%', marginTop: '-8rem', position: 'fixed' }}  /> */}
+            {/* Camera monitoring */}
             {isMonitored && <OnlineTestMonitoring isCameraOn={isMonitored} style={{ marginLeft: '80%', marginTop: '-8rem', position: 'fixed' }} />}
+
             <h2>Test</h2>
+
+            {/* Total Marks and Timer */}
             <div className="d-flex justify-content-between">
                 <div>Total Marks: {totalMarks}</div>
-                <div className='fw-bolder '>Time Remaining: {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, '0')}</div>
+                <div className="fw-bolder">Time Remaining: {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, '0')}</div>
             </div>
+
+            {/* Questions and options */}
             {!showSummary && !testResults && (
                 <>
                     {questions.map((question, index) => (
@@ -364,6 +369,7 @@ const PlacementTest = () => {
                 </>
             )}
 
+            {/* Summary and detailed results */}
             {showSummary && showResult && (
                 <Card className="mt-5 shadow">
                     <Card.Header>
@@ -398,18 +404,70 @@ const PlacementTest = () => {
                                 </tr>
                             </tbody>
                         </Table>
+
+                        {/* Detailed results for each question */}
+                        <Table bordered hover className="mt-4">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Question</th>
+                                    <th>Available Options</th>
+                                    <th>Your Answers</th>
+                                    <th>Correct Answers</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {questions.map((question, index) => (
+                                    <tr key={question.cumulative_question_id}>
+                                        <td>{index + 1}</td>
+                                        <td>{question.question_description}</td>
+                                        <td>
+                                            <div className="d-grid gap-2">
+                                                {question.options.map((option, idx) => (
+                                                    <div key={idx} className="p-2 border rounded">
+                                                        {option.option_description}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {answers[question.cumulative_question_id]?.length > 0
+                                                ? answers[question.cumulative_question_id].map((answer, idx) => (
+                                                    <div key={idx} className={`p-2 rounded ${question.correct_answers.includes(answer) ? 'bg-success text-white' : 'bg-danger text-white'}`}>
+                                                        {answer}
+                                                    </div>
+                                                ))
+                                                : <div className="p-2 rounded bg-secondary text-white">Not Attended</div>
+                                            }
+                                        </td>
+                                        <td>
+                                            {question.correct_answers.map((correctAnswer, idx) => (
+                                                <div key={idx} className="p-2 rounded bg-success text-white">
+                                                    {correctAnswer}
+                                                </div>
+                                            ))}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
                     </Card.Body>
                 </Card>
             )}
+
+
+
+            {/* Message if results are not available */}
             {showSummary && !showResult && (
-                <h3 className='text-info text-center'>Your result will be updated soon.</h3>
+                <h3 className="text-info text-center">Your result will be updated soon.</h3>
             )}
-            <Modal show={modalOpen} >
-                <Modal.Header >
+
+            {/* Student details form modal */}
+            <Modal show={modalOpen}>
+                <Modal.Header>
                     <Modal.Title>Please Fill the Form</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-
                     <Form onSubmit={handleSaveStudent}>
                         <Form.Group controlId="name">
                             <Form.Label>Name</Form.Label>
@@ -442,32 +500,32 @@ const PlacementTest = () => {
                             />
                         </Form.Group>
                         {saveError && <p className="text-danger">{saveError}</p>}
-                        <Button variant="primary" type="submit" disabled={savingStudent} style={{marginTop:'5px'}}>
+                        <Button variant="primary" type="submit" disabled={savingStudent} style={{ marginTop: '5px' }}>
                             {savingStudent ? 'Saving...' : 'Submit'}
                         </Button>
                     </Form>
-                        <Alert variant="info" className="mt-4">
-                            <Alert.Heading>Info</Alert.Heading>
-                            <p>
-                            Please Allow the camera and microphone inorder to attend the test
-                            </p>
-                        </Alert>
-                        <Alert variant="danger" className="mt-4">
-                            <Alert.Heading>Warning</Alert.Heading>
-                            <div>
-                                Please be aware that any form of malpractice during the test, such as
-                                <ul>
-                                    <li>Switching to a different tab or leaving the test window </li>
-                                    <li>Your Face should always facing towards the screen</li>
-                                    <li>Ensure that you stay within the test environment until you submit test</li>
-                                </ul> 
-                                The test will be monitered by the system if any malpractice is found the test will be TERMINATED!!!
-                                 Adhere to the rules at all times to avoid disqualification.
-                            </div>
-                        </Alert>
+                    <Alert variant="info" className="mt-4">
+                        <Alert.Heading>Info</Alert.Heading>
+                        <p>
+                            Please Allow the camera and microphone to attend the test.
+                        </p>
+                    </Alert>
+                    <Alert variant="danger" className="mt-4">
+                        <Alert.Heading>Warning</Alert.Heading>
+                        <div>
+                            Please be aware that any form of malpractice during the test, such as:
+                            <ul>
+                                <li>Switching to a different tab or leaving the test window</li>
+                                <li>Your face should always face towards the screen</li>
+                                <li>Ensure that you stay within the test environment until you submit the test</li>
+                            </ul>
+                            The test will be monitored by the system. If any malpractice is found, the test will be TERMINATED! Adhere to the rules at all times to avoid disqualification.
+                        </div>
+                    </Alert>
                 </Modal.Body>
             </Modal>
 
+            {/* Submit button */}
             {!showSummary && (
                 <Button variant="success" onClick={handleSubmitTest}>
                     Submit Test
@@ -476,6 +534,7 @@ const PlacementTest = () => {
 
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
         </div>
+
     );
 };
 

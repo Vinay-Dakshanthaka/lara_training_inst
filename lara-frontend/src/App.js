@@ -46,6 +46,7 @@ import AddQuestion from './components/admin/AddQuestion';
 import AddQuestionsToLink from './components/placementTest/AddQuestionsToLink';
 import UploadQuestionsToLink from './components/placementTest/UploadQuestionsToLink';
 import AllPlacementTests from './components/placementTest/AllPlacementTests';
+import EditTestLinkQuestions from './components/placementTest/EditTestLinkQuestions';
 
 
 const App = () => {
@@ -97,6 +98,7 @@ const App = () => {
             <Route path="/add-questions-tolink/:test_id" element={<AddQuestionsToLink />} />
             <Route path="/add-new-questions/:test_id" element={<AddQuestion />} />
             <Route path="/upload-excel-link/:test_id" element={<UploadQuestionsToLink />} />
+            <Route path="/edit-quesitons/:test_id" element={<EditTestLinkQuestions />} />
             <Route path="/test-links" element={<AllPlacementTests />} />
             {/* <Route path="/add-question" element={<AddQuestion />} /> */}
             {/* <Route path="/profile" element={<Profile />} /> */}

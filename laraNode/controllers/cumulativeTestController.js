@@ -563,6 +563,174 @@ const getPracticeQuestionsByTopicIds = async (req, res) => {
     }
 };
 
+// const updateQuestionById = async (req, res) => {
+//     try {
+//         const { cumulative_question_id, question_description, options, correct_answers } = req.body;
+//         console.log("correct anwers ", correct_answers)
+//         if (!cumulative_question_id) {
+//             return res.status(400).send({ message: "Cumulative Question ID is required" });
+//         }
+
+//         // Find the question by ID
+//         const question = await db.CumulativeQuestion.findByPk(cumulative_question_id);
+
+//         if (!question) {
+//             return res.status(404).send({ message: "Question not found" });
+//         }
+
+//         // Update the question description
+//         question.question_description = question_description || question.question_description;
+//         await question.save();
+
+//         // Update options
+//         if (options && options.length) {
+//             // Delete existing options
+//             await db.Option.destroy({
+//                 where: { cumulative_question_id }
+//             });
+
+//             // Add new options
+//             for (let option of options) {
+//                 await db.Option.create({
+//                     cumulative_question_id,
+//                     option_description: option.option_description
+//                 });
+//             }
+//         }
+
+//         // Update correct answers
+//      // Update correct answers
+// // Update correct answers
+// if (correct_answers && correct_answers.length) {
+//     // Delete existing correct answers
+//     await db.CorrectAnswer.destroy({
+//         where: { cumulative_question_id }
+//     });
+
+//     // Filter out null or empty values
+//     const validCorrectAnswers = correct_answers.filter(answer => answer);
+
+//     // Add new correct answers
+//     for (let answer of validCorrectAnswers) {
+//         try {
+//             await db.CorrectAnswer.create({
+//                 cumulative_question_id,
+//                 answer_description: answer // Ensure this is a valid string
+//             });
+//         } catch (error) {
+//             console.error("Error creating correct answer:", error);
+//             // Handle the error appropriately (logging, throwing, etc.)
+//         }
+        
+//     }
+// }
+
+
+
+//         res.status(200).send({ message: "Question updated successfully" });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send({ message: error.message });
+//     }
+// };
+
+const updateQuestionById = async (req, res) => {
+    try {
+        const { cumulative_question_id, question_description, options, correct_answers } = req.body;
+
+        if (!cumulative_question_id) {
+            return res.status(400).send({ message: "Cumulative Question ID is required" });
+        }
+
+        // Find the question by ID
+        const question = await db.CumulativeQuestion.findByPk(cumulative_question_id);
+
+        if (!question) {
+            return res.status(404).send({ message: "Question not found" });
+        }
+
+        // Update the question description
+        question.question_description = question_description || question.question_description;
+        await question.save();
+
+        // Update options
+        if (options && options.length) {
+            // Delete existing options
+            await db.Option.destroy({
+                where: { cumulative_question_id }
+            });
+
+            // Add new options
+            for (let option of options) {
+                await db.Option.create({
+                    cumulative_question_id,
+                    option_description: option.option_description
+                });
+            }
+        }
+
+        // Filter correct answers to keep only those that match the available options
+        const validCorrectAnswers = correct_answers.filter(answer => 
+            options.some(option => option.option_description === answer)
+        );
+
+        // Update correct answers
+        if (validCorrectAnswers && validCorrectAnswers.length) {
+            // Delete existing correct answers
+            await db.CorrectAnswer.destroy({
+                where: { cumulative_question_id }
+            });
+
+            // Add new valid correct answers
+            for (let answer of validCorrectAnswers) {
+                await db.CorrectAnswer.create({
+                    cumulative_question_id,
+                    answer_description: answer
+                });
+            }
+        }
+
+        res.status(200).send({ message: "Question updated successfully" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: error.message });
+    }
+};
+
+
+const deleteQuestionById = async (req, res) => {
+    try {
+        const { cumulative_question_id } = req.params;
+
+        if (!cumulative_question_id) {
+            return res.status(400).send({ message: "Cumulative Question ID is required" });
+        }
+
+        // Find the question by ID
+        const question = await db.CumulativeQuestion.findByPk(cumulative_question_id);
+
+        if (!question) {
+            return res.status(404).send({ message: "Question not found" });
+        }
+
+        // Delete the question, its options, and correct answers
+        await db.CorrectAnswer.destroy({
+            where: { cumulative_question_id }
+        });
+
+        await db.Option.destroy({
+            where: { cumulative_question_id }
+        });
+
+        await question.destroy();
+
+        res.status(200).send({ message: "Question deleted successfully" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: error.message });
+    }
+};
+
 
 
 const getQuestionCountsByTopicIds = async (req, res) => {
@@ -1095,6 +1263,8 @@ module.exports = {
     getTopicsBySubjectId,
     getAllSubjectsAndTopics,
     getQuestionsByTopicIds,
+    updateQuestionById,
+    deleteQuestionById,
     getPracticeQuestionsByTopicIds,
     getQuestionCountsByTopicIds,
     saveTestResults,
