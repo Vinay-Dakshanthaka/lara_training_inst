@@ -1,13 +1,24 @@
 import React from 'react'
-import TodaysSchedule from './admin/UpdateSchedule'
-import HeroSection from './homeComponents/HeroSection'
+import HeroSectionNew from './homeComponents/HeroSectionNew';
+import DiscoverSection from './homeComponents/DiscoverSection';
+import FeaturesSection from './homeComponents/FeaturesSection';
+import DsaSection from './homeComponents/DsaSection';
+import RecruitersCarousel from './homeComponents/RecruitersCarousel';
+import CourseDetails from './homeComponents/CourseDetails';
 
 const Home = () => {
   return (
     <>
-     <HeroSection/>
+    {/* <img src={blogging} alt="blogging" /> */}
+     {/* <HeroSection /> */}
+     <HeroSectionNew />
+     <CourseDetails />
+    <DiscoverSection />
+    <FeaturesSection />
+    <DsaSection />
+    <RecruitersCarousel />
     </>
   )
 }
 
-export default Home
+export default Home;

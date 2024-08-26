@@ -1,0 +1,30 @@
+.about-us {
+    background-color: #f8f9fa;
+    /* padding: 60px 0; */
+  }
+  
+  .about-us h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+  
+  .about-us .highlight-item {
+    margin-bottom: 30px;
+  }
+  
+  .about-us .highlight-item h3 {
+    font-size: 1.75rem;
+    font-weight: bold;
+  }
+  
+  .about-us .courses,
+  .about-us .features,
+  .about-us .recruiting-partners {
+    margin-bottom: 60px;
+  }
+  
+  .about-us p {
+    font-size: 1.1rem;
+    color: #6c757d;
+  }
+  

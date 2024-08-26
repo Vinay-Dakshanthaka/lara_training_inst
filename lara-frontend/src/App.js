@@ -57,7 +57,7 @@ const App = () => {
         {/* <CustomNavbar /> */}
         <CustomNavbars />
         {/* <RenderNavbar /> */}
-        <div className="container">
+        <div className="">
           <Routes>
             <Route path='/' element={<Home/>}/>
             <Route path='about' element={<AboutUsPage/>}/>

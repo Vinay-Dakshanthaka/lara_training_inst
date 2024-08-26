@@ -1,0 +1,22 @@
+/* recruitersCarousel.css */
+.recruiter-img {
+    width: 150px; /* Fixed width */
+    height: 150px; /* Fixed height */
+    object-fit: contain; /* Ensure the image covers the entire box */
+    margin: 0 10px; /* Add space between images */
+  }
+  
+  @media (max-width: 768px) {
+    .recruiter-img {
+      width: 100px;
+      height: 100px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .recruiter-img {
+      width: 80px;
+      height: 80px;
+    }
+  }
+  

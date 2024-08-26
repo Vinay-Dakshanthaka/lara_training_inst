@@ -1,0 +1,37 @@
+/* featuresSection.css */
+#discover {
+    /* padding: 60px 0; */
+  }
+  
+  .lc-block h3 {
+    color: #007bff; /* Blue color for main heading */
+    font-weight: bold;
+  }
+  
+  .lc-block h5 {
+    color: #28a745; /* Green color for subheadings */
+  }
+  
+  .lc-block p {
+    color: #6c757d;
+  }
+  
+  .lc-block p a {
+    color: #007bff; /* Same blue color for links */
+    text-decoration: none;
+  }
+  
+  .lc-block p a:hover {
+    text-decoration: underline;
+  }
+  
+  .img-fluid {
+    border-radius: 10px;
+  }
+  
+  @media (max-width: 768px) {
+    .lc-block {
+      text-align: center;
+    }
+  }
+  

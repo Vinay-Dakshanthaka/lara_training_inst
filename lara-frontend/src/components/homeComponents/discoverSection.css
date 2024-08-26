@@ -1,0 +1,21 @@
+/* discoverSection.css */
+#discover {
+    /* padding: 60px 0; */
+  }
+  
+  .lc-block h2.h4 {
+    color: #17a2b8;
+    font-weight: bold;
+  }
+
+  
+  .lc-block p.lead {
+    color: #6c757d;
+  }
+  
+  @media (max-width: 768px) {
+    #discover .lc-block {
+      text-align: center;
+    }
+  }
+  
