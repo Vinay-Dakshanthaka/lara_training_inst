@@ -1,21 +1,33 @@
-/* discoverSection.css */
-#discover {
-    /* padding: 60px 0; */
-  }
-  
-  .lc-block h2.h4 {
-    color: #17a2b8;
-    font-weight: bold;
-  }
+.discover-section {
+  background: linear-gradient(to right, #f8f9fa, #e9ecef);
+  padding: 40px 0;
+}
 
-  
-  .lc-block p.lead {
-    color: #6c757d;
-  }
-  
-  @media (max-width: 768px) {
-    #discover .lc-block {
-      text-align: center;
-    }
-  }
-  
+.card {
+  background: #ffffff;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s, box-shadow 0.3s;
+  padding: 20px;
+}
+
+.card-title {
+  color: #333;
+  font-weight: bold;
+}
+
+.card-text {
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.highlight-text {
+  text-decoration: underline dotted;
+  color: #007bff;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}

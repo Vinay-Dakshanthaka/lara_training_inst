@@ -1,11 +1,160 @@
-/* heroSectionNew.css */
+/* Background styling for the hero section */
+.bg-top-wave {
+  background-image: url('./blob-scene-haikei.svg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh; /* Ensure the section takes at least the full height of the viewport */
+}
 
+/* Text styling */
+h1.display-3 {
+  color: #343a40;
+}
+
+p.lead {
+  color: #6c757d;
+}
+
+/* Hero section adjustments */
+.hero-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  overflow: hidden;
+}
+
+.lc-block {
+  max-width: 100%;
+  overflow: hidden; /* Prevents overflowing content */
+  margin-bottom: 1rem; /* Add spacing between sections */
+}
+
+.text2 {
+  color: #FF6A00;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 3.5rem;
+  /* text-align: center; */
+  line-height: 1.2; /* Adjusted line height for better readability */
+  margin-bottom: 1rem; /* Add some space below the heading */
+}
+
+@media (max-width: 768px) {
+  /* For smaller screens */
+  .text2 {
+    font-size: 2.5rem; /* Reduce the font size */
+  }
+
+  .lc-block {
+    padding: 0 1rem; /* Add padding for smaller screens */
+  }
+
+  .bg-top-wave {
+    padding-top: 4rem; /* Add top padding to prevent content overlap */
+    padding-bottom: 2rem; /* Add bottom padding for spacing */
+  }
+}
+
+/* Responsive SVG and image adjustments */
+.svg-container,
+.img-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.svg-container svg,
+.img-container img {
+  max-width: 100%;
+  height: auto;
+}
+.hero-container{
+  position: relative;
+}
+
+/* Ensure image does not overflow on smaller screens */
+@media (max-width: 576px) {
+  .svg-container svg,
+  .img-container img {
+    width: 80%;
+    max-width: 100%;
+  }
+
+  .text2 {
+    font-size: 2rem; /* Further reduce font size on very small screens */
+  }
+ 
+}
+
+.announcement-table {
+  width: 320px;
+  position: absolute;
+  margin-left: 73%;
+  transform: translateX(-50%);
+  z-index: 100;
+  margin-top: -3rem;
+  background-color: #f8f9fa; /* Light background to make the table stand out */
+  border-radius: 10px; /* Rounded corners */
+  border: none !important;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  */
+  overflow: hidden;
+  text-align: left;
+}
+
+.table {
+  margin: 0; /* Remove default margin */
+  /* border: 10px solid ; */
+}
+
+.table-bordered td {
+  /* border-color: #dee2e6;  */
   
-  h1.display-3 {
-    color: #343a40;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+td {
+  color: #004AAD !important;
+  padding: 5px; 
+  text-align: left;
+  font-weight: bold;
+}
+
+.bullet-icon {
+  margin-right: 0.5rem;
+  font-size: 1.2rem; /* Adjust icon size for consistency */
+}
+
+
+@media (max-width: 576px) {
+  .announcement-table {
+    width: 300px; /* Adjust width for smaller screens */
+    margin-left: 45%;
+    transform: translateX(-50%);
+    margin-top: -6rem; /* Adjust margin for better positioning */
+    /* text-align: center; */
   }
   
-  p.lead {
-    color: #6c757d;
+  .table td {
+    font-size: 1rem; /* Reduce font size on smaller screens */
+  }
+  .table-bordered td {
+    /* border-color: #dee2e6;  */
+    font-weight: bold;
+    font-size: 1rem;
   }
   
+  td {
+    color: #004AAD;
+    padding: 5px;
+  }
+  
+  .bullet-icon {
+    margin-right: 0.5rem;
+    font-size: 1rem; /* Adjust icon size for consistency */
+  }
+}

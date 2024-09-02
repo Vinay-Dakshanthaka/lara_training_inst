@@ -1,17 +1,18 @@
 import React from 'react';
 import { Container, Row, Col, Card, ListGroup } from 'react-bootstrap';
 import ScrollToTopButton from '../ScrollToTopButton';
+import './course.css'
 
 const Course = () => {
   return (
-    <>
-      <Container className="my-5">
-        <h2 className="text-center">JAVA DATA STRUCTURES AND ALGORITHMS (LEETCODE) COURSE</h2>
+    <div className='course-content-page'>
+      <Container className="my-5 ">
+        <h2 className="text-center" style={{color:'FF6A00'}}>JAVA DATA STRUCTURES AND ALGORITHMS (LEETCODE) COURSE</h2>
         <Card className="shadow mt-4">
           <Card.Body>
             <Row className="mb-3 text-center">
               <Col sm={4}>
-                <h6>Duration : 1.5 Months</h6>
+                <h6>Duration : 4 Months</h6>
               </Col>
               <Col sm={4}>
                 <h6>Course Hours : 120</h6>
@@ -310,7 +311,7 @@ const Course = () => {
         </Row>
         <ScrollToTopButton/>
       </Container>
-    </>
+    </div>
   );
 };
 

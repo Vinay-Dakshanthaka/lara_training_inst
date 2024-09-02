@@ -14,7 +14,7 @@ const RecruitersCarousel = () => {
 
   return (
   <section className="my-5">
-    <h2 className="text-info text-center">Our Recruiting Partners</h2>
+    <h2 className=" text-center" style={{color:'#FF6A00'}}>Our Recruiting Partners</h2>
       <Container className="my-2">
       <Carousel>
         {chunkedImages.map((chunk, idx) => (

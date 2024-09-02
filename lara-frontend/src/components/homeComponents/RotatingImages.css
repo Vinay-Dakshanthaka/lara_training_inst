@@ -1,0 +1,68 @@
+/* RotatingImages.css */
+
+.rotating-container {
+  position: relative;
+  width: 400px; /* Container width */
+  height: 400px; /* Container height */
+  margin: 0 auto; /* Center the container */
+}
+
+.center-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px; /* Central image size */
+  height: 100px;
+  z-index: 10; /* Bring central image to the top */
+}
+
+.center-image img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%; /* Optional: make the center image circular */
+}
+
+.rotating-skill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px; /* Skill block width */
+  height: 40px; /* Skill block height */
+  margin: -20px 0 0 -60px; /* Adjust margin to keep skill blocks centered */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background-color: #f0f0f0; /* Optional: skill block background */
+  animation: rotate 10s infinite linear; /* Smooth infinite rotation */
+  transform-origin: 150px; /* Adjust the radius of rotation */
+}
+
+.rotating-skill span {
+  font-size: 14px; /* Skill text size */
+  color: #333; /* Skill text color */
+}
+
+/* Keyframes for rotation animation */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg) translateX(150px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(150px) rotate(-360deg);
+  }
+}
+
+/* Position each skill block at a different angle around the circle */
+.rotating-skill-1 { transform: rotate(0deg) translateX(150px) rotate(0deg); }
+.rotating-skill-2 { transform: rotate(32deg) translateX(150px) rotate(-32deg); }
+.rotating-skill-3 { transform: rotate(64deg) translateX(150px) rotate(-64deg); }
+.rotating-skill-4 { transform: rotate(96deg) translateX(150px) rotate(-96deg); }
+.rotating-skill-5 { transform: rotate(128deg) translateX(150px) rotate(-128deg); }
+.rotating-skill-6 { transform: rotate(160deg) translateX(150px) rotate(-160deg); }
+.rotating-skill-7 { transform: rotate(192deg) translateX(150px) rotate(-192deg); }
+.rotating-skill-8 { transform: rotate(224deg) translateX(150px) rotate(-224deg); }
+.rotating-skill-9 { transform: rotate(256deg) translateX(150px) rotate(-256deg); }
+.rotating-skill-10 { transform: rotate(288deg) translateX(150px) rotate(-288deg); }
+.rotating-skill-11 { transform: rotate(320deg) translateX(150px) rotate(-320deg); }

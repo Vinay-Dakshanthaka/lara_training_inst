@@ -97,47 +97,126 @@
 // export default AboutUsPage
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import './aboutUs.css';
 import RecruitersCarousel from './homeComponents/RecruitersCarousel';
-// import CourseDetails from './homeComponents/CourseDetails';
 
 const AboutUsPage = () => {
+  // Framer Motion animation variants
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } },
+  };
+
+  const fadeIn = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.8, ease: 'easeOut' } },
+  };
+
   return (
     <>
-      {/* <CourseDetails /> */}
-
-      <section className="about-us py-5">
+      <section className="about-us py-5" style={{ color: '#6600FF' }}>
         <div className="container">
-          <h2 className="text-center mb-4 text-warning">About Lara Technologies</h2>
-        <p className="lead text-center">Accelerate your career with expert-led Java Full Stack training at Lara Technologies.</p>
+          {/* Title with motion effect */}
+          <motion.h2
+            className="text-center mb-4 display-4 fw-bold"
+            style={{ color: '#FF6A00' }} // Gold color for heading
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+          >
+            About Lara Technologies
+          </motion.h2>
 
-          <div className="highlights my-5">
-            <div className="highlight-item">
-              <h3 className="text-info">Since 2005</h3>
-              <p>Lara Technologies has been a leader in Java Full Stack training for nearly two decades, offering top-quality education.</p>
-            </div>
-            <div className="highlight-item">
-              <h3 className="text-info">100,000+ Students Trained</h3>
-              <p>We have successfully trained over 100,000 students, equipping them with the skills to thrive in the tech industry.</p>
-            </div>
-            <div className="highlight-item">
-              <h3 className="text-info">250+ Batches Completed</h3>
-              <p>Our structured programs ensure comprehensive learning and practical experience, with over 250 batches completed.</p>
-            </div>
+          {/* Subheading with motion effect */}
+          <motion.p
+            className="display-6 text-center mb-5 fw-300"
+            style={{ color: '#6600FF' }}
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+          >
+            Accelerate your career with expert-led Java Full Stack training at Lara Technologies.
+          </motion.p>
+
+          {/* Highlights Section */}
+          <div className="highlights row mb-5">
+            {[
+              { title: 'Since 2005', text: 'Lara Technologies has been a leader in Java Full Stack training for nearly two decades, providing unparalleled education and mentorship to budding software developers worldwide.' },
+              { title: '100,000+ Students Trained', text: 'With a proven track record, we have successfully empowered over 100,000 students with the skills and confidence to excel in the dynamic tech landscape.' },
+              { title: '250+ Batches Completed', text: 'Our comprehensive and structured programs ensure practical experience and mastery, with more than 250 batches completed to date.' },
+            ].map((item, index) => (
+              <motion.div
+                key={index}
+                className="col-md-4 mb-4"
+                initial="hidden"
+                animate="visible"
+                variants={fadeInUp}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+              >
+                <div className="highlight-item p-4" style={{ backgroundColor: '#fff', color: '#6600FF', borderRadius: '8px', height:'220px' }}>
+                  <h3>{item.title}</h3>
+                  <p>{item.text}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
 
-          <div className="courses my-5">
-            <h3 className="text-center mb-4">Master Data Structures & Algorithms (DSA)</h3>
-            <p>Our DSA course offers hands-on practice with 100+ LeetCode problems, preparing you for coding interviews with in-depth knowledge of data structures and algorithms.</p>
+          {/* Courses Section */}
+          <div className="more-info">
+          <div className="courses mb-5">
+            <motion.h3
+              className="text-center mb-4 display-5 fw-bold"
+              style={{ color: '#FF6A00' }} 
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+            >
+              Master Data Structures & Algorithms (DSA)
+            </motion.h3>
+            <motion.p
+              style={{ color: '#fff' }}
+              initial="hidden"
+              animate="visible"
+              variants={fadeIn}
+              className='lead'
+            >
+              Dive deep into Data Structures and Algorithms with our hands-on DSA course, solving over 100 LeetCode problems. This course is designed to equip you with a thorough understanding, preparing you for coding interviews and real-world challenges with confidence.
+            </motion.p>
           </div>
 
-          <div className="features my-5">
-            <h3 className="text-center mb-4">Flexible Learning & Robust LMS</h3>
-            <p>Choose between online and offline formats, with access to 600 hours of content, 15,000 MCQs, and unlimited exams. We offer ongoing support with weekly doubt-clearing sessions and job application assistance.</p>
+          {/* Features Section */}
+          <div className="features display-5 mb-5 fw-bold">
+            <motion.h3
+              className="text-center mb-4"
+              style={{ color: '#FF6A00' }}
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+            >
+              Flexible Learning & Robust LMS
+            </motion.h3>
+            <motion.p
+              style={{ color: '#fff' }}
+              initial="hidden"
+              animate="visible"
+              variants={fadeIn}
+              className='lead'
+            >
+              Enjoy the flexibility of online and offline learning formats with our state-of-the-art Learning Management System (LMS). Access over 600 hours of content, 15,000 MCQs, and participate in unlimited exams to hone your skills. We provide continuous support through weekly doubt-clearing sessions and personalized job application assistance.
+            </motion.p>
+          </div>
           </div>
 
-          <RecruitersCarousel />
-
+          {/* Recruiters Carousel Section */}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+          >
+            <RecruitersCarousel />
+          </motion.div>
         </div>
       </section>
     </>

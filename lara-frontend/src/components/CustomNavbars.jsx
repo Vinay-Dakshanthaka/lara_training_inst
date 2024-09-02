@@ -118,7 +118,7 @@ function CustomNavbars() {
 
 
     return (
-        <AppBar position="static" sx={{ backgroundColor: 'white', color: 'black' }}>
+        <AppBar position="static" sx={{ backgroundColor: '#347ddb', color: '#fff' }} className=''>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     {/* <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} /> */}
@@ -137,8 +137,8 @@ function CustomNavbars() {
                             textDecoration: 'none',
                         }}
                     >
-                        <Tooltip title="Lara Technologies">
-                             <img src={logoImage} alt="Logo" style={{ height: '30px' }} />
+                        <Tooltip title="Lara Technologies" className='bg-white rounded m-1'>
+                             <img src={logoImage} alt="Logo" style={{ height: '40px' }} />
                         </Tooltip>
                     </Typography>
 
@@ -234,7 +234,7 @@ function CustomNavbars() {
                                     }
                                     handleCloseNavMenu();
                                 }}
-                                sx={{ my: 2, color: 'black', display: 'block'  }}
+                                sx={{ my: 2, color: '#fff', display: 'block'  }}
                             >
                                 {page}
                             </Button>

@@ -1,0 +1,22 @@
+.bg-footer {
+    background-color: #004AAD; 
+    /* background-color: #347ddb;  */
+  }
+  
+  .text-light {
+    color: #ffffff !important; /* Ensure text is readable on dark background */
+  }
+  
+  .text-white {
+    color: #ffffff;
+  }
+  
+  a.text-light {
+    color: #f8f9fa;
+    text-decoration: none;
+  }
+  
+  a.text-light:hover {
+    color: #FF6A00; /* Hover effect for links */
+  }
+  

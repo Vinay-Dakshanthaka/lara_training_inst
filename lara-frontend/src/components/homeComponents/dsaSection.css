@@ -1,34 +1,62 @@
-/* dsaSection.css */
+.text-light {
+  color: #f8f9fa !important;
+}
 
+.text-warning {
+  color: #ffc107 !important; /* Yellow color for main heading */
+}
 
-  
-  .text-light {
-    color: #f8f9fa !important;
+.lc-block h3 {
+  font-weight: bold;
+  color: #FF6A00; /* Use #FF6A00 for headings */
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Add spacing between image and text */
+}
+
+.lc-block h5 {
+  color: #6600FF; /* Use #6600FF for subheadings */
+  font-weight: 600;
+}
+
+.lc-block p {
+  color: #adb5bd; /* Light gray for paragraph text */
+  font-size: 1rem; /* Slightly increase paragraph font size for readability */
+  line-height: 1.6; /* Improve readability with line-height */
+}
+
+.img-fluid {
+  border-radius: 10px;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); Add subtle shadow for depth */
+  transition: transform 0.3s ease; /* Smooth transition for hover effect */
+}
+
+/* .img-fluid:hover {
+  transform: scale(1.05); 
+} */
+
+.position-relative {
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .lc-block {
+    text-align: center;
+    margin-bottom: 2rem;
   }
   
-  .text-warning {
-    color: #ffc107 !important; /* Yellow color for main heading */
+  .col-lg-5,
+  .col-lg-7 {
+    text-align: center; /* Center content on smaller screens */
   }
   
-  .lc-block h3 {
-    font-weight: bold;
-  }
-  
-  .lc-block h5 {
-    color: #17a2b8; /* Teal color for subheadings */
-  }
-  
-  .lc-block p {
-    color: #adb5bd; /* Light gray for paragraph text */
+  .d-block.mx-lg-auto.img-fluid.position-absolute {
+    position: relative;
+    transform: none; /* Remove absolute positioning on smaller screens */
+    margin: auto;
   }
   
   .img-fluid {
-    border-radius: 10px;
+    width: 80%; /* Reduce image width on smaller screens */
   }
-  
-  @media (max-width: 768px) {
-    .lc-block {
-      text-align: center;
-    }
-  }
-  
+}
