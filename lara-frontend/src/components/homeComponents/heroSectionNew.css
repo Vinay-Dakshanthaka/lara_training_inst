@@ -135,17 +135,18 @@ td {
     width: 300px; /* Adjust width for smaller screens */
     margin-left: 45%;
     transform: translateX(-50%);
-    margin-top: -6rem; /* Adjust margin for better positioning */
+    margin-top: -5rem; /* Adjust margin for better positioning */
     /* text-align: center; */
   }
   
   .table td {
-    font-size: 1rem; /* Reduce font size on smaller screens */
+    font-size: 12px; /* Reduce font size on smaller screens */
+    padding: 0 !important;
   }
   .table-bordered td {
     /* border-color: #dee2e6;  */
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 12px;
   }
   
   td {
