@@ -69,7 +69,7 @@ const HeroSectionNew = () => {
 
         <div className="row flex-lg-row-reverse align-items-center g-5 ">
           <motion.div
-            className="col-12 col-sm-8 col-lg-6 position-relative d-flex justify-content-center align-items-center text-center"
+            className="col-12 col-sm-8 col-lg-6 position-relative d-flex justify-content-center align-items-center text-center svg-bg"
             variants={imageVariant}
             initial="hidden"
             animate="visible"

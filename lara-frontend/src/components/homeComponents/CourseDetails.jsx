@@ -9,7 +9,7 @@ const CourseDetails = () => {
         subtitle:
             'Develop core competencies and advanced techniques in Java technologies and frameworks. Learn from the basics to advanced topics and transform yourself into a full-fledged developer.',
         duration: '3 months',
-        courseHours: '300',
+        courseHours: '750',
         prerequisites: 'No Prerequisites',
         skills1: [
             'Core Java',
