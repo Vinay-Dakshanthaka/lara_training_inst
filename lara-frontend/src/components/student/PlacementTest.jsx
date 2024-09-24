@@ -38,41 +38,41 @@ const PlacementTest = () => {
         alert("Allow camera and microphone access inorder to attend the test")
     }
 
-    useEffect(() => {
-        const handleVisibilityChange = async () => {
-            if (!showSummary && document.hidden) {
-                setIsCameraOn(false);
-                setIsMonitored(false);
-                setAutoSubmit(true);
-                await handleSubmitTest();
-                navigate('/malpractice-detected');
-            }
-        };
+    // useEffect(() => {
+    //     const handleVisibilityChange = async () => {
+    //         if (!showSummary && document.hidden) {
+    //             setIsCameraOn(false);
+    //             setIsMonitored(false);
+    //             setAutoSubmit(true);
+    //             await handleSubmitTest();
+    //             navigate('/malpractice-detected');
+    //         }
+    //     };
 
-        const handlePopState = async () => {
-            if (!showSummary) {
-                setAutoSubmit(true);
-                await handleSubmitTest();
-                navigate('/malpractice-detected');
-            }
-        };
+    //     const handlePopState = async () => {
+    //         if (!showSummary) {
+    //             setAutoSubmit(true);
+    //             await handleSubmitTest();
+    //             navigate('/malpractice-detected');
+    //         }
+    //     };
 
-        const setupListeners = () => {
-            document.addEventListener("visibilitychange", handleVisibilityChange);
-            window.addEventListener("popstate", handlePopState);
-        };
+    //     const setupListeners = () => {
+    //         document.addEventListener("visibilitychange", handleVisibilityChange);
+    //         window.addEventListener("popstate", handlePopState);
+    //     };
 
-        const cleanupListeners = () => {
-            document.removeEventListener("visibilitychange", handleVisibilityChange);
-            window.removeEventListener("popstate", handlePopState);
-        };
+    //     const cleanupListeners = () => {
+    //         document.removeEventListener("visibilitychange", handleVisibilityChange);
+    //         window.removeEventListener("popstate", handlePopState);
+    //     };
 
-        setupListeners();
+    //     setupListeners();
 
-        return () => {
-            cleanupListeners();
-        };
-    }, [navigate, showSummary]);
+    //     return () => {
+    //         cleanupListeners();
+    //     };
+    // }, [navigate, showSummary]);
 
     useEffect(() => {
         const fetchTestDetails = async () => {
@@ -344,11 +344,15 @@ const PlacementTest = () => {
             {!showSummary && !testResults && (
                 <>
                     {questions.map((question, index) => (
-                        <Form key={question.cumulative_question_id} className="mb-3">
-                            <Form.Group as={Row}>
+                        <Form key={question.cumulative_question_id} className="mb-4 p-3 rounded shadow-sm border">
+                            <Form.Group as={Row} className="align-items-start">
                                 <Form.Label column sm="12" className="position-relative">
-                                    <span>{index + 1}. {question.question_description}</span>
-                                    <span className="position-absolute top-0 end-0">Marks: {question.no_of_marks_allocated}</span>
+                                    <pre style={{ maxWidth: '90%', whiteSpace: 'pre-wrap', fontFamily: 'inherit', marginBottom: '10px', fontSize: '1rem' }}>
+                                        <code> {index + 1}. {question.question_description}</code>
+                                    </pre>
+                                    <span className="position-absolute top-0 end-0 bg-light px-2 py-1 rounded" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+                                        Marks: {question.no_of_marks_allocated}
+                                    </span>
                                 </Form.Label>
                                 <Col sm="12">
                                     {question.options.map((option, idx) => (
@@ -360,11 +364,14 @@ const PlacementTest = () => {
                                             value={option.option_description}
                                             checked={answers[question.cumulative_question_id]?.includes(option.option_description)}
                                             onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value, e.target.checked)}
+                                            className="mb-2 lead "
+                                            style={{ paddingLeft: '1.5rem', fontSize: '0.95rem', fontWeight: '400', }}
                                         />
                                     ))}
                                 </Col>
                             </Form.Group>
                         </Form>
+
                     ))}
                 </>
             )}
@@ -396,7 +403,7 @@ const PlacementTest = () => {
                                 </tr>
                                 <tr>
                                     <td className="font-weight-bold text-info">Marks Obtained</td>
-                                    <td>{obtainedMarks}</td>
+                                    <td className='fs-4'>{obtainedMarks}</td>
                                 </tr>
                                 <tr>
                                     <td className="font-weight-bold text-secondary">Total Marks</td>
@@ -406,7 +413,7 @@ const PlacementTest = () => {
                         </Table>
 
                         {/* Detailed results for each question */}
-                        <Table bordered hover className="mt-4">
+                        <Table responsive bordered hover className="mt-4 ">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -420,7 +427,11 @@ const PlacementTest = () => {
                                 {questions.map((question, index) => (
                                     <tr key={question.cumulative_question_id}>
                                         <td>{index + 1}</td>
-                                        <td>{question.question_description}</td>
+                                        <td className='responsive'>
+                                            <pre className='lead text-dark' style={{ maxWidth: '40vw', whiteSpace: 'pre-wrap', fontFamily: 'inherit', marginBottom: '10px', fontSize: '1rem' }}>
+                                                <code> {index + 1}. {question.question_description}</code>
+                                            </pre>
+                                        </td>
                                         <td>
                                             <div className="d-grid gap-2">
                                                 {question.options.map((option, idx) => (
@@ -437,12 +448,12 @@ const PlacementTest = () => {
                                                         {answer}
                                                     </div>
                                                 ))
-                                                : <div className="p-2 rounded bg-secondary text-white">Not Attended</div>
+                                                : <div className="p-2 rounded bg-secondary text-white my-1">Not Attended</div>
                                             }
                                         </td>
                                         <td>
                                             {question.correct_answers.map((correctAnswer, idx) => (
-                                                <div key={idx} className="p-2 rounded bg-success text-white">
+                                                <div key={idx} className="p-2 rounded bg-success text-white my-1">
                                                     {correctAnswer}
                                                 </div>
                                             ))}
@@ -454,7 +465,6 @@ const PlacementTest = () => {
                     </Card.Body>
                 </Card>
             )}
-
 
 
             {/* Message if results are not available */}

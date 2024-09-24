@@ -1080,13 +1080,17 @@ const addQuestion = async (req, res) => {
 //             }
 //         }
 //     }
-// };
+// }; 
 
 const processExcel = async (filePath, topic_id, test_id = null) => {
     const workbook = xlsx.readFile(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows = xlsx.utils.sheet_to_json(sheet);
 
+    // Function to preserve text formatting (including line breaks and spaces)
+    const preserveStringFormat = (value) => (value != null ? String(value) : '');
+
+    // Function to clean other fields (removes excessive spaces but keeps valid ones)
     const cleanString = (value) => (value != null ? String(value).trim().replace(/\s+/g, ' ') : '');
 
     for (const row of rows) {
@@ -1100,9 +1104,9 @@ const processExcel = async (filePath, topic_id, test_id = null) => {
             option4,
             correctOptionValue
         ] = [
-            cleanString(row["Question Text"]),
-            cleanString(row.Difficulty),
-            cleanString(row.Marks),
+            preserveStringFormat(row["Question Text"]), // Preserve original format (including line breaks)
+            cleanString(row.Difficulty), // Clean extra spaces for difficulty
+            cleanString(row.Marks), // Clean extra spaces for marks
             cleanString(row["Option 1"]),
             cleanString(row["Option 2"]),
             cleanString(row["Option 3"]),
@@ -1111,13 +1115,21 @@ const processExcel = async (filePath, topic_id, test_id = null) => {
         ];
 
         // Create the cumulative question with an optional test_id
+        // const question = await CumulativeQuestion.create({
+        //     question_description: questionText, // Preserve original formatting
+        //     topic_id: topic_id,
+        //     difficulty_level: difficulty,
+        //     no_of_marks_allocated: marks,
+        //     test_id // This will be null for practice questions
+        // });
+
         const question = await CumulativeQuestion.create({
-            question_description: questionText,
+            question_description: JSON.stringify(questionText), // Store as JSON
             topic_id: topic_id,
             difficulty_level: difficulty,
             no_of_marks_allocated: marks,
             test_id // This will be null for practice questions
-        });
+          });
 
         // Extract the question ID
         const questionId = question.cumulative_question_id;

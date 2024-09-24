@@ -66,7 +66,8 @@ const FetchResultsByTestId = () => {
     return filteredResults;
   };
 
-  const downloadExcel = () => {
+  // Existing download function with email and phone number
+  const downloadExcelWithDetails = () => {
     const sortedResults = [...results].sort((a, b) => b.marks_obtained - a.marks_obtained);
 
     const dataToExport = sortedResults.map(result => ({
@@ -79,9 +80,26 @@ const FetchResultsByTestId = () => {
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results with Details');
 
-    XLSX.writeFile(workbook, `Test_${test_id}_Results.xlsx`);
+    XLSX.writeFile(workbook, `Test_${test_id}_Results_With_Details.xlsx`);
+  };
+
+  // New download function without email and phone number
+  const downloadExcelWithoutDetails = () => {
+    const sortedResults = [...results].sort((a, b) => b.marks_obtained - a.marks_obtained);
+
+    const dataToExport = sortedResults.map(result => ({
+      'Student Name': result.student_details.student_name,
+      'Marks Obtained': result.marks_obtained,
+      'Total Marks': result.total_marks,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results Without Details');
+
+    XLSX.writeFile(workbook, `Test_${test_id}_Results_Without_Details.xlsx`);
   };
 
   if (loading) {
@@ -97,8 +115,11 @@ const FetchResultsByTestId = () => {
           value={filterName}
           onChange={(e) => setFilterName(e.target.value)}
         />
-        <Button variant="primary" onClick={downloadExcel}>
-          Download Results as Excel
+        <Button variant="primary" onClick={downloadExcelWithDetails}>
+          Download Results (with Email & Phone)
+        </Button>
+        <Button variant="secondary" onClick={downloadExcelWithoutDetails} className="ms-2">
+          Download Results (Name, Marks only)
         </Button>
       </InputGroup>
       <Table striped bordered hover>

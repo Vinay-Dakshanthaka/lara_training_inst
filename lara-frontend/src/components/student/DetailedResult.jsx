@@ -88,7 +88,7 @@ const DetailedResult = () => {
                         return (
                             <div key={question.cumulative_question_id} ref={el => questionRefs.current[index] = el} className={`p-2 mb-2 border position-relative ${isCorrect ? 'border-success' : 'border-danger'}`}>
                             <span className="position-absolute top-0 end-0">Marks: {question.no_of_marks_allocated}</span>
-                            <p>{index + 1}. {question.question_description}</p>
+                            <pre>{index + 1}. {question.question_description}</pre>
                             <ul>
                                 <li className={`text-black`}>a : {question.option_1}</li>
                                 <li className={`text-black`}>b : {question.option_2}</li>

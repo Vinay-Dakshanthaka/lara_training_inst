@@ -787,12 +787,58 @@ const saveQuestionAndAddToLink = async (data) => {
     }
 };
 
+// const uploadAndAssignQuestionsToLink = async (filePath, topic_id, placement_test_id = null) => {
+//     const workbook = xlsx.readFile(filePath);
+//     const sheet = workbook.Sheets[workbook.SheetNames[0]];
+//     const rows = xlsx.utils.sheet_to_json(sheet);
+
+//     const cleanString = (value) => (value != null ? String(value).trim().replace(/\s+/g, ' ') : '');
+
+//     for (const row of rows) {
+//         const [
+//             questionText,
+//             difficulty,
+//             marks,
+//             option1,
+//             option2,
+//             option3,
+//             option4,
+//             correctOptionValue
+//         ] = [
+//             cleanString(row["Question Text"]),
+//             cleanString(row.Difficulty),
+//             cleanString(row.Marks),
+//             cleanString(row["Option 1"]),
+//             cleanString(row["Option 2"]),
+//             cleanString(row["Option 3"]),
+//             cleanString(row["Option 4"]),
+//             cleanString(row["Correct Option"])
+//         ];
+
+//         // Define options and correct answers
+//         const options = [option1, option2, option3, option4];
+//         const correctOptions = correctOptionValue.split(',').map(opt => opt.trim());
+
+//         // Call saveQuestionAndAddToLink
+//         await saveQuestionAndAddToLink({
+//             topic_id,
+//             question_description: questionText,
+//             no_of_marks_allocated: marks,
+//             difficulty_level: difficulty,
+//             options,
+//             correct_options: correctOptions,
+//             placement_test_id
+//         });
+//     }
+// };
+
 const uploadAndAssignQuestionsToLink = async (filePath, topic_id, placement_test_id = null) => {
     const workbook = xlsx.readFile(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows = xlsx.utils.sheet_to_json(sheet);
 
-    const cleanString = (value) => (value != null ? String(value).trim().replace(/\s+/g, ' ') : '');
+    // Preserve line breaks and spaces inside the question text
+    const preserveStringFormat = (value) => (value != null ? String(value).trim() : '');
 
     for (const row of rows) {
         const [
@@ -805,14 +851,14 @@ const uploadAndAssignQuestionsToLink = async (filePath, topic_id, placement_test
             option4,
             correctOptionValue
         ] = [
-            cleanString(row["Question Text"]),
-            cleanString(row.Difficulty),
-            cleanString(row.Marks),
-            cleanString(row["Option 1"]),
-            cleanString(row["Option 2"]),
-            cleanString(row["Option 3"]),
-            cleanString(row["Option 4"]),
-            cleanString(row["Correct Option"])
+            preserveStringFormat(row["Question Text"]),
+            preserveStringFormat(row.Difficulty),
+            preserveStringFormat(row.Marks),
+            preserveStringFormat(row["Option 1"]),
+            preserveStringFormat(row["Option 2"]),
+            preserveStringFormat(row["Option 3"]),
+            preserveStringFormat(row["Option 4"]),
+            preserveStringFormat(row["Correct Option"])
         ];
 
         // Define options and correct answers
@@ -822,7 +868,7 @@ const uploadAndAssignQuestionsToLink = async (filePath, topic_id, placement_test
         // Call saveQuestionAndAddToLink
         await saveQuestionAndAddToLink({
             topic_id,
-            question_description: questionText,
+            question_description: questionText, // This will now preserve format
             no_of_marks_allocated: marks,
             difficulty_level: difficulty,
             options,
@@ -831,7 +877,6 @@ const uploadAndAssignQuestionsToLink = async (filePath, topic_id, placement_test
         });
     }
 };
-
 
 
 const getTopicsByPlacementTestId = async (req, res) => {

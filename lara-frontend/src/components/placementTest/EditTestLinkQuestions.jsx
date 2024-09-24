@@ -33,7 +33,7 @@ const EditTestLinkQuestions = () => {
         };
 
         fetchPlacementTestDetails(); // Call the function inside useEffect
-    }, [test_id]); 
+    }, [test_id]);
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -153,7 +153,7 @@ const EditTestLinkQuestions = () => {
                 )}
             </div>
             <h3>Edit Test Link Questions</h3>
-            <Table bordered hover>
+            <Table bordered hover responsive>
                 <thead>
                     <tr>
                         <th>#</th>
@@ -171,16 +171,18 @@ const EditTestLinkQuestions = () => {
                         return (
                             <tr key={question.cumulative_question_id} className={hasMismatch ? 'bg-danger text-white' : ''}>
                                 <td>{index + 1}</td>
-                                <td>
-                                    {question.question_description}
+                                <td style={{maxWidth:'60vw'}}>
+                                   <pre>
+                                   {question.question_description}
                                     {hasMismatch && (
                                         <>
                                             <Badge bg="warning" text="dark" className="ml-2 my-2 ">
-                                                Available options and correct options are not matching delete this question and add it again 
+                                                Available options and correct options are not matching delete this question and add it again
                                             </Badge>
                                             <BsExclamation className='bg-danger fs-1 rounded' />
                                         </>
                                     )}
+                                   </pre>
                                 </td>
                                 <td>
                                     {question.options.map((option, idx) => (
@@ -212,11 +214,14 @@ const EditTestLinkQuestions = () => {
                         <Form.Group controlId="question_description">
                             <Form.Label>Question Description</Form.Label>
                             <Form.Control
-                                type="text"
+                                as="textarea"       // Change the type to textarea
                                 name="question_description"
                                 value={formData.question_description}
                                 onChange={e => handleChange(e)}
+                                rows={4}            // Optional: Set the number of rows (adjust as needed)
+                                placeholder="Enter question description"  // Optional: Add a placeholder
                             />
+
                         </Form.Group>
                         <Form.Group controlId="options">
                             <Form.Label>Options</Form.Label>
