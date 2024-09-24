@@ -214,7 +214,7 @@ const StartTest = () => {
                                     return (
                                         <div key={question.cumulative_question_id} ref={el => questionRefs.current[index] = el} className={`p-2 mb-2 border position-relative ${isCorrect ? 'border-success' : 'border-danger'}`}>
                                             <span className="position-absolute top-0 end-0">Marks: {question.no_of_marks_allocated}</span>
-                                            <pre>{index + 1}. {question.question_description}</pre>
+                                            <pre style={{paddingRight:'2rem'}}>{index + 1}. {question.question_description}</pre>
                                             <p className={`text-${isCorrect ? 'success' : 'danger'}`}>Your Answer: {selectedOptions.length > 0 ? selectedOptions.join(', ') : "Not Attempted"}</p>
                                             {!isCorrect && (
                                                 <p className="text-success">Correct Answer: {correctOptions.join(', ')}</p>
@@ -229,8 +229,8 @@ const StartTest = () => {
                                    <Form key={question.cumulative_question_id} className="mb-3" ref={el => questionRefs.current[index] = el}>
                                        <Form.Group as={Row}>
                                            <Form.Label column sm="12" className="position-relative">
-                                               <pre>{index + 1}. {question.question_description}</pre>
-                                               <span className="position-absolute top-0 end-0 ">Marks: {question.no_of_marks_allocated}</span>
+                                               <pre style={{paddingRight:'2rem'}}>{index + 1}. {question.question_description}</pre>
+                                               <span className="position-absolute top-0 end-0 " style={{maxWidth:'80%'}}>Marks: {question.no_of_marks_allocated}</span>
                                            </Form.Label>
                                            <Col sm="12">
                                                {question.QuestionOptions.map((option, i) => (

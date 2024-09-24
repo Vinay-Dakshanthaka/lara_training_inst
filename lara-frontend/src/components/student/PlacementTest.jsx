@@ -38,41 +38,41 @@ const PlacementTest = () => {
         alert("Allow camera and microphone access inorder to attend the test")
     }
 
-    // useEffect(() => {
-    //     const handleVisibilityChange = async () => {
-    //         if (!showSummary && document.hidden) {
-    //             setIsCameraOn(false);
-    //             setIsMonitored(false);
-    //             setAutoSubmit(true);
-    //             await handleSubmitTest();
-    //             navigate('/malpractice-detected');
-    //         }
-    //     };
+    useEffect(() => {
+        const handleVisibilityChange = async () => {
+            if (!showSummary && document.hidden) {
+                setIsCameraOn(false);
+                setIsMonitored(false);
+                setAutoSubmit(true);
+                await handleSubmitTest();
+                navigate('/malpractice-detected');
+            }
+        };
 
-    //     const handlePopState = async () => {
-    //         if (!showSummary) {
-    //             setAutoSubmit(true);
-    //             await handleSubmitTest();
-    //             navigate('/malpractice-detected');
-    //         }
-    //     };
+        const handlePopState = async () => {
+            if (!showSummary) {
+                setAutoSubmit(true);
+                await handleSubmitTest();
+                navigate('/malpractice-detected');
+            }
+        };
 
-    //     const setupListeners = () => {
-    //         document.addEventListener("visibilitychange", handleVisibilityChange);
-    //         window.addEventListener("popstate", handlePopState);
-    //     };
+        const setupListeners = () => {
+            document.addEventListener("visibilitychange", handleVisibilityChange);
+            window.addEventListener("popstate", handlePopState);
+        };
 
-    //     const cleanupListeners = () => {
-    //         document.removeEventListener("visibilitychange", handleVisibilityChange);
-    //         window.removeEventListener("popstate", handlePopState);
-    //     };
+        const cleanupListeners = () => {
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+            window.removeEventListener("popstate", handlePopState);
+        };
 
-    //     setupListeners();
+        setupListeners();
 
-    //     return () => {
-    //         cleanupListeners();
-    //     };
-    // }, [navigate, showSummary]);
+        return () => {
+            cleanupListeners();
+        };
+    }, [navigate, showSummary]);
 
     useEffect(() => {
         const fetchTestDetails = async () => {
