@@ -6,6 +6,7 @@ const multer = require('multer');
 const { Student } = require('../models');
 const upload = multer({ dest: 'cumulative_questions/' });
 const verifyToken = require('../middleware/authMiddleware');
+const uploadQuestionImage = multer({dest: 'cumulative_question_images/' });
 
 placementTestRoute.post('/create-test-link', placementTestContoller.createPlacementTestLink); 
 

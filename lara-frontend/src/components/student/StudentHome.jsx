@@ -6,6 +6,7 @@ import { BsFillEnvelopeFill, BsPhone } from "react-icons/bs";
 import defaultProfileImage from "../default-profile.png";
 import { BsStarFill, BsStar } from 'react-icons/bs'; // Import star icons
 import { baseURL } from '../config';
+import PlacementTestTableForStudent from "../placementTest/PlacementTestTableForStudent";
 
 const FeedbackButton = ({ onClick }) => {
   return (
@@ -532,6 +533,7 @@ const StudentHome = () => {
           />
         </div>
 
+        {/* <PlacementTestTableForStudent /> */}
 
         {/* Education Details */}
         <div className="row mb-4">

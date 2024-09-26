@@ -113,6 +113,8 @@ router.get('/getAllReviews',verifyToken,reviewController.getAllReviews)
 
 router.post('/executeJavaCodeHandler',verifyToken,assignmentController.executeJavaCodeHandler)
 
+router.post('/executeJavaCodeHandlerFree',verifyToken,assignmentController.executeJavaCodeHandlerFree)
+
 router.post('/executeJavaCodeHandler2',assignmentController.executeJavaCodeHandler2)
 
 router.post('/saveQuestion',verifyToken,uploadQuestionImage.single('image'),assignmentController.saveQuestion)

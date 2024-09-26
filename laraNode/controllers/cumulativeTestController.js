@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const multer = require('multer');
 const { Sequelize } = require('sequelize');
 const xlsx = require('xlsx');
+const fs = require('fs');
 
 const Subject = db.Subject;
 const CumulativeQuestion = db.CumulativeQuestion;
@@ -511,57 +512,57 @@ const fetchQuestionsByTestId = async (req, res) => {
 };
 
 
-const getPracticeQuestionsByTopicIds = async (req, res) => {
-    try {
-        const { topic_ids, numberOfQuestions } = req.body;
-        if (!topic_ids || topic_ids.length === 0 || !numberOfQuestions) {
-            return res.status(400).send({ message: "Invalid input data" });
-        }
+// const getPracticeQuestionsByTopicIds = async (req, res) => {
+//     try {
+//         const { topic_ids, numberOfQuestions } = req.body;
+//         if (!topic_ids || topic_ids.length === 0 || !numberOfQuestions) {
+//             return res.status(400).send({ message: "Invalid input data" });
+//         }
 
-        const questionsPerTopic = Math.floor(numberOfQuestions / topic_ids.length);
-        const remainderQuestions = numberOfQuestions % topic_ids.length;
+//         const questionsPerTopic = Math.floor(numberOfQuestions / topic_ids.length);
+//         const remainderQuestions = numberOfQuestions % topic_ids.length;
 
-        let allQuestions = [];
+//         let allQuestions = [];
 
-        for (let i = 0; i < topic_ids.length; i++) {
-            const topicId = topic_ids[i];
-            let questionsToFetch = questionsPerTopic;
+//         for (let i = 0; i < topic_ids.length; i++) {
+//             const topicId = topic_ids[i];
+//             let questionsToFetch = questionsPerTopic;
 
-            if (i < remainderQuestions) {
-                questionsToFetch += 1;
-            }
+//             if (i < remainderQuestions) {
+//                 questionsToFetch += 1;
+//             }
 
-            const questions = await CumulativeQuestion.findAll({
-                where: { topic_id: topicId, test_id: null }, // test_id will be set as null for practice questions
-                limit: questionsToFetch,
-                order: Sequelize.literal('RAND()'),
-                include: [
-                    {
-                        model: Option,
-                        as: 'QuestionOptions',
-                        attributes: ['option_id', 'option_description']
-                    },
-                    {
-                        model: CorrectAnswer,
-                        as: 'CorrectAnswers',
-                        attributes: ['correct_answer_id', 'answer_description']
-                    }
-                ]
-            });
+//             const questions = await CumulativeQuestion.findAll({
+//                 where: { topic_id: topicId, test_id: null }, // test_id will be set as null for practice questions
+//                 limit: questionsToFetch,
+//                 order: Sequelize.literal('RAND()'),
+//                 include: [
+//                     {
+//                         model: Option,
+//                         as: 'QuestionOptions',
+//                         attributes: ['option_id', 'option_description']
+//                     },
+//                     {
+//                         model: CorrectAnswer,
+//                         as: 'CorrectAnswers',
+//                         attributes: ['correct_answer_id', 'answer_description']
+//                     }
+//                 ]
+//             });
 
-            allQuestions = allQuestions.concat(questions);
-        }
+//             allQuestions = allQuestions.concat(questions);
+//         }
 
-        if (allQuestions.length > 0) {
-            res.status(200).json(allQuestions);
-        } else {
-            res.status(404).send({ message: "Questions not found" });
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: error.message });
-    }
-};
+//         if (allQuestions.length > 0) {
+//             res.status(200).json(allQuestions);
+//         } else {
+//             res.status(404).send({ message: "Questions not found" });
+//         }
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send({ message: error.message });
+//     }
+// };
 
 // const updateQuestionById = async (req, res) => {
 //     try {
@@ -633,6 +634,108 @@ const getPracticeQuestionsByTopicIds = async (req, res) => {
 //         res.status(500).send({ message: error.message });
 //     }
 // };
+
+const getPracticeQuestionsByTopicIds = async (req, res) => {
+    try {
+        const { topic_ids, numberOfQuestions } = req.body;
+        if (!topic_ids || topic_ids.length === 0 || !numberOfQuestions) {
+            return res.status(400).send({ message: "Invalid input data" });
+        }
+
+        let allAvailableQuestions = [];
+        const topicQuestionsMap = {};
+        let totalQuestionsAvailable = 0;
+
+        // Step 1: Fetch available questions for each topic
+        for (const topicId of topic_ids) {
+            const questions = await CumulativeQuestion.findAll({
+                where: { topic_id: topicId, test_id: null },
+                include: [
+                    {
+                        model: Option,
+                        as: 'QuestionOptions',
+                        attributes: ['option_id', 'option_description']
+                    },
+                    {
+                        model: CorrectAnswer,
+                        as: 'CorrectAnswers',
+                        attributes: ['correct_answer_id', 'answer_description']
+                    }
+                ]
+            });
+
+            topicQuestionsMap[topicId] = questions;
+            allAvailableQuestions = allAvailableQuestions.concat(questions);
+            totalQuestionsAvailable += questions.length;
+
+            // Log how many questions were fetched for each topic
+            console.log(`Topic ID: ${topicId}, Questions Fetched: ${questions.length}`);
+        }
+
+        // Log total number of available questions across all topics
+        console.log(`Total Questions Available: ${totalQuestionsAvailable}`);
+
+        // Step 2: Check if total available questions are less than requested
+        if (allAvailableQuestions.length <= numberOfQuestions) {
+            // Return all available questions if they're less than or equal to the requested amount
+            const randomQuestions = allAvailableQuestions.sort(() => 0.5 - Math.random());
+            console.log(`Returning ${randomQuestions.length} questions as total available questions are less than or equal to the requested amount`);
+            return res.status(200).json(randomQuestions);
+        }
+
+        // Step 3: Distribute questions equally across topics
+        const questionsPerTopic = Math.floor(numberOfQuestions / topic_ids.length);
+        const remainderQuestions = numberOfQuestions % topic_ids.length;
+
+        let selectedQuestions = [];
+        let remainingQuestionsNeeded = numberOfQuestions;
+
+        // Step 4: Fetch questions topic by topic, and compensate if one topic has fewer questions
+        for (let i = 0; i < topic_ids.length && remainingQuestionsNeeded > 0; i++) {
+            const topicId = topic_ids[i];
+            let questionsToFetch = questionsPerTopic;
+
+            if (i < remainderQuestions) {
+                questionsToFetch += 1;
+            }
+
+            // Fetch questions from the current topic
+            const topicQuestions = topicQuestionsMap[topicId] || [];
+            const randomQuestionsFromTopic = topicQuestions.sort(() => 0.5 - Math.random()).slice(0, questionsToFetch);
+
+            selectedQuestions = selectedQuestions.concat(randomQuestionsFromTopic);
+            remainingQuestionsNeeded -= randomQuestionsFromTopic.length;
+
+            // Log how many questions were fetched for each topic during selection
+            console.log(`Topic ID: ${topicId}, Random Questions Fetched: ${randomQuestionsFromTopic.length}`);
+        }
+
+        // If after distributing, still some questions are needed
+        if (remainingQuestionsNeeded > 0) {
+            // Get extra questions from any available topic
+            const extraQuestions = allAvailableQuestions.filter(
+                (question) => !selectedQuestions.includes(question)
+            ).sort(() => 0.5 - Math.random()).slice(0, remainingQuestionsNeeded);
+
+            selectedQuestions = selectedQuestions.concat(extraQuestions);
+
+            // Log how many extra questions were fetched
+            console.log(`Extra Questions Fetched: ${extraQuestions.length}`);
+        }
+
+        // Step 5: Log the total number of questions being returned
+        console.log(`Total Questions Returned: ${selectedQuestions.length}`);
+
+        // Step 6: Return the selected questions
+        res.status(200).json(selectedQuestions);
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: error.message });
+    }
+};
+
+
 
 const updateQuestionById = async (req, res) => {
     try {

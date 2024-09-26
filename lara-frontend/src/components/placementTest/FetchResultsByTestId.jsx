@@ -9,7 +9,8 @@ import * as XLSX from 'xlsx';
 
 const FetchResultsByTestId = () => {
   const { test_id } = useParams();
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState([]); // This will hold the 'students' data
+  const [topics, setTopics] = useState([]); // This will hold the 'topics' data
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState(null);
   const [sortOrder, setSortOrder] = useState('asc');
@@ -19,7 +20,12 @@ const FetchResultsByTestId = () => {
     const fetchResults = async () => {
       try {
         const response = await axios.post(`${baseURL}/api/placement-test/getAllResultsByTestId`, { placement_test_id: test_id });
-        setResults(response.data);
+        
+        setResults(response.data.students); // Set only the 'students' part of the response
+        setTopics(response.data.topics); // Store 'topics' separately
+        // console.log('Students:', response.data.students);
+        // console.log('Topics:', response.data.topics);
+        
         setLoading(false);
       } catch (error) {
         console.error('Error fetching results:', error);
@@ -44,7 +50,9 @@ const FetchResultsByTestId = () => {
     if (sortBy) {
       const sortedResults = [...results].sort((a, b) => {
         if (sortBy === 'student_name') {
-          return sortOrder === 'asc' ? a.student_details.student_name.localeCompare(b.student_details.student_name) : b.student_details.student_name.localeCompare(a.student_details.student_name);
+          return sortOrder === 'asc'
+            ? a.student_details.student_name.localeCompare(b.student_details.student_name)
+            : b.student_details.student_name.localeCompare(a.student_details.student_name);
         } else if (sortBy === 'marks_obtained') {
           return sortOrder === 'asc' ? a.marks_obtained - b.marks_obtained : b.marks_obtained - a.marks_obtained;
         }
@@ -52,7 +60,7 @@ const FetchResultsByTestId = () => {
       });
       setResults(sortedResults);
     }
-  }, [sortBy, sortOrder]);
+  }, [sortBy, sortOrder, results]);
 
   const applyFilters = () => {
     let filteredResults = results;
@@ -66,28 +74,41 @@ const FetchResultsByTestId = () => {
     return filteredResults;
   };
 
-  // Existing download function with email and phone number
+  // Function to download Excel with details and topics
   const downloadExcelWithDetails = () => {
     const sortedResults = [...results].sort((a, b) => b.marks_obtained - a.marks_obtained);
 
+    // Create a comma-separated string of topics
+    const topicsString = topics.join(', ');
+
+    // Create an array for Excel data
     const dataToExport = sortedResults.map(result => ({
       'Student Name': result.student_details.student_name,
       'Email': result.student_details.email,
-      'Phone ': result.student_details.phone_number,
+      'Phone': result.student_details.phone_number,
       'Marks Obtained': result.marks_obtained,
       'Total Marks': result.total_marks,
     }));
 
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const worksheet = XLSX.utils.json_to_sheet([]);
+    
+    // Add topics in the first row
+    XLSX.utils.sheet_add_aoa(worksheet, [['Topics: ' + topicsString]], { origin: 'A1' });
+    
+    // Add the rest of the data after the topics row
+    XLSX.utils.sheet_add_json(worksheet, dataToExport, { origin: 'A2' });
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Results with Details');
 
     XLSX.writeFile(workbook, `Test_${test_id}_Results_With_Details.xlsx`);
   };
 
-  // New download function without email and phone number
+  // New download function without email and phone number and with topics
   const downloadExcelWithoutDetails = () => {
     const sortedResults = [...results].sort((a, b) => b.marks_obtained - a.marks_obtained);
+
+    const topicsString = topics.join(', ');
 
     const dataToExport = sortedResults.map(result => ({
       'Student Name': result.student_details.student_name,
@@ -95,7 +116,11 @@ const FetchResultsByTestId = () => {
       'Total Marks': result.total_marks,
     }));
 
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const worksheet = XLSX.utils.json_to_sheet([]);
+    
+    XLSX.utils.sheet_add_aoa(worksheet, [['Topics: ' + topicsString]], { origin: 'A1' });
+    XLSX.utils.sheet_add_json(worksheet, dataToExport, { origin: 'A2' });
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Results Without Details');
 
@@ -107,8 +132,23 @@ const FetchResultsByTestId = () => {
   }
 
   return (
-    <div className="container mt-5">
+    <div className="container mt-5 resp">
       <h2>Placement Test Results</h2>
+      
+      {/* Topics Table */}
+      <Table striped bordered hover responsive className="mb-3">
+        <thead>
+          <tr>
+            <th>Test Conducted on these topics</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{topics.join(', ')}</td>
+          </tr>
+        </tbody>
+      </Table>
+
       <InputGroup className="mb-3">
         <FormControl
           placeholder="Filter by Student Name"
@@ -122,7 +162,8 @@ const FetchResultsByTestId = () => {
           Download Results (Name, Marks only)
         </Button>
       </InputGroup>
-      <Table striped bordered hover>
+
+      <Table striped bordered hover responsive>
         <thead>
           <tr>
             <th>SI No</th>
@@ -146,6 +187,7 @@ const FetchResultsByTestId = () => {
           ))}
         </tbody>
       </Table>
+
       <ToastContainer position="top-right" />
     </div>
   );

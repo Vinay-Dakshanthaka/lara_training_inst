@@ -791,7 +791,7 @@ const executeJavaCodeHandler = async (req, res) => {
       script: code,
       language: 'java',
       versionIndex: '3', // Specify the Java version index (e.g., '3' for Java 8)
-      clientId: 'cf50f833c14a453d7b51231fe243dda6',
+      clientId: 'cf50f833c14a453d7b51231fe243dda6', //vinayd098@gmail.com account 220 present credits (220 request can be sent per day for this api key )
       clientSecret: 'bb9342a1e142f420f0a1f2345749fc7b751d32340b5906b76544cd02095c666a',
       stdin: '',
     };
@@ -807,6 +807,57 @@ const executeJavaCodeHandler = async (req, res) => {
   }
 };
 
+/*
+  The below implemented java compiler (executeJavaCodeHandlerFree) is a free api found on github. 
+  it will accept unlimted api request as of now for refernce please refer this github repo 
+
+  https://github.com/Jaagrav/CodeX-API?tab=readme-ov-file
+
+
+
+*/
+
+const executeJavaCodeHandlerFree = async (req, res) => {
+  try {
+    const { code } = req.body;
+
+    // Construct the request body for CodeX API
+    const data = {
+      'code': code,
+      'language': 'java',
+      'input': '', // Optional: If your Java code requires input
+    };
+
+    // Configure the request to CodeX API
+    const config = {
+      method: 'post',
+      url: 'https://api.codex.jaagrav.in',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      data: new URLSearchParams(data).toString()
+    };
+
+    // Send request to CodeX API
+    const response = await axios(config);
+
+    // Extract the output and error from the response
+    const { output, error } = response.data;
+
+    // Check if there's an error in the response
+    if (error) {
+      console.error('Error in code execution:', error);
+      res.json({ error });
+    } else {
+      // If no error, return the output
+      // console.log("Response from CODEXAPI", response.data);
+      res.json({ output });
+    }
+  } catch (err) {
+    console.error('Error executing Java code:', err);
+    res.status(500).json({ error: 'Error executing Java code' });
+  }
+};
 
 const executeJavaCodeHandler2 = async (req, res) => {
   try {
@@ -917,6 +968,7 @@ const executeJavaCodeHandler2 = async (req, res) => {
 
 module.exports = {
   executeJavaCodeHandler,
+  executeJavaCodeHandlerFree,
   executeJavaCodeHandler2,
   saveQuestion,
   saveTestcases,

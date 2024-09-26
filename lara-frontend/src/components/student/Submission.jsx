@@ -691,17 +691,26 @@ const Submission = () => {
       };
 
       setLoading(true);
-      const response = await axios.post(`${baseURL}/api/student/executeJavaCodeHandler`, {
+      // const response = await axios.post(`${baseURL}/api/student/executeJavaCodeHandler`, {  //this api requests accepts 220 credits per day 
+     /* this accepets unlimited requestes but it is open source and hosted on limited resources server 
+        if incase the below endopoint fails to provide response use the above api (220 credits per day )
+     */
+      const response = await axios.post(`${baseURL}/api/student/executeJavaCodeHandlerFree`, { 
         code: code,
       }, config);
 
-      setOutput(response.data.output);
+        // Check if the response contains an error
+    if (response.data.error) {
+      setOutput(response.data.error);  // Display error if present
+    } else {
+      setOutput(response.data.output); // Display output if no error
+    }
     } catch (error) {
       console.error('Error executing Java code:', error);
       if (error.response && error.response.data) {
         console.error('Error message from server:', error.response.data);
       }
-      setOutput('Error executing Java code');
+      setOutput('Error executing Java code Please Try again after some time!!!');
     } finally {
       setLoading(false);
     }

@@ -148,7 +148,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: 1
-        }
+        },
+        // cumulative_question_image: {
+        //     type: DataTypes.TEXT, 
+        //     allowNull: true, 
+        // },
     }, {
         timestamps: true
     });
@@ -167,5 +171,3 @@ module.exports = (sequelize, DataTypes) => {
 
     return CumulativeQuestion;
 };
-
-

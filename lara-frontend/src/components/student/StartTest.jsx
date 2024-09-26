@@ -105,46 +105,46 @@ const StartTest = () => {
     const handleSubmit = async () => {
         setLoading(true);
         stopTimer();
-    
+
         try {
             const completed_date_time = new Date().toISOString();
             const obtained_marks = questions.reduce((sum, question) => {
                 const selectedOptions = answers[question.cumulative_question_id] || [];
                 const correctOptions = question.CorrectAnswers.map(ans => ans.answer_description).sort();
-                const isCorrect = selectedOptions.length === correctOptions.length && 
-                                  selectedOptions.sort().every(opt => correctOptions.includes(opt));
+                const isCorrect = selectedOptions.length === correctOptions.length &&
+                    selectedOptions.sort().every(opt => correctOptions.includes(opt));
                 if (isCorrect) {
                     return sum + question.no_of_marks_allocated;
                 }
                 return sum;
             }, 0);
-    
+
             setObtainedMarks(obtained_marks);
-    
+
             const question_ans_data = {};
             questions.forEach(question => {
                 question_ans_data[question.cumulative_question_id] = answers[question.cumulative_question_id] || [];
             });
-    
+
             const token = localStorage.getItem("token");
             if (!token) {
                 throw new Error("No token provided.");
             }
-    
+
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
             };
-    
+
             const response = await axios.post(`${baseURL}/api/cumulative-test/saveTestResults`, {
                 total_marks: totalMarks,
                 completed_date_time,
                 obtained_marks,
                 question_ans_data,
             }, config);
-    
+
             setTestResults({
                 ...response.data,
                 question_ans_data,
@@ -185,7 +185,7 @@ const StartTest = () => {
         return questions.filter(question => {
             const selectedOptions = answers[question.cumulative_question_id] || [];
             return selectedOptions.length > 0 &&
-                   !selectedOptions.every(opt => question.CorrectAnswers.map(ans => ans.answer_description).includes(opt));
+                !selectedOptions.every(opt => question.CorrectAnswers.map(ans => ans.answer_description).includes(opt));
         }).length;
     };
 
@@ -210,11 +210,11 @@ const StartTest = () => {
                                     const correctOptions = question.CorrectAnswers.map(ans => ans.answer_description);
                                     const isCorrect = selectedOptions.length === correctOptions.length &&
                                         selectedOptions.every(opt => correctOptions.includes(opt));
- 
+
                                     return (
                                         <div key={question.cumulative_question_id} ref={el => questionRefs.current[index] = el} className={`p-2 mb-2 border position-relative ${isCorrect ? 'border-success' : 'border-danger'}`}>
                                             <span className="position-absolute top-0 end-0">Marks: {question.no_of_marks_allocated}</span>
-                                            <pre style={{paddingRight:'2rem'}}>{index + 1}. {question.question_description}</pre>
+                                            <pre style={{ paddingRight: '2rem' }}>{index + 1}. {question.question_description}</pre>
                                             <p className={`text-${isCorrect ? 'success' : 'danger'}`}>Your Answer: {selectedOptions.length > 0 ? selectedOptions.join(', ') : "Not Attempted"}</p>
                                             {!isCorrect && (
                                                 <p className="text-success">Correct Answer: {correctOptions.join(', ')}</p>
@@ -226,28 +226,28 @@ const StartTest = () => {
                         ) : (
                             <>
                                 {questions.map((question, index) => (
-                                   <Form key={question.cumulative_question_id} className="mb-3" ref={el => questionRefs.current[index] = el}>
-                                       <Form.Group as={Row}>
-                                           <Form.Label column sm="12" className="position-relative">
-                                               <pre style={{paddingRight:'2rem'}}>{index + 1}. {question.question_description}</pre>
-                                               <span className="position-absolute top-0 end-0 " style={{maxWidth:'80%'}}>Marks: {question.no_of_marks_allocated}</span>
-                                           </Form.Label>
-                                           <Col sm="12">
-                                               {question.QuestionOptions.map((option, i) => (
-                                                   <Form.Check
-                                                       type="checkbox"
-                                                       label={option.option_description}
-                                                       name={`question-${index}`}
-                                                       id={`question-${index}-option-${option.option_id}`}
-                                                       value={option.option_description}
-                                                       checked={answers[question.cumulative_question_id]?.includes(option.option_description) || false}
-                                                       onChange={() => handleAnswerChange(question.cumulative_question_id, option.option_description)}
-                                                       key={option.option_id}
-                                                   />
-                                               ))}
-                                           </Col>
-                                       </Form.Group>
-                                   </Form>
+                                    <Form key={question.cumulative_question_id} className="mb-3" ref={el => questionRefs.current[index] = el}>
+                                        <Form.Group as={Row}>
+                                            <Form.Label column sm="12" className="position-relative">
+                                                <pre style={{ paddingRight: '2rem' }}>{index + 1}. {question.question_description}</pre>
+                                                <span className="position-absolute top-0 end-0 " style={{ maxWidth: '80%' }}>Marks: {question.no_of_marks_allocated}</span>
+                                            </Form.Label>
+                                            <Col sm="12">
+                                                {question.QuestionOptions.map((option, i) => (
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        label={option.option_description}
+                                                        name={`question-${index}`}
+                                                        id={`question-${index}-option-${option.option_id}`}
+                                                        value={option.option_description}
+                                                        checked={answers[question.cumulative_question_id]?.includes(option.option_description) || false}
+                                                        onChange={() => handleAnswerChange(question.cumulative_question_id, option.option_description)}
+                                                        key={option.option_id}
+                                                    />
+                                                ))}
+                                            </Col>
+                                        </Form.Group>
+                                    </Form>
                                 ))}
                                 <Button variant="primary" onClick={handleSubmit}>Submit</Button>
                             </>

@@ -1,5 +1,8 @@
 const db = require('../models');
 const xlsx = require('xlsx');
+const multer = require('multer');
+const fs = require('fs');
+
 
 const {Op} = require('sequelize');
 const Student = db.Student;
@@ -510,6 +513,71 @@ const savePlacementTestStudent = async (req, res) => {
 };
 
 
+// const getAllResultsByTestId = async (req, res) => {
+//     try {
+//         const { placement_test_id } = req.body;
+
+//         if (!placement_test_id) {
+//             return res.status(400).send({ message: 'placement_test_id is required' });
+//         }
+
+
+//         // Step 1: Fetch all results from PlacementTestResult table by placement_test_id
+//         const results = await PlacementTestResult.findAll({
+//             where: { placement_test_id },
+//             attributes: ['placement_test_student_id', 'marks_obtained','total_marks']
+//         });
+
+//         // Step 2: Extract all unique placement_test_student_id values
+//         const studentIds = results.map(result => result.placement_test_student_id);
+
+//         if (studentIds.length === 0) {
+//             return res.status(404).send({ message: 'No results found for the provided placement_test_id' });
+//         }
+
+//         // Step 3: Fetch student details from PlacementTestStudent table
+//         const students = await PlacementTestStudent.findAll({
+//             where: {
+//                 placement_test_student_id: studentIds
+//             },
+//             attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number']
+//         });
+
+//         // Step 4: Combine results with student details
+//         const combinedResults = results.map(result => {
+//             const student = students.find(student => student.placement_test_student_id === result.placement_test_student_id);
+//             return {
+//                 placement_test_student_id: result.placement_test_student_id,
+//                 marks_obtained: result.marks_obtained,
+//                 total_marks: result.total_marks,
+//                 student_details: student ? {
+//                     student_name: student.student_name,
+//                     email: student.email,
+//                     phone_number: student.phone_number
+//                 } : null
+//             };
+//         });
+
+//         return res.status(200).send(combinedResults);
+
+//     } catch (error) {
+//         return res.status(500).send({ message: error.message });
+//     }
+// };
+
+// const disableTestLink = async(req, res) => {
+// try {
+//     const {is_Active, test_id} = req.body;
+
+//     if(is_Active){
+//         await PlacementTest.update({is_Active:false where {
+//             [op.ne] = test_id
+//         }})
+//     }
+// } catch (error) {
+    
+// }
+
 const getAllResultsByTestId = async (req, res) => {
     try {
         const { placement_test_id } = req.body;
@@ -518,11 +586,10 @@ const getAllResultsByTestId = async (req, res) => {
             return res.status(400).send({ message: 'placement_test_id is required' });
         }
 
-
         // Step 1: Fetch all results from PlacementTestResult table by placement_test_id
         const results = await PlacementTestResult.findAll({
             where: { placement_test_id },
-            attributes: ['placement_test_student_id', 'marks_obtained','total_marks']
+            attributes: ['placement_test_student_id', 'marks_obtained', 'total_marks']
         });
 
         // Step 2: Extract all unique placement_test_student_id values
@@ -540,7 +607,25 @@ const getAllResultsByTestId = async (req, res) => {
             attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number']
         });
 
-        // Step 4: Combine results with student details
+        // Step 4: Fetch assigned topic_id from PlacementTestTopics table
+        const assignedTopics = await PlacementTestTopic.findAll({
+            where: { placement_test_id },
+            attributes: ['topic_id']
+        });
+
+        const topicIds = assignedTopics.map(topic => topic.topic_id);
+        console.log("Topic id's : ==", topicIds);
+
+        // Step 5: Fetch topic names from Topics table using the topic_id
+        const topics = await Topic.findAll({
+            where: { topic_id: topicIds },
+            attributes: ['topic_id', 'name'] // Make sure 'name' is the correct column name for the topic
+        });
+
+        const topicNames = topics.map(topic => topic.name); // Extract topic names
+        console.log("topics ", topicNames);
+
+        // Step 6: Combine results with student details (no need to include topics here for each result)
         const combinedResults = results.map(result => {
             const student = students.find(student => student.placement_test_student_id === result.placement_test_student_id);
             return {
@@ -555,25 +640,17 @@ const getAllResultsByTestId = async (req, res) => {
             };
         });
 
-        return res.status(200).send(combinedResults);
+        // Send the combined results along with the topics separately
+        return res.status(200).send({
+            students: combinedResults,
+            topics: topicNames 
+        });
 
     } catch (error) {
         return res.status(500).send({ message: error.message });
     }
 };
 
-// const disableTestLink = async(req, res) => {
-// try {
-//     const {is_Active, test_id} = req.body;
-
-//     if(is_Active){
-//         await PlacementTest.update({is_Active:false where {
-//             [op.ne] = test_id
-//         }})
-//     }
-// } catch (error) {
-    
-// }
 
 
 const disableLink = async (req, res) => {
@@ -738,6 +815,73 @@ const saveOneQuestionAndAddToLink = async (req, res) => {
         return res.status(500).send({ message: 'Failed to save question and add to link', error: error.message });
     }
 };
+
+// const saveOneQuestionAndAddToLink = async (req, res) => {
+//     try {
+//         // Extract required fields from the request body
+//         const { topic_id, question_description, no_of_marks_allocated, difficulty_level, options, correct_options, placement_test_id } = req.body;
+
+//         // Initialize imagePath to null
+//         let imagePath = null;
+
+//         // Check if file was uploaded
+//         if (req.file) {
+//             // Check if the file format is valid
+//             const validFileFormats = ['jpeg', 'jpg', 'png'];
+//             const fileFormat = req.file.originalname.split('.').pop().toLowerCase();
+//             if (!validFileFormats.includes(fileFormat)) {
+//                 throw new Error('Invalid file format. Supported formats: JPEG, JPG, PNG.');
+//             }
+
+//             // Construct the full path for saving the image
+//             imagePath = req.file.path;  // Assuming you're storing the path of the uploaded file
+//         }
+
+//         // Create the cumulative question with the image path
+//         const newQuestion = await CumulativeQuestion.create({
+//             topic_id,
+//             question_description,
+//             no_of_marks_allocated,
+//             difficulty_level,
+//             cumulative_question_image: imagePath // Assign the image path
+//         });
+
+//         // Extract the question ID
+//         const questionId = newQuestion.cumulative_question_id;
+
+//         // Create the options
+//         const optionList = options.map((optionDescription) => ({
+//             cumulative_question_id: questionId,
+//             option_description: optionDescription.trim()
+//         }));
+
+//         await OptionsTable.bulkCreate(optionList);
+
+//         // Create the correct answers
+//         const correctOptionList = correct_options.map((correctOption) => ({
+//             cumulative_question_id: questionId,
+//             answer_description: correctOption.trim()
+//         }));
+
+//         await db.CorrectAnswer.bulkCreate(correctOptionList);
+
+//         // Create the association with the placement test
+//         await CumulativeQuestionPlacementTest.create({
+//             cumulative_question_id: questionId,
+//             placement_test_id
+//         });
+
+//         // Send the response with the newly created question details
+//         return res.status(201).send({
+//             message: 'Question created and added to placement test successfully',
+//             question: newQuestion
+//         });
+//     } catch (error) {
+//         console.error('Error saving question and adding to link:', error);
+//         return res.status(500).send({ message: 'Failed to save question and add to link', error: error.message });
+//     }
+// };
+
 
 const saveQuestionAndAddToLink = async (data) => {
     try {
@@ -1066,9 +1210,6 @@ const uploadAndAssignQuestionsByExcelTopics = async (filePath, link_topic_ids, n
         console.log(`Question for Topic ID ${topic_id} processed successfully.`);
     }
 };
-
-
-
 
 
 
