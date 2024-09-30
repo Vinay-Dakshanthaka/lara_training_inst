@@ -9,25 +9,27 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const corsOptions = {
-    // origin: 'https://www.laragrooming.com',
-    origin: ['https://www.laragrooming.com', 'https://laragrooming.com'],
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-  };
+// const corsOptions = {
+//     // origin: 'https://www.laragrooming.com',
+//     origin: ['https://www.laragrooming.com', 'https://laragrooming.com'],
+//     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+//   };
   
-// Enable CORS 
-app.use(cors(corsOptions)); 
-// app.use(cors());  
+// // Enable CORS 
+// app.use(cors(corsOptions)); 
+app.use(cors());  
 
 // Routers
 const router = require('./routes/studentRoutes.js');
 const cumulativeTestRouter = require('./routes/cumulativeTestRoutes.js')
 const placementTestRoute = require('./routes/placementTestRoutes.js')
+const internalTestRoute = require('./routes/internalTestRoute.js')
 
 
 app.use('/api/student', router);
 app.use('/api/cumulative-test',cumulativeTestRouter)
 app.use('/api/placement-test', placementTestRoute);
+app.use('/api/internal-test', internalTestRoute);
 
 
 // Static Images Folder

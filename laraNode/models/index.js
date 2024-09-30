@@ -187,6 +187,10 @@ db.Subject = require('./subjectModel.js')(sequelize, DataTypes);
 db.Option = require('./optionModel.js')(sequelize, DataTypes);  
 db.CorrectAnswer = require('./correctAnswerModel.js')(sequelize, DataTypes);  
 db.CumulativeQuestionPlacementTest = require('./CQPlacementTestModel.js')(sequelize, DataTypes);  
+db.CumulativeQuestionInternalTest = require('./CQIntrenalTestModel.js')(sequelize, DataTypes);  
+db.InternalTest = require('./internalTestModel.js')(sequelize, DataTypes);  
+db.InternalTestResult = require('./internalTestResultModel.js')(sequelize, DataTypes);  
+db.InternalTestTopic = require('./internalTestTopicModel.js')(sequelize, DataTypes);  
 
 // Define associations  
 db.Student.hasOne(db.Profile, {
@@ -383,6 +387,67 @@ db.PlacementTestResult.belongsTo(db.PlacementTestStudent, {
     onDelete: 'CASCADE',
     as: 'TestResultStudent' // Unique alias for the association
 });
+
+
+// Associations for InternalTest
+db.InternalTest.hasMany(db.InternalTestTopic, {
+    foreignKey: 'internal_test_id',
+    as: 'TestTopics' // Unique alias for the association
+});
+
+db.InternalTestTopic.belongsTo(db.InternalTest, {
+    foreignKey: 'internal_test_id',
+    onDelete: 'CASCADE',
+    as: 'InternalTest' // Unique alias for the association
+});
+
+db.Topic.hasMany(db.InternalTestTopic, {
+    foreignKey: 'topic_id',
+    as: 'TopicInternalTests' // Unique alias for the association
+});
+
+db.InternalTestTopic.belongsTo(db.Topic, {
+    foreignKey: 'topic_id',
+    onDelete: 'CASCADE',
+    as: 'InternalTestTopic' // Unique alias for the association
+});
+
+db.InternalTest.hasMany(db.InternalTestResult, {
+    foreignKey: 'internal_test_id',
+    as: 'TestResults' // Unique alias for the association
+});
+
+db.InternalTestResult.belongsTo(db.InternalTest, {
+    foreignKey: 'internal_test_id',
+    onDelete: 'CASCADE',
+    as: 'InternalTest' // Unique alias for the association
+});
+
+// Associations for InternalTestResult and Student
+db.Student.hasMany(db.InternalTestResult, {
+    foreignKey: 'student_id',
+    as: 'StudentResults' // Unique alias for the association
+});
+
+db.InternalTestResult.belongsTo(db.Student, {
+    foreignKey: 'student_id',
+    onDelete: 'CASCADE',
+    as: 'TestResultStudent' // Unique alias for the association
+});
+
+// Associations for CumulativeQuestion and InternalTest
+db.CumulativeQuestion.belongsToMany(db.InternalTest, {
+    through: 'CQInternalTest', // Use the consistent table name
+    foreignKey: 'cumulative_question_id',
+    as: 'InternalTestsCumulativeQuestions'
+});
+
+db.InternalTest.belongsToMany(db.CumulativeQuestion, {
+    through: 'CQInternalTest', // Use the consistent table name
+    foreignKey: 'internal_test_id',
+    as: 'CumulativeQuestionsInternalTest'
+});
+
 
 // Call associate method for each model if defined
 Object.keys(db).forEach(modelName => {

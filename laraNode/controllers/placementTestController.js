@@ -767,83 +767,17 @@ const assignQuestionsToPlacementTest = async (req, res) => {
     }
 };
 
-const saveOneQuestionAndAddToLink = async (req, res) => {
-    try {
-        // Extract required fields from the request body
-        const { topic_id, question_description, no_of_marks_allocated, difficulty_level, options, correct_options, placement_test_id } = req.body;
-
-        // Create the cumulative question
-        const newQuestion = await CumulativeQuestion.create({
-            topic_id,
-            question_description,
-            no_of_marks_allocated,
-            difficulty_level,
-        });
-
-        // Extract the question ID
-        const questionId = newQuestion.cumulative_question_id;
-
-        // Create the options
-        const optionList = options.map((optionDescription) => ({
-            cumulative_question_id: questionId,
-            option_description: optionDescription.trim()
-        }));
-
-        await OptionsTable.bulkCreate(optionList);
-
-        // Create the correct answers
-        const correctOptionList = correct_options.map((correctOption) => ({
-            cumulative_question_id: questionId,
-            answer_description: correctOption.trim()
-        }));
-
-        await db.CorrectAnswer.bulkCreate(correctOptionList);
-
-        // Create the association with placement test
-        await CumulativeQuestionPlacementTest.create({
-            cumulative_question_id: questionId,
-            placement_test_id
-        });
-
-        // Send the response with the newly created question details
-        return res.status(201).send({
-            message: 'Question created and added to placement test successfully',
-            question: newQuestion
-        });
-    } catch (error) {
-        console.error('Error saving question and adding to link:', error);
-        return res.status(500).send({ message: 'Failed to save question and add to link', error: error.message });
-    }
-};
-
 // const saveOneQuestionAndAddToLink = async (req, res) => {
 //     try {
 //         // Extract required fields from the request body
 //         const { topic_id, question_description, no_of_marks_allocated, difficulty_level, options, correct_options, placement_test_id } = req.body;
 
-//         // Initialize imagePath to null
-//         let imagePath = null;
-
-//         // Check if file was uploaded
-//         if (req.file) {
-//             // Check if the file format is valid
-//             const validFileFormats = ['jpeg', 'jpg', 'png'];
-//             const fileFormat = req.file.originalname.split('.').pop().toLowerCase();
-//             if (!validFileFormats.includes(fileFormat)) {
-//                 throw new Error('Invalid file format. Supported formats: JPEG, JPG, PNG.');
-//             }
-
-//             // Construct the full path for saving the image
-//             imagePath = req.file.path;  // Assuming you're storing the path of the uploaded file
-//         }
-
-//         // Create the cumulative question with the image path
+//         // Create the cumulative question
 //         const newQuestion = await CumulativeQuestion.create({
 //             topic_id,
 //             question_description,
 //             no_of_marks_allocated,
 //             difficulty_level,
-//             cumulative_question_image: imagePath // Assign the image path
 //         });
 
 //         // Extract the question ID
@@ -865,7 +799,7 @@ const saveOneQuestionAndAddToLink = async (req, res) => {
 
 //         await db.CorrectAnswer.bulkCreate(correctOptionList);
 
-//         // Create the association with the placement test
+//         // Create the association with placement test
 //         await CumulativeQuestionPlacementTest.create({
 //             cumulative_question_id: questionId,
 //             placement_test_id
@@ -881,6 +815,72 @@ const saveOneQuestionAndAddToLink = async (req, res) => {
 //         return res.status(500).send({ message: 'Failed to save question and add to link', error: error.message });
 //     }
 // };
+
+const saveOneQuestionAndAddToLink = async (req, res) => {
+    try {
+        // Extract required fields from the request body
+        const { topic_id, question_description, no_of_marks_allocated, difficulty_level, options, correct_options, placement_test_id } = req.body;
+
+        // Initialize imagePath to null
+        let imagePath = null;
+
+        // Check if file was uploaded
+        if (req.file) {
+            // Check if the file format is valid
+            const validFileFormats = ['jpeg', 'jpg', 'png'];
+            const fileFormat = req.file.originalname.split('.').pop().toLowerCase();
+            if (!validFileFormats.includes(fileFormat)) {
+                throw new Error('Invalid file format. Supported formats: JPEG, JPG, PNG.');
+            }
+
+            // Construct the full path for saving the image
+            imagePath = req.file.path;  // Assuming you're storing the path of the uploaded file
+        }
+
+        // Create the cumulative question with the image path
+        const newQuestion = await CumulativeQuestion.create({
+            topic_id,
+            question_description,
+            no_of_marks_allocated,
+            difficulty_level,
+            cumulative_question_image: imagePath // Assign the image path
+        });
+
+        // Extract the question ID
+        const questionId = newQuestion.cumulative_question_id;
+
+        // Create the options
+        const optionList = options.map((optionDescription) => ({
+            cumulative_question_id: questionId,
+            option_description: optionDescription.trim()
+        }));
+
+        await OptionsTable.bulkCreate(optionList);
+
+        // Create the correct answers
+        const correctOptionList = correct_options.map((correctOption) => ({
+            cumulative_question_id: questionId,
+            answer_description: correctOption.trim()
+        }));
+
+        await db.CorrectAnswer.bulkCreate(correctOptionList);
+
+        // Create the association with the placement test
+        await CumulativeQuestionPlacementTest.create({
+            cumulative_question_id: questionId,
+            placement_test_id
+        });
+
+        // Send the response with the newly created question details
+        return res.status(201).send({
+            message: 'Question created and added to placement test successfully',
+            question: newQuestion
+        });
+    } catch (error) {
+        console.error('Error saving question and adding to link:', error);
+        return res.status(500).send({ message: 'Failed to save question and add to link', error: error.message });
+    }
+};
 
 
 const saveQuestionAndAddToLink = async (data) => {

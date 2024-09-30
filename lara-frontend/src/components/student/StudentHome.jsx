@@ -6,7 +6,9 @@ import { BsFillEnvelopeFill, BsPhone } from "react-icons/bs";
 import defaultProfileImage from "../default-profile.png";
 import { BsStarFill, BsStar } from 'react-icons/bs'; // Import star icons
 import { baseURL } from '../config';
-import PlacementTestTableForStudent from "../placementTest/PlacementTestTableForStudent";
+// import PlacementTestTableForStudent from "../placementTest/PlacementTestTableForStudent";
+import StudentInternalTestDetails from "../internalTests/StudentInternalTestDetails";
+import StudentPerformanceDashboard from "../internalTests/StudentPerformanceDashboard";
 
 const FeedbackButton = ({ onClick }) => {
   return (
@@ -479,6 +481,11 @@ const StudentHome = () => {
                     {studentDetails.phoneNumber}
                   </p>
                 </div>
+                <div className="text-center">
+                  <Link to={`/updateProfile`} className=" col-4 text-center">
+                    Click Here to Update Your Details
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -533,10 +540,13 @@ const StudentHome = () => {
           />
         </div>
 
+        <StudentPerformanceDashboard />
+
+        <StudentInternalTestDetails />
         {/* <PlacementTestTableForStudent /> */}
 
         {/* Education Details */}
-        <div className="row mb-4">
+        {/* <div className="row mb-4">
           <div className="col-md-12">
             <div className="card">
               <div className="card-body">
@@ -578,10 +588,10 @@ const StudentHome = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Contact Details */}
-        <div className="row mb-4">
+        {/* <div className="row mb-4">
           <div className="col-md-12">
             <div className="card">
               <div className="card-body">
@@ -623,10 +633,10 @@ const StudentHome = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Address */}
-        <div className="row mb-4">
+        {/* <div className="row mb-4">
           <div className="col-md-12">
             <div className="card">
               <div className="card-body">
@@ -664,15 +674,12 @@ const StudentHome = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Update Profile Button */}
-        <div className="text-center">
-          <Link to={`/updateProfile`} className="btn btn-primary col-4 text-center">
-            Update Profile
-          </Link>
-        </div>
+
       </div>
+
       <Toast
         style={{
           position: 'fixed',

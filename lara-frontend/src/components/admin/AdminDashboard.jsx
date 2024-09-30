@@ -8,15 +8,16 @@ import BatchDetails from './BatchDetails';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import StudentReviews from './StudentReviews';
-import AssignStudentsToCollege from './AssignStudentsToCollege';
+// import AssignStudentsToCollege from './AssignStudentsToCollege';
 import CollegeDetails from './CollegeDetails';
 import PlacementOfficer from './PlacementOfficer';
 import Attendance from './Attendance';
 import UpdateSchedule from './UpdateSchedule';
-import UpdateBestPerformer from './UpdateBestPerformer';
+// import UpdateBestPerformer from './UpdateBestPerformer';
 import CumulativeTest from '../cumulativeTest/CumulativeTest';
 import CreateTestLink from '../placementTest/CreateTestLink';
 import AllPlacementTests from '../placementTest/AllPlacementTests';
+import InternalTestsDashboard from '../internalTests/InternalTestsDashboard';
 
 const AdminDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');
@@ -71,9 +72,9 @@ const AdminDashboard = () => {
         <Tab eventKey="updateSchedule" title="Update Schedule">
           <UpdateSchedule />
         </Tab>
-        <Tab eventKey="updateBestPerformer" title="Best Performer">
+        {/* <Tab eventKey="updateBestPerformer" title="Best Performer">
           <UpdateBestPerformer />
-        </Tab>
+        </Tab> */}
         <Tab eventKey="cumulativeTest" title="Cumulative Test">
           <CumulativeTest />
         </Tab>
@@ -82,6 +83,9 @@ const AdminDashboard = () => {
         </Tab>
         <Tab eventKey="addQuestionsToTestLInk" title="Add Questions To Test Link">
           <AllPlacementTests />
+        </Tab>
+        <Tab eventKey="internalTest" title="Internal Tests">
+          <InternalTestsDashboard />
         </Tab>
       </Tabs>
     </div>

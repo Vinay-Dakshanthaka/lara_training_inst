@@ -47,6 +47,15 @@ import AddQuestionsToLink from './components/placementTest/AddQuestionsToLink';
 import UploadQuestionsToLink from './components/placementTest/UploadQuestionsToLink';
 import AllPlacementTests from './components/placementTest/AllPlacementTests';
 import EditTestLinkQuestions from './components/placementTest/EditTestLinkQuestions';
+import AssignQuestionsToInternalTestLink from './components/internalTests/AssignQuestionsToInternalTestLink';
+import AddQuestionToInternalTest from './components/internalTests/AddQuestionToInternalTest';
+import UploadQuestionsToInternalTestLink from './components/internalTests/UploadQuestionsToInternalTestLink';
+import EditTestInternalTestLinkQuestions from './components/internalTests/EditTestInternalTestLinkQuestions';
+import InternalTest from './components/internalTests/InternalTest';
+import DetailedInternalTestResult from './components/internalTests/DetailedInternalTestResult';
+import StudentPerformanceDashboard from './components/internalTests/StudentPerformanceDashboard';
+import StudentPerformanceForAdmin from './components/internalTests/StudentPerformanceForAdmin';
+import FetchInternalTestResultsByTestId from './components/internalTests/FetchInternalTestResultsByTestId';
 
 
 const App = () => {
@@ -91,15 +100,23 @@ const App = () => {
             <Route path="/all-test-results" element={<AllTestResults />} />
             <Route path="/all-test-results/:test_id" element={<DetailedResult />} />
             <Route path="/test/:test_id" element={<PlacementTest />} />
+            <Route path="/internal-test/:test_id" element={<InternalTest />} />
             <Route path="/malpractice-detected" element={<PlacementTestError />} />
             <Route path="/create-test-link" element={<CreateTestLink />} />
             <Route path="/not-found" element={<NotFound />} /> 
             <Route path="/get-result/:test_id" element={<FetchResultsByTestId />} />
+            <Route path="/get-internal-test-result/:internal_test_id" element={<FetchInternalTestResultsByTestId />} />
             <Route path="/add-questions-tolink/:test_id" element={<AddQuestionsToLink />} />
+            <Route path="/assign-questions-internal-test/:internal_test_id" element={<AssignQuestionsToInternalTestLink />} />
+            <Route path="/add-questions-internal-test/:internal_test_id" element={<AddQuestionToInternalTest />} />
             <Route path="/add-new-questions/:test_id" element={<AddQuestion />} />
             <Route path="/upload-excel-link/:test_id" element={<UploadQuestionsToLink />} />
+            <Route path="/upload-excel-internal-test-link/:internal_test_id" element={<UploadQuestionsToInternalTestLink />} />
             <Route path="/edit-quesitons/:test_id" element={<EditTestLinkQuestions />} />
+            <Route path="/detailed-internal-result/:internal_test_id" element={<DetailedInternalTestResult />} />
+            <Route path="/edit-internal-quesitons/:internal_test_id" element={<EditTestInternalTestLinkQuestions />} />
             <Route path="/test-links" element={<AllPlacementTests />} />
+            <Route path="/student-performance/:student_id" element={<StudentPerformanceForAdmin/>} />
             {/* <Route path="/add-question" element={<AddQuestion />} /> */}
             {/* <Route path="/profile" element={<Profile />} /> */}
             <Route path="*" element={<LoginForm />} />
