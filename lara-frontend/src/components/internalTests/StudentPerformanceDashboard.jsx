@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Container, Row, Col, Table, Spinner, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Table, Spinner, Badge, Card } from 'react-bootstrap';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { toast, ToastContainer } from 'react-toastify';
@@ -88,28 +88,44 @@ const StudentPerformanceDashboard = () => {
 
             {/* Performance Summary Table */}
             <Row className="mt-5">
-                <Col>
-                    <h4>Performance Summary</h4>
-                    <Table striped bordered hover responsive>
-                        <thead>
-                            <tr>
-                                <th>Total Tests Attended</th>
-                                <th>Total Marks Obtained</th>
-                                <th>Total Possible Marks</th>
-                                <th>Average Score per Test</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>{performance.total_tests_attended}</td>
-                                <td>{performance.total_marks_obtained}</td>
-                                <td>{performance.total_possible_marks}</td>
-                                <td>{performance.average_score_per_test}</td>
-                            </tr>
-                        </tbody>
-                    </Table>
-                </Col>
-            </Row>
+            <Col>
+                <h4 className="mb-4 text-center">Performance Summary</h4>
+                <Row xs={1} md={2} lg={2} className="g-4">
+                    <Col>
+                        <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
+                            <Card.Body>
+                                <Card.Title className="display-6 text-primary">Total Tests Attended</Card.Title>
+                                <Card.Text className="fs-2 fw-bold">{performance.total_tests_attended}</Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                    <Col>
+                        <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
+                            <Card.Body>
+                                <Card.Title className="display-6 text-primary">Total Marks Obtained</Card.Title>
+                                <Card.Text className="fs-2 fw-bold">{performance.total_marks_obtained}</Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                    <Col>
+                        <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
+                            <Card.Body>
+                                <Card.Title className="display-6 text-primary">Total Possible Marks</Card.Title>
+                                <Card.Text className="fs-2 fw-bold">{performance.total_possible_marks}</Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                    <Col>
+                        <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
+                            <Card.Body>
+                                <Card.Title className="display-6 text-primary">Average Score per Test</Card.Title>
+                                <Card.Text className="fs-2 fw-bold">{performance.average_score_per_test}</Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+            </Col>
+        </Row>
 
             {/* Charts Section */}
             <Row className="mt-4">
@@ -241,7 +257,7 @@ export default StudentPerformanceDashboard;
 //                     <Card className="shadow-sm">
 //                         <Card.Body>
 //                             <Card.Title>Performance Summary</Card.Title>
-//                             <ProgressBar now={(performance.total_marks_obtained / performance.total_possible_marks) * 100} 
+//                             <ProgressBar now={(performance.total_marks_obtained / performance.total_possible_marks) * 100}
 //                                          label={`${((performance.total_marks_obtained / performance.total_possible_marks) * 100).toFixed(2)}%`} />
 //                             <Card.Text className="mt-2">
 //                                 {performance.total_marks_obtained} out of {performance.total_possible_marks} marks obtained.
