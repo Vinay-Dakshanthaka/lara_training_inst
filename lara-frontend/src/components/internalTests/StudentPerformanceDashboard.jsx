@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Container, Row, Col, Table, Spinner, Badge, Card } from 'react-bootstrap';
+import { Container, Row, Col, Table, Spinner, Badge, Card, Alert } from 'react-bootstrap';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { toast, ToastContainer } from 'react-toastify';
@@ -73,59 +73,59 @@ const StudentPerformanceDashboard = () => {
             {/* Overall Performance Summary */}
             <Row className="text-center mt-4">
                 <Col>
-                    <h4>Overall Performance</h4>
+                    <h4>Overall Performance Review</h4>
                     <h3>
-                        <Badge pill bg={performancePercentage >= 75 ? "success" : performancePercentage >= 50 ? "warning" : "danger"}>
+                        <Alert  variant={performancePercentage >= 75 ? "success" : performancePercentage >= 50 ? "warning" : "danger"}>
                             {performanceLevel}
-                        </Badge>
+                        </Alert>
                     </h3>
                     <p>You have scored {performance.total_marks_obtained} out of {performance.total_possible_marks} total marks ({performancePercentage.toFixed(2)}%)</p>
                 </Col>
             </Row>
 
             {/* Toast Notification */}
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
+            {/* <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover /> */}
 
             {/* Performance Summary Table */}
             <Row className="mt-5">
-            <Col>
-                <h4 className="mb-4 text-center">Performance Summary</h4>
-                <Row xs={1} md={2} lg={2} className="g-4">
-                    <Col>
-                        <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
-                            <Card.Body>
-                                <Card.Title className="display-6 text-primary">Total Tests Attended</Card.Title>
-                                <Card.Text className="fs-2 fw-bold">{performance.total_tests_attended}</Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col>
-                        <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
-                            <Card.Body>
-                                <Card.Title className="display-6 text-primary">Total Marks Obtained</Card.Title>
-                                <Card.Text className="fs-2 fw-bold">{performance.total_marks_obtained}</Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col>
-                        <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
-                            <Card.Body>
-                                <Card.Title className="display-6 text-primary">Total Possible Marks</Card.Title>
-                                <Card.Text className="fs-2 fw-bold">{performance.total_possible_marks}</Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col>
-                        <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
-                            <Card.Body>
-                                <Card.Title className="display-6 text-primary">Average Score per Test</Card.Title>
-                                <Card.Text className="fs-2 fw-bold">{performance.average_score_per_test}</Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
-            </Col>
-        </Row>
+                <Col>
+                    <h4 className="mb-4 text-center">Performance Summary</h4>
+                    <Row xs={1} md={2} lg={2} className="g-4">
+                        <Col>
+                            <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
+                                <Card.Body>
+                                    <Card.Title className="display-6 text-primary">Total Tests Attended</Card.Title>
+                                    <Card.Text className="fs-2 fw-bold">{performance.total_tests_attended}</Card.Text>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
+                                <Card.Body>
+                                    <Card.Title className="display-6 text-primary">Total Marks Obtained</Card.Title>
+                                    <Card.Text className="fs-2 fw-bold">{performance.total_marks_obtained}</Card.Text>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
+                                <Card.Body>
+                                    <Card.Title className="display-6 text-primary">Total Possible Marks</Card.Title>
+                                    <Card.Text className="fs-2 fw-bold">{performance.total_possible_marks}</Card.Text>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card className="h-100 shadow-lg p-3 bg-white rounded text-center">
+                                <Card.Body>
+                                    <Card.Title className="display-6 text-primary">Average Score per Test</Card.Title>
+                                    <Card.Text className="fs-2 fw-bold">{performance.average_score_per_test}</Card.Text>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                </Col>
+            </Row>
 
             {/* Charts Section */}
             <Row className="mt-4">

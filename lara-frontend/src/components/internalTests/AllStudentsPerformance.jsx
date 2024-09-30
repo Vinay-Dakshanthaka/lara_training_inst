@@ -180,7 +180,7 @@ const AllStudentsPerformance = () => {
                         <th>Total Marks Obtained</th>
                         <th>Total Possible Marks</th>
                         <th>Average Score per Test</th>
-                        <th>Overview</th> {/* New Overview Column */}
+                        <th>Overview</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -198,7 +198,7 @@ const AllStudentsPerformance = () => {
                             </td>
                             <td>
                                 <Link to={`/student-performance/${student.student_id}`}>
-                                    <Button variant="primary">View Overview</Button>
+                                    <Button variant="primary">Overview</Button>
                                 </Link>
                             </td>
                         </tr>
