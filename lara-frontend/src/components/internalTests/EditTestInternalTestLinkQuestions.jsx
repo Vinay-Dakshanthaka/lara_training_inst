@@ -37,11 +37,21 @@ const EditTestInternalTestLinkQuestions = () => {
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
-                const response = await axios.post(`${baseURL}/api/internal-test/fetchQuestionsByInternalTestId`, {
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    throw new Error("No token provided.");
+                }
+    
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                };
+                const response = await axios.post(`${baseURL}/api/internal-test/fetchQuestionsByInternalTestIdForEdit`, {
                     internal_test_id: internal_test_id
-                });
-
-                const formattedQuestions = response.data.map(question => ({
+                },config);
+                // console.log('response questions', response.data)
+                const formattedQuestions = response.data.questions.map(question => ({
                     ...question,
                     options: question.QuestionOptions.map(opt => ({
                         option_id: opt.option_id,
@@ -252,5 +262,4 @@ const EditTestInternalTestLinkQuestions = () => {
         </div>
     );
 }
-
 export default EditTestInternalTestLinkQuestions;

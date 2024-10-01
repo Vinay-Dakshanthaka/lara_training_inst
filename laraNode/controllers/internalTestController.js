@@ -595,6 +595,87 @@ const fetchQuestionsByInternalTestId = async (req, res) => {
     }
 };
 
+const fetchQuestionsByInternalTestIdForEdit = async (req, res) => {
+    try {
+        const student_id = req.studentId;
+        const { internal_test_id } = req.body;
+        console.log("Internal Test ID:", internal_test_id);
+
+        if (!internal_test_id) {
+            return res.status(400).send({ message: "Internal Test ID is required" });
+        }
+
+        // Fetch details from InternalTest table including is_monitored, show_result, and number_of_questions
+        const internalTest = await db.InternalTest.findByPk(internal_test_id, {
+            attributes: ['number_of_questions', 'is_monitored', 'show_result']
+        });
+
+        if (!internalTest) {
+            return res.status(404).send({ message: "Internal test not found" });
+        }
+
+        const { number_of_questions, is_monitored, show_result } = internalTest;
+
+        // // Check if the student has already attended this test
+        // const existingResult = await InternalTestResult.findOne({
+        //     where: {
+        //         internal_test_id,
+        //         student_id,
+        //     },
+        // });
+
+        // if (existingResult) {
+        //     return res.status(400).send({ message: "You have already attended this test" });
+        // }
+
+        // Fetch cumulative_question_ids from CumulativeQuestionInternalTest table
+        const questionInternals = await db.CumulativeQuestionInternalTest.findAll({
+            where: { internal_test_id },
+            attributes: ['cumulative_question_id']
+        });
+
+        if (!questionInternals.length) {
+            return res.status(404).send({ message: "No questions found for this test" });
+        }
+
+        const questionIds = questionInternals.map(q => q.cumulative_question_id);
+
+        // Shuffle the question IDs and limit to the number of questions specified in the internal test
+        const shuffledQuestionIds = questionIds.sort(() => 0.5 - Math.random());
+        const limitedQuestionIds = shuffledQuestionIds.slice(0, Math.min(number_of_questions, questionIds.length));
+
+        // Fetch questions based on the shuffled and limited question IDs
+        const questions = await db.CumulativeQuestion.findAll({
+            where: { cumulative_question_id: limitedQuestionIds },
+            include: [
+                {
+                    model: db.Option,
+                    as: 'QuestionOptions',
+                    attributes: ['option_id', 'option_description']
+                },
+                {
+                    model: db.CorrectAnswer,
+                    as: 'CorrectAnswers',
+                    attributes: ['correct_answer_id', 'answer_description']
+                }
+            ]
+        });
+
+        if (questions.length > 0) {
+            res.status(200).send({
+                questions: questions,
+                is_monitored: is_monitored,
+                show_result: show_result
+            });
+        } else {
+            res.status(404).send({ message: "No questions found for the given internal test ID" });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: error.message });
+    }
+};
+
 
 const saveInternalTestResults = async (req, res) => {
     try {
@@ -1168,6 +1249,7 @@ module.exports = {
     saveQuestionAndAddToLinkTopic,
     assignQuestionsToInternalTestLink,
     fetchQuestionsByInternalTestId,
+    fetchQuestionsByInternalTestIdForEdit,
     saveInternalTestResults,
     fetchInternalTestResults,
     getStudentInternalTestDetails,

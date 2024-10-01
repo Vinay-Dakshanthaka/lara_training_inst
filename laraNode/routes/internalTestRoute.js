@@ -21,6 +21,8 @@ internalTestRoute.post('/assignQuestionsToInternalTestLink', internalTestControl
 
 internalTestRoute.post('/fetchQuestionsByInternalTestId', verifyToken, internalTestController.fetchQuestionsByInternalTestId); 
 
+internalTestRoute.post('/fetchQuestionsByInternalTestIdForEdit', verifyToken, internalTestController.fetchQuestionsByInternalTestIdForEdit); 
+
 internalTestRoute.post('/saveInternalTestResults',verifyToken, internalTestController.saveInternalTestResults); 
 
 internalTestRoute.get('/results/:internal_test_id',verifyToken, internalTestController.fetchInternalTestResults); 
