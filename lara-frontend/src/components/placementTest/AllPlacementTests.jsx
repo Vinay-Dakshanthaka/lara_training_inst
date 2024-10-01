@@ -3,8 +3,8 @@ import axios from 'axios';
 import { baseURL } from '../config';
 import { Link } from 'react-router-dom';
 import { BsCopy, BsPencil } from 'react-icons/bs';
-import { OverlayTrigger, Tooltip, Badge, Modal, Button, Form } from 'react-bootstrap';
-import { toast, ToastContainer as ToastifyContainer } from 'react-toastify';
+import { OverlayTrigger, Tooltip, Badge, Modal, Button, Form, Pagination, Table } from 'react-bootstrap';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './allPlacementTest.css';
 
@@ -13,6 +13,8 @@ const AllPlacementTests = () => {
     const [selectedTest, setSelectedTest] = useState(null);
     const [newQuestionCount, setNewQuestionCount] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1); // Track the current page, starting from 1
+    const [testsPerPage] = useState(10); // Number of tests to display per page
 
     useEffect(() => {
         const fetchPlacementTests = async () => {
@@ -100,12 +102,34 @@ const AllPlacementTests = () => {
         }
     };
 
+    // Pagination logic
+    const totalPages = Math.ceil(placementTests.length / testsPerPage);
+    const indexOfLastTest = currentPage * testsPerPage;
+    const indexOfFirstTest = indexOfLastTest - testsPerPage;
+    const currentTests = placementTests.slice(indexOfFirstTest, indexOfLastTest);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const renderPaginationItems = () => {
+        let items = [];
+        for (let number = 1; number <= totalPages; number++) {
+            items.push(
+                <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
+                    {number}
+                </Pagination.Item>
+            );
+        }
+        return items;
+    };
+
     return (
         <div className="container mt-5">
-            <ToastifyContainer />
+            <ToastContainer />
             <h2>All Placement Tests</h2>
             <div className="table-responsive">
-                <table className="table table-bordered">
+                <Table className="table table-bordered">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -121,7 +145,7 @@ const AllPlacementTests = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {placementTests.map(test => (
+                        {currentTests.map(test => (
                             <tr key={test.placement_test_id} className={test.is_Active ? 'table-success animate-to-top' : ''}>
                                 <td>{test.placement_test_id} {test.placement_test_id === Math.max(...placementTests.map(t => t.placement_test_id)) && <Badge bg="info">New</Badge>}</td>
                                 <td className="test-link-cell">
@@ -142,8 +166,8 @@ const AllPlacementTests = () => {
                                 </td>
                                 <td>
                                     {test.number_of_questions}
-                                    <button  className='btn btn-outline-secondary m-1'>
-                                    <BsPencil onClick={() => handleEditClick(test)} className="" />
+                                    <button className='btn btn-outline-secondary m-1'>
+                                        <BsPencil onClick={() => handleEditClick(test)} />
                                     </button>
                                 </td>
                                 <td>
@@ -191,8 +215,13 @@ const AllPlacementTests = () => {
                             </tr>
                         ))}
                     </tbody>
-                </table>
+                </Table>
             </div>
+
+            {/* Bootstrap Pagination */}
+            <Pagination className="justify-content-center">
+                {renderPaginationItems()}
+            </Pagination>
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
@@ -220,5 +249,4 @@ const AllPlacementTests = () => {
         </div>
     );
 };
-
 export default AllPlacementTests;
