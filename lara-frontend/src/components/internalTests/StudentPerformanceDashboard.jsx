@@ -60,8 +60,17 @@ const StudentPerformanceDashboard = () => {
     const performancePercentage = (performance.total_marks_obtained / performance.total_possible_marks) * 100;
 
     // Determine the performance level
-    const performanceLevel = performancePercentage >= 75 ? "Great" :
-        performancePercentage >= 50 ? "Good" : "Needs Improvement";
+    // const performanceLevel = performancePercentage >= 75 ? "Great" :
+    //     performancePercentage >= 50 ? "Good" : "Needs Improvement";
+
+    const performanceMessage = performancePercentage >= 75 ?
+        "Excellent work! Keep up the outstanding performance." :
+        performancePercentage >= 50 ?
+            "Good job! You're doing well but there's room for improvement." :
+            "Needs improvement. Practice more to improve your score.";
+
+    const performanceColor = performancePercentage >= 75 ? "text-success" :
+        performancePercentage >= 50 ? "text-warning" : "text-danger";
 
     // Get the latest 3 test results
     const latestTestResults = performance.test_results.slice(-3);
@@ -74,12 +83,15 @@ const StudentPerformanceDashboard = () => {
             <Row className="text-center mt-4">
                 <Col>
                     <h4>Overall Performance Review</h4>
-                    <h3>
-                        <Alert  variant={performancePercentage >= 75 ? "success" : performancePercentage >= 50 ? "warning" : "danger"}>
-                            {performanceLevel}
-                        </Alert>
+                    <h3 className={`fw-bold ${performanceColor}`}>
+                        {performanceMessage}
                     </h3>
-                    <p>You have scored {performance.total_marks_obtained} out of {performance.total_possible_marks} total marks ({performancePercentage.toFixed(2)}%)</p>
+                    {/* <p>{performanceMessage}</p> */}
+                    <p className="mt-3">
+                        You have scored <span className="fw-bold">{performance.total_marks_obtained}</span> out of
+                        <span className="fw-bold"> {performance.total_possible_marks}</span> total marks
+                        ({performancePercentage.toFixed(2)}%).
+                    </p>
                 </Col>
             </Row>
 

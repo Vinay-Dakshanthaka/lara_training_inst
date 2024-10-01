@@ -388,11 +388,15 @@ const InternalTest = () => {
                     Authorization: `Bearer ${token}`,
                 },
             };
+    
             const response = await axios.post(`${baseURL}/api/internal-test/fetchQuestionsByInternalTestId`, {
                 internal_test_id: test_id
             }, config);
     
-            const { questions: testQuestions, is_monitored, number_of_questions } = response.data;
+            const { questions: testQuestions, is_monitored } = response.data;
+    
+            console.log("Number of questions fetched: ", testQuestions.length);
+    
             setQuestions(testQuestions);
             setIsMonitored(is_monitored); // Set the is_monitored state
     
@@ -408,16 +412,58 @@ const InternalTest = () => {
             setTotalMarks(totalMarks);
     
             // Set remaining time based on the number of questions (1 minute per question)
-            const testTimeInMinutes = number_of_questions; // 1 minute per question
+            const testTimeInMinutes = testQuestions.length; // 1 minute per question based on the length of questions
             const remainingTimeInSeconds = testTimeInMinutes * 60;
+    
+            // Debugging output
+            console.log("Test time in minutes:", testTimeInMinutes);
+            console.log("Remaining time in seconds:", remainingTimeInSeconds);
+    
             setRemainingTime(remainingTimeInSeconds);
             startTimer(remainingTimeInSeconds); // Start the timer
     
             setLoading(false);
         } catch (error) {
+            console.error("Error fetching test details:", error);
             handleFetchError(error);
         }
     };
+    
+    
+    const startTimer = (initialTime) => {
+        let preciseTime = initialTime; // Track time more accurately with a variable
+        timerRef.current = setInterval(() => {
+            preciseTime -= 1; // Decrement the precise time each second
+    
+            setRemainingTime(preciseTime); // Update state to re-render the UI every second
+    
+            if (preciseTime <= 0) {
+                clearInterval(timerRef.current);
+                setAutoSubmit(true); // Trigger auto submission when time runs out
+            }
+        }, 1000);
+    };
+    
+
+    // const startTimer = (initialTime) => {
+    //     if (isNaN(initialTime)) {
+    //         console.error("Invalid initial time for timer:", initialTime);
+    //         return;
+    //     }
+    
+    //     timerRef.current = setInterval(() => {
+    //         setRemainingTime((prevTime) => {
+    //             if (prevTime <= 1) {
+    //                 clearInterval(timerRef.current);
+    //                 setAutoSubmit(true); // Trigger auto submission when time runs out
+    //                 return 0;
+    //             }
+    //             return prevTime - 1;
+    //         });
+    //     }, 1000);
+    // };
+    
+    
     
 
     const handleFetchError = (error) => {
@@ -430,18 +476,6 @@ const InternalTest = () => {
         setLoading(false);
     };
 
-    const startTimer = (initialTime) => {
-        timerRef.current = setInterval(() => {
-            setRemainingTime((prevTime) => {
-                if (prevTime <= 1) {
-                    clearInterval(timerRef.current);
-                    setAutoSubmit(true); // Trigger auto submission when time runs out
-                    return 0;
-                }
-                return prevTime - 1;
-            });
-        }, 1000);
-    };
 
     const handleAnswerChange = (questionId, selectedOption, checked) => {
         setAnswers((prevAnswers) => {
