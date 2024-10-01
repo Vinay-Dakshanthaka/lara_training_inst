@@ -149,10 +149,10 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             defaultValue: 1
         },
-        cumulative_question_image: {
-            type: DataTypes.TEXT, 
-            allowNull: true, 
-        },
+        // cumulative_question_image: {
+        //     type: DataTypes.TEXT, 
+        //     allowNull: true, 
+        // },
     }, {
         timestamps: true
     });
