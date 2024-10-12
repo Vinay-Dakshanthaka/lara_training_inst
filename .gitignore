@@ -5,3 +5,5 @@ lara-frontend/node_modules
 laraNode/.env
 
 laraNode/cumulative_questions
+
+laraNode/weekly_test_questions
