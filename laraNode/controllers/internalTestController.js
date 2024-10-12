@@ -20,7 +20,7 @@ const { baseURL } = require('./baseURLConfig')
 
 const createInternalTestLink = async (req, res) => {
     try {
-        const { number_of_questions, show_result, is_active, is_monitored, topic_ids,test_description } = req.body;
+        const { number_of_questions, show_result, is_active, is_monitored, topic_ids,test_description,test_date } = req.body;
 
         if (!number_of_questions || !Array.isArray(topic_ids) || topic_ids.length === 0) {
             return res.status(400).send({ message: 'Required fields are missing or invalid' });
@@ -42,6 +42,7 @@ const createInternalTestLink = async (req, res) => {
             internal_test_link: '', // Initially empty, will be updated later
             number_of_questions,
             test_description,
+            test_date,
             show_result: show_result !== undefined ? show_result : true, // Default to true if not provided
             is_active: is_active !== undefined ? is_active : true, // Default to true if not provided
             is_monitored: is_monitored !== undefined ? is_monitored : false // Default to false if not provided
@@ -313,24 +314,31 @@ const uploadAndAssignQuestionsToLink = async (filePath, topic_id, internal_test_
             preserveStringFormat(row["Option 4"]),
             preserveStringFormat(row["Correct Option"])
         ];
-    
+
+        // Validate and convert marks to an integer
+        const noOfMarksAllocated = parseInt(marks, 10);
+        if (isNaN(noOfMarksAllocated)) {
+            console.warn(`Invalid marks value for question "${questionText}":`, marks);
+            continue; // Skip this row if marks are invalid
+        }
+
         // Define options and correct answers
         const options = [option1, option2, option3, option4];
         const correctOptions = correctOptionValue.split(',').map(opt => opt.trim());
-    
+
         // Call saveQuestionAndAddToInternalTest with an object of the necessary fields
         await saveQuestionAndAddToInternalTest({
             topic_id,
             question_description: questionText, // This will now preserve format
-            no_of_marks_allocated: marks,
+            no_of_marks_allocated: noOfMarksAllocated,
             difficulty_level: difficulty,
             options,
             correct_options: correctOptions,
             internal_test_id // Use internal_test_id instead of placement_test_id
         });
     }
-    
 };
+
 
 const saveQuestionAndAddToInternalTest = async ({
     topic_id,
@@ -342,7 +350,6 @@ const saveQuestionAndAddToInternalTest = async ({
     internal_test_id
 }) => {
     try {
-        // Log the received internal_test_id
         console.log("Received internal_test_id:", internal_test_id);
 
         // Create the cumulative question
@@ -355,7 +362,6 @@ const saveQuestionAndAddToInternalTest = async ({
 
         const questionId = newQuestion.cumulative_question_id;
 
-        // Log the created question ID
         console.log('New question created with ID:', questionId);
 
         // Create the options
@@ -684,7 +690,7 @@ const saveInternalTestResults = async (req, res) => {
             internal_test_id,
             marks_obtained,
             total_marks,
-            detailed_results // Expect this to be an array of objects
+            detailed_results // array of objects
         } = req.body;
 
         // Check if there is already a result for this combination
@@ -722,8 +728,8 @@ const saveInternalTestResults = async (req, res) => {
 
 const fetchInternalTestResults = async (req, res) => {
     try {
-        const student_id = req.studentId; // Assuming student ID is set in middleware
-        const { internal_test_id } = req.params; // Assuming test ID is sent as a URL parameter
+        const student_id = req.studentId; 
+        const { internal_test_id } = req.params; 
 
         // Fetch the saved test results for the specific student and test ID
         const result = await InternalTestResult.findOne({
@@ -870,10 +876,78 @@ const getStudentInternalTestDetails = async (req, res) => {
         // Get student_id from the request
         const student_id = req.studentId;
 
+        // Fetch attended tests for the student including marks obtained and total marks
+        const attendedTests = await InternalTestResult.findAll({
+            where: { student_id },
+            attributes: ['internal_test_id', 'marks_obtained', 'total_marks'], 
+        });
+
+        // Convert attendedTests to a Map for easier lookup
+        const attendedTestMap = new Map(attendedTests.map(result => [result.internal_test_id, result]));
+
+        // Prepare response data to send back, filtering out tests with 0 questions or no assigned topics
+        const formattedTests = internalTests
+            .filter(test => test.number_of_questions > 0 && test.TestTopics.length > 0) // Exclude tests with no questions or no associated topics
+            .map(test => ({
+                internal_test_id: test.internal_test_id,
+                internal_test_link: test.internal_test_link,
+                number_of_questions: test.number_of_questions,
+                test_description: test.test_description,
+                show_result: test.show_result,
+                is_active: test.is_active,
+                is_monitored: test.is_monitored,
+                test_date: test.test_date,
+                created_at: test.createdAt,
+                updated_at: test.updatedAt,
+                topics: test.TestTopics.map(topicData => ({
+                    topic_id: topicData.topic_id,
+                    topic_name: topicData.InternalTestTopic ? topicData.InternalTestTopic.name : null // Access the topic name correctly based on the alias
+                })),
+                attended: attendedTestMap.has(test.internal_test_id) ? {
+                    marks_obtained: attendedTestMap.get(test.internal_test_id).marks_obtained,
+                    total_marks: attendedTestMap.get(test.internal_test_id).total_marks
+                } : null // Set the attended details based on presence in attendedTestMap
+            }));
+
+        return res.status(200).send({ message: 'Internal tests fetched successfully', internalTests: formattedTests });
+    } catch (error) {
+        console.error('Error fetching internal tests:', error.stack);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+
+const getStudentInternalTestDetailsBySdId = async (req, res) => {
+    try {
+        // Fetch all InternalTests including associated topics in descending order by internal_test_id
+        const internalTests = await InternalTest.findAll({
+            include: [
+                {
+                    model: InternalTestTopic,
+                    as: 'TestTopics',
+                    include: [
+                        {
+                            model: Topic,
+                            as: 'InternalTestTopic' // This alias should match the one defined in your association
+                        }
+                    ]
+                }
+            ],
+            order: [['internal_test_id', 'DESC']], // Order by internal_test_id descending
+        });
+
+        // Check if there are no internal tests
+        if (!internalTests || internalTests.length === 0) {
+            return res.status(404).send({ message: 'No internal tests found' });
+        }
+
+        // Get student_id from the request
+        const student_id = req.studentId;
+
         // Fetch attended tests for the student
         const attendedTests = await InternalTestResult.findAll({
             where: { student_id },
-            attributes: ['internal_test_id'], // Only fetch internal_test_id
+            attributes: ['internal_test_id','marks_obtained', 'total_marks'], 
         });
 
         // Convert attendedTests to a Set for easier lookup
@@ -890,6 +964,7 @@ const getStudentInternalTestDetails = async (req, res) => {
                 show_result: test.show_result,
                 is_active: test.is_active,
                 is_monitored: test.is_monitored,
+                test_date:test.test_date,
                 created_at: test.createdAt,
                 updated_at: test.updatedAt,
                 topics: test.TestTopics.map(topicData => ({
@@ -905,6 +980,7 @@ const getStudentInternalTestDetails = async (req, res) => {
         return res.status(500).send({ message: error.message });
     }
 };
+
 const getStudentPerformance = async (req, res) => {
     try {
         // Get student_id from JWT or request body
@@ -1253,6 +1329,7 @@ module.exports = {
     saveInternalTestResults,
     fetchInternalTestResults,
     getStudentInternalTestDetails,
+    getStudentInternalTestDetailsBySdId,
     getStudentPerformance,
     getAllStudentDetailsForPerformance,
     getAllStudentsPerformance,

@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Nav, Navbar, Offcanvas } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import InternalTestLinkForm from './InternalTestLinkForm'; // Assuming it's in the same directory
+import InternalTestLinkForm from './InternalTestLinkForm';
 import AllInternalTests from './AllInternalTests';
-import StudentWiseTestOverview from './StudentWiseTestOverview';
+// import StudentWiseTestOverview from './StudentWiseTestOverview';
 import AllStudentsPerformance from './AllStudentsPerformance';
+import CreateWeeklyTest from '../weeklyTest/CreateWeeklyTest';
+import WeeklyTestList from '../weeklyTest/WeeklyTestList';
+import EvaluvateWeeklyTest from '../weeklyTest/EvaluvateWeeklyTest';
+import AllStudentsWeeklyTestPerformance from '../weeklyTest/weeklyTestStudentAnswerSubmission/AllStudentsWeeklyTestPerformance';
 
 const InternalTestsDashboard = () => {
     const [activeComponent, setActiveComponent] = useState('AllTests');
@@ -20,17 +24,23 @@ const InternalTestsDashboard = () => {
             //     return <StudentWiseTestOverview />;
             case 'AllStudentsPerformance':
                 return <AllStudentsPerformance />;
-            // Add more cases here for other components you wish to include
+            case 'CreateWeeklyTest':
+                return <CreateWeeklyTest />;
+            case 'WeeklyTestList':
+                return <WeeklyTestList />;
+            case 'EvaluvateWeeklyTest':
+                return <EvaluvateWeeklyTest />;
+            case 'AllStudentsWeeklyTestPerformance':
+                return <AllStudentsWeeklyTestPerformance />;
             default:
                 return <AllInternalTests />;
         }
     };
 
     return (
-        <Container fluid className="shadow card my-3 responsive overflow-auto" style={{ overflow: 'auto' }}>
+        <Container fluid className="shadow  my-3 responsive overflow-auto" style={{ overflow: 'auto' }}>
             <Row>
                 <Col xs={12} md={2} id="sidebar-wrapper" className="bg-light">
-                    {/* Navbar for small screens */}
                     <Navbar expand="md" className="bg-light d-md-none">
                         <Navbar.Brand href="#">Internal Tests</Navbar.Brand>
                         <Navbar.Toggle
@@ -38,8 +48,6 @@ const InternalTestsDashboard = () => {
                             onClick={() => setShow(true)}
                         />
                     </Navbar>
-
-                    {/* Offcanvas component for small screens */}
                     <Offcanvas show={show} onHide={() => setShow(false)} placement="start">
                         <Offcanvas.Header closeButton>
                             <Offcanvas.Title>Navigation</Offcanvas.Title>
@@ -49,7 +57,7 @@ const InternalTestsDashboard = () => {
                                 activeKey={activeComponent}
                                 onSelect={(selectedKey) => {
                                     setActiveComponent(selectedKey);
-                                    setShow(false); // Close the offcanvas when a nav item is selected
+                                    setShow(false);
                                 }}
                             >
 
@@ -77,16 +85,39 @@ const InternalTestsDashboard = () => {
                                         Students Performance
                                     </Nav.Link>
                                 </Nav.Item>
-                                {/* <Nav.Item>
+                                <Nav.Item>
                                     <Nav.Link
-                                        eventKey="StudentWiseTestOverview"
-                                        className={activeComponent === 'StudentWiseTestOverview' ? 'active' : ''}
+                                        eventKey="CreateWeeklyTest"
+                                        className={activeComponent === 'CreateWeeklyTest' ? 'active' : ''}
                                     >
-                                        Students Performance
+                                        Create Weekly test Link
                                     </Nav.Link>
-                                </Nav.Item> */}
+                                </Nav.Item>
+                                <Nav.Item>
+                                    <Nav.Link
+                                        eventKey="WeeklyTestList"
+                                        className={activeComponent === 'WeeklyTestList' ? 'active' : ''}
+                                    >
+                                        Weekly Test List
+                                    </Nav.Link>
+                                </Nav.Item>
+                                <Nav.Item>
+                                    <Nav.Link
+                                        eventKey="EvaluvateWeeklyTest"
+                                        className={activeComponent === 'EvaluvateWeeklyTest' ? 'active' : ''}
+                                    >
+                                        Evaluvate Weekly Test
+                                    </Nav.Link>
+                                </Nav.Item>
+                                <Nav.Item>
+                                    <Nav.Link
+                                        eventKey="AllStudentsWeeklyTestPerformance"
+                                        className={activeComponent === 'AllStudentsWeeklyTestPerformance' ? 'active' : ''}
+                                    >
+                                        Student Performance Weekly Test
+                                    </Nav.Link>
+                                </Nav.Item>
 
-                                {/* Add more navigation items here if you add new features */}
                             </Nav>
                         </Offcanvas.Body>
                     </Offcanvas>
@@ -122,15 +153,38 @@ const InternalTestsDashboard = () => {
                                 Students Performance
                             </Nav.Link>
                         </Nav.Item>
-                        {/* <Nav.Item>
+                        <Nav.Item>
                             <Nav.Link
-                                eventKey="StudentWiseTestOverview"
-                                className={activeComponent === 'StudentWiseTestOverview' ? 'active' : ''}
+                                eventKey="CreateWeeklyTest"
+                                className={activeComponent === 'CreateWeeklyTest' ? 'active' : ''}
                             >
-                                Students Performance
+                                Create Weekly test Link
                             </Nav.Link>
-                        </Nav.Item> */}
-                        {/* Add more navigation items here if you add new features */}
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link
+                                eventKey="WeeklyTestList"
+                                className={activeComponent === 'WeeklyTestList' ? 'active' : ''}
+                            >
+                                Weekly Test List
+                            </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link
+                                eventKey="EvaluvateWeeklyTest"
+                                className={activeComponent === 'EvaluvateWeeklyTest' ? 'active' : ''}
+                            >
+                                Evaluvate Weekly Test
+                            </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link
+                                eventKey="AllStudentsWeeklyTestPerformance"
+                                className={activeComponent === 'AllStudentsWeeklyTestPerformance' ? 'active' : ''}
+                            >
+                                Student Performance Weekly Test
+                            </Nav.Link>
+                        </Nav.Item>
                     </Nav>
                 </Col>
                 <Col xs={12} md={10} id="page-content-wrapper" style={{ maxWidth: '100%' }}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router,Link, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Link, Routes, Route } from 'react-router-dom';
 // import { Navbar,Nav  } from 'react-bootstrap';
 import LoginForm from './components/LoginForm';
 import SignUpForm from './components/SignUpForm';
@@ -56,10 +56,24 @@ import DetailedInternalTestResult from './components/internalTests/DetailedInter
 import StudentPerformanceDashboard from './components/internalTests/StudentPerformanceDashboard';
 import StudentPerformanceForAdmin from './components/internalTests/StudentPerformanceForAdmin';
 import FetchInternalTestResultsByTestId from './components/internalTests/FetchInternalTestResultsByTestId';
+import CreateWeeklyTest from './components/weeklyTest/CreateWeeklyTest';
+import UpdateWeeklyTest from './components/weeklyTest/UpdateWeeklyTest';
+import AddWeeklyTestQuestion from './components/weeklyTest/AddWeeklyTestQuestion';
+import QuestionsByWeeklyTestId from './components/weeklyTest/QuestionsByWeeklyTestId';
+import EditWeeklyTestQuestion from './components/weeklyTest/EditWeeklyTestQuestion';
+import UploadWeeklyTestQuestions from './components/weeklyTest/UploadWeeklyTestQuestions';
+import StudentAnswerForm from './components/weeklyTest/weeklyTestStudentAnswerSubmission/StudentAnswerForm';
+import AnswerUpdateForm from './components/weeklyTest/weeklyTestStudentAnswerSubmission/AnswerUpdateForm';
+import WeeklyTestAttendedStudentsList from './components/weeklyTest/weeklyTestStudentAnswerSubmission/WeeklyTestAttendedStudentsList';
+import StudentQuestionAnswer from './components/weeklyTest/weeklyTestStudentAnswerSubmission/StudentQuestionAnswer';
+import WeeklyTestStudentDetailedSummary from './components/weeklyTest/WeeklyTestStudentDetailedSummary';
+import AllStudentsWeeklyTestResults from './components/weeklyTest/AllStudentsWeeklyTestResults';
+import WeeklyTestPerformanceForAdmin from './components/weeklyTest/weeklyTestStudentAnswerSubmission/WeeklyTestPerformanceForAdmin';
+// import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
 const App = () => {
-  
+
   return (
     <Router>
       <>
@@ -68,10 +82,10 @@ const App = () => {
         {/* <RenderNavbar /> */}
         <div className="">
           <Routes>
-            <Route path='/' element={<Home/>}/>
-            <Route path='about' element={<AboutUsPage/>}/>
-            <Route path='course' element={<Course/>}/>
-            <Route path='terms' element={<TermsAndCondition/>} />
+            <Route path='/' element={<Home />} />
+            <Route path='about' element={<AboutUsPage />} />
+            <Route path='course' element={<Course />} />
+            <Route path='terms' element={<TermsAndCondition />} />
             <Route path="/login" element={<LoginForm />} />
             <Route path="/signup" element={<SignUpForm />} />
             <Route path="/studentHome" element={<StudentHome />} />
@@ -103,7 +117,7 @@ const App = () => {
             <Route path="/internal-test/:test_id" element={<InternalTest />} />
             <Route path="/malpractice-detected" element={<PlacementTestError />} />
             <Route path="/create-test-link" element={<CreateTestLink />} />
-            <Route path="/not-found" element={<NotFound />} /> 
+            <Route path="/not-found" element={<NotFound />} />
             <Route path="/get-result/:test_id" element={<FetchResultsByTestId />} />
             <Route path="/get-internal-test-result/:internal_test_id" element={<FetchInternalTestResultsByTestId />} />
             <Route path="/add-questions-tolink/:test_id" element={<AddQuestionsToLink />} />
@@ -116,14 +130,27 @@ const App = () => {
             <Route path="/detailed-internal-result/:internal_test_id" element={<DetailedInternalTestResult />} />
             <Route path="/edit-internal-quesitons/:internal_test_id" element={<EditTestInternalTestLinkQuestions />} />
             <Route path="/test-links" element={<AllPlacementTests />} />
-            <Route path="/student-performance/:student_id" element={<StudentPerformanceForAdmin/>} />
+            <Route path="/student-performance/:student_id" element={<StudentPerformanceForAdmin />} />
             {/* <Route path="/add-question" element={<AddQuestion />} /> */}
             {/* <Route path="/profile" element={<Profile />} /> */}
             <Route path="*" element={<LoginForm />} />
+            <Route path='/weekly-test' element={<CreateWeeklyTest />} />
+            <Route path='/update-weekly-test/:wt_id' element={<UpdateWeeklyTest />} />
+            <Route path='/add-questoin-weekly-test/:wt_id' element={<AddWeeklyTestQuestion />} />
+            <Route path='/fetch-questoins-weekly-test/:wt_id' element={<QuestionsByWeeklyTestId />} />
+            <Route path='/edit-weekly-test-question/:question_id' element={<EditWeeklyTestQuestion />} />
+            <Route path='/upload-questoins-weekly-test/:wt_id' element={<UploadWeeklyTestQuestions />} />
+            <Route path='/weekly-test/:wt_id' element={<StudentAnswerForm />} />
+            <Route path='/test-answer-form/:wt_id' element={<AnswerUpdateForm />} />
+            <Route path='/wt-attended-student-list/:wt_id' element={<WeeklyTestAttendedStudentsList />} />
+            <Route path='/evaluvate-student-answers/:wt_id/:student_id' element={<StudentQuestionAnswer />} />
+            <Route path='studentHome/weeklytest-detailed-summary/:wt_id' element={<WeeklyTestStudentDetailedSummary />} />
+            <Route path='studentHome/weekly-test-results/:wt_id' element={<AllStudentsWeeklyTestResults />} />
+            <Route path='weekly-test-student-performance/:student_id' element={<WeeklyTestPerformanceForAdmin />} />
 
           </Routes>
         </div>
-        <Footer/>
+        <Footer />
       </>
     </Router>
   );

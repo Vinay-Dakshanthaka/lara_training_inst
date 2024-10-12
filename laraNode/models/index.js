@@ -191,6 +191,16 @@ db.CumulativeQuestionInternalTest = require('./CQIntrenalTestModel.js')(sequeliz
 db.InternalTest = require('./internalTestModel.js')(sequelize, DataTypes);  
 db.InternalTestResult = require('./internalTestResultModel.js')(sequelize, DataTypes);  
 db.InternalTestTopic = require('./internalTestTopicModel.js')(sequelize, DataTypes);  
+db.WeeklyTest = require('./weeklyTestModel.js')(sequelize, DataTypes);  
+db.WeeklyTestQuestion = require('./weeklyTestQuestionsModel.js')(sequelize, DataTypes);  
+db.WeeklyTestQuestionAnswer = require('./weeklyTestQuestionAnswer.js')(sequelize, DataTypes);  
+db.WeeklyTestTopics = require('./weeklyTestTopicModel.js')(sequelize, DataTypes);  
+db.WeeklyTestQuestionAssignment = require('./weeklyTestQuestionAssignment.js')(sequelize, DataTypes);  
+db.WeeklyTestQuestionMapping = require('./weeklyTestQuestionMapping.js')(sequelize, DataTypes);  
+db.StudentAnswer = require('./weeklyTestStudentAnswers.js')(sequelize, DataTypes);  
+db.WeeklyTestFinalSubmission = require('./weeklyTestFinalSubmissionModel.js')(sequelize, DataTypes);  
+
+
 
 // Define associations  
 db.Student.hasOne(db.Profile, {
@@ -448,6 +458,46 @@ db.InternalTest.belongsToMany(db.CumulativeQuestion, {
     as: 'CumulativeQuestionsInternalTest'
 });
 
+// // For WeeklyTest to WeeklyTestQuestion association
+// db.WeeklyTest.hasMany(db.WeeklyTestQuestion, {
+//     foreignKey: 'wt_id',
+//     as: 'WeeklyTestQuestions'  // Unique alias for this association
+// });
+
+// For WeeklyTestQuestion to WeeklyTestQuestionAnswer association
+db.WeeklyTestQuestion.hasMany(db.WeeklyTestQuestionAnswer, {
+    foreignKey: 'wt_question_id',
+    as: 'TestQuestionAnswerDetails'  // Unique alias for this association
+});
+
+// For WeeklyTestTopics to WeeklyTest association
+db.WeeklyTestTopics.belongsTo(db.WeeklyTest, {
+    foreignKey: 'wt_id',
+    onDelete: 'CASCADE',
+    as: 'WeeklyTestAssociated'  // Unique alias for WeeklyTestTopics
+});
+
+// For WeeklyTestTopics to Topic association
+db.WeeklyTestTopics.belongsTo(db.Topic, {
+    foreignKey: 'topic_id',
+    onDelete: 'CASCADE',
+    as: 'TopicDetails'  // Alias for TopicDetails
+});
+
+db.StudentAnswer.belongsTo(db.WeeklyTest, {
+    foreignKey: 'wt_id',
+    as: 'Test'
+});
+
+db.StudentAnswer.belongsTo(db.WeeklyTestQuestion, {
+    foreignKey: 'wt_question_id',
+    as: 'Question'
+});
+
+db.StudentAnswer.belongsTo(db.Student, {
+    foreignKey: 'student_id',
+    as: 'Student'
+});
 
 // Call associate method for each model if defined
 Object.keys(db).forEach(modelName => {

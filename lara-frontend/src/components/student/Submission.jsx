@@ -691,11 +691,11 @@ const Submission = () => {
       };
 
       setLoading(true);
-      // const response = await axios.post(`${baseURL}/api/student/executeJavaCodeHandler`, {  //this api requests accepts 220 credits per day 
+      const response = await axios.post(`${baseURL}/api/student/executeJavaCodeHandler`, {  //this api requests accepts 220 credits per day 
      /* this accepets unlimited requestes but it is open source and hosted on limited resources server 
         if incase the below endopoint fails to provide response use the above api (220 credits per day )
      */
-      const response = await axios.post(`${baseURL}/api/student/executeJavaCodeHandlerFree`, { 
+      // const response = await axios.post(`${baseURL}/api/student/executeJavaCodeHandlerFree`, { 
         code: code,
       }, config);
 

@@ -77,7 +77,7 @@
 //             if (!token) {
 //                 throw new Error("No token provided.");
 //             }
-    
+
 //             const config = {
 //                 headers: {
 //                     Authorization: `Bearer ${token}`,
@@ -86,21 +86,21 @@
 //             const response = await axios.post(`${baseURL}/api/internal-test/fetchQuestionsByInternalTestId`, {
 //                 internal_test_id: test_id
 //             }, config);
-    
+
 //             const testQuestions = response.data.questions;
 //             setQuestions(testQuestions);
-    
+
 //             // Initialize answers
 //             const initialAnswers = {};
 //             testQuestions.forEach(question => {
 //                 initialAnswers[question.cumulative_question_id] = [];
 //             });
 //             setAnswers(initialAnswers);
-    
+
 //             // Calculate total marks
 //             const totalMarks = testQuestions.reduce((sum, question) => sum + question.no_of_marks_allocated, 0);
 //             setTotalMarks(totalMarks);
-    
+
 //             setRemainingTime(60 * 30); // Example: 30 minutes
 //             startTimer(60 * 30);
 //             setLoading(false);
@@ -151,37 +151,37 @@
 
 //     const handleSubmitTest = async () => {
 //         setLoading(true);
-    
+
 //         try {
 //             const obtainedMarks = questions.reduce((sum, question) => {
 //                 const selectedOptions = answers[question.cumulative_question_id] || [];
 //                 const correctOptions = question.CorrectAnswers.map((answer) => answer.answer_description);
-    
+
 //                 const isCorrect = correctOptions.length === selectedOptions.length &&
 //                     correctOptions.every((answer) => selectedOptions.includes(answer));
-    
+
 //                 return isCorrect ? sum + question.no_of_marks_allocated : sum;
 //             }, 0);
-    
+
 //             setObtainedMarks(obtainedMarks);
-    
+
 //             const detailedResults = questions.map((question) => ({
 //                 cumulative_question_id: question.cumulative_question_id,
 //                 correct_options: question.CorrectAnswers.map((answer) => answer.answer_description),
 //                 selected_options: answers[question.cumulative_question_id] || []
 //             }));
-    
+
 //             const token = localStorage.getItem("token");
 //             if (!token) {
 //                 throw new Error("No token provided.");
 //             }
-    
+
 //             const config = {
 //                 headers: {
 //                     Authorization: `Bearer ${token}`,
 //                 },
 //             };
-    
+
 //             // Call to backend API to save results
 //             await axios.post(`${baseURL}/api/internal-test/saveInternalTestResults`, {
 //                 internal_test_id: test_id,
@@ -190,7 +190,7 @@
 //                 total_marks: totalMarks,
 //                 detailed_results: detailedResults, // Send the correctly formatted detailedResults
 //             }, config);
-    
+
 //             toast.success('Test submitted successfully!');
 //             setShowSummary(true);
 //             // Stop the timer after submission
@@ -382,75 +382,75 @@ const InternalTest = () => {
             if (!token) {
                 throw new Error("No token provided.");
             }
-    
+
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             };
-    
+
             const response = await axios.post(`${baseURL}/api/internal-test/fetchQuestionsByInternalTestId`, {
                 internal_test_id: test_id
             }, config);
-    
+
             const { questions: testQuestions, is_monitored } = response.data;
-    
+
             console.log("Number of questions fetched: ", testQuestions.length);
-    
+
             setQuestions(testQuestions);
             setIsMonitored(is_monitored); // Set the is_monitored state
-    
+
             // Initialize answers
             const initialAnswers = {};
             testQuestions.forEach(question => {
                 initialAnswers[question.cumulative_question_id] = [];
             });
             setAnswers(initialAnswers);
-    
+
             // Calculate total marks
             const totalMarks = testQuestions.reduce((sum, question) => sum + question.no_of_marks_allocated, 0);
             setTotalMarks(totalMarks);
-    
+
             // Set remaining time based on the number of questions (1 minute per question)
             const testTimeInMinutes = testQuestions.length; // 1 minute per question based on the length of questions
             const remainingTimeInSeconds = testTimeInMinutes * 60;
-    
+
             // Debugging output
             console.log("Test time in minutes:", testTimeInMinutes);
             console.log("Remaining time in seconds:", remainingTimeInSeconds);
-    
+
             setRemainingTime(remainingTimeInSeconds);
             startTimer(remainingTimeInSeconds); // Start the timer
-    
+
             setLoading(false);
         } catch (error) {
             console.error("Error fetching test details:", error);
             handleFetchError(error);
         }
     };
-    
-    
+
+
     const startTimer = (initialTime) => {
         let preciseTime = initialTime; // Track time more accurately with a variable
         timerRef.current = setInterval(() => {
             preciseTime -= 1; // Decrement the precise time each second
-    
+
             setRemainingTime(preciseTime); // Update state to re-render the UI every second
-    
+
             if (preciseTime <= 0) {
                 clearInterval(timerRef.current);
                 setAutoSubmit(true); // Trigger auto submission when time runs out
             }
         }, 1000);
     };
-    
+
 
     // const startTimer = (initialTime) => {
     //     if (isNaN(initialTime)) {
     //         console.error("Invalid initial time for timer:", initialTime);
     //         return;
     //     }
-    
+
     //     timerRef.current = setInterval(() => {
     //         setRemainingTime((prevTime) => {
     //             if (prevTime <= 1) {
@@ -462,9 +462,9 @@ const InternalTest = () => {
     //         });
     //     }, 1000);
     // };
-    
-    
-    
+
+
+
 
     const handleFetchError = (error) => {
         if (error.response && error.response.status === 400) {
@@ -496,37 +496,37 @@ const InternalTest = () => {
 
     const handleSubmitTest = async () => {
         setLoading(true);
-    
+
         try {
             const obtainedMarks = questions.reduce((sum, question) => {
                 const selectedOptions = answers[question.cumulative_question_id] || [];
                 const correctOptions = question.CorrectAnswers.map((answer) => answer.answer_description);
-    
+
                 const isCorrect = correctOptions.length === selectedOptions.length &&
                     correctOptions.every((answer) => selectedOptions.includes(answer));
-    
+
                 return isCorrect ? sum + question.no_of_marks_allocated : sum;
             }, 0);
-    
+
             setObtainedMarks(obtainedMarks);
-    
+
             const detailedResults = questions.map((question) => ({
                 cumulative_question_id: question.cumulative_question_id,
                 correct_options: question.CorrectAnswers.map((answer) => answer.answer_description),
                 selected_options: answers[question.cumulative_question_id] || []
             }));
-    
+
             const token = localStorage.getItem("token");
             if (!token) {
                 throw new Error("No token provided.");
             }
-    
+
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             };
-    
+
             // Call to backend API to save results
             await axios.post(`${baseURL}/api/internal-test/saveInternalTestResults`, {
                 internal_test_id: test_id,
@@ -535,10 +535,10 @@ const InternalTest = () => {
                 total_marks: totalMarks,
                 detailed_results: detailedResults, // Send the correctly formatted detailedResults
             }, config);
-    
+
             toast.success('Test submitted successfully!');
             setShowSummary(true);
-    
+
             // Stop the timer after submission
             if (timerRef.current) {
                 clearInterval(timerRef.current);
@@ -614,13 +614,16 @@ const InternalTest = () => {
                                         <Form.Check
                                             key={idx}
                                             type="checkbox"
-                                            label={option.option_description}
                                             value={option.option_description}
                                             checked={answers[question.cumulative_question_id]?.includes(option.option_description) || false} // Ensure checked is always a boolean
                                             onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value, e.target.checked)}
+                                            label={
+                                                <pre style={{ whiteSpace: 'pre-wrap' }}>{option.option_description}</pre> // Preserve text format
+                                            }
                                         />
                                     ))}
                                 </Col>
+
                             </Form.Group>
                         </Form>
                     ))}

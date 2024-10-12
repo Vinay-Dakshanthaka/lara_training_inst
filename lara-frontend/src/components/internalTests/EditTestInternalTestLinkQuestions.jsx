@@ -6,6 +6,7 @@ import { baseURL } from '../config';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify'; // Importing toast
 import { BsExclamation } from 'react-icons/bs';
+import BackButton from '../BackButton';
 
 const EditTestInternalTestLinkQuestions = () => {
     const [questionsWithOptions, setQuestionsWithOptions] = useState([]);
@@ -148,6 +149,7 @@ const EditTestInternalTestLinkQuestions = () => {
 
     return (
         <div className="container mt-5">
+            <BackButton />
             <ToastContainer />
             <div className="container">
                 {internalTestDetails && (

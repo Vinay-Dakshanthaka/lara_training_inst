@@ -19,9 +19,11 @@ const InternalTestLinkForm = () => {
     const [isActive, setIsActive] = useState(true);
     const [isMonitored, setIsMonitored] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [newTestLink, setNewTestLink] = useState(''); // New state for test link
-    const [alert, setAlert] = useState({ show: false, message: '', variant: '' }); // State for Bootstrap alerts
-    
+    const [newTestLink, setNewTestLink] = useState('');
+    const [alert, setAlert] = useState({ show: false, message: '', variant: '' });
+
+    // State variables for date and time
+    const [dateAndTime, setDateAndTime] = useState('');
 
     useEffect(() => {
         const fetchSubjects = async () => {
@@ -163,13 +165,14 @@ const InternalTestLinkForm = () => {
             test_description: testDescription,
             show_result: showResult,
             is_active: isActive,
-            is_monitored: isMonitored
+            is_monitored: isMonitored,
+            test_date: dateAndTime // Include date and time in the data
         };
 
         try {
             const response = await axios.post(`${baseURL}/api/internal-test/createInternalTestLink`, data);
             toast.success(response.data.message);
-            setNewTestLink(response.data.newTest.test_link); // Set the test link in state
+            setNewTestLink(response.data.newTest.test_link);
             setAlert({ show: true, message: 'Link Created Successfully', variant: 'success' });
         } catch (error) {
             toast.error('Error creating internal test. ' + (error.response?.data?.message || error.message));
@@ -196,7 +199,6 @@ const InternalTestLinkForm = () => {
                     </p>
                 </div>
             )}
-            {/* <ToastContainer /> */}
             <h2>Create Internal Test</h2>
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formSubject" className="mt-4" style={{ maxWidth: '300px' }}>
@@ -255,6 +257,16 @@ const InternalTestLinkForm = () => {
                         onChange={(e) => setTestDescription(e.target.value)}
                         required
                         placeholder="Enter test description"
+                    />
+                </Form.Group>
+
+                <Form.Group controlId="dateAndTime" className="mt-3">
+                    <Form.Label>Date and Time</Form.Label>
+                    <Form.Control
+                        type="datetime-local"
+                        value={dateAndTime}
+                        onChange={(e) => setDateAndTime(e.target.value)}
+                        required
                     />
                 </Form.Group>
 

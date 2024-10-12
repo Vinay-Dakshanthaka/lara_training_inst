@@ -5,7 +5,6 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { baseURL } from '../config';
 import { Link } from 'react-router-dom';
-// import './StudentInternalTestDetails.css'; 
 
 const ITEMS_PER_PAGE = 5; // Adjust the number of items per page
 
@@ -32,7 +31,13 @@ const StudentInternalTestDetails = () => {
             };
 
             const response = await axios.get(`${baseURL}/api/internal-test/getStudentInternalTestDetails`, config);
-            setTests(response.data.internalTests);
+            // Format dates here before setting the state
+            const formattedTests = response.data.internalTests.map(test => ({
+                ...test,
+                formatted_date: new Date(test.test_date).toISOString().split('T')[0]
+            }));
+            console.log("internal test ", response.data)
+            setTests(formattedTests);
         } catch (error) {
             console.error('Error fetching test details:', error);
             toast.error('Error fetching test details');
@@ -54,59 +59,74 @@ const StudentInternalTestDetails = () => {
 
     return (
         <Container className="mt-5">
-            <h2 className="text-center">Your Test Details</h2>
-            <Table striped bordered hover responsive className="mt-4">
-                <thead>
-                    <tr>
-                        <th>Test Link</th>
-                        <th>Number of Questions</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Detailed Summary</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {paginatedTests.map((test) => (
-                        <tr key={test.internal_test_id}>
-                            <td>
-                                <a href={test.internal_test_link} target="_blank" rel="noopener noreferrer">
-                                    {test.internal_test_link}
-                                </a>
-                            </td>
-                            <td>{test.number_of_questions}</td>
-                            <td>{test.test_description}</td>
-                            <td>
-                                {test.attended ? (
-                                    <span className="text-success">Attended</span>
-                                ) : (
-                                    <Badge bg="danger">Not Attended</Badge>
-                                )}
-                            </td>
-                            <td>
-                                {test.attended && (
-                                    <Link to={`/detailed-internal-result/${test.internal_test_id}`}>
-                                        <Button variant="info">View </Button>
-                                    </Link>
-                                )}
-                            </td>
+    <h2 className="text-center">Your Test Details</h2>
+    <Table striped bordered hover responsive className="mt-4">
+        <thead>
+            <tr>
+                <th>Test Link</th>
+                <th>Number of Questions</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Total Marks</th>
+                <th>Marks Obtained</th>
+                <th>Detailed Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            {paginatedTests.map((test) => (
+                <tr key={test.internal_test_id}>
+                    <td>
+                        <a href={test.internal_test_link} target="_blank" rel="noopener noreferrer">
+                            {test.test_description}
+                        </a>
+                    </td>
+                    <td>{test.number_of_questions}</td>
+                    <td>{test.formatted_date}</td> {/* Display formatted date */}
+                    <td>
+                        {test.attended ? (
+                            <span className="text-success">Attended</span>
+                        ) : (
+                            <Badge bg="danger">Not Attended</Badge>
+                        )}
+                    </td>
+                    <td>
+                        {test.attended ? (
+                            <span>{test.attended.total_marks}</span>
+                        ) : (
+                            <span>-</span> // Display dash if test was not attended
+                        )}
+                    </td>
+                    <td>
+                        {test.attended ? (
+                            <span>{test.attended.marks_obtained}</span>
+                        ) : (
+                            <span>-</span> // Display dash if test was not attended
+                        )}
+                    </td>
+                    <td>
+                        {test.attended && (
+                            <Link to={`/detailed-internal-result/${test.internal_test_id}`}>
+                                <Button variant="info">View</Button>
+                            </Link>
+                        )}
+                    </td>
+                </tr>
+            ))}
+        </tbody>
+    </Table>
+    <Pagination className="justify-content-center mt-4">
+        {[...Array(totalPages)].map((_, index) => (
+            <Pagination.Item
+                key={index + 1}
+                active={index + 1 === currentPage}
+                onClick={() => handlePageChange(index + 1)}
+            >
+                {index + 1}
+            </Pagination.Item>
+        ))}
+    </Pagination>
+</Container>
 
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-            <Pagination className="justify-content-center mt-4">
-                {[...Array(totalPages)].map((_, index) => (
-                    <Pagination.Item
-                        key={index + 1}
-                        active={index + 1 === currentPage}
-                        onClick={() => handlePageChange(index + 1)}
-                    >
-                        {index + 1}
-                    </Pagination.Item>
-                ))}
-            </Pagination>
-            {/* <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover /> */}
-        </Container>
     );
 };
 

@@ -29,6 +29,11 @@ module.exports = (sequelize, DataTypes) => {
         is_monitored: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
+        },
+        test_date: {
+            type: DataTypes.DATE,
+            allowNull: true, 
+            defaultValue: null
         }
     }, {
         timestamps: true,

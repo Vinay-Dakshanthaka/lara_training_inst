@@ -9,6 +9,8 @@ import { baseURL } from '../config';
 // import PlacementTestTableForStudent from "../placementTest/PlacementTestTableForStudent";
 import StudentInternalTestDetails from "../internalTests/StudentInternalTestDetails";
 import StudentPerformanceDashboard from "../internalTests/StudentPerformanceDashboard";
+import ActiveWeeklyTests from "../weeklyTest/forStudentDashboard/ActiveWeeklyTest";
+import WeeklyTestPerformanceChart from "../weeklyTest/forStudentDashboard/WeeklyTestPerformanceChart";
 
 const FeedbackButton = ({ onClick }) => {
   return (
@@ -539,10 +541,11 @@ const StudentHome = () => {
             }}
           />
         </div>
-
         <StudentPerformanceDashboard />
 
         <StudentInternalTestDetails />
+        <WeeklyTestPerformanceChart />
+        <ActiveWeeklyTests />
         {/* <PlacementTestTableForStudent /> */}
 
         {/* Education Details */}

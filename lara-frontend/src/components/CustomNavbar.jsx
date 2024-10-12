@@ -92,7 +92,7 @@ function CustomNavbar() {
             src={imgSrc}
             alt="Lara Technologies"
             className="img-fluid"
-            style={{ width: "80px", height: "40px" }}
+            style={{ width: "80px", height: "40px"}}
           />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />

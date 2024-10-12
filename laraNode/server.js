@@ -24,12 +24,14 @@ const router = require('./routes/studentRoutes.js');
 const cumulativeTestRouter = require('./routes/cumulativeTestRoutes.js')
 const placementTestRoute = require('./routes/placementTestRoutes.js')
 const internalTestRoute = require('./routes/internalTestRoute.js')
+const weeklyTestRoute = require('./routes/weeklyTestRoutes.js')
 
 
 app.use('/api/student', router);
 app.use('/api/cumulative-test',cumulativeTestRouter)
 app.use('/api/placement-test', placementTestRoute);
 app.use('/api/internal-test', internalTestRoute);
+app.use('/api/weekly-test',weeklyTestRoute);
 
 
 // Static Images Folder

@@ -99,11 +99,17 @@ const DetailedInternalTestResult = () => {
                                 {result.question_description}
                                 </pre>
                             </td>
-                            <td>{result.correct_options.join(', ')}</td>
                             <td>
+                                <pre>
+                                {result.correct_options.join(', ')}
+                                </pre>
+                            </td>
+                            <td>
+                                <pre>
                                 {result.selected_options.length > 0 
                                     ? result.selected_options.join(', ') 
                                     : 'Not Attempted'}
+                                </pre>
                             </td>
                             <td>
                                 <ListGroup>
