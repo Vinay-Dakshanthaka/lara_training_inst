@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Button, Form, Container, Row, Col, Card, ToastContainer } from "react-bootstrap";
@@ -13,6 +13,8 @@ const StudentQuestionAnswer = () => {
   const [correctAnswers, setCorrectAnswers] = useState({});
   const [updatedMarks, setUpdatedMarks] = useState({});
   const [updatedComment, setUpdatedComment] = useState({});
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0); // Track active question for navigation
+  const questionRefs = useRef([]); // Use refs to store question elements for scrolling
 
   useEffect(() => {
     axios
@@ -48,18 +50,18 @@ const StudentQuestionAnswer = () => {
   const handleUpdate = (question_id, maxMarks) => {
     const marks = updatedMarks[question_id];
     const comment = updatedComment[question_id];
-  
+
     // Validation: Marks should not exceed the maximum assigned marks
     if (marks > maxMarks) {
       toast.error(`Marks cannot exceed the maximum of ${maxMarks}`);
       return;
     }
-  
+
     if (marks === undefined || comment === undefined) {
       toast.error("Marks and comment cannot be empty.");
       return;
     }
-  
+
     axios
       .put(`${baseURL}/api/weekly-test/updateMarksAndCommentByStudentId/${wt_id}/${student_id}/${question_id}`, {
         marks,
@@ -67,19 +69,19 @@ const StudentQuestionAnswer = () => {
       })
       .then(() => {
         toast.success("Marks and comments updated successfully!");
-  
+
         // Update local state: only modify the `marks` and `comment` of `studentAnswer`, while keeping the `answer` intact
         setQuestionsWithAnswers((prev) =>
           prev.map((item) =>
             item.question_id === question_id
               ? {
-                  ...item,
-                  studentAnswer: {
-                    ...item.studentAnswer, // Keep the existing `answer`
-                    marks,
-                    comment,
-                  },
-                }
+                ...item,
+                studentAnswer: {
+                  ...item.studentAnswer, // Keep the existing `answer`
+                  marks,
+                  comment,
+                },
+              }
               : item
           )
         );
@@ -88,32 +90,37 @@ const StudentQuestionAnswer = () => {
         toast.error("Error updating marks and comments.");
       });
   };
-  
+
+  // Handle navigation to a specific question
+  const handleScrollToQuestion = (index) => {
+    setActiveQuestionIndex(index);
+    questionRefs.current[index].scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
-    <Container className="my-4">
-        <StudentDetailsByWeeklyTestId />
-      <ToastContainer /> {/* Toast messages container */}
-      <h2 className="mb-4">Student Answer Details</h2>
-
+    <Container fluid className="my-4">
       <Row>
-        {questionsWithAnswers.length === 0 ? (
-          <Col>
+        {/* Left side: Student Answer Details */}
+        <Col md={9} className="overflow-auto" style={{ maxHeight: "100vh" }}>
+          <StudentDetailsByWeeklyTestId />
+          <ToastContainer /> {/* Toast messages container */}
+          <h2 className="mb-4">Student Answer Details</h2>
+
+          {questionsWithAnswers.length === 0 ? (
             <Card>
               <Card.Body>
                 <h5>No questions found for this student.</h5>
               </Card.Body>
             </Card>
-          </Col>
-        ) : (
-          questionsWithAnswers.map((item) => (
-            <Col key={item.question_id} xs={12} className="mb-4"> 
-              <Card>
+          ) : (
+            questionsWithAnswers.map((item, index) => (
+              <Card
+                key={item.question_id}
+                className={`mb-4 ${index === activeQuestionIndex ? "border-primary" : ""}`}
+                ref={(el) => (questionRefs.current[index] = el)}
+              >
                 <Card.Body>
-                  {/* <Card.Title></Card.Title> */}
                   <Card.Subtitle className="mb-2 text-muted">Topic: {item.topic || "N/A"}</Card.Subtitle>
-
-                  {/* Display the question as it is using <pre> tag */}
                   <pre style={{ whiteSpace: "pre-wrap" }}>Question: {item.question_text}</pre>
 
                   <p><strong>Marks: </strong>{item.marks}</p>
@@ -163,16 +170,41 @@ const StudentQuestionAnswer = () => {
                     />
                   </Form.Group>
 
-                  <Button variant="primary" onClick={() => handleUpdate(item.question_id, item.marks)} className="my-2">
+                  {/* Update Button with conditional variant */}
+                  <Button
+                    variant={item.studentAnswer.marks && item.studentAnswer.comment ? "success" : "warning"}
+                    onClick={() => handleUpdate(item.question_id, item.marks)}
+                    className="my-2"
+                  >
                     Update
                   </Button>
                 </Card.Body>
               </Card>
-            </Col>
-          ))
-        )}
+            ))
+          )}
+        </Col>
+
+        {/* Right side: Navigation buttons */}
+        <Col md={3} className="overflow-auto" style={{ maxHeight: "100vh" }}>
+          <div className="d-flex flex-column align-items-end">
+            <Row>
+              {questionsWithAnswers.map((item, index) => (
+                <Col xs={6} key={index} className="mb-2 d-flex justify-content-center">
+                  <Button
+                    variant={index === activeQuestionIndex ? "primary" : item.studentAnswer.marks && item.studentAnswer.comment ? "success" : "warning"}
+                    onClick={() => handleScrollToQuestion(index)}
+                    style={{ width: "60px", fontWeight: index === activeQuestionIndex ? "bold" : "normal" }}
+                  >
+                    {index + 1}
+                  </Button>
+                </Col>
+              ))}
+            </Row>
+          </div>
+        </Col>
       </Row>
     </Container>
+
   );
 };
 
