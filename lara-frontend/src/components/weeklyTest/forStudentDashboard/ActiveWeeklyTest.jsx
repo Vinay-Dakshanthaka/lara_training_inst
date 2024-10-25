@@ -130,7 +130,7 @@ const ActiveWeeklyTests = () => {
         <tbody>
           {currentTests.length === 0 ? (
             <tr>
-              <td colSpan="4" className="text-center">
+              <td colSpan="6" className="text-center">
                 No active weekly tests available.
               </td>
             </tr>
@@ -143,11 +143,10 @@ const ActiveWeeklyTests = () => {
                     {test.test_description}
                   </a>
                 </td>
-                {/* <td>{new Date(test.test_date).toLocaleDateString()}</td> */}
                 <td>{test.test_date}</td>
                 <td>{test.total_available_marks}</td>
                 <td>{test.obtained_marks}</td>
-               
+
                 <td>
                   {/* Display attendance status */}
                   {test.has_attended ? (
@@ -157,9 +156,15 @@ const ActiveWeeklyTests = () => {
                   )}
                 </td>
                 <td>
-                  <Link to={`weeklytest-detailed-summary/${test.test_id}`} className="btn btn-outline-info">View</Link>
+                  {/* Only show the 'View' button if obtained_marks is available */}
+                  {test.obtained_marks !== null ? (
+                    <Link to={`weeklytest-detailed-summary/${test.test_id}`} className="btn btn-outline-info">
+                      View
+                    </Link>
+                  ) : (
+                    "N/A"
+                  )}
                 </td>
-               
               </tr>
             ))
           )}
@@ -168,13 +173,13 @@ const ActiveWeeklyTests = () => {
 
       {/* Pagination */}
       <div className="d-flex align-items-center justify-content-center">
-      <Pagination>
-        {[...Array(Math.ceil(activeTests.length / testsPerPage)).keys()].map((num) => (
-          <Pagination.Item key={num + 1} active={num + 1 === currentPage} onClick={() => paginate(num + 1)}>
-            {num + 1}
-          </Pagination.Item>
-        ))}
-      </Pagination>
+        <Pagination>
+          {[...Array(Math.ceil(activeTests.length / testsPerPage)).keys()].map((num) => (
+            <Pagination.Item key={num + 1} active={num + 1 === currentPage} onClick={() => paginate(num + 1)}>
+              {num + 1}
+            </Pagination.Item>
+          ))}
+        </Pagination>
       </div>
     </Container>
   );

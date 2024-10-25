@@ -5,7 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import defaultProfileImage from "../components/default-profile.png";
 import imgSrc from "../resources/images/laralogo.webp";
 import LogoutModal from "./LogoutModal";
-import {baseURL}  from './config';
+import { baseURL } from './config';
 
 function CustomNavbar() {
   const navigate = useNavigate();
@@ -92,7 +92,7 @@ function CustomNavbar() {
             src={imgSrc}
             alt="Lara Technologies"
             className="img-fluid"
-            style={{ width: "80px", height: "40px"}}
+            style={{ width: "80px", height: "40px" }}
           />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />

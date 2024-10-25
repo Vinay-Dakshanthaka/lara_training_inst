@@ -1208,7 +1208,7 @@ const getQuestionAnswerDataByStudentId = async (req, res) => {
 
             return {
                 question_id: questionId,
-                question_text: question.wt_question_description,  // Assuming the question description is stored in this field
+                question_text: question.wt_question_description,  
                 marks: question.marks,
                 minutes: question.minutes,
                 topic: question.TopicDetails ? question.TopicDetails.name : null,  // Include topic details
@@ -1251,11 +1251,14 @@ const updateMarksAndCommentByStudentId = async (req, res) => {
             });
         }
 
-        // Step 2: Update the marks and comment for the question
+        // Step 2: Set default value for comment if it's empty or undefined
+        const updatedComment = comment && comment.trim() !== '' ? comment : 'N/A';
+
+        // Step 3: Update the marks and comment for the question
         await StudentAnswer.update(
             {
                 marks,  // New marks
-                comment  // New comment
+                comment: updatedComment  // New comment with default if needed
             },
             {
                 where: {
