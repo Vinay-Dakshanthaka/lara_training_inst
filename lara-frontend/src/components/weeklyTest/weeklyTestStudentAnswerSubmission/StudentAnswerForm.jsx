@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 import { Container, Row, Col } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import QuestionDisplay from './QuestionDisplay';
@@ -13,6 +13,7 @@ import TestData from '../TestData';
 
 const StudentAnswerForm = () => {
   const { wt_id } = useParams();
+  const navigate = useNavigate(); // Initialize useNavigate for navigation
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [savedAnswers, setSavedAnswers] = useState({});
@@ -21,13 +22,35 @@ const StudentAnswerForm = () => {
   const [currentPage, setCurrentPage] = useState(-1); // Start with -1 to show rules page by default
   const [finalSubmissionLoading, setFinalSubmissionLoading] = useState(false);
   const [totalMarks, setTotalMarks] = useState(null);
+
+  // Check if the browser is Chrome
+  useEffect(() => {
+    const userAgent = navigator.userAgent;
+    const isChromeBrowser = /Chrome/.test(userAgent) && !/Edge|Edg|OPR/.test(userAgent);
+
+    if (!isChromeBrowser) {
+      alert("This test is supported only in Google Chrome.");
+      navigate('/chrome-only'); // Redirect to the Not Found page
+    }
+  }, [navigate]);
+
+  const checkForGrammarly = () => {
+    const grammarlyElement = document.querySelector('[data-grammarly-extension]');
+    if (grammarlyElement) {
+      alert('Grammarly is interfering with text input. Please disable it for the best experience.');
+    }
+  };
+
+  setInterval(checkForGrammarly, 2000);
+
+
   // Fetch questions for the weekly test
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const response = await axios.get(`${baseURL}/api/weekly-test/getQuestionsByWeeklyTestId/${wt_id}`);
         setQuestions(response.data.questions);
-        setTotalMarks(response.data.totalMarks)
+        setTotalMarks(response.data.totalMarks);
         setLoading(false);
       } catch (error) {
         setError(error.message);

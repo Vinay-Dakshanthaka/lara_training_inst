@@ -467,50 +467,50 @@ const savePlacementTestResults = async (req, res) => {
 
 
 
-const savePlacementTestStudent = async (req, res) => {
-    try {
-        const { name, email, phone_number, placement_test_id } = req.body;
+// const savePlacementTestStudent = async (req, res) => {
+//     try {
+//         const { name, email, phone_number, placement_test_id } = req.body;
 
-        // Check if all required fields are provided
-        if (!name || !email || !phone_number || !placement_test_id) {
-            return res.status(400).send({ message: 'Required fields are missing or invalid' });
-        }
+//         // Check if all required fields are provided
+//         if (!name || !email || !phone_number || !placement_test_id) {
+//             return res.status(400).send({ message: 'Required fields are missing or invalid' });
+//         }
 
-        // Check if the email already exists in the PlacementTestStudent table
-        const existingStudent = await PlacementTestStudent.findOne({
-            where: {
-                email
-            }
-        });
+//         // Check if the email already exists in the PlacementTestStudent table
+//         const existingStudent = await PlacementTestStudent.findOne({
+//             where: {
+//                 email
+//             }
+//         });
 
-        if (existingStudent) {
-            // Check if the student has already taken this specific test
-            const existingResult = await PlacementTestResult.findOne({
-                where: {
-                    placement_test_id,
-                    placement_test_student_id: existingStudent.placement_test_student_id,
-                }
-            });
+//         if (existingStudent) {
+//             // Check if the student has already taken this specific test
+//             const existingResult = await PlacementTestResult.findOne({
+//                 where: {
+//                     placement_test_id,
+//                     placement_test_student_id: existingStudent.placement_test_student_id,
+//                 }
+//             });
 
-            if (existingResult) {
-                return res.status(403).send({ message: 'You have already attended this test.' });
-            } else {
-                return res.status(200).send({ message: 'Student details already exist', existingStudent });
-            }
-        }
+//             if (existingResult) {
+//                 return res.status(403).send({ message: 'You have already attended this test.' });
+//             } else {
+//                 return res.status(200).send({ message: 'Student details already exist', existingStudent });
+//             }
+//         }
 
-        // Create the new student record
-        const newStudent = await PlacementTestStudent.create({
-            student_name: name,
-            email,
-            phone_number
-        });
+//         // Create the new student record
+//         const newStudent = await PlacementTestStudent.create({
+//             student_name: name,
+//             email,
+//             phone_number
+//         });
 
-        return res.status(200).send({ message: 'Student details saved successfully', newStudent });
-    } catch (error) {
-        return res.status(500).send({ message: error.message });
-    }
-};
+//         return res.status(200).send({ message: 'Student details saved successfully', newStudent });
+//     } catch (error) {
+//         return res.status(500).send({ message: error.message });
+//     }
+// };
 
 
 // const getAllResultsByTestId = async (req, res) => {
@@ -578,6 +578,55 @@ const savePlacementTestStudent = async (req, res) => {
     
 // }
 
+const savePlacementTestStudent = async (req, res) => {
+    try {
+        const { name, email, phone_number, placement_test_id , university_name, college_name} = req.body;
+
+        // Check if all required fields are provided
+        if (!name || !email || !phone_number || !placement_test_id,!university_name || !college_name) {
+            return res.status(400).send({ message: 'Required fields are missing or invalid' });
+        }
+
+        // Check if the email already exists in the PlacementTestStudent table
+        const existingStudent = await PlacementTestStudent.findOne({
+            where: {
+                email
+            }
+        });
+
+        if (existingStudent) {
+            // Check if the student has already taken this specific test
+            const existingResult = await PlacementTestResult.findOne({
+                where: {
+                    placement_test_id,
+                    placement_test_student_id: existingStudent.placement_test_student_id,
+                }
+            });
+
+            if (existingResult) {
+                return res.status(403).send({ message: 'You have already attended this test.' });
+            } else {
+                return res.status(200).send({ message: 'Student details already exist', existingStudent });
+            }
+        }
+
+        // Create the new student record
+        const newStudent = await PlacementTestStudent.create({
+            student_name: name,
+            email,
+            phone_number,
+            university_name,
+            college_name
+        });
+
+        return res.status(200).send({ message: 'Student details saved successfully', newStudent });
+    } catch (error) {
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+
+
 const getAllResultsByTestId = async (req, res) => {
     try {
         const { placement_test_id } = req.body;
@@ -604,7 +653,7 @@ const getAllResultsByTestId = async (req, res) => {
             where: {
                 placement_test_student_id: studentIds
             },
-            attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number']
+            attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number','university_name','college_name']
         });
 
         // Step 4: Fetch assigned topic_id from PlacementTestTopics table
@@ -635,7 +684,9 @@ const getAllResultsByTestId = async (req, res) => {
                 student_details: student ? {
                     student_name: student.student_name,
                     email: student.email,
-                    phone_number: student.phone_number
+                    phone_number: student.phone_number,
+                    university_name :student.university_name,
+                    college_name: student.college_name
                 } : null
             };
         });
@@ -650,6 +701,79 @@ const getAllResultsByTestId = async (req, res) => {
         return res.status(500).send({ message: error.message });
     }
 };
+
+// const getAllResultsByTestId = async (req, res) => {
+//     try {
+//         const { placement_test_id } = req.body;
+
+//         if (!placement_test_id) {
+//             return res.status(400).send({ message: 'placement_test_id is required' });
+//         }
+
+//         // Step 1: Fetch all results from PlacementTestResult table by placement_test_id
+//         const results = await PlacementTestResult.findAll({
+//             where: { placement_test_id },
+//             attributes: ['placement_test_student_id', 'marks_obtained', 'total_marks']
+//         });
+
+//         // Step 2: Extract all unique placement_test_student_id values
+//         const studentIds = results.map(result => result.placement_test_student_id);
+
+//         if (studentIds.length === 0) {
+//             return res.status(404).send({ message: 'No results found for the provided placement_test_id' });
+//         }
+
+//         // Step 3: Fetch student details from PlacementTestStudent table
+//         const students = await PlacementTestStudent.findAll({
+//             where: {
+//                 placement_test_student_id: studentIds
+//             },
+//             attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number']
+//         });
+
+//         // Step 4: Fetch assigned topic_id from PlacementTestTopics table
+//         const assignedTopics = await PlacementTestTopic.findAll({
+//             where: { placement_test_id },
+//             attributes: ['topic_id']
+//         });
+
+//         const topicIds = assignedTopics.map(topic => topic.topic_id);
+//         console.log("Topic id's : ==", topicIds);
+
+//         // Step 5: Fetch topic names from Topics table using the topic_id
+//         const topics = await Topic.findAll({
+//             where: { topic_id: topicIds },
+//             attributes: ['topic_id', 'name'] // Make sure 'name' is the correct column name for the topic
+//         });
+
+//         const topicNames = topics.map(topic => topic.name); // Extract topic names
+//         console.log("topics ", topicNames);
+
+//         // Step 6: Combine results with student details (no need to include topics here for each result)
+//         const combinedResults = results.map(result => {
+//             const student = students.find(student => student.placement_test_student_id === result.placement_test_student_id);
+//             return {
+//                 placement_test_student_id: result.placement_test_student_id,
+//                 marks_obtained: result.marks_obtained,
+//                 total_marks: result.total_marks,
+//                 student_details: student ? {
+//                     student_name: student.student_name,
+//                     email: student.email,
+//                     phone_number: student.phone_number
+//                 } : null
+//             };
+//         });
+
+//         // Send the combined results along with the topics separately
+//         return res.status(200).send({
+//             students: combinedResults,
+//             topics: topicNames 
+//         });
+
+//     } catch (error) {
+//         return res.status(500).send({ message: error.message });
+//     }
+// };
 
 
 

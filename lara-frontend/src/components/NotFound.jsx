@@ -10,6 +10,7 @@ const NotFound = () => {
                 <div className="col-md-8">
                     <h1 className="not-found-display-1 text-danger">404</h1>
                     <h2 className="mb-4">Oops! Page not found</h2>
+                    <h3>If you are here for the test. <br />The test will be active at the scheduled time</h3>
                     <p className="lead mb-4">
                         The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
                     </p>

@@ -31,13 +31,17 @@ const OnlineTestMonitoring = ({ style, isCameraOn }) => {
 
     const startVideo = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 320, height: 240 },
-          audio: true // Request audio stream
+          audio: true, // Request audio stream
         });
         const videoElement = document.getElementById('video');
         if (videoElement) {
           videoElement.srcObject = stream;
+    
+          // Mute the audio output
+          videoElement.muted = true;
+    
           videoElement.onloadedmetadata = () => {
             videoElement.play().catch(err => console.error('Error playing video:', err));
           };

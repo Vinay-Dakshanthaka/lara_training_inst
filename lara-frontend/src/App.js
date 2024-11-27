@@ -69,6 +69,8 @@ import StudentQuestionAnswer from './components/weeklyTest/weeklyTestStudentAnsw
 import WeeklyTestStudentDetailedSummary from './components/weeklyTest/WeeklyTestStudentDetailedSummary';
 import AllStudentsWeeklyTestResults from './components/weeklyTest/AllStudentsWeeklyTestResults';
 import WeeklyTestPerformanceForAdmin from './components/weeklyTest/weeklyTestStudentAnswerSubmission/WeeklyTestPerformanceForAdmin';
+import ChromeOnlyMessage from './components/ChromeOnlyMessage';
+import TestNotActiveYet from './components/TestNotActiveYet';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -118,6 +120,8 @@ const App = () => {
             <Route path="/malpractice-detected" element={<PlacementTestError />} />
             <Route path="/create-test-link" element={<CreateTestLink />} />
             <Route path="/not-found" element={<NotFound />} />
+            <Route path="/test-not-active" element={<TestNotActiveYet />} />
+            <Route path="/chrome-only" element={<ChromeOnlyMessage />} />
             <Route path="/get-result/:test_id" element={<FetchResultsByTestId />} />
             <Route path="/get-internal-test-result/:internal_test_id" element={<FetchInternalTestResultsByTestId />} />
             <Route path="/add-questions-tolink/:test_id" element={<AddQuestionsToLink />} />
