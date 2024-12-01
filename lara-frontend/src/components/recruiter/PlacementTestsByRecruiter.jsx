@@ -19,7 +19,7 @@
 //     useEffect(() => {
 //         const fetchPlacementTests = async () => {
 //             try {
-//                 const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+//                 const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`);
 //                 const sortedTests = response.data.placementTests.sort((a, b) => b.is_Active - a.is_Active);
 //                 setPlacementTests(sortedTests);
 //             } catch (error) {
@@ -51,7 +51,7 @@
 //                 is_Active: true
 //             });
 //             toast.success('Link activated successfully');
-//             const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+//             const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`);
 //             const sortedTests = response.data.placementTests.sort((a, b) => b.is_Active - a.is_Active);
 //             setPlacementTests(sortedTests);
 //         } catch (error) {
@@ -74,7 +74,7 @@
 //             });
 //             toast.success('Number of questions updated successfully');
 //             setShowModal(false);
-//             const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+//             const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`);
 //             setPlacementTests(response.data.placementTests);
 //         } catch (error) {
 //             console.error('Error updating number of questions:', error);
@@ -260,9 +260,9 @@ import { BsCopy, BsPencil } from 'react-icons/bs';
 import { OverlayTrigger, Tooltip, Badge, Modal, Button, Form, Pagination, Table } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './allPlacementTest.css';
+import UpdatePlacementTestModal from '../placementTest/UpdatePlacementTestModal';
 
-const AllPlacementTests = () => {
+const PlacementTestsByRecruiter = () => {
     const [placementTests, setPlacementTests] = useState([]);
     const [selectedTest, setSelectedTest] = useState(null);
     const [newQuestionCount, setNewQuestionCount] = useState('');
@@ -270,10 +270,33 @@ const AllPlacementTests = () => {
     const [currentPage, setCurrentPage] = useState(1); // Track the current page, starting from 1
     const [testsPerPage] = useState(10); // Number of tests to display per page
 
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
+    const [selectedTestId, setSelectedTestId] = useState(null);
+  
+    const handleOpenModal = (testId) => {
+      setSelectedTestId(testId);
+      setShowUpdateModal(true);
+    };
+  
+    const handleCloseModal = () => {
+        setShowUpdateModal(false);
+      setSelectedTestId(null);
+    };
+
     useEffect(() => {
         const fetchPlacementTests = async () => {
             try {
-                const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    throw new Error("No token provided.");
+                }
+
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                };
+                const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`, config);
                 console.log(response, "-----------------------------------responseof fecthpalcemnsttests");
 
                 // Sort first by is_Active (active tests first), then by placement_test_id in descending order
@@ -312,12 +335,22 @@ const AllPlacementTests = () => {
     const activateLink = async (placement_test_id) => {
         console.log(placement_test_id, "--------------------------placement_test_id");
         try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                throw new Error("No token provided.");
+            }
+
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            };
             await axios.post(`${baseURL}/api/placement-test/disable-link`, {
                 test_id: placement_test_id,
                 is_Active: true
             });
             toast.success('Link activated successfully');
-            const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+            const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`, config);
             // console.log(response,"-------------------------------------------");
             const sortedTests = response.data.placementTests.sort((a, b) => b.is_Active - a.is_Active);
             setPlacementTests(sortedTests);
@@ -342,7 +375,17 @@ const AllPlacementTests = () => {
             });
             toast.success('Number of questions updated successfully');
             setShowModal(false);
-            const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+            const token = localStorage.getItem("token");
+            if (!token) {
+                throw new Error("No token provided.");
+            }
+
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+            const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`, config);
             setPlacementTests(response.data.placementTests);
         } catch (error) {
             console.error('Error updating number of questions:', error);
@@ -449,7 +492,7 @@ const AllPlacementTests = () => {
                             <th style={{ width: 'fit-content' }}>Test Link</th>
                             <th>Number of Questions</th>
                             <th>Camera Monitoring</th>
-                            <th>Update Details</th>
+                            <th>Update</th>
                             <th>Results</th>
                             <th>Add Existing Questions</th>
                             <th>Add New Questions</th>
@@ -467,7 +510,7 @@ const AllPlacementTests = () => {
                                         placement="top"
                                         overlay={<Tooltip id={`tooltip-${test.placement_test_id}`}>{test.test_link}</Tooltip>}
                                     >
-                                        <p className="test-link-text" style={{ width: 'fit-content', textWrap: 'wrap' }}>{test.test_link}&nbsp;</p>
+                                        <p className="test-link-text" style={{ width: 'fit-content', textWrap: 'wrap' }}>{test.test_title}&nbsp;</p>
                                     </OverlayTrigger>
                                     {test.is_Active && (
                                         <button
@@ -489,6 +532,20 @@ const AllPlacementTests = () => {
                                         type="checkbox"
                                         checked={test.is_Monitored}
                                         onChange={() => handleMonitoredChange(test)}
+                                    />
+                                </td>
+                                <td>
+                                    <button
+                                        onClick={() => handleOpenModal(1)} // Pass the test ID here
+                                        className="btn btn-primary"
+                                    >
+                                        Update Placement Test
+                                    </button>
+
+                                    <UpdatePlacementTestModal
+                                        placement_test_id={test.placement_test_id}
+                                        show={showUpdateModal}
+                                        handleClose={handleCloseModal}
                                     />
                                 </td>
                                 <td>
@@ -572,4 +629,4 @@ const AllPlacementTests = () => {
         </div>
     );
 };
-export default AllPlacementTests;
+export default PlacementTestsByRecruiter;

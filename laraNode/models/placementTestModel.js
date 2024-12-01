@@ -133,3 +133,13 @@ module.exports = (sequelize, DataTypes) => {
 // add column whatsAppChannelLink varchar(255) null;
 // add column test_title varchar(255) null
 // add column certificate_name varchar(255) null;
+
+
+// SET SQL_SAFE_UPDATES = 0;
+
+// UPDATE laradb.Placementtests
+// SET 
+//     whatsAppChannelLink = 'https://whatsapp.com/channel/0029Var9Wub30LKJP7fK7y06',
+//     test_title = 'Test';
+
+// SET SQL_SAFE_UPDATES = 1;  -- Restore safe update mode after running the update

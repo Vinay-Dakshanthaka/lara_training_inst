@@ -6,6 +6,7 @@ import Tabs from 'react-bootstrap/Tabs';
 import CumulativeTest from '../cumulativeTest/CumulativeTest';
 import CreateTestLink from '../placementTest/CreateTestLink';
 import AllPlacementTests from '../placementTest/AllPlacementTests';
+import PlacementTestsByRecruiter from './PlacementTestsByRecruiter';
 
 const RecruiterDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');
@@ -37,7 +38,7 @@ const RecruiterDashboard = () => {
           <CreateTestLink />
         </Tab>
         <Tab eventKey="addQuestionsToTestLInk" title="Add Questions To Test Link">
-          <AllPlacementTests />
+          <PlacementTestsByRecruiter />
         </Tab>
       </Tabs>
     </div>

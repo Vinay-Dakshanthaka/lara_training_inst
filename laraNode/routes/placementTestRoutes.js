@@ -14,11 +14,15 @@ const uploadQuestionImage = multer({ dest: 'cumulative_question_images/' });
 const nodemailer = require('nodemailer');
 const logoPath = path.join(__dirname, 'laralogo.png');
 
-placementTestRoute.post('/create-test-link', placementTestContoller.createPlacementTestLink);
+placementTestRoute.post('/create-test-link', verifyToken,  placementTestContoller.createPlacementTestLink);
+
+placementTestRoute.put('/updatePlacementTest/:placement_test_id', verifyToken,  placementTestContoller.updatePlacementTest);
 
 placementTestRoute.post('/saveWhatsAppChannelLink', placementTestContoller.saveWhatsAppChannelLink);
 
 placementTestRoute.put('/updateWhatsAppChannelLink/:id', placementTestContoller.updateWhatsAppChannelLink);
+
+placementTestRoute.get('/getPlacementTestDetailsById/:placement_test_id', placementTestContoller.getPlacementTestDetailsById);
 
 placementTestRoute.delete('/deleteWhatsAppChannelLink/:id', placementTestContoller.deleteWhatsAppChannelLink);
 
@@ -29,6 +33,8 @@ placementTestRoute.get('/fetchWhatsAppChannelLinkById/:channel_id', placementTes
 placementTestRoute.post('/save-placement-test-student', placementTestContoller.savePlacementTestStudent);
 
 placementTestRoute.get('/get-all-placement-tests', placementTestContoller.getAllPlacementTests);
+
+placementTestRoute.get('/getAllPlacementTestsByCreator',verifyToken, placementTestContoller.getAllPlacementTestsByCreator);
 
 placementTestRoute.post('/fetchTestTopicIdsAndQnNums', placementTestContoller.fetchTestTopicIdsAndQnNums);
 

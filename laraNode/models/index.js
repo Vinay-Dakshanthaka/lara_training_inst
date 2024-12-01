@@ -200,7 +200,7 @@ db.WeeklyTestQuestionMapping = require('./weeklyTestQuestionMapping.js')(sequeli
 db.StudentAnswer = require('./weeklyTestStudentAnswers.js')(sequelize, DataTypes);  
 db.WeeklyTestFinalSubmission = require('./weeklyTestFinalSubmissionModel.js')(sequelize, DataTypes);  
 db.WhatsAppChannelLinks = require('./whatsAppChannelLinksModel.js')(sequelize, DataTypes);  
-
+db.PlacementTestCreator = require('./placementTestCreator.js')(sequelize, DataTypes);
 
 
 // Define associations  
@@ -498,6 +498,17 @@ db.StudentAnswer.belongsTo(db.WeeklyTestQuestion, {
 db.StudentAnswer.belongsTo(db.Student, {
     foreignKey: 'student_id',
     as: 'Student'
+});
+
+// Add the association to PlacementTestCreator
+db.PlacementTest.hasMany(db.PlacementTestCreator, {
+    foreignKey: 'placement_test_id',
+    as: 'Creators'
+});
+
+db.Student.hasMany(db.PlacementTestCreator, {
+    foreignKey: 'student_id',
+    as: 'CreatedTests'
 });
 
 // Call associate method for each model if defined
