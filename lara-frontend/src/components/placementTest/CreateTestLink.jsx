@@ -3,6 +3,8 @@ import { Button, Form, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { baseURL } from '../config';
+import WhatsAppChannelDropdown from './WhatsAppChannelDropdown';
+import SaveWhatsAppChannelModal from './SaveWhatsAppChannelModal';
 
 const CreateTestLink = () => {
     const [subjects, setSubjects] = useState([]);
@@ -20,6 +22,10 @@ const CreateTestLink = () => {
     const [isMonitored, setIsMonitored] = useState(false); // State for isMonitored
     const [newTestLink, setNewTestLink] = useState(''); // New state for test link
     const [alert, setAlert] = useState({ show: false, message: '', variant: '' }); // State for Bootstrap alerts
+    const [testTitle, setTestTitle] = useState('');
+    const [channelLink, setChannelLink] = useState('');
+    const [certificateName, setCertificateName] = useState('');
+    const [showModal, setShowModal] = useState(false);
 
     const navigate = useNavigate();
 
@@ -46,6 +52,10 @@ const CreateTestLink = () => {
 
         fetchSubjects();
     }, []);
+
+    const handleChannelSelect = (link) => {
+        setChannelLink(link);
+    };
 
     const handleSubjectChange = async (e) => {
         const subjectId = e.target.value;
@@ -166,150 +176,211 @@ const CreateTestLink = () => {
             if (!token) {
                 throw new Error("No token provided.");
             }
-
+    
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             };
-
-            const response = await axios.post(`${baseURL}/api/placement-test/create-test-link`, {
-                number_of_questions: numQuestions,
-                description,
-                start_time: startTime,
-                end_time: endTime,
-                show_result: showResult,
-                topic_ids: selectedTopics,
-                is_Monitored: isMonitored, // Send isMonitored to the backend
-            }, config);
-
-            setNewTestLink(response.data.newTest.test_link); // Set the test link in state
+    
+            const response = await axios.post(
+                `${baseURL}/api/placement-test/create-test-link`,
+                {
+                    number_of_questions: numQuestions,
+                    description,
+                    start_time: startTime,
+                    end_time: endTime,
+                    show_result: showResult,
+                    topic_ids: selectedTopics,
+                    is_Monitored: isMonitored, // Send isMonitored to the backend
+                    test_title: testTitle,
+                    channel_link: channelLink,
+                    certificate_name: certificateName,
+                },
+                config
+            );
+    
+            // Set the test link in state
+            setNewTestLink(response.data.newTest.test_link);
             setAlert({ show: true, message: 'Link Created Successfully', variant: 'success' });
+    
+            // Scroll to the top of the page
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (error) {
             console.error('Error creating test link:', error);
             setAlert({ show: true, message: 'Something went wrong!!', variant: 'danger' });
+    
+            // Scroll to the top of the page for the error alert
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
+    
 
     return (
         <div className="container mt-5">
-            {alert.show && (
-                <Alert variant={alert.variant} onClose={() => setAlert({ ...alert, show: false })} dismissible>
-                    {alert.message}
-                </Alert>
-            )}
-
-            {newTestLink && (
-                <div className="mt-4 p-3 card " style={{ border: '1px solid #007bff', borderRadius: '5px', backgroundColor: '#e9ecef' }}>
-                    <h5> Link Created Successfully :</h5>
-                    <p style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#007bff' }}>
-                        {newTestLink}
-                    </p>
-                    <p className="fw-bolder">
-                        To add questions to this link
-                        <Link to="/test-links"> click here</Link>
-                    </p>
-                </div>
-            )}
-
-            <h3 className="text-center">Create Test Link</h3>
-            <Form.Group controlId="formSubject" className="mt-4" style={{ maxWidth: '300px' }}>
-                <Form.Label>Select Subject</Form.Label>
-                <Form.Control as="select" value={selectedSubject} onChange={handleSubjectChange} required>
-                    <option value="">-- Select Subject --</option>
-                    {subjects.map((subject) => (
-                        <option key={subject.subject_id} value={subject.subject_id}>
-                            {subject.name}
-                        </option>
-                    ))}
-                </Form.Control>
-            </Form.Group>
-
-            <div className="mt-4">
-                <h5>Select Topics</h5>
-                <Form.Group>
-                    <Form.Check
-                        type="checkbox"
-                        label="Select All"
-                        checked={selectAllTopics}
-                        onChange={handleSelectAllTopics}
-                    />
-                    <div className="row mt-2">
-                        {topics.map((topic) => (
-                            <div className="col-3" key={topic.topic_id}>
-                                <Form.Check
-                                    type="checkbox"
-                                    label={`${topic.name} (${topic.question_count} questions)`}
-                                    checked={selectedTopics.includes(topic.topic_id)}
-                                    onChange={() => handleTopicChange(topic.topic_id)}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </Form.Group>
+        {alert.show && (
+            <Alert variant={alert.variant} onClose={() => setAlert({ ...alert, show: false })} dismissible>
+                {alert.message}
+            </Alert>
+        )}
+    
+        {newTestLink && (
+            <div className="mt-4 p-3 card" style={{ border: '1px solid #007bff', borderRadius: '5px', backgroundColor: '#e9ecef' }}>
+                <h5>Link Created Successfully:</h5>
+                <p style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#007bff' }}>{newTestLink}</p>
+                <p className="fw-bolder">
+                    To add questions to this link, 
+                    <Link to="/test-links"> click here</Link>.
+                </p>
             </div>
-
-            <Form.Group controlId="formNumQuestions" className="mt-4" style={{ maxWidth: '200px' }}>
-                <Form.Label>Number of Questions</Form.Label>
-                <Form.Control
-                    type="number"
-                    value={numQuestions}
-                    onChange={handleNumQuestionsChange}
-                    isInvalid={!!errorMessage}
-                />
-                <Form.Control.Feedback type="invalid">{errorMessage}</Form.Control.Feedback>
-            </Form.Group>
-
-            <Form.Group controlId="formDescription" className="mt-4">
-                <Form.Label>Test Description</Form.Label>
-                <Form.Control
-                    as="textarea"
-                    rows={3}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                />
-            </Form.Group>
-
-            <Form.Group controlId="formStartTime" className="mt-4" style={{ maxWidth: '300px' }}>
-                <Form.Label>Start Time</Form.Label>
-                <Form.Control
-                    type="datetime-local"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                />
-            </Form.Group>
-
-            <Form.Group controlId="formEndTime" className="mt-4" style={{ maxWidth: '300px' }}>
-                <Form.Label>End Time</Form.Label>
-                <Form.Control
-                    type="datetime-local"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                />
-            </Form.Group>
-
-            <Form.Group controlId="formShowResult" className="mt-4">
+        )}
+    
+        <h3 className="text-center">Create Test Link</h3>
+    
+        <Form.Group controlId="formSubject" className="mt-4" style={{ maxWidth: '400px' }}>
+            <Form.Label>Select Subject</Form.Label>
+            <Form.Control as="select" value={selectedSubject} onChange={handleSubjectChange} required>
+                <option value="">-- Select Subject --</option>
+                {subjects.map((subject) => (
+                    <option key={subject.subject_id} value={subject.subject_id}>
+                        {subject.name}
+                    </option>
+                ))}
+            </Form.Control>
+        </Form.Group>
+    
+        <div className="mt-4">
+            <h5>Select Topics</h5>
+            <Form.Group>
                 <Form.Check
                     type="checkbox"
-                    label="Show Result After Test"
-                    checked={showResult}
-                    onChange={() => setShowResult(!showResult)}
+                    label="Select All Topics"
+                    checked={selectAllTopics}
+                    onChange={handleSelectAllTopics}
                 />
+                <div className="row mt-2">
+                    {topics.map((topic) => (
+                        <div className="col-md-3 col-sm-6 col-12" key={topic.topic_id}>
+                            <Form.Check
+                                type="checkbox"
+                                label={`${topic.name} (${topic.question_count} questions)`}
+                                checked={selectedTopics.includes(topic.topic_id)}
+                                onChange={() => handleTopicChange(topic.topic_id)}
+                            />
+                        </div>
+                    ))}
+                </div>
             </Form.Group>
-
-            <Form.Group controlId="formIsMonitored" className="mt-4">
-                <Form.Check
-                    type="checkbox"
-                    label="Is Monitored"
-                    checked={isMonitored}
-                    onChange={() => setIsMonitored(!isMonitored)}
-                />
-            </Form.Group>
-
-            <Button className="mt-4" onClick={handleCreateLink}>
-                Create Link
-            </Button>
         </div>
+    
+        <Form.Group controlId="formTestTitle" className="mt-4">
+            <Form.Label>Test Title</Form.Label>
+            <Form.Control
+                type="text"
+                value={testTitle}
+                onChange={(e) => setTestTitle(e.target.value)}
+                placeholder="Enter test title"
+                required
+            />
+        </Form.Group>
+    
+        <Form.Group controlId="formCertificateName" className="mt-4">
+            <Form.Label>Certificate Name</Form.Label>
+            <Form.Control
+                type="text"
+                value={certificateName}
+                onChange={(e) => setCertificateName(e.target.value)}
+                placeholder="Enter certificate name"
+                required
+            />
+        </Form.Group>
+    
+        <WhatsAppChannelDropdown onSelectChannel={handleChannelSelect} />
+    
+        <Form.Group controlId="formChannelLink" className="mt-4">
+            <Form.Label>WhatsApp Channel Link</Form.Label>
+            <Form.Control
+                type="url"
+                value={channelLink}
+                onChange={(e) => setChannelLink(e.target.value)}
+                placeholder="The WhatsApp link will appear here"
+                required
+                disabled
+            />
+        </Form.Group>
+    
+        <button className="btn btn-primary mt-3" onClick={() => setShowModal(true)}>
+            Add WhatsApp Channel
+        </button>
+        {showModal && (
+            <SaveWhatsAppChannelModal
+                showModal={showModal}
+                onClose={() => setShowModal(false)}
+            />
+        )}
+    
+        <Form.Group controlId="formNumQuestions" className="mt-4" style={{ maxWidth: '300px' }}>
+            <Form.Label>Number of Questions</Form.Label>
+            <Form.Control
+                type="number"
+                value={numQuestions}
+                onChange={handleNumQuestionsChange}
+                isInvalid={!!errorMessage}
+            />
+            <Form.Control.Feedback type="invalid">{errorMessage}</Form.Control.Feedback>
+        </Form.Group>
+    
+        <Form.Group controlId="formDescription" className="mt-4">
+            <Form.Label>Test Description</Form.Label>
+            <Form.Control
+                as="textarea"
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+            />
+        </Form.Group>
+    
+        <Form.Group controlId="formStartTime" className="mt-4" style={{ maxWidth: '400px' }}>
+            <Form.Label>Start Time</Form.Label>
+            <Form.Control
+                type="datetime-local"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+            />
+        </Form.Group>
+    
+        <Form.Group controlId="formEndTime" className="mt-4" style={{ maxWidth: '400px' }}>
+            <Form.Label>End Time</Form.Label>
+            <Form.Control
+                type="datetime-local"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+            />
+        </Form.Group>
+    
+        <Form.Group controlId="formShowResult" className="mt-4">
+            <Form.Check
+                type="checkbox"
+                label="Show Results After Test"
+                checked={showResult}
+                onChange={() => setShowResult(!showResult)}
+            />
+        </Form.Group>
+    
+        <Form.Group controlId="formIsMonitored" className="mt-4">
+            <Form.Check
+                type="checkbox"
+                label="Enable Monitoring"
+                checked={isMonitored}
+                onChange={() => setIsMonitored(!isMonitored)}
+            />
+        </Form.Group>
+    
+        <Button className="btn btn-success mt-4 w-100" onClick={handleCreateLink}>
+            Create Test Link
+        </Button>
+    </div>
+    
     );
 };
 

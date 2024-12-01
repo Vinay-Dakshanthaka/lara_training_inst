@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true, 
         },
         role: {
-            type: DataTypes.ENUM('ADMIN','TRAINER','STUDENT', 'SUPER ADMIN','PLACEMENT OFFICER'),
+            type: DataTypes.ENUM('ADMIN','TRAINER','STUDENT', 'SUPER ADMIN','PLACEMENT OFFICER','RECRUITER'),
             allowNull: false
         },
         college_id: {
@@ -36,3 +36,8 @@ module.exports = (sequelize, DataTypes) => {
 
     return Student;
 };
+
+
+
+// ALTER TABLE laradb.students
+// MODIFY COLUMN `role` ENUM('ADMIN', 'TRAINER', 'STUDENT', 'SUPER ADMIN', 'PLACEMENT OFFICER', 'RECRUITER') NOT NULL;

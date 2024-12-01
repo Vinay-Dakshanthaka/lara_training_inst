@@ -16,6 +16,16 @@ const logoPath = path.join(__dirname, 'laralogo.png');
 
 placementTestRoute.post('/create-test-link', placementTestContoller.createPlacementTestLink);
 
+placementTestRoute.post('/saveWhatsAppChannelLink', placementTestContoller.saveWhatsAppChannelLink);
+
+placementTestRoute.put('/updateWhatsAppChannelLink/:id', placementTestContoller.updateWhatsAppChannelLink);
+
+placementTestRoute.delete('/deleteWhatsAppChannelLink/:id', placementTestContoller.deleteWhatsAppChannelLink);
+
+placementTestRoute.get('/fetchWhatsAppChannelLinks', placementTestContoller.fetchWhatsAppChannelLinks);
+
+placementTestRoute.get('/fetchWhatsAppChannelLinkById/:channel_id', placementTestContoller.fetchWhatsAppChannelLinkById);
+
 placementTestRoute.post('/save-placement-test-student', placementTestContoller.savePlacementTestStudent);
 
 placementTestRoute.get('/get-all-placement-tests', placementTestContoller.getAllPlacementTests);

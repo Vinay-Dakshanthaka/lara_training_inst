@@ -199,6 +199,7 @@ db.WeeklyTestQuestionAssignment = require('./weeklyTestQuestionAssignment.js')(s
 db.WeeklyTestQuestionMapping = require('./weeklyTestQuestionMapping.js')(sequelize, DataTypes);  
 db.StudentAnswer = require('./weeklyTestStudentAnswers.js')(sequelize, DataTypes);  
 db.WeeklyTestFinalSubmission = require('./weeklyTestFinalSubmissionModel.js')(sequelize, DataTypes);  
+db.WhatsAppChannelLinks = require('./whatsAppChannelLinksModel.js')(sequelize, DataTypes);  
 
 
 

@@ -204,6 +204,15 @@ function CustomNavbar() {
                           Dashboard
                         </Nav.Link>
                       )}
+                      {userRole === "RECRUITER" && (
+                        <Nav.Link
+                          as={Link}
+                          to="/recruiterDashboard"
+                          className="dropdown-item text-dark ms-1"
+                        >
+                          Dashboard
+                        </Nav.Link>
+                      )}
                       <button
                         type="button"
                         className="btn btn-danger ms-1"

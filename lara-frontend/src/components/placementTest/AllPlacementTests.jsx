@@ -274,8 +274,16 @@ const AllPlacementTests = () => {
         const fetchPlacementTests = async () => {
             try {
                 const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
-                console.log(response,"-----------------------------------responseof fecthpalcemnsttests")
-                const sortedTests = response.data.placementTests.sort((a, b) => b.is_Active - a.is_Active);
+                console.log(response, "-----------------------------------responseof fecthpalcemnsttests");
+
+                // Sort first by is_Active (active tests first), then by placement_test_id in descending order
+                const sortedTests = response.data.placementTests.sort((a, b) => {
+                    if (b.is_Active === a.is_Active) {
+                        return b.placement_test_id - a.placement_test_id; // If both have same active status, sort by test ID
+                    }
+                    return b.is_Active - a.is_Active; // Active tests will be sorted first
+                });
+
                 setPlacementTests(sortedTests);
             } catch (error) {
                 console.error('Error fetching placement tests:', error);
@@ -290,7 +298,7 @@ const AllPlacementTests = () => {
     }, []);
 
     const copyTestLinkToClipboard = (testLink) => {
-       
+
         navigator.clipboard.writeText(testLink)
             .then(() => {
                 toast.info('Test link copied to clipboard');
@@ -302,7 +310,7 @@ const AllPlacementTests = () => {
 
 
     const activateLink = async (placement_test_id) => {
-        console.log(placement_test_id,"--------------------------placement_test_id");
+        console.log(placement_test_id, "--------------------------placement_test_id");
         try {
             await axios.post(`${baseURL}/api/placement-test/disable-link`, {
                 test_id: placement_test_id,
@@ -320,7 +328,7 @@ const AllPlacementTests = () => {
     };
 
     const handleEditClick = (test) => {
-        console.log(test,"-------------------")
+        console.log(test, "-------------------")
         setSelectedTest(test);
         setNewQuestionCount(test.number_of_questions);
         setShowModal(true);
@@ -363,6 +371,7 @@ const AllPlacementTests = () => {
     };
 
     // Pagination logic
+    // Pagination logic
     const totalPages = Math.ceil(placementTests.length / testsPerPage);
     const indexOfLastTest = currentPage * testsPerPage;
     const indexOfFirstTest = indexOfLastTest - testsPerPage;
@@ -372,17 +381,61 @@ const AllPlacementTests = () => {
         setCurrentPage(pageNumber);
     };
 
+    // Render pagination items with ellipsis for large number of pages
     const renderPaginationItems = () => {
         let items = [];
-        for (let number = 1; number <= totalPages; number++) {
+        const maxVisiblePages = 5; // Maximum visible pages before adding ellipsis
+
+        if (totalPages <= maxVisiblePages) {
+            // Show all pages if total pages are less than maxVisiblePages
+            for (let number = 1; number <= totalPages; number++) {
+                items.push(
+                    <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
+                        {number}
+                    </Pagination.Item>
+                );
+            }
+        } else {
+            // Show the first page
             items.push(
-                <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
-                    {number}
+                <Pagination.Item key={1} active={1 === currentPage} onClick={() => handlePageChange(1)}>
+                    1
+                </Pagination.Item>
+            );
+
+            // Show ellipsis if the current page is far from the first page
+            if (currentPage > 3) {
+                items.push(<Pagination.Ellipsis key="left-ellipsis" />);
+            }
+
+            // Show a range of pages around the current page
+            const pageRange = [currentPage - 1, currentPage, currentPage + 1].filter(
+                (page) => page >= 2 && page <= totalPages - 1
+            );
+            pageRange.forEach((page) => {
+                items.push(
+                    <Pagination.Item key={page} active={page === currentPage} onClick={() => handlePageChange(page)}>
+                        {page}
+                    </Pagination.Item>
+                );
+            });
+
+            // Show ellipsis if the current page is far from the last page
+            if (currentPage < totalPages - 2) {
+                items.push(<Pagination.Ellipsis key="right-ellipsis" />);
+            }
+
+            // Show the last page
+            items.push(
+                <Pagination.Item key={totalPages} active={totalPages === currentPage} onClick={() => handlePageChange(totalPages)}>
+                    {totalPages}
                 </Pagination.Item>
             );
         }
         return items;
     };
+
+
 
     return (
         <div className="container mt-5">
@@ -479,9 +532,18 @@ const AllPlacementTests = () => {
             </div>
 
             {/* Bootstrap Pagination */}
-            <Pagination className="justify-content-center">
+            <Pagination className="justify-content-center" style={{ overflowX: 'auto' }}>
+                <Pagination.Prev
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                />
                 {renderPaginationItems()}
+                <Pagination.Next
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                />
             </Pagination>
+
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>

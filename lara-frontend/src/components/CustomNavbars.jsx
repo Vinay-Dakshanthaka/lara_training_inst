@@ -303,6 +303,9 @@ function CustomNavbars() {
                                      {userRole === "PLACEMENT OFFICER" && (
                                         <MenuItem onClick={() => navigate("/placementOfficerDashboard")}>Dashboard</MenuItem>
                                     )}
+                                     {userRole === "RECRUITER" && (
+                                        <MenuItem onClick={() => navigate("/recruiterDashboard")}>Dashboard</MenuItem>
+                                    )}
                                     {/* Common menu items */}
                                     <MenuItem onClick={() => navigate("/studentHome")}>Profile</MenuItem>
                                     <MenuItem onClick={() => navigate("/studentCumulativeTest")}>Cumulative Test</MenuItem>

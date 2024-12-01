@@ -71,6 +71,7 @@ import AllStudentsWeeklyTestResults from './components/weeklyTest/AllStudentsWee
 import WeeklyTestPerformanceForAdmin from './components/weeklyTest/weeklyTestStudentAnswerSubmission/WeeklyTestPerformanceForAdmin';
 import ChromeOnlyMessage from './components/ChromeOnlyMessage';
 import TestNotActiveYet from './components/TestNotActiveYet';
+import RecruiterDashboard from './components/recruiter/RecruiterDashboard';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -97,6 +98,7 @@ const App = () => {
             <Route path="/adminDashboard" element={<AdminDashboard />} />
             <Route path="/trainerDashboard" element={<TrainerDashboard />} />
             <Route path="/placementOfficerDashboard" element={<PlacementOfficerDashboard />} />
+            <Route path="/recruiterDashboard" element={<RecruiterDashboard />} />
             <Route path="/passwodResetForm" element={<PasswordResetForm />} />
             <Route path="/resetPassword" element={<ResetPassword />} />
             <Route path='/createNewBatch' element={<CreateNewBatch />} />

@@ -13,6 +13,7 @@ const Topic = db.Topic;
 const PlacementTestResult = db.PlacementTestResult;
 const CumulativeQuestion = db.CumulativeQuestion;
 const CumulativeQuestionPlacementTest = db.CumulativeQuestionPlacementTest;
+const WhatsAppChannelLinks = db.WhatsAppChannelLinks;
 const OptionsTable = db.Option;
 const { baseURL } = require('./baseURLConfig')
 
@@ -76,19 +77,107 @@ const jwtSecret = process.env.JWT_SECRET;
 //     }
 // };
 
+// const createPlacementTestLink = async (req, res) => {
+//     try {
+//         const { number_of_questions, description, start_time, end_time, show_result, topic_ids,is_Monitored } = req.body;
+
+//         if (!number_of_questions || !start_time || !end_time || !Array.isArray(topic_ids) || topic_ids.length === 0) {
+//             return res.status(400).send({ message: 'Required fields are missing or invalid' });
+//         }
+
+//         // Validate that all provided topic_ids exist in the topics table
+//         const topics = await Topic.findAll({
+//             where: {
+//                 topic_id: topic_ids
+//             }
+//         });
+
+//         if (topics.length !== topic_ids.length) {
+//             return res.status(400).send({ message: 'One or more topic IDs are invalid' });
+//         }
+
+//         // Create a new PlacementTest
+//         const newTest = await PlacementTest.create({
+//             test_link: '', // Initially empty, will be updated later
+//             number_of_questions,
+//             description,
+//             start_time, // Store as string
+//             end_time, // Store as string
+//             show_result: show_result !== undefined ? show_result : true ,// Default to true if not provided
+//             is_Monitored: is_Monitored !== undefined ? is_Monitored : false // Default to false if not provided
+//         });
+
+//         // Generate the test link with the placement_test_id
+//         const test_link = `${baseURL}/test/${newTest.placement_test_id}`;
+//         newTest.test_link = test_link;
+//         await newTest.save();
+
+//         // Save the topic IDs in the PlacementTestTopic table
+//         const topicPromises = topic_ids.map(topic_id =>
+//             PlacementTestTopic.create({
+//                 placement_test_id: newTest.placement_test_id,
+//                 topic_id
+//             })
+//         );
+
+//         await Promise.all(topicPromises);
+
+//         // Distribute questions among the selected topics
+//         const questionsPerTopic = Math.floor(number_of_questions / topic_ids.length);
+//         const remainderQuestions = number_of_questions % topic_ids.length;
+
+//         for (let i = 0; i < topic_ids.length; i++) {
+//             const topicId = topic_ids[i];
+//             let questionsToFetch = questionsPerTopic;
+
+//             if (i < remainderQuestions) {
+//                 questionsToFetch += 1;
+//             }
+
+//             // Fetch and associate questions with the test
+//             const questions = await CumulativeQuestion.findAll({
+//                 where: {
+//                     topic_id: topicId,
+//                     test_id: null // Only fetch questions not yet associated with any test
+//                 },
+//                 limit: questionsToFetch,
+//                 order: db.sequelize.random()
+//             });
+
+//             for (const question of questions) {
+//                 await question.update({ test_id: newTest.placement_test_id });
+//             }
+//         }
+//         console.log("newly created test ", newTest)
+//         return res.status(200).send({ message: 'Placement test added successfully', newTest });
+//     } catch (error) {
+//         console.error('Error creating placement test link:', error.stack);
+//         return res.status(500).send({ message: error.message });
+//     }
+// };
+
 const createPlacementTestLink = async (req, res) => {
     try {
-        const { number_of_questions, description, start_time, end_time, show_result, topic_ids,is_Monitored } = req.body;
+        const {
+            number_of_questions,
+            description,
+            start_time,
+            end_time,
+            show_result,
+            topic_ids,
+            is_Monitored,
+            channel_link,
+            test_title,
+            certificate_name,
+        } = req.body;
 
         if (!number_of_questions || !start_time || !end_time || !Array.isArray(topic_ids) || topic_ids.length === 0) {
             return res.status(400).send({ message: 'Required fields are missing or invalid' });
         }
-
+        console.log("WhatsApp channel link :: ", channel_link)
         // Validate that all provided topic_ids exist in the topics table
         const topics = await Topic.findAll({
-            where: {
-                topic_id: topic_ids
-            }
+            where: { topic_id: topic_ids },
         });
 
         if (topics.length !== topic_ids.length) {
@@ -100,11 +189,15 @@ const createPlacementTestLink = async (req, res) => {
             test_link: '', // Initially empty, will be updated later
             number_of_questions,
             description,
+            test_title,
+            certificate_name,
+            whatsAppChannelLink: channel_link || null, // Save the link directly in the table
             start_time, // Store as string
             end_time, // Store as string
-            show_result: show_result !== undefined ? show_result : true ,// Default to true if not provided
-            is_Monitored: is_Monitored !== undefined ? is_Monitored : false // Default to false if not provided
-        });
+            show_result: show_result !== undefined ? show_result : true, // Default to true if not provided
+            is_Monitored: is_Monitored !== undefined ? is_Monitored : false, // Default to false if not provided
+        }); 
+        
 
         // Generate the test link with the placement_test_id
         const test_link = `${baseURL}/test/${newTest.placement_test_id}`;
@@ -115,7 +208,7 @@ const createPlacementTestLink = async (req, res) => {
         const topicPromises = topic_ids.map(topic_id =>
             PlacementTestTopic.create({
                 placement_test_id: newTest.placement_test_id,
-                topic_id
+                topic_id,
             })
         );
 
@@ -137,23 +230,141 @@ const createPlacementTestLink = async (req, res) => {
             const questions = await CumulativeQuestion.findAll({
                 where: {
                     topic_id: topicId,
-                    test_id: null // Only fetch questions not yet associated with any test
+                    test_id: null, // Only fetch questions not yet associated with any test
                 },
                 limit: questionsToFetch,
-                order: db.sequelize.random()
+                order: db.sequelize.random(),
             });
 
             for (const question of questions) {
                 await question.update({ test_id: newTest.placement_test_id });
             }
         }
-        console.log("newly created test ", newTest)
+
         return res.status(200).send({ message: 'Placement test added successfully', newTest });
     } catch (error) {
         console.error('Error creating placement test link:', error.stack);
+        console.log("Error while creating the placement test link :", error)
         return res.status(500).send({ message: error.message });
     }
 };
+
+const saveWhatsAppChannelLink = async (req, res) => {
+    try {
+        const { channel_name, link } = req.body;
+
+        if (!channel_name || !link) {
+            return res.status(400).send({ message: 'Channel name and link are required' });
+        }
+
+        // Check if the link already exists
+        const existingChannel = await WhatsAppChannelLinks.findOne({ where: { link } });
+
+        if (existingChannel) {
+            return res.status(400).send({ message: 'Channel link already exists', channel: existingChannel });
+        }
+
+        // Create the WhatsApp channel link
+        const newChannel = await WhatsAppChannelLinks.create({ channel_name, link });
+
+        return res.status(201).send({ message: 'WhatsApp channel link saved successfully', channel: newChannel });
+    } catch (error) {
+        console.error('Error saving WhatsApp channel link:', error.stack);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+
+const fetchWhatsAppChannelLinks = async (req, res) => {
+    try {
+        // Fetch all WhatsApp channel links
+        const channels = await WhatsAppChannelLinks.findAll();
+
+        if (!channels.length) {
+            return res.status(404).send({ message: 'No WhatsApp channel links found' });
+        }
+
+        return res.status(200).send({ message: 'WhatsApp channel links fetched successfully', channels });
+    } catch (error) {
+        console.error('Error fetching WhatsApp channel links:', error.stack);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+const fetchWhatsAppChannelLinkById = async (req, res) => {
+    try {
+        const { channel_id } = req.params;
+
+        if (!channel_id) {
+            return res.status(400).send({ message: 'Channel ID is required' });
+        }
+
+        // Fetch the WhatsApp channel link by channel_id
+        const channel = await WhatsAppChannelLinks.findByPk(channel_id);
+
+        if (!channel) {
+            return res.status(404).send({ message: 'WhatsApp channel link not found' });
+        }
+
+        return res.status(200).send({ message: 'WhatsApp channel link fetched successfully', channel });
+    } catch (error) {
+        console.error('Error fetching WhatsApp channel link:', error.stack);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+
+const updateWhatsAppChannelLink = async (req, res) => {
+    try {
+        const { id } = req.params; // Assuming the ID of the channel is passed as a route parameter
+        const { channel_name, link } = req.body;
+
+        if (!id || (!channel_name && !link)) {
+            return res.status(400).send({ message: 'Channel ID, and at least one of channel name or link, are required' });
+        }
+
+        // Find the WhatsApp channel link by ID
+        const channel = await WhatsAppChannelLinks.findByPk(id);
+
+        if (!channel) {
+            return res.status(404).send({ message: 'WhatsApp channel link not found' });
+        }
+
+        // Update the channel with provided data
+        const updatedChannel = await channel.update({ channel_name, link });
+
+        return res.status(200).send({ message: 'WhatsApp channel link updated successfully', channel: updatedChannel });
+    } catch (error) {
+        console.error('Error updating WhatsApp channel link:', error.stack);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+const deleteWhatsAppChannelLink = async (req, res) => {
+    try {
+        const { id } = req.params; // Assuming the ID of the channel is passed as a route parameter
+
+        if (!id) {
+            return res.status(400).send({ message: 'Channel ID is required' });
+        }
+        const channel_id = id 
+        // Find the WhatsApp channel link by ID
+        const channel = await WhatsAppChannelLinks.findByPk(channel_id);
+
+        if (!channel) {
+            return res.status(404).send({ message: 'WhatsApp channel link not found' });
+        }
+
+        // Delete the channel
+        await channel.destroy();
+
+        return res.status(200).send({ message: 'WhatsApp channel link deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting WhatsApp channel link:', error.stack);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
 
 
 // Function to decrypt the encrypted test ID
@@ -213,7 +424,7 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
 
         // Fetch number_of_questions from PlacementTest table
         const placementTest = await PlacementTest.findByPk(encrypted_test_id, {
-            attributes: ['number_of_questions', 'show_result','is_Monitored'] // Only fetch number_of_questions
+            attributes: ['number_of_questions', 'show_result','is_Monitored','whatsAppChannelLink','test_title','certificate_name'] // Only fetch number_of_questions
         });
 
         if (!placementTest) {
@@ -227,7 +438,10 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
             topic_ids,
             number_of_questions: placementTest.number_of_questions,
             show_result: placementTest.show_result,
-            is_Monitored:placementTest.is_Monitored
+            is_Monitored:placementTest.is_Monitored,
+            whatsAppChannelLink:placementTest.whatsAppChannelLink,
+            test_title:placementTest.test_title,
+            certificate_name:placementTest.certificate_name
             // start_time: PlacementTest.start_time,
             // end_time: PlacementTest.end_time
         });
@@ -775,8 +989,6 @@ const getAllResultsByTestId = async (req, res) => {
 //     }
 // };
 
-
-
 const disableLink = async (req, res) => {
     try {
         const { test_id, is_Active } = req.body;
@@ -840,8 +1052,7 @@ const updateIsMonitored = async (req, res) => {
         res.status(500).send({ message: 'An error occurred while updating the monitoring status' });
     }
 };
-
-    
+ 
 
 const assignQuestionsToPlacementTest = async (req, res) => {
     const { placement_test_id, question_ids } = req.body;
@@ -1340,6 +1551,11 @@ const uploadAndAssignQuestionsByExcelTopics = async (filePath, link_topic_ids, n
 module.exports = {
     createPlacementTestLink,
     savePlacementTestStudent,
+    saveWhatsAppChannelLink,
+    updateWhatsAppChannelLink,
+    fetchWhatsAppChannelLinks,
+    fetchWhatsAppChannelLinkById,
+    deleteWhatsAppChannelLink,
     getPlacementTestById,
     getAllPlacementTests,
     fetchTestTopicIdsAndQnNums,

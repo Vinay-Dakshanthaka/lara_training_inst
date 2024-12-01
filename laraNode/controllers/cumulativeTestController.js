@@ -21,7 +21,7 @@ const saveSubject = async (req, res) => {
         const userRole = user.role;
 
         // Check if the user role is authorized
-        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER' && userRole !== 'RECRUITER') {
             return res.status(403).json({ error: 'Access forbidden' });
         }
 
@@ -55,7 +55,7 @@ const updateSubject = async (req, res) => {
         const userRole = user.role; // Get the user's role
 
         // Check if the user role is either "ADMIN" or "SUPER ADMIN" or "TRAINER"
-        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER' && userRole !== 'RECRUITER') {
             return res.status(403).json({ error: 'Access forbidden' });
         }
 
@@ -135,7 +135,7 @@ const saveTopic = async (req, res) => {
         const userRole = user.role;
 
         // Check if the user role is either "ADMIN", "SUPER ADMIN", or "TRAINER"
-        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER' && userRole !== 'RECRUITER') {
             return res.status(403).json({ error: 'Access forbidden' });
         }
 
@@ -177,7 +177,7 @@ const updateTopic = async (req, res) => {
         console.log("role :" + userRole);
 
         // Check if the user role is either "ADMIN", "SUPER ADMIN", or "TRAINER"
-        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
+        if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER' && userRole !== 'RECRUITER') {
             return res.status(403).json({ error: 'Access forbidden' });
         }
 
@@ -230,7 +230,7 @@ const deleteTopic = async (req, res)=>{
          const userRole = user.role; // Get the user's role
          console.log("role :"+userRole)
          // Check if the user role is either "ADMIN" or "SUPER ADMIN"
-         if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
+         if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER' && userRole !== 'RECRUITER') {
              return res.status(403).json({ error: 'Access forbidden' });
          }
 

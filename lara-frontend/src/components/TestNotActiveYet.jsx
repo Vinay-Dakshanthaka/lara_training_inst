@@ -9,7 +9,7 @@ const TestNotActiveYet = () => {
             <div className="row justify-content-center">
                 <div className="col-md-8">
                     <h1 className="not-found-display-1 text-danger">Test wil be available at the scheduled time</h1>
-                    <h2 className="mb-4">The Test is Not Active yet</h2>
+                    <h2 className="mb-4"></h2>
                     
                 </div>
             </div>

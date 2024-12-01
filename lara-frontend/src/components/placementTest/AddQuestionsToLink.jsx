@@ -15,7 +15,7 @@ const AddQuestionsToLink = () => {
     const [selectedQuestions, setSelectedQuestions] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [placementTestDetails, setPlacementTestDetails] = useState()
+    const [placementTestDetails, setPlacementTestDetails] = useState();
     const { test_id } = useParams();
 
     const fetchPlacementTestDetails = async () => {
@@ -24,9 +24,7 @@ const AddQuestionsToLink = () => {
                 `${baseURL}/api/placement-test/getPlacementTestById`,
                 { placement_test_id: test_id },
             );
-            // console.log("data ",response.data)
             setPlacementTestDetails(response.data);
-            // console.log('placement test link ', placementTestDetails.test_link)
         } catch (error) {
             if (error.response && error.response.status === 404) {
                 toast.info('No Test details found')
@@ -151,6 +149,20 @@ const AddQuestionsToLink = () => {
         setCurrentPage(pageNumber);
     };
 
+    const handleSelectAll = () => {
+        setSelectedQuestions(questions.map(question => question.cumulative_question_id));
+    };
+
+    const handleSelectRandomQuestions = () => {
+        const randomQuestions = [...questions];
+        if (randomQuestions.length > 45) {
+            const shuffled = randomQuestions.sort(() => 0.5 - Math.random());
+            setSelectedQuestions(shuffled.slice(0, 45).map(question => question.cumulative_question_id));
+        } else {
+            setSelectedQuestions(randomQuestions.map(question => question.cumulative_question_id));
+        }
+    };
+
     const paginatedQuestions = questions.slice(
         (currentPage - 1) * ITEMS_PER_PAGE,
         currentPage * ITEMS_PER_PAGE
@@ -158,7 +170,10 @@ const AddQuestionsToLink = () => {
 
     const renderPagination = () => {
         let items = [];
-        for (let number = 1; number <= totalPages; number++) {
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        for (let number = startPage; number <= endPage; number++) {
             items.push(
                 <Pagination.Item
                     key={number}
@@ -169,6 +184,7 @@ const AddQuestionsToLink = () => {
                 </Pagination.Item>
             );
         }
+
         return items;
     };
 
@@ -193,6 +209,8 @@ const AddQuestionsToLink = () => {
                         <h5>Subject: {topics.length > 0 ? topics[0].subject_name : "N/A"}</h5>
                     </Col>
 
+
+
                     <Col md={6} className="mb-3">
                         <Form.Group controlId="topicSelect">
                             <Form.Label>Select Topic</Form.Label>
@@ -215,6 +233,38 @@ const AddQuestionsToLink = () => {
                 </Row>
 
                 <Row>
+                    <Col><Button
+                        variant="primary"
+                        onClick={handleSelectAll}
+                        className="mr-2"
+                    >
+                        Select All
+                    </Button></Col>
+                    <Col>
+                        <Button
+                            variant="secondary"
+                            onClick={handleSelectRandomQuestions}
+                            className="mr-2"
+                        >
+                            Select Random 45 Questions
+                        </Button>
+                    </Col>
+                    <Col>
+                        <Button
+                            variant="primary"
+                            onClick={handleAddQuestions}
+                            disabled={selectedQuestions.length === 0}
+                        >
+                            Add the selected Questions
+                        </Button>
+                    </Col>
+
+
+
+
+                </Row>
+
+                <Row>
                     <Col>
                         <h4>Available Questions:</h4>
                         {questions.length === 0 ? (
@@ -234,16 +284,12 @@ const AddQuestionsToLink = () => {
                                         </li>
                                     ))}
                                 </ul>
-                                <Pagination>{renderPagination()}</Pagination>
+                                <div className="d-flex justify-content-center my-4">
+                                    <Pagination>{renderPagination()}</Pagination>
+                                </div>
                             </>
                         )}
-                        <Button
-                            variant="primary"
-                            onClick={handleAddQuestions}
-                            disabled={selectedQuestions.length === 0}
-                        >
-                            Add the selected Questions
-                        </Button>
+
                     </Col>
                 </Row>
             </Container>

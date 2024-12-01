@@ -564,10 +564,12 @@ import "jspdf-autotable";
 import logoUrl from "./laralogo.png";
 import qrCodeUrl from "./qr_code_whatsApp.png"
 import { WhatsApp } from '@mui/icons-material';
+import QRCodeDisplay from './QRCodeDisplay';
 
 
 const PlacementTest = () => {
     const [loading, setLoading] = useState(true);
+    const [testDetails, setTestDetails] = useState()
     const [questions, setQuestions] = useState([]);
     const [answers, setAnswers] = useState({});
     const [totalMarks, setTotalMarks] = useState(0);
@@ -593,12 +595,15 @@ const PlacementTest = () => {
     const navigate = useNavigate();
     const [isCameraOn, setIsCameraOn] = useState(true);
     const [isMonitored, setIsMonitored] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState(null);
 
     let marksForCertificate;
 
     const showAlert = () => {
         alert("Allow camera and microphone access inorder to attend the test")
     }
+
+    //code to prevent open new tab and opening the context menu 
 
     useEffect(() => {
         const handleVisibilityChange = async () => {
@@ -680,7 +685,7 @@ const PlacementTest = () => {
             cleanupListeners();
         };
     }, []);
-
+// code to prevent open new tab and opening the context menu ends 
 
     useEffect(() => {
         const fetchTestDetails = async () => {
@@ -688,20 +693,21 @@ const PlacementTest = () => {
                 const response1 = await axios.post(`${baseURL}/api/placement-test/fetchTestTopicIdsAndQnNums`, {
                     encrypted_test_id: test_id,
                 });
-    
-                const { topic_ids, number_of_questions, show_result, is_Monitored } = response1.data;
-    
+                console.log("Fetch test details ", response1.data)
+                setTestDetails(response1.data)
+                const { topic_ids, number_of_questions, show_result, is_Monitored, whatsAppChannelLink, test_title, certificate_name } = response1.data;
+
                 setShowResult(show_result);
                 setIsMonitored(is_Monitored);
-    
+
                 if (!show_result) {
                     setShowSummary(false);
                 }
-    
+
                 const response2 = await axios.post(`${baseURL}/api/cumulative-test/fetchQuestionsByTestId`, {
                     placement_test_id: test_id,
                 });
-    
+
                 const questionsWithOptions = response2.data.map((question) => ({
                     ...question,
                     options: question.QuestionOptions.map((opt) => ({
@@ -710,27 +716,27 @@ const PlacementTest = () => {
                     })),
                     correct_answers: question.CorrectAnswers.map((ans) => ans.answer_description),
                 }));
-    
+
                 // Shuffle questions
                 const shuffledQuestions = shuffleArray(questionsWithOptions);
-    
+
                 setQuestions(shuffledQuestions);
-    
+
                 const totalMarks = shuffledQuestions.reduce(
                     (sum, question) => sum + question.no_of_marks_allocated,
                     0
                 );
                 setTotalMarks(totalMarks);
-    
+
                 // Set the timer based on the number of questions
                 const initialTime = number_of_questions * 60; // 1 minute per question
                 setRemainingTime(initialTime);
-    
+
                 setLoading(false);
             } catch (error) {
                 if (error.response) {
                     if (error.response.status === 403) {
-                        navigate('/not-found');
+                        navigate('/test-not-active');
                     } else if (error.response.status === 404) {
                         navigate('/not-found');
                     }
@@ -740,9 +746,9 @@ const PlacementTest = () => {
                 }
             }
         };
-    
+
         fetchTestDetails();
-    
+
         return () => {
             // Clean up the timer when the component unmounts
             if (timerRef.current) {
@@ -750,7 +756,7 @@ const PlacementTest = () => {
             }
         };
     }, [test_id]);
-    
+
     // Utility function to shuffle the array
     const shuffleArray = (array) => {
         const shuffled = [...array]; // Create a copy to avoid mutating the original array
@@ -760,7 +766,7 @@ const PlacementTest = () => {
         }
         return shuffled;
     };
-    
+
 
     useEffect(() => {
         if (autoSubmit) {
@@ -876,17 +882,17 @@ const PlacementTest = () => {
 
     const sendPdfToEmail = async (pdfBlob) => {
         const { name, email } = formData;
-    
+
         if (!name || !email) {
             alert("Name and email are required.");
             return;
         }
-    
+
         const formPayload = new FormData();
         formPayload.append("pdf", pdfBlob, `${name}_Certificate.pdf`);
         formPayload.append("email", email);
         formPayload.append("name", name);
-    
+
         try {
             const response = await axios.post(
                 `${baseURL}/api/placement-test/send-certificate-to-email`,
@@ -895,7 +901,7 @@ const PlacementTest = () => {
                     headers: { "Content-Type": "multipart/form-data" },
                 }
             );
-    
+
             if (response.status === 200) {
                 toast.success("The certificate has been sent to your registered email")
             }
@@ -905,9 +911,9 @@ const PlacementTest = () => {
             toast.warning("Sorry!! We are Unable to send the certificate to you email!")
         }
     };
-    
-    
-      
+
+
+
 
     const generateCertificate = () => {
         const doc = new jsPDF("landscape"); // Set landscape layout
@@ -971,13 +977,30 @@ const PlacementTest = () => {
                 doc.setFontSize(28);
                 doc.setTextColor(255); // White text for certificate title
                 doc.text(
-                    "CERTIFICATE OF COMPLETION",
+                    "CERTIFICATE OF RECOGNITION",
                     centerX,
                     60,
                     null,
                     null,
                     "center"
                 );
+
+                doc.setFont("times", "italic");
+                doc.setFontSize(18); // Slightly smaller font for additional line
+                doc.setTextColor(255); // White text
+
+                // Fallback to "Logical Reasoning" if certificate_name is not available
+                const certificateName = testDetails.certificate_name || "Logical Reasoning";
+
+                doc.text(
+                    `in ${certificateName}`,
+                    centerX,
+                    70, // Adjusted Y position to be below the title
+                    null,
+                    null,
+                    "center"
+                );
+
 
                 // Recipient Details
                 doc.setFont("times", "italic");
@@ -1024,7 +1047,7 @@ const PlacementTest = () => {
 
                 // Table Content
                 const tableStartY = 125; // Start position for the table
-                const columnSpacing = 100;
+                const columnSpacing = 70;
                 const rowSpacing = 8;
                 const tableData = [
                     { label: "Email:", value: formData.email },
@@ -1072,10 +1095,14 @@ const PlacementTest = () => {
                 doc.setTextColor(0, 0, 0); // Black text for message
                 doc.text("Join our whatsApp channel for more updates", qrCodeX + 0, qrCodeY + 45);
 
-                // Save Certificate
-                doc.save(`${formData.name}_Lara_Technologies_Certificate.pdf`);
+                // // Save Certificate
+                // doc.save(`${formData.name}_Lara_Technologies_Certificate.pdf`);
 
-                const pdfBlob = doc.output("blob"); // Generate PDF as a Blob
+                // const pdfBlob = doc.output("blob"); // Generate PDF as a Blob
+
+                const pdfBlob = doc.output("blob");
+                const pdfObjectUrl = URL.createObjectURL(pdfBlob);
+                setPdfUrl(pdfObjectUrl);
                 sendPdfToEmail(pdfBlob);
             })
             .catch((err) => {
@@ -1173,7 +1200,13 @@ const PlacementTest = () => {
             {/* Camera monitoring */}
             {isMonitored && <OnlineTestMonitoring isCameraOn={isMonitored} style={{ marginLeft: '80%', marginTop: '-8rem', position: 'fixed' }} />}
 
-            <h2>Test</h2>
+            <h2>{
+                testDetails ? (
+                    <>{testDetails.test_title}</>
+                ) : (
+                    <>Test</>
+                )
+            }</h2>
 
             {/* Total Marks and Timer */}
             <div className="d-flex justify-content-between">
@@ -1253,6 +1286,34 @@ const PlacementTest = () => {
                             </tbody>
                         </Table>
 
+                        <div className='text-center'>
+                            {/* <button onClick={generateCertificate} className="btn btn-primary">
+                Generate Certificate
+            </button> */}
+                            {pdfUrl && (
+                                <a href={pdfUrl} download={`${formData.name}_Lara_Technologies_Certificate.pdf`} className="btn btn-success mt-3">
+                                    Download Certificate
+                                </a>
+                            )}
+                        </div>
+
+                        <div className="container">
+                            {testDetails ? (
+                                <>
+                                    <p className='h4 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
+                                    <QRCodeDisplay link={testDetails.whatsAppChannelLink} />
+                                </>
+                            ) : (
+                                <>
+                                    <p className='h4 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
+                                    <img src={qrCodeUrl} alt="WhatsApp channel link" width={200} height={200} />
+                                </>
+                            )
+                            }
+                        </div>
+
+
+
                         {/* Detailed results for each question */}
                         <Table responsive bordered hover className="mt-4 ">
                             <thead>
@@ -1321,12 +1382,19 @@ const PlacementTest = () => {
                 <Modal.Body>
                     {!showForm ? (
                         <div className="container text-center">
-                            <img src={qrCodeUrl} alt="WhatsApp channel link" width={200} height={200} />
-                            <p>
-                                Scan and Join our <WhatsApp className="text-success" /> channel <br />
-                                Place Where we share our knowledge
-                            </p>
-                            <Button variant="primary" onClick={() => setShowForm(true)}>
+                            {testDetails ? (
+                                <>
+                                    <p className='h6 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
+                                    <QRCodeDisplay link={testDetails.whatsAppChannelLink} />
+                                </>
+                            ) : (
+                                <>
+                                    <p className='h6 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
+                                    <img src={qrCodeUrl} alt="WhatsApp channel link" width={200} height={200} />
+                                </>
+                            )
+                            }
+                            <Button variant="primary my-3" onClick={() => setShowForm(true)}>
                                 Next
                             </Button>
                         </div>
