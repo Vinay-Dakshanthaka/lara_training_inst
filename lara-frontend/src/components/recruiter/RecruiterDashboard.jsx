@@ -7,6 +7,7 @@ import CumulativeTest from '../cumulativeTest/CumulativeTest';
 import CreateTestLink from '../placementTest/CreateTestLink';
 import AllPlacementTests from '../placementTest/AllPlacementTests';
 import PlacementTestsByRecruiter from './PlacementTestsByRecruiter';
+import RecruiterCreateTestLink from './RecruiterCreateTestLink';
 
 const RecruiterDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');
@@ -35,7 +36,7 @@ const RecruiterDashboard = () => {
           <CumulativeTest />
         </Tab>
         <Tab eventKey="create-test-link" title="Create Test Link">
-          <CreateTestLink />
+          <RecruiterCreateTestLink />
         </Tab>
         <Tab eventKey="addQuestionsToTestLInk" title="Add Questions To Test Link">
           <PlacementTestsByRecruiter />

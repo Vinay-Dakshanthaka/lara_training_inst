@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { baseURL } from '../config';
 import 'react-toastify/dist/ReactToastify.css';
-import { Form, Button, Container, Row, Col, Modal } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Modal, Spinner } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
-import image from './excel-sheet-example.png'
+import image from './excel-sheet-example.png';
 import { Link } from 'react-router-dom';
 
 const UploadQuestions = () => {
@@ -14,6 +14,7 @@ const UploadQuestions = () => {
     const [selectedTopic, setSelectedTopic] = useState('');
     const [file, setFile] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
 
     useEffect(() => {
         const fetchSubjects = async () => {
@@ -105,6 +106,8 @@ const UploadQuestions = () => {
             return;
         }
 
+        setIsSubmitting(true); // Start submission process
+
         try {
             const token = localStorage.getItem("token");
             if (!token) {
@@ -130,6 +133,8 @@ const UploadQuestions = () => {
         } catch (error) {
             console.error('Error uploading questions:', error);
             toast.error("Something went wrong while uploading the questions.");
+        } finally {
+            setIsSubmitting(false); // End submission process
         }
     };
 
@@ -139,7 +144,6 @@ const UploadQuestions = () => {
     return (
         <Container>
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
-            {/* <Link to="/add-question">Add Questions Manually</Link> */}
             <Row>
                 <Col md={6}>
                     <Form onSubmit={handleUpload}>
@@ -166,16 +170,22 @@ const UploadQuestions = () => {
                                 ))}
                             </Form.Control>
                         </Form.Group>
+
                         <Button variant="info" className="mt-3" onClick={handleShowModal}>
                             Example Excel Sheet Format to Upload
                         </Button>
+
                         <Form.Group controlId="fileUpload">
                             <Form.Label>Upload Questions</Form.Label>
                             <Form.Control type="file" onChange={handleFileChange} required />
                         </Form.Group>
 
-                        <Button type="submit" className="mt-3" disabled={!selectedTopic}>
-                            Upload
+                        <Button type="submit" className="mt-3" disabled={isSubmitting || !selectedTopic}>
+                            {isSubmitting ? (
+                                <Spinner animation="border" size="sm" />
+                            ) : (
+                                'Upload'
+                            )}
                         </Button>
                     </Form>
                 </Col>

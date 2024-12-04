@@ -57,7 +57,7 @@ cumulativeTestRouter.post('/upload-questions',upload.single('file'),verifyToken,
      const userRole = user.role; // Get the user's role
      console.log("role :"+userRole)
      // Check if the user role is either "ADMIN" or "SUPER ADMIN"
-     if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER') {
+     if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN' && userRole !== 'TRAINER' && userRole !== 'RECRUITER') {
          return res.status(403).json({ error: 'Access forbidden' });
      }
     

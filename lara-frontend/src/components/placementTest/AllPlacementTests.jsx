@@ -257,10 +257,11 @@ import axios from 'axios';
 import { baseURL } from '../config';
 import { Link } from 'react-router-dom';
 import { BsCopy, BsPencil } from 'react-icons/bs';
-import { OverlayTrigger, Tooltip, Badge, Modal, Button, Form, Pagination, Table } from 'react-bootstrap';
+import { OverlayTrigger, Tooltip, Badge, Modal, Button, Form, Pagination, Table, Alert } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './allPlacementTest.css';
+import UpdatePlacementTestModal from './UpdatePlacementTestModal';
 
 const AllPlacementTests = () => {
     const [placementTests, setPlacementTests] = useState([]);
@@ -269,6 +270,26 @@ const AllPlacementTests = () => {
     const [showModal, setShowModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1); // Track the current page, starting from 1
     const [testsPerPage] = useState(10); // Number of tests to display per page
+
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
+    const [selectedTestId, setSelectedTestId] = useState(null);
+
+    const handleOpenModal = (testId) => {
+        setSelectedTestId(testId); // Set the selected test ID
+        setShowUpdateModal(true); // Open the modal
+    };
+
+    const handleCloseModal = () => {
+        setShowUpdateModal(false); // Close the modal
+        setSelectedTestId(null); // Reset the selected ID
+    };
+
+    const [alert, setAlert] = useState({
+        show: false,
+        message: '',
+        variant: '', // 'success' or 'danger'
+    });
+
 
     useEffect(() => {
         const fetchPlacementTests = async () => {
@@ -285,6 +306,7 @@ const AllPlacementTests = () => {
                 });
 
                 setPlacementTests(sortedTests);
+                console.log("placement test details : ", sortedTests)
             } catch (error) {
                 console.error('Error fetching placement tests:', error);
             }
@@ -309,23 +331,65 @@ const AllPlacementTests = () => {
     };
 
 
-    const activateLink = async (placement_test_id) => {
-        console.log(placement_test_id, "--------------------------placement_test_id");
+    // const activateLink = async (placement_test_id) => {
+    //     console.log(placement_test_id, "--------------------------placement_test_id");
+    //     try {
+    //         await axios.post(`${baseURL}/api/placement-test/disable-link`, {
+    //             test_id: placement_test_id,
+    //             is_Active: true
+    //         });
+    //         toast.success('Link activated successfully');
+    //         const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+    //         // console.log(response,"-------------------------------------------");
+    //         const sortedTests = response.data.placementTests.sort((a, b) => b.is_Active - a.is_Active);
+    //         setPlacementTests(sortedTests);
+    //     } catch (error) {
+    //         console.error('Error activating link:', error);
+    //         toast.error('Failed to activate link');
+    //     }
+    // };
+
+    const toggleLinkStatus = async (placement_test_id, currentStatus) => {
         try {
+            // Toggle is_Active status
+            const newStatus = !currentStatus;
+
             await axios.post(`${baseURL}/api/placement-test/disable-link`, {
                 test_id: placement_test_id,
-                is_Active: true
+                is_Active: newStatus,
             });
-            toast.success('Link activated successfully');
+
+            // toast.success(`Link ${newStatus ? 'activated' : 'deactivated'} successfully`);
+            setAlert({
+                show: true,
+                message: `Link ${newStatus ? 'activated' : 'deactivated'} successfully`,
+                variant: 'success',
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
             const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
-            // console.log(response,"-------------------------------------------");
-            const sortedTests = response.data.placementTests.sort((a, b) => b.is_Active - a.is_Active);
+            // console.log(response, "-----------------------------------responseof fecthpalcemnsttests");
+
+            // Sort first by is_Active (active tests first), then by placement_test_id in descending order
+            const sortedTests = response.data.placementTests.sort((a, b) => {
+                if (b.is_Active === a.is_Active) {
+                    return b.placement_test_id - a.placement_test_id; // If both have same active status, sort by test ID
+                }
+                return b.is_Active - a.is_Active; // Active tests will be sorted first
+            });
             setPlacementTests(sortedTests);
         } catch (error) {
-            console.error('Error activating link:', error);
-            toast.error('Failed to activate link');
+            console.error('Error toggling link status:', error);
+            // toast.error('Failed to update link status');
+            setAlert({
+                show: true,
+                message: 'Failed to update link status',
+                variant: 'danger',
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
+
 
     const handleEditClick = (test) => {
         console.log(test, "-------------------")
@@ -439,7 +503,12 @@ const AllPlacementTests = () => {
 
     return (
         <div className="container mt-5">
-            <ToastContainer />
+            <ToastContainer autoClose />
+            {alert.show && (
+                <Alert variant={alert.variant} onClose={() => setAlert({ show: false })} dismissible>
+                    {alert.message}
+                </Alert>
+            )}
             <h2>All Placement Tests</h2>
             <div className="table-responsive">
                 <Table className="table table-bordered">
@@ -461,13 +530,16 @@ const AllPlacementTests = () => {
                     <tbody>
                         {currentTests.map(test => (
                             <tr key={test.placement_test_id} className={test.is_Active ? 'table-success animate-to-top' : ''}>
-                                <td>{test.placement_test_id} {test.placement_test_id === Math.max(...placementTests.map(t => t.placement_test_id)) && <Badge bg="info">New</Badge>}</td>
+                                <td>
+                                    {test.placement_test_id}
+                                    {test.placement_test_id === Math.max(...placementTests.map(t => t.placement_test_id)) && <Badge bg="info">New</Badge>}
+                                </td>
                                 <td className="test-link-cell">
                                     <OverlayTrigger
                                         placement="top"
                                         overlay={<Tooltip id={`tooltip-${test.placement_test_id}`}>{test.test_link}</Tooltip>}
                                     >
-                                        <p className="test-link-text" style={{ width: 'fit-content', textWrap: 'wrap' }}>{test.test_link}&nbsp;</p>
+                                        <p className="test-link-text" style={{ width: 'fit-content', textWrap: 'wrap' }}>{test.test_title}&nbsp;</p>
                                     </OverlayTrigger>
                                     {test.is_Active && (
                                         <button
@@ -490,6 +562,14 @@ const AllPlacementTests = () => {
                                         checked={test.is_Monitored}
                                         onChange={() => handleMonitoredChange(test)}
                                     />
+                                </td>
+                                <td>
+                                    <button
+                                        onClick={() => handleOpenModal(test.placement_test_id)}
+                                        className="btn btn-primary"
+                                    >
+                                        Update details
+                                    </button>
                                 </td>
                                 <td>
                                     <Link to={`/get-result/${test.placement_test_id}`}>
@@ -517,20 +597,24 @@ const AllPlacementTests = () => {
                                     </Link>
                                 </td>
                                 <td>
-                                    {!test.is_Active && (
-                                        <button
-                                            className="btn btn-primary"
-                                            onClick={() => activateLink(test.placement_test_id)}
-                                        >
-                                            Activate
-                                        </button>
-                                    )}
+                                    <button
+                                        className={`btn ${test.is_Active ? 'btn-success' : 'btn-danger'}`}
+                                        onClick={() => toggleLinkStatus(test.placement_test_id, test.is_Active)}
+                                    >
+                                        {test.is_Active ? 'Deactivate' : 'Activate'}
+                                    </button>
                                 </td>
                             </tr>
+
                         ))}
                     </tbody>
                 </Table>
             </div>
+            <UpdatePlacementTestModal
+                placement_test_id={selectedTestId}
+                show={showUpdateModal}
+                handleClose={handleCloseModal}
+            />
 
             {/* Bootstrap Pagination */}
             <Pagination className="justify-content-center" style={{ overflowX: 'auto' }}>

@@ -18,6 +18,8 @@ const UpdatePlacementTestModal = ({ placement_test_id, show, handleClose }) => {
         certificate_name: "",
     });
 
+    console.log("Received placment test id in update modal : ", placement_test_id)
+
     const [topics, setTopics] = useState([]);
 
     // Fetch existing test details when modal is shown

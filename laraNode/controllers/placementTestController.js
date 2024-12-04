@@ -4,7 +4,7 @@ const multer = require('multer');
 const fs = require('fs');
 
 
-const {Op} = require('sequelize');
+const { Op, where } = require('sequelize');
 const Student = db.Student;
 const PlacementTest = db.PlacementTest;
 const PlacementTestTopic = db.PlacementTestTopic;
@@ -16,7 +16,8 @@ const CumulativeQuestionPlacementTest = db.CumulativeQuestionPlacementTest;
 const WhatsAppChannelLinks = db.WhatsAppChannelLinks;
 const OptionsTable = db.Option;
 const { baseURL } = require('./baseURLConfig');
-const PlacementTestCreator = db.PlacementTestCreator
+const PlacementTestCreator = db.PlacementTestCreator;
+const StudentWhatsAppLinks = db.StudentWhatsAppLinks;
 
 
 const jwtSecret = process.env.JWT_SECRET;
@@ -200,7 +201,7 @@ const jwtSecret = process.env.JWT_SECRET;
 //             show_result: show_result !== undefined ? show_result : true, // Default to true if not provided
 //             is_Monitored: is_Monitored !== undefined ? is_Monitored : false, // Default to false if not provided
 //         }); 
-        
+
 
 //         // Generate the test link with the placement_test_id
 //         const test_link = `${baseURL}/test/${newTest.placement_test_id}`;
@@ -437,28 +438,251 @@ const getPlacementTestDetailsById = async (req, res) => {
 
 
 
+// const saveWhatsAppChannelLink = async (req, res) => {
+//     try {
+//         const { channel_name, link } = req.body;
+
+//         if (!channel_name || !link) {
+//             return res.status(400).send({ message: 'Channel name and link are required' });
+//         }
+
+//         // Check if the link already exists
+//         const existingChannel = await WhatsAppChannelLinks.findOne({ where: { link } });
+
+//         if (existingChannel) {
+//             return res.status(400).send({ message: 'Channel link already exists', channel: existingChannel });
+//         }
+
+//         // Create the WhatsApp channel link
+//         const newChannel = await WhatsAppChannelLinks.create({ channel_name, link });
+
+//         return res.status(201).send({ message: 'WhatsApp channel link saved successfully', channel: newChannel });
+//     } catch (error) {
+//         console.error('Error saving WhatsApp channel link:', error.stack);
+//         return res.status(500).send({ message: error.message });
+//     }
+// };
+
 const saveWhatsAppChannelLink = async (req, res) => {
     try {
-        const { channel_name, link } = req.body;
+        const { channel_name, link, student_ids } = req.body; // `student_ids` is an array of student IDs
 
+        // Validate input
         if (!channel_name || !link) {
             return res.status(400).send({ message: 'Channel name and link are required' });
         }
 
-        // Check if the link already exists
-        const existingChannel = await WhatsAppChannelLinks.findOne({ where: { link } });
+        // Check if the WhatsApp channel link already exists
+        let channel = await WhatsAppChannelLinks.findOne({ where: { link } });
 
-        if (existingChannel) {
-            return res.status(400).send({ message: 'Channel link already exists', channel: existingChannel });
+        if (!channel) {
+            // Create the WhatsApp channel link if it doesn't exist
+            channel = await WhatsAppChannelLinks.create({ channel_name, link });
+        } else {
+            // If it exists, ensure the channel name matches
+            if (channel.channel_name !== channel_name) {
+                return res.status(400).send({
+                    message: 'Channel link already exists with a different name',
+                    existingChannel: channel,
+                });
+            }
         }
 
-        // Create the WhatsApp channel link
-        const newChannel = await WhatsAppChannelLinks.create({ channel_name, link });
+        // If student IDs are provided, assign the channel to the students
+        if (student_ids && Array.isArray(student_ids) && student_ids.length > 0) {
+            // Validate each student and create associations
+            const failedAssignments = [];
+            for (const student_id of student_ids) {
+                const student = await Student.findByPk(student_id);
 
-        return res.status(201).send({ message: 'WhatsApp channel link saved successfully', channel: newChannel });
+                if (!student) {
+                    failedAssignments.push({ student_id, error: 'Student not found' });
+                    continue;
+                }
+
+                if (student.role !== 'RECRUITER') {
+                    failedAssignments.push({ student_id, error: 'Not a Recruiter' });
+                    continue;
+                }
+
+                // Check if the association already exists in the junction table
+                const existingAssociation = await StudentWhatsAppLinks.findOne({
+                    where: {
+                        student_id,
+                        channel_id: channel.channel_id,
+                    },
+                });
+
+                if (!existingAssociation) {
+                    // Create the association in the junction table
+                    await StudentWhatsAppLinks.create({
+                        student_id,
+                        channel_id: channel.channel_id,
+                    });
+                }
+            }
+
+            // If some assignments failed, include them in the response
+            if (failedAssignments.length > 0) {
+                return res.status(207).send({
+                    message: 'WhatsApp channel link created, but some associations failed',
+                    channel,
+                    failedAssignments,
+                });
+            }
+        }
+
+        return res.status(201).send({
+            message: 'WhatsApp channel link saved successfully',
+            channel,
+        });
     } catch (error) {
         console.error('Error saving WhatsApp channel link:', error.stack);
-        return res.status(500).send({ message: error.message });
+        return res.status(500).send({ message: 'Internal server error', error: error.message });
+    }
+};
+
+const assignWhatsAppChannelToStudent = async (req, res) => {
+    try {
+        const { student_id, channel_id } = req.body;
+
+        // Validate input
+        if (!student_id || !channel_id) {
+            return res.status(400).send({ message: 'Student ID and Channel ID are required' });
+        }
+
+        // Check if the student exists
+        const student = await Student.findByPk(student_id);
+        if (!student) {
+            return res.status(404).send({ message: 'Student not found' });
+        }
+
+        // Ensure the student has the 'RECRUITER' role
+        if (student.role !== 'RECRUITER') {
+            return res.status(400).send({ message: 'Only recruiters can be assigned to a channel' });
+        }
+
+        // Check if the channel exists
+        const channel = await WhatsAppChannelLinks.findByPk(channel_id);
+        if (!channel) {
+            return res.status(404).send({ message: 'WhatsApp channel not found' });
+        }
+
+        // Check if the association already exists
+        const existingAssociation = await StudentWhatsAppLinks.findOne({
+            where: { student_id, channel_id },
+        });
+
+        if (existingAssociation) {
+            return res.status(409).send({ message: 'This student is already assigned to this channel' });
+        }
+
+        // Create the association in the junction table
+        const association = await StudentWhatsAppLinks.create({ student_id, channel_id });
+
+        return res.status(201).send({
+            message: 'Student successfully assigned to WhatsApp channel',
+            association,
+        });
+    } catch (error) {
+        console.error('Error assigning WhatsApp channel to student:', error.stack);
+        return res.status(500).send({ message: 'Internal server error', error: error.message });
+    }
+};
+
+
+const getAllWhatsAppChannelLinks = async (req, res) => {
+    try {
+        // Fetch all WhatsAppChannelLinks with associated Student details
+        const channels = await WhatsAppChannelLinks.findAll({
+            include: {
+                model: Student,
+                attributes: ['id', 'name', 'email', 'phoneNumber', 'role'], // Select specific student attributes
+                through: {
+                    attributes: [] // Exclude attributes from the junction table
+                }
+            }
+        });
+
+        // Check if any channels exist
+        if (!channels.length) {
+            return res.status(404).send({ message: 'No WhatsApp channel links found' });
+        }
+
+        return res.status(200).send({
+            message: 'WhatsApp channel links retrieved successfully',
+            channels
+        });
+    } catch (error) {
+        console.error('Error fetching WhatsApp channel links:', error.stack);
+        return res.status(500).send({ message: 'Internal server error', error: error.message });
+    }
+};
+
+const getAllStudentsWithWhatsAppChannelLinks = async (req, res) => {
+    try {
+        // Fetch all Students with associated WhatsAppChannelLinks
+        const students = await Student.findAll({
+            where: {
+                role: 'RECRUITER'
+            },
+            include: {
+                model: WhatsAppChannelLinks,
+                attributes: ['channel_id', 'channel_name', 'link'], // Select specific channel attributes
+                through: {
+                    attributes: [] // Exclude attributes from the junction table
+                }
+            },
+            attributes: ['id', 'name', 'email', 'phoneNumber', 'role'], // Select specific student attributes
+        });
+
+        // Check if any students exist
+        if (!students.length) {
+            return res.status(404).send({ message: 'No students found with associated WhatsApp channel links' });
+        }
+
+        return res.status(200).send({
+            message: 'Students with WhatsApp channel links retrieved successfully',
+            students,
+        });
+    } catch (error) {
+        console.error('Error fetching students with WhatsApp channel links:', error.stack);
+        return res.status(500).send({ message: 'Internal server error', error: error.message });
+    }
+};
+
+const getStudentWithWhatsAppChannelLinks = async (req, res) => {
+    try {
+        const studentId = req.studentId;
+
+        // Fetch the Student with associated WhatsAppChannelLinks
+        const student = await Student.findOne({
+            where: {
+                id: studentId,
+                role: 'RECRUITER', // Ensure the student is a recruiter
+            },
+            include: {
+                model: WhatsAppChannelLinks,
+                attributes: ['channel_id', 'channel_name', 'link'], // Select specific channel attributes
+                through: {
+                    attributes: [] // Exclude attributes from the junction table
+                }
+            },
+            attributes: ['id', 'name', 'email', 'phoneNumber', 'role'], // Select specific student attributes
+        });
+
+        // Check if the student exists
+        if (!student) {
+            return res.status(404).send({ message: 'No student found with associated WhatsApp channel links' });
+        }
+
+        return res.status(200).send({
+            message: 'Student with WhatsApp channel links retrieved successfully',
+            student, // Send the student details
+        });
+    } catch (error) {
+        console.error('Error fetching student with WhatsApp channel links:', error.stack);
+        return res.status(500).send({ message: 'Internal server error', error: error.message });
     }
 };
 
@@ -535,7 +759,7 @@ const deleteWhatsAppChannelLink = async (req, res) => {
         if (!id) {
             return res.status(400).send({ message: 'Channel ID is required' });
         }
-        const channel_id = id 
+        const channel_id = id
         // Find the WhatsApp channel link by ID
         const channel = await WhatsAppChannelLinks.findByPk(channel_id);
 
@@ -585,12 +809,12 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
         }
 
         const activeTest = await PlacementTest.findByPk(encrypted_test_id);
-        if(!activeTest){
-            return res.status(404).send({message: "Test Not Found"})
+        if (!activeTest) {
+            return res.status(404).send({ message: "Test Not Found" })
         }
         // console.log('ACtive test ', activeTest)
-        if(!activeTest.is_Active){
-            return res.status(403).send({message:"Access Forbidden"})
+        if (!activeTest.is_Active) {
+            return res.status(403).send({ message: "Access Forbidden" })
         }
         // // Decrypt the test ID
         // let test_id;
@@ -612,7 +836,7 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
 
         // Fetch number_of_questions from PlacementTest table
         const placementTest = await PlacementTest.findByPk(encrypted_test_id, {
-            attributes: ['number_of_questions', 'show_result','is_Monitored','whatsAppChannelLink','test_title','certificate_name'] // Only fetch number_of_questions
+            attributes: ['number_of_questions', 'show_result', 'is_Monitored', 'whatsAppChannelLink', 'test_title', 'certificate_name'] // Only fetch number_of_questions
         });
 
         if (!placementTest) {
@@ -626,10 +850,10 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
             topic_ids,
             number_of_questions: placementTest.number_of_questions,
             show_result: placementTest.show_result,
-            is_Monitored:placementTest.is_Monitored,
-            whatsAppChannelLink:placementTest.whatsAppChannelLink,
-            test_title:placementTest.test_title,
-            certificate_name:placementTest.certificate_name
+            is_Monitored: placementTest.is_Monitored,
+            whatsAppChannelLink: placementTest.whatsAppChannelLink,
+            test_title: placementTest.test_title,
+            certificate_name: placementTest.certificate_name
             // start_time: PlacementTest.start_time,
             // end_time: PlacementTest.end_time
         });
@@ -773,30 +997,30 @@ const savePlacementTestResults = async (req, res) => {
 };
 
 
-  
-  const getAllResults = async(req, res) => {
-      try {
+
+const getAllResults = async (req, res) => {
+    try {
         //   const student_id = req.student_id;
         //   const student = await Student.findByPk(student_id);
         //   const role = student.role;
-  
+
         //   if (role !== 'PLACEMENT OFFICER' & role !== 'SUPER ADMIN')
         //       return res.status(403).send({ message: 'Access Forbidden' });
-  
-          const placementResults = await PlacementTestResult.findAll();
-          if(!placementResults){
-              return res.status(404).send({message: "No Test Results Available"})
-          }
-  
-          return res.status(200).send(placementResults)
-  
-      } catch (error) {
-          return res.status(500).send({ message: error.message });
-      }
-  }
 
-  const getPlacementTestById = async (req, res) =>{
-    try{
+        const placementResults = await PlacementTestResult.findAll();
+        if (!placementResults) {
+            return res.status(404).send({ message: "No Test Results Available" })
+        }
+
+        return res.status(200).send(placementResults)
+
+    } catch (error) {
+        return res.status(500).send({ message: error.message });
+    }
+}
+
+const getPlacementTestById = async (req, res) => {
+    try {
         const { placement_test_id } = req.body;
 
         if (!placement_test_id) {
@@ -805,19 +1029,19 @@ const savePlacementTestResults = async (req, res) => {
 
         const placementTest = await PlacementTest.findByPk(placement_test_id);
 
-        if(!placementTest){
-            return res.status(404).send({message:'No placement Test link found for the id'})
+        if (!placementTest) {
+            return res.status(404).send({ message: 'No placement Test link found for the id' })
         }
 
         return res.status(200).send(placementTest)
 
-    }catch(error){
+    } catch (error) {
         console.error('Error retrieving placement tests:', error);
         return res.status(500).send({ message: error.message });
     }
-  }
+}
 
-  const getAllPlacementTests = async (req, res) => {
+const getAllPlacementTests = async (req, res) => {
     try {
         const placementTests = await PlacementTest.findAll({
             include: [
@@ -847,10 +1071,12 @@ const savePlacementTestResults = async (req, res) => {
             start_time: test.start_time,
             end_time: test.end_time,
             show_result: test.show_result,
+            test_title: test.test_title,
+            certificate_name: test.certificate_name,
             created_at: test.createdAt,
             updated_at: test.updatedAt,
             is_Active: test.is_Active,
-            is_Monitored:test.is_Monitored,
+            is_Monitored: test.is_Monitored,
             topics: test.TestTopics.map(testTopic => ({
                 topic_id: testTopic.PlacementTestTopic.topic_id,
                 createdAt: testTopic.PlacementTestTopic.createdAt,
@@ -1047,15 +1273,15 @@ const getAllPlacementTestsByCreator = async (req, res) => {
 //         }})
 //     }
 // } catch (error) {
-    
+
 // }
 
 const savePlacementTestStudent = async (req, res) => {
     try {
-        const { name, email, phone_number, placement_test_id , university_name, college_name} = req.body;
+        const { name, email, phone_number, placement_test_id, university_name, college_name } = req.body;
 
         // Check if all required fields are provided
-        if (!name || !email || !phone_number || !placement_test_id,!university_name || !college_name) {
+        if (!name || !email || !phone_number || !placement_test_id, !university_name || !college_name) {
             return res.status(400).send({ message: 'Required fields are missing or invalid' });
         }
 
@@ -1125,7 +1351,7 @@ const getAllResultsByTestId = async (req, res) => {
             where: {
                 placement_test_student_id: studentIds
             },
-            attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number','university_name','college_name']
+            attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number', 'university_name', 'college_name']
         });
 
         // Step 4: Fetch assigned topic_id from PlacementTestTopics table
@@ -1157,7 +1383,7 @@ const getAllResultsByTestId = async (req, res) => {
                     student_name: student.student_name,
                     email: student.email,
                     phone_number: student.phone_number,
-                    university_name :student.university_name,
+                    university_name: student.university_name,
                     college_name: student.college_name
                 } : null
             };
@@ -1166,7 +1392,7 @@ const getAllResultsByTestId = async (req, res) => {
         // Send the combined results along with the topics separately
         return res.status(200).send({
             students: combinedResults,
-            topics: topicNames 
+            topics: topicNames
         });
 
     } catch (error) {
@@ -1247,28 +1473,46 @@ const getAllResultsByTestId = async (req, res) => {
 //     }
 // };
 
+// const disableLink = async (req, res) => {
+//     try {
+//         const { test_id, is_Active } = req.body;
+//         console.log("is active ", is_Active, "  test _ id ", test_id)
+//         // Step 1: Find the currently active test link
+//         const activeTest = await PlacementTest.findAll({
+//             where: { is_Active: true }
+//         });
+
+//         // Step 2: Disable the currently active test link if it exists
+//         if (activeTest.length > 0) {
+//             await PlacementTest.update({ is_Active: false }, {
+//                 where: { placement_test_id: activeTest.map(test => test.placement_test_id) }
+//             });
+//         }
+
+//         // Step 3: Enable the specified test link if is_Active is true
+//         if (is_Active) {
+//             await PlacementTest.update({ is_Active: true }, {
+//                 where: { placement_test_id: test_id }
+//             });
+//         }
+
+//         res.status(200).send({ message: 'Test link status updated successfully' });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send({ message: 'An error occurred while updating test link status' });
+//     }
+// };
+
 const disableLink = async (req, res) => {
     try {
         const { test_id, is_Active } = req.body;
-        console.log( "is active ", is_Active, "  test _ id ", test_id)
-        // Step 1: Find the currently active test link
-        const activeTest = await PlacementTest.findAll({
-            where: { is_Active: true }
-        });
+        console.log("is active ", is_Active, "  test _ id ", test_id);
 
-        // Step 2: Disable the currently active test link if it exists
-        if (activeTest.length > 0) {
-            await PlacementTest.update({ is_Active: false }, {
-                where: { placement_test_id: activeTest.map(test => test.placement_test_id) }
-            });
-        }
-
-        // Step 3: Enable the specified test link if is_Active is true
-        if (is_Active) {
-            await PlacementTest.update({ is_Active: true }, {
-                where: { placement_test_id: test_id }
-            });
-        }
+        // Step 1: Update the status of the specified test link
+        await PlacementTest.update(
+            { is_Active },
+            { where: { placement_test_id: test_id } }
+        );
 
         res.status(200).send({ message: 'Test link status updated successfully' });
     } catch (error) {
@@ -1276,6 +1520,7 @@ const disableLink = async (req, res) => {
         res.status(500).send({ message: 'An error occurred while updating test link status' });
     }
 };
+
 
 const updateNumberOfQuestions = async (req, res) => {
     try {
@@ -1310,7 +1555,7 @@ const updateIsMonitored = async (req, res) => {
         res.status(500).send({ message: 'An error occurred while updating the monitoring status' });
     }
 };
- 
+
 
 const assignQuestionsToPlacementTest = async (req, res) => {
     const { placement_test_id, question_ids } = req.body;
@@ -1351,9 +1596,9 @@ const assignQuestionsToPlacementTest = async (req, res) => {
         // Bulk create entries in the CumulativeQuestionPlacementTest table
         const createdAssignments = await CumulativeQuestionPlacementTest.bulkCreate(assignments);
 
-        return res.status(200).send({ 
-            message: 'Questions assigned to placement test successfully.', 
-            assignments: createdAssignments 
+        return res.status(200).send({
+            message: 'Questions assigned to placement test successfully.',
+            assignments: createdAssignments
         });
     } catch (error) {
         return res.status(500).send({ message: error.message });
@@ -1476,6 +1721,145 @@ const saveOneQuestionAndAddToLink = async (req, res) => {
 };
 
 
+// const saveQuestionAndAddToLink = async (data) => {
+//     try {
+//         const { topic_id, question_description, no_of_marks_allocated, difficulty_level, options, correct_options, placement_test_id } = data;
+
+//         // Create the cumulative question
+//         const newQuestion = await CumulativeQuestion.create({
+//             topic_id,
+//             question_description,
+//             no_of_marks_allocated,
+//             difficulty_level,
+//         });
+
+//         const questionId = newQuestion.cumulative_question_id;
+
+//         // Create the options
+//         const optionList = options.map((optionDescription) => ({
+//             cumulative_question_id: questionId,
+//             option_description: optionDescription.trim()
+//         }));
+
+//         await OptionsTable.bulkCreate(optionList);
+
+//         // Create the correct answers
+//         const correctOptionList = correct_options.map((correctOption) => ({
+//             cumulative_question_id: questionId,
+//             answer_description: correctOption.trim()
+//         }));
+
+//         await db.CorrectAnswer.bulkCreate(correctOptionList);
+
+//         // Create the association with placement test if provided
+//         if (placement_test_id) {
+//             await CumulativeQuestionPlacementTest.create({
+//                 cumulative_question_id: questionId,
+//                 placement_test_id
+//             });
+//         }
+
+//         return {
+//             message: 'Question created and added to placement test successfully',
+//             question: newQuestion
+//         };
+//     } catch (error) {
+//         console.error('Error saving question and adding to link:', error);
+//         throw new Error('Failed to save question and add to link');
+//     }
+// };
+
+// const uploadAndAssignQuestionsToLink = async (filePath, topic_id, placement_test_id = null) => {
+//     const workbook = xlsx.readFile(filePath);
+//     const sheet = workbook.Sheets[workbook.SheetNames[0]];
+//     const rows = xlsx.utils.sheet_to_json(sheet);
+
+//     const cleanString = (value) => (value != null ? String(value).trim().replace(/\s+/g, ' ') : '');
+
+//     for (const row of rows) {
+//         const [
+//             questionText,
+//             difficulty,
+//             marks,
+//             option1,
+//             option2,
+//             option3,
+//             option4,
+//             correctOptionValue
+//         ] = [
+//             cleanString(row["Question Text"]),
+//             cleanString(row.Difficulty),
+//             cleanString(row.Marks),
+//             cleanString(row["Option 1"]),
+//             cleanString(row["Option 2"]),
+//             cleanString(row["Option 3"]),
+//             cleanString(row["Option 4"]),
+//             cleanString(row["Correct Option"])
+//         ];
+
+//         // Define options and correct answers
+//         const options = [option1, option2, option3, option4];
+//         const correctOptions = correctOptionValue.split(',').map(opt => opt.trim());
+
+//         // Call saveQuestionAndAddToLink
+//         await saveQuestionAndAddToLink({
+//             topic_id,
+//             question_description: questionText,
+//             no_of_marks_allocated: marks,
+//             difficulty_level: difficulty,
+//             options,
+//             correct_options: correctOptions,
+//             placement_test_id
+//         });
+//     }
+// };
+
+// const uploadAndAssignQuestionsToLink = async (filePath, topic_id, placement_test_id = null) => {
+//     const workbook = xlsx.readFile(filePath);
+//     const sheet = workbook.Sheets[workbook.SheetNames[0]];
+//     const rows = xlsx.utils.sheet_to_json(sheet);
+
+//     // Preserve line breaks and spaces inside the question text
+//     const preserveStringFormat = (value) => (value != null ? String(value).trim() : '');
+
+//     for (const row of rows) {
+//         const [
+//             questionText,
+//             difficulty,
+//             marks,
+//             option1,
+//             option2,
+//             option3,
+//             option4,
+//             correctOptionValue
+//         ] = [
+//                 preserveStringFormat(row["Question Text"]),
+//                 preserveStringFormat(row.Difficulty),
+//                 preserveStringFormat(row.Marks),
+//                 preserveStringFormat(row["Option 1"]),
+//                 preserveStringFormat(row["Option 2"]),
+//                 preserveStringFormat(row["Option 3"]),
+//                 preserveStringFormat(row["Option 4"]),
+//                 preserveStringFormat(row["Correct Option"])
+//             ];
+
+//         // Define options and correct answers
+//         const options = [option1, option2, option3, option4];
+//         const correctOptions = correctOptionValue.split(',').map(opt => opt.trim());
+
+//         // Call saveQuestionAndAddToLink
+//         await saveQuestionAndAddToLink({
+//             topic_id,
+//             question_description: questionText, // This will now preserve format
+//             no_of_marks_allocated: marks,
+//             difficulty_level: difficulty,
+//             options,
+//             correct_options: correctOptions,
+//             placement_test_id
+//         });
+//     }
+// };
+
 const saveQuestionAndAddToLink = async (data) => {
     try {
         const { topic_id, question_description, no_of_marks_allocated, difficulty_level, options, correct_options, placement_test_id } = data;
@@ -1524,95 +1908,85 @@ const saveQuestionAndAddToLink = async (data) => {
     }
 };
 
-// const uploadAndAssignQuestionsToLink = async (filePath, topic_id, placement_test_id = null) => {
-//     const workbook = xlsx.readFile(filePath);
-//     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-//     const rows = xlsx.utils.sheet_to_json(sheet);
-
-//     const cleanString = (value) => (value != null ? String(value).trim().replace(/\s+/g, ' ') : '');
-
-//     for (const row of rows) {
-//         const [
-//             questionText,
-//             difficulty,
-//             marks,
-//             option1,
-//             option2,
-//             option3,
-//             option4,
-//             correctOptionValue
-//         ] = [
-//             cleanString(row["Question Text"]),
-//             cleanString(row.Difficulty),
-//             cleanString(row.Marks),
-//             cleanString(row["Option 1"]),
-//             cleanString(row["Option 2"]),
-//             cleanString(row["Option 3"]),
-//             cleanString(row["Option 4"]),
-//             cleanString(row["Correct Option"])
-//         ];
-
-//         // Define options and correct answers
-//         const options = [option1, option2, option3, option4];
-//         const correctOptions = correctOptionValue.split(',').map(opt => opt.trim());
-
-//         // Call saveQuestionAndAddToLink
-//         await saveQuestionAndAddToLink({
-//             topic_id,
-//             question_description: questionText,
-//             no_of_marks_allocated: marks,
-//             difficulty_level: difficulty,
-//             options,
-//             correct_options: correctOptions,
-//             placement_test_id
-//         });
-//     }
-// };
-
 const uploadAndAssignQuestionsToLink = async (filePath, topic_id, placement_test_id = null) => {
     const workbook = xlsx.readFile(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows = xlsx.utils.sheet_to_json(sheet);
 
-    // Preserve line breaks and spaces inside the question text
     const preserveStringFormat = (value) => (value != null ? String(value).trim() : '');
 
+    const skippedQuestions = [];
+    let successfullyUploaded = 0;
+    let successfullyAssigned = 0;
+
     for (const row of rows) {
-        const [
-            questionText,
-            difficulty,
-            marks,
-            option1,
-            option2,
-            option3,
-            option4,
-            correctOptionValue
-        ] = [
-            preserveStringFormat(row["Question Text"]),
-            preserveStringFormat(row.Difficulty),
-            preserveStringFormat(row.Marks),
-            preserveStringFormat(row["Option 1"]),
-            preserveStringFormat(row["Option 2"]),
-            preserveStringFormat(row["Option 3"]),
-            preserveStringFormat(row["Option 4"]),
-            preserveStringFormat(row["Correct Option"])
-        ];
+        try {
+            const [
+                questionText,
+                difficulty,
+                marks,
+                option1,
+                option2,
+                option3,
+                option4,
+                correctOptionValue
+            ] = [
+                    preserveStringFormat(row["Question Text"]),
+                    preserveStringFormat(row.Difficulty) || "1", // Default difficulty = 1
+                    preserveStringFormat(row.Marks) || "1", // Default marks = 1
+                    preserveStringFormat(row["Option 1"]),
+                    preserveStringFormat(row["Option 2"]),
+                    preserveStringFormat(row["Option 3"]),
+                    preserveStringFormat(row["Option 4"]),
+                    preserveStringFormat(row["Correct Option"])
+                ];
 
-        // Define options and correct answers
-        const options = [option1, option2, option3, option4];
-        const correctOptions = correctOptionValue.split(',').map(opt => opt.trim());
+            // Define options and correct answers
+            const options = [option1, option2, option3, option4].filter(opt => opt); // Remove null or empty options
+            const correctOptions = correctOptionValue.split(',').map(opt => opt.trim());
 
-        // Call saveQuestionAndAddToLink
-        await saveQuestionAndAddToLink({
-            topic_id,
-            question_description: questionText, // This will now preserve format
-            no_of_marks_allocated: marks,
-            difficulty_level: difficulty,
-            options,
-            correct_options: correctOptions,
-            placement_test_id
-        });
+            // Check if correct options are valid
+            const invalidOptions = correctOptions.filter(opt => !options.includes(opt));
+            if (invalidOptions.length > 0) {
+                skippedQuestions.push({
+                    questionText,
+                    reason: `Invalid correct options: ${invalidOptions.join(', ')}`
+                });
+                continue;
+            }
+
+            // Save question and associate with test link
+            const response = await saveQuestionAndAddToLink({
+                topic_id,
+                question_description: questionText,
+                no_of_marks_allocated: marks,
+                difficulty_level: difficulty,
+                options,
+                correct_options: correctOptions,
+                placement_test_id
+            });
+
+            successfullyUploaded++;
+            if (placement_test_id) successfullyAssigned++;
+        } catch (error) {
+            console.error('Error processing question:', error);
+            skippedQuestions.push({
+                questionText: row["Question Text"],
+                reason: error.message || 'Unknown error occurred'
+            });
+        }
     }
+
+    return {
+        message: 'Upload process completed',
+        summary: {
+            totalQuestions: rows.length,
+            successfullyUploaded,
+            successfullyAssigned,
+            skippedQuestionsCount: skippedQuestions.length
+        },
+        skippedQuestions
+    };
 };
 
 
@@ -1757,15 +2131,15 @@ const uploadAndAssignQuestionsByExcelTopics = async (filePath, link_topic_ids, n
             option4,
             correctOptionValue
         ] = [
-            cleanString(row["Question Text"]),
-            cleanString(row.Difficulty),
-            cleanString(row.Marks),
-            cleanString(row["Option 1"]),
-            cleanString(row["Option 2"]),
-            cleanString(row["Option 3"]),
-            cleanString(row["Option 4"]),
-            cleanString(row["Correct Option"])
-        ];
+                cleanString(row["Question Text"]),
+                cleanString(row.Difficulty),
+                cleanString(row.Marks),
+                cleanString(row["Option 1"]),
+                cleanString(row["Option 2"]),
+                cleanString(row["Option 3"]),
+                cleanString(row["Option 4"]),
+                cleanString(row["Correct Option"])
+            ];
 
         console.log(`Processing row with Topic ID: ${topic_id}`);
         console.log(`Placement test ID being passed: ${placement_test_id}`);
@@ -1811,6 +2185,10 @@ module.exports = {
     savePlacementTestStudent,
     getPlacementTestDetailsById,
     saveWhatsAppChannelLink,
+    assignWhatsAppChannelToStudent,
+    getAllWhatsAppChannelLinks,
+    getAllStudentsWithWhatsAppChannelLinks,
+    getStudentWithWhatsAppChannelLinks,
     updateWhatsAppChannelLink,
     fetchWhatsAppChannelLinks,
     fetchWhatsAppChannelLinkById,

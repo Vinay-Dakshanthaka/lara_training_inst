@@ -3,10 +3,9 @@ import { Button, Form, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { baseURL } from '../config';
-import WhatsAppChannelDropdown from './WhatsAppChannelDropdown';
-import SaveWhatsAppChannelModal from './SaveWhatsAppChannelModal';
+import WhatsAppChannelDropdownForRecruiter from './WhatsAppChannelDropdownForRecruiter';
 
-const CreateTestLink = () => {
+const RecruiterCreateTestLink = () => {
     const [subjects, setSubjects] = useState([]);
     const [topics, setTopics] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
@@ -297,8 +296,9 @@ const CreateTestLink = () => {
 
             <div className="row">
             <div className='col-auto'>
-                <WhatsAppChannelDropdown onSelectChannel={handleChannelSelect} />
-                <Link to='/add-whatsApp-link' className='btn btn-success my-3'>Add WhatsApp Channel</Link>
+                <WhatsAppChannelDropdownForRecruiter onSelectChannel={handleChannelSelect} />
+                {/* <WhatsAppChannelDropdown onSelectChannel={handleChannelSelect} />
+                <Link to='/add-whatsApp-link' className='btn btn-success my-3'>Add WhatsApp Channel</Link> */}
             </div>
             </div>
 
@@ -390,4 +390,4 @@ const CreateTestLink = () => {
     );
 };
 
-export default CreateTestLink;
+export default RecruiterCreateTestLink;

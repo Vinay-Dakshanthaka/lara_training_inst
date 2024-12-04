@@ -257,7 +257,7 @@ import axios from 'axios';
 import { baseURL } from '../config';
 import { Link } from 'react-router-dom';
 import { BsCopy, BsPencil } from 'react-icons/bs';
-import { OverlayTrigger, Tooltip, Badge, Modal, Button, Form, Pagination, Table } from 'react-bootstrap';
+import { OverlayTrigger, Tooltip, Badge, Modal, Button, Form, Pagination, Table, Alert } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UpdatePlacementTestModal from '../placementTest/UpdatePlacementTestModal';
@@ -272,15 +272,21 @@ const PlacementTestsByRecruiter = () => {
 
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [selectedTestId, setSelectedTestId] = useState(null);
-  
+
+    const [alert, setAlert] = useState({
+        show: false,
+        message: '',
+        variant: '', // 'success' or 'danger'
+    });
+
     const handleOpenModal = (testId) => {
-      setSelectedTestId(testId);
-      setShowUpdateModal(true);
+        setSelectedTestId(testId);
+        setShowUpdateModal(true);
     };
-  
+
     const handleCloseModal = () => {
         setShowUpdateModal(false);
-      setSelectedTestId(null);
+        setSelectedTestId(null);
     };
 
     useEffect(() => {
@@ -332,9 +338,53 @@ const PlacementTestsByRecruiter = () => {
     };
 
 
-    const activateLink = async (placement_test_id) => {
-        console.log(placement_test_id, "--------------------------placement_test_id");
+    // const activateLink = async (placement_test_id) => {
+    //     console.log(placement_test_id, "--------------------------placement_test_id");
+    //     try {
+    //         const token = localStorage.getItem("token");
+    //         if (!token) {
+    //             throw new Error("No token provided.");
+    //         }
+
+    //         const config = {
+    //             headers: {
+    //                 Authorization: `Bearer ${token}`,
+    //             },
+    //         };
+    //         await axios.post(`${baseURL}/api/placement-test/disable-link`, {
+    //             test_id: placement_test_id,
+    //             is_Active: true
+    //         });
+    //         toast.success('Link activated successfully');
+    //         const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`, config);
+    //         // console.log(response,"-------------------------------------------");
+    //         const sortedTests = response.data.placementTests.sort((a, b) => b.is_Active - a.is_Active);
+    //         setPlacementTests(sortedTests);
+    //     } catch (error) {
+    //         console.error('Error activating link:', error);
+    //         toast.error('Failed to activate link');
+    //     }
+    // };
+
+    const toggleLinkStatus = async (placement_test_id, currentStatus) => {
         try {
+            // Toggle is_Active status
+            const newStatus = !currentStatus;
+
+            await axios.post(`${baseURL}/api/placement-test/disable-link`, {
+                test_id: placement_test_id,
+                is_Active: newStatus,
+            });
+
+            // toast.success(`Link ${newStatus ? 'activated' : 'deactivated'} successfully`);
+            setAlert({
+                show: true,
+                message: `Link ${newStatus ? 'activated' : 'deactivated'} successfully`,
+                variant: 'success',
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+
             const token = localStorage.getItem("token");
             if (!token) {
                 throw new Error("No token provided.");
@@ -345,18 +395,28 @@ const PlacementTestsByRecruiter = () => {
                     Authorization: `Bearer ${token}`,
                 },
             };
-            await axios.post(`${baseURL}/api/placement-test/disable-link`, {
-                test_id: placement_test_id,
-                is_Active: true
-            });
-            toast.success('Link activated successfully');
+
             const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`, config);
-            // console.log(response,"-------------------------------------------");
-            const sortedTests = response.data.placementTests.sort((a, b) => b.is_Active - a.is_Active);
+            // console.log(response, "-----------------------------------responseof fecthpalcemnsttests");
+
+            // Sort first by is_Active (active tests first), then by placement_test_id in descending order
+            const sortedTests = response.data.placementTests.sort((a, b) => {
+                if (b.is_Active === a.is_Active) {
+                    return b.placement_test_id - a.placement_test_id; // If both have same active status, sort by test ID
+                }
+                return b.is_Active - a.is_Active; // Active tests will be sorted first
+            });
+
             setPlacementTests(sortedTests);
         } catch (error) {
-            console.error('Error activating link:', error);
-            toast.error('Failed to activate link');
+            console.error('Error toggling link status:', error);
+            // toast.error('Failed to update link status');
+            setAlert({
+                show: true,
+                message: 'Failed to update link status',
+                variant: 'danger',
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
@@ -386,6 +446,14 @@ const PlacementTestsByRecruiter = () => {
                 },
             };
             const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`, config);
+             // Sort first by is_Active (active tests first), then by placement_test_id in descending order
+             const sortedTests = response.data.placementTests.sort((a, b) => {
+                if (b.is_Active === a.is_Active) {
+                    return b.placement_test_id - a.placement_test_id; // If both have same active status, sort by test ID
+                }
+                return b.is_Active - a.is_Active; // Active tests will be sorted first
+            });
+
             setPlacementTests(response.data.placementTests);
         } catch (error) {
             console.error('Error updating number of questions:', error);
@@ -483,6 +551,11 @@ const PlacementTestsByRecruiter = () => {
     return (
         <div className="container mt-5">
             <ToastContainer />
+            {alert.show && (
+                <Alert variant={alert.variant} onClose={() => setAlert({ show: false })} dismissible>
+                    {alert.message}
+                </Alert>
+            )}
             <h2>All Placement Tests</h2>
             <div className="table-responsive">
                 <Table className="table table-bordered">
@@ -574,14 +647,12 @@ const PlacementTestsByRecruiter = () => {
                                     </Link>
                                 </td>
                                 <td>
-                                    {!test.is_Active && (
-                                        <button
-                                            className="btn btn-primary"
-                                            onClick={() => activateLink(test.placement_test_id)}
-                                        >
-                                            Activate
-                                        </button>
-                                    )}
+                                    <button
+                                        className={`btn ${test.is_Active ? 'btn-success' : 'btn-danger'}`}
+                                        onClick={() => toggleLinkStatus(test.placement_test_id, test.is_Active)}
+                                    >
+                                        {test.is_Active ? 'Deactivate' : 'Activate'}
+                                    </button>
                                 </td>
                             </tr>
                         ))}
