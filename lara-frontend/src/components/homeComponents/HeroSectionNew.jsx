@@ -50,7 +50,7 @@ const HeroSectionNew = () => {
                 <td>
                   <span className="bullet-icon">📅</span> New Batch
                 </td>
-                <td>Sept 16</td>
+                <td>Jan 17</td>
               </tr>
               <tr>
                 <td>
