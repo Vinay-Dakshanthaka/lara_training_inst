@@ -110,6 +110,9 @@ function CustomNavbar() {
                 <Nav.Link as={Link} to="course">
                   Course
                 </Nav.Link>
+                <Nav.Link as={Link} to="external-test-results">
+                  Results
+                </Nav.Link>
                 <div
                   className="dropdown me-3 p-2"
                   style={{ position: "relative" }}

@@ -20,6 +20,7 @@ const CreateTestLink = () => {
     const [description, setDescription] = useState('');
     const [showResult, setShowResult] = useState(true);
     const [isMonitored, setIsMonitored] = useState(false); // State for isMonitored
+    const [isIssueCertificate, setIsIssueCertificate] = useState(false); // State for provide certificate
     const [newTestLink, setNewTestLink] = useState(''); // New state for test link
     const [alert, setAlert] = useState({ show: false, message: '', variant: '' }); // State for Bootstrap alerts
     const [testTitle, setTestTitle] = useState('');
@@ -196,6 +197,7 @@ const CreateTestLink = () => {
                     test_title: testTitle,
                     channel_link: channelLink,
                     certificate_name: certificateName,
+                    issue_certificate:isIssueCertificate
                 },
                 config
             );
@@ -379,6 +381,14 @@ const CreateTestLink = () => {
                     label="Enable Monitoring"
                     checked={isMonitored}
                     onChange={() => setIsMonitored(!isMonitored)}
+                />
+            </Form.Group>
+            <Form.Group controlId="formIssueCertificate" className="mt-4">
+                <Form.Check
+                    type="checkbox"
+                    label="Provide Certificate "
+                    checked={isIssueCertificate}
+                    onChange={() => setIsIssueCertificate(!isIssueCertificate)}
                 />
             </Form.Group>
 

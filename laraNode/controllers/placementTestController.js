@@ -266,6 +266,7 @@ const createPlacementTestLink = async (req, res) => {
             channel_link,
             test_title,
             certificate_name,
+            issue_certificate,
         } = req.body;
 
         // Get studentId from the request (assuming it's set via middleware or is part of the request)
@@ -298,6 +299,7 @@ const createPlacementTestLink = async (req, res) => {
             end_time, // Store as string
             show_result: show_result !== undefined ? show_result : true, // Default to true if not provided
             is_Monitored: is_Monitored !== undefined ? is_Monitored : false, // Default to false if not provided
+            issue_certificate: issue_certificate !== undefined ? issue_certificate : false, // Default to false if not provided
         });
 
         // Generate the test link with the placement_test_id
@@ -368,6 +370,7 @@ const updatePlacementTest = async (req, res) => {
             channel_link,
             test_title,
             certificate_name,
+            issue_certificate,
         } = req.body;
 
         // Get the placement test ID from the request parameters
@@ -386,10 +389,11 @@ const updatePlacementTest = async (req, res) => {
         placementTest.end_time = end_time || placementTest.end_time;
         placementTest.show_result = show_result !== undefined ? show_result : placementTest.show_result;
         placementTest.is_Monitored = is_Monitored !== undefined ? is_Monitored : placementTest.is_Monitored;
+        placementTest.issue_certificate = issue_certificate !== undefined ? issue_certificate : placementTest.issue_certificate;
         placementTest.test_title = test_title || placementTest.test_title;
         placementTest.certificate_name = certificate_name || placementTest.certificate_name;
         placementTest.whatsAppChannelLink = channel_link || placementTest.whatsAppChannelLink;
-
+        
         // Save the updated placement test
         await placementTest.save();
 
@@ -423,6 +427,7 @@ const getPlacementTestDetailsById = async (req, res) => {
             end_time: placementTest.end_time,
             show_result: placementTest.show_result,
             is_Monitored: placementTest.is_Monitored,
+            issue_certificate: placementTest.issue_certificate,
             whatsAppChannelLink: placementTest.whatsAppChannelLink,
             certificate_name: placementTest.certificate_name,
         };
@@ -686,7 +691,6 @@ const getStudentWithWhatsAppChannelLinks = async (req, res) => {
     }
 };
 
-
 const fetchWhatsAppChannelLinks = async (req, res) => {
     try {
         // Fetch all WhatsApp channel links
@@ -836,7 +840,7 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
 
         // Fetch number_of_questions from PlacementTest table
         const placementTest = await PlacementTest.findByPk(encrypted_test_id, {
-            attributes: ['number_of_questions', 'show_result', 'is_Monitored', 'whatsAppChannelLink', 'test_title', 'certificate_name'] // Only fetch number_of_questions
+            attributes: ['number_of_questions', 'show_result', 'is_Monitored', 'whatsAppChannelLink', 'test_title', 'certificate_name','issue_certificate'] // Only fetch number_of_questions
         });
 
         if (!placementTest) {
@@ -853,7 +857,8 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
             is_Monitored: placementTest.is_Monitored,
             whatsAppChannelLink: placementTest.whatsAppChannelLink,
             test_title: placementTest.test_title,
-            certificate_name: placementTest.certificate_name
+            certificate_name: placementTest.certificate_name,
+            issue_certificate: placementTest.issue_certificate
             // start_time: PlacementTest.start_time,
             // end_time: PlacementTest.end_time
         });
@@ -991,6 +996,52 @@ const savePlacementTestResults = async (req, res) => {
         });
 
         return res.status(200).send(testResults);
+    } catch (error) {
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+const getPlacementTestResultsByEmail = async (req, res) => {
+    try {
+        const { email } = req.params; // Assuming email is passed as a route parameter
+
+        // Find the student by email
+        const placementStudent = await PlacementTestStudent.findOne({
+            where: { email },
+            attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number','university_name','college_name'], // Add necessary student attributes
+        });
+
+        if (!placementStudent) {
+            return res.status(404).send({ message: "Student with this email not found." });
+        }
+
+        const { placement_test_student_id } = placementStudent;
+
+        // Fetch all test results for the student, including test details
+        const testResults = await PlacementTestResult.findAll({
+            where: { placement_test_student_id },
+            attributes: ['placement_test_id', 'marks_obtained', 'total_marks', 'createdAt'], // Customize fields as needed
+            include: [
+                {
+                    model: PlacementTest, 
+                    as:'PlacementTest',
+                    attributes: ['test_title', 'start_time'], 
+                },
+            ],
+            order: [['createdAt', 'DESC']], // Optional: order by most recent results
+        });
+
+        if (testResults.length === 0) {
+            return res.status(404).send({
+                message: "No test results found for this student.",
+                student: placementStudent,
+            });
+        }
+
+        return res.status(200).send({
+            student: placementStudent,
+            testResults,
+        });
     } catch (error) {
         return res.status(500).send({ message: error.message });
     }
@@ -2199,6 +2250,7 @@ module.exports = {
     getAllPlacementTests,
     fetchTestTopicIdsAndQnNums,
     savePlacementTestResults,
+    getPlacementTestResultsByEmail,
     getAllResults,
     getAllResultsByTestId,
     disableLink,

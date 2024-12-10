@@ -11,7 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { Modal } from 'react-bootstrap';
 
 
-const pages = ['HOME', 'ABOUT', 'COURSE'];
+const pages = ['HOME', 'ABOUT', 'COURSE','RESULTS'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function CustomNavbars() {
@@ -27,25 +27,25 @@ function CustomNavbars() {
     const handleCloseModal = () => setShowModal(false);
     const [showModal, setShowModal] = useState(false);
 
-    useEffect(()=>{
+    useEffect(() => {
         const fetchStudentDetails = async () => {
-          try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`${baseURL}/api/student/getStudentDetails`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-      
-            // Assuming the response data contains student details, set it to state
-            setStudentDetails(response.data);
-          } catch (error) {
-            console.error('Error fetching student details:', error);
-          }
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get(`${baseURL}/api/student/getStudentDetails`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                // Assuming the response data contains student details, set it to state
+                setStudentDetails(response.data);
+            } catch (error) {
+                console.error('Error fetching student details:', error);
+            }
         };
-    
+
         fetchStudentDetails();
-      }, [])
+    }, [])
 
 
     const handleOpenNavMenu = (event) => {
@@ -138,7 +138,7 @@ function CustomNavbars() {
                         }}
                     >
                         <Tooltip title="Lara Technologies" className='bg-white rounded m-1'>
-                             <img src={logoImage} alt="Logo" style={{ height: '40px' }} />
+                            <img src={logoImage} alt="Logo" style={{ height: '40px' }} />
                         </Tooltip>
                     </Typography>
 
@@ -183,6 +183,9 @@ function CustomNavbars() {
                                                 break;
                                             case 'COURSE':
                                                 navigate('/course');
+                                                break;
+                                            case 'RESULTS':
+                                                navigate('/external-test-results');
                                                 break;
                                             default:
                                                 break;
@@ -229,12 +232,15 @@ function CustomNavbars() {
                                         case 'COURSE':
                                             navigate('/course');
                                             break;
+                                        case 'RESULTS':
+                                            navigate('/external-test-results');
+                                            break;
                                         default:
                                             break;
                                     }
                                     handleCloseNavMenu();
                                 }}
-                                sx={{ my: 2, color: '#fff', display: 'block'  }}
+                                sx={{ my: 2, color: '#fff', display: 'block' }}
                             >
                                 {page}
                             </Button>
@@ -300,10 +306,10 @@ function CustomNavbars() {
                                     {userRole === "TRAINER" && (
                                         <MenuItem onClick={() => navigate("/trainerDashboard")}>Dashboard</MenuItem>
                                     )}
-                                     {userRole === "PLACEMENT OFFICER" && (
+                                    {userRole === "PLACEMENT OFFICER" && (
                                         <MenuItem onClick={() => navigate("/placementOfficerDashboard")}>Dashboard</MenuItem>
                                     )}
-                                     {userRole === "RECRUITER" && (
+                                    {userRole === "RECRUITER" && (
                                         <MenuItem onClick={() => navigate("/recruiterDashboard")}>Dashboard</MenuItem>
                                     )}
                                     {/* Common menu items */}
@@ -330,7 +336,7 @@ function CustomNavbars() {
                         <button onClick={handleCloseModal} className='btn btn-primary'>
                             Cancel
                         </button>
-                        <button  onClick={handleConfirmLogout} className='btn btn-danger'>
+                        <button onClick={handleConfirmLogout} className='btn btn-danger'>
                             Confirm
                         </button>
                     </Modal.Footer>

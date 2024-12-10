@@ -553,7 +553,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Form, Modal, Row, Col, Card, Table, Alert } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -565,6 +565,7 @@ import logoUrl from "./laralogo.png";
 import qrCodeUrl from "./qr_code_whatsApp.png"
 import { WhatsApp } from '@mui/icons-material';
 import QRCodeDisplay from './QRCodeDisplay';
+import PlacementTestStudentResults from './PlacementTestStudentResults';
 
 
 const PlacementTest = () => {
@@ -595,6 +596,7 @@ const PlacementTest = () => {
     const navigate = useNavigate();
     const [isCameraOn, setIsCameraOn] = useState(true);
     const [isMonitored, setIsMonitored] = useState(false);
+    const [isIssueCertificate, setIsIssueCertificate] = useState(false);
     const [pdfUrl, setPdfUrl] = useState(null);
 
     let marksForCertificate;
@@ -685,7 +687,7 @@ const PlacementTest = () => {
             cleanupListeners();
         };
     }, []);
-// code to prevent open new tab and opening the context menu ends 
+    // code to prevent open new tab and opening the context menu ends 
 
     useEffect(() => {
         const fetchTestDetails = async () => {
@@ -695,10 +697,11 @@ const PlacementTest = () => {
                 });
                 console.log("Fetch test details ", response1.data)
                 setTestDetails(response1.data)
-                const { topic_ids, number_of_questions, show_result, is_Monitored, whatsAppChannelLink, test_title, certificate_name } = response1.data;
+                const { topic_ids, number_of_questions, show_result, is_Monitored, whatsAppChannelLink, test_title, certificate_name, issue_certificate } = response1.data;
 
                 setShowResult(show_result);
                 setIsMonitored(is_Monitored);
+                setIsIssueCertificate(issue_certificate)
 
                 if (!show_result) {
                     setShowSummary(false);
@@ -847,7 +850,10 @@ const PlacementTest = () => {
             setIsMonitored(false);
             setIsCameraOn(false);
             setShowSummary(true);
-            generateCertificate();
+            if (isIssueCertificate) {
+                generateCertificate();
+            }
+
             if (!showResult) {
                 // Display a message for pending results
                 alert('Your result will be updated soon.');
@@ -1218,34 +1224,36 @@ const PlacementTest = () => {
             {!showSummary && !testResults && (
                 <>
                     {questions.map((question, index) => (
-                        <Form key={question.cumulative_question_id} className="mb-4 p-3 rounded shadow-sm border">
-                            <Form.Group as={Row} className="align-items-start">
-                                <Form.Label column sm="12" className="position-relative">
-                                    <pre style={{ maxWidth: '90%', whiteSpace: 'pre-wrap', fontFamily: 'inherit', marginBottom: '10px', fontSize: '1rem' }}>
-                                        <code> {index + 1}. <br />{question.question_description}</code>
-                                    </pre>
-                                    <span className="position-absolute top-0 end-0 bg-light px-2 py-1 rounded" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
-                                        Marks: {question.no_of_marks_allocated}
-                                    </span>
-                                </Form.Label>
-                                <Col sm="12">
-                                    {question.options.map((option, idx) => (
-                                        <Form.Check
-                                            key={idx}
-                                            type="checkbox"
-                                            label={option.option_description}
-                                            name={`question-${index}`}
-                                            value={option.option_description}
-                                            checked={answers[question.cumulative_question_id]?.includes(option.option_description)}
-                                            onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value, e.target.checked)}
-                                            className="mb-2 lead "
-                                            style={{ paddingLeft: '1.5rem', fontSize: '0.95rem', fontWeight: '400', }}
-                                        />
-                                    ))}
-                                </Col>
-                            </Form.Group>
-                        </Form>
+                        <>
+                            <Form key={question.cumulative_question_id} className="mb-4 p-3 rounded shadow-sm border">
+                                <Form.Group as={Row} className="align-items-start">
+                                    <Form.Label column sm="12" className="position-relative">
+                                        <pre style={{ maxWidth: '90%', whiteSpace: 'pre-wrap', fontFamily: 'inherit', marginBottom: '10px', fontSize: '1rem' }}>
+                                            <code> {index + 1}. <br />{question.question_description}</code>
+                                        </pre>
+                                        <span className="position-absolute top-0 end-0 bg-light px-2 py-1 rounded" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+                                            Marks: {question.no_of_marks_allocated}
+                                        </span>
+                                    </Form.Label>
+                                    <Col sm="12">
+                                        {question.options.map((option, idx) => (
+                                            <Form.Check
+                                                key={idx}
+                                                type="checkbox"
+                                                label={option.option_description}
+                                                name={`question-${index}`}
+                                                value={option.option_description}
+                                                checked={answers[question.cumulative_question_id]?.includes(option.option_description)}
+                                                onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value, e.target.checked)}
+                                                className="mb-2 lead "
+                                                style={{ paddingLeft: '1.5rem', fontSize: '0.95rem', fontWeight: '400', }}
+                                            />
+                                        ))}
+                                    </Col>
+                                </Form.Group>
+                            </Form>
 
+                        </>
                     ))}
                 </>
             )}
@@ -1284,6 +1292,13 @@ const PlacementTest = () => {
                                     <td>{totalMarks}</td>
                                 </tr>
                             </tbody>
+                            <h4 className='text-center my-3'>
+                                To View Your Previouslsy attended test results
+                                <Link to="/external-test-results" target="_blank" rel="noopener noreferrer">
+                                    Click Here
+                                </Link>
+
+                            </h4>
                         </Table>
 
                         <div className='text-center'>
@@ -1381,8 +1396,8 @@ const PlacementTest = () => {
                 </Modal.Header>
                 <Modal.Body>
                     {!showForm ? (
-                        <div className="container text-center">
-                            {testDetails ? (
+                        <div className="container ">
+                            {/* {testDetails ? (
                                 <>
                                     <p className='h6 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
                                     <QRCodeDisplay link={testDetails.whatsAppChannelLink} />
@@ -1393,7 +1408,23 @@ const PlacementTest = () => {
                                     <img src={qrCodeUrl} alt="WhatsApp channel link" width={200} height={200} />
                                 </>
                             )
-                            }
+                            } */}
+                            <Alert variant="info" className="mt-4">
+                                <Alert.Heading>Info</Alert.Heading>
+                                <p>Please Allow the camera and microphone to attend the test. If asked.</p>
+                            </Alert>
+                            <Alert variant="danger" className="mt-4">
+                                <Alert.Heading>Warning</Alert.Heading>
+                                <div>
+                                    Please be aware that any form of malpractice during the test, such as:
+                                    <ul>
+                                        <li>Switching to a different tab or leaving the test window</li>
+                                        <li>Your face should always face towards the screen</li>
+                                        <li>Ensure that you stay within the test environment until you submit the test</li>
+                                    </ul>
+                                    The test will be monitored by the system. If any malpractice is found, the test will be TERMINATED! Adhere to the rules at all times to avoid disqualification.
+                                </div>
+                            </Alert>
                             <Button variant="primary my-3" onClick={() => setShowForm(true)}>
                                 Next
                             </Button>
@@ -1459,7 +1490,7 @@ const PlacementTest = () => {
                                     {savingStudent ? "Saving..." : "Submit"}
                                 </Button>
                             </Form>
-                            <Alert variant="info" className="mt-4">
+                            {/* <Alert variant="info" className="mt-4">
                                 <Alert.Heading>Info</Alert.Heading>
                                 <p>Please Allow the camera and microphone to attend the test.</p>
                             </Alert>
@@ -1474,7 +1505,7 @@ const PlacementTest = () => {
                                     </ul>
                                     The test will be monitored by the system. If any malpractice is found, the test will be TERMINATED! Adhere to the rules at all times to avoid disqualification.
                                 </div>
-                            </Alert>
+                            </Alert> */}
                         </>
                     )}
                 </Modal.Body>
@@ -1488,6 +1519,7 @@ const PlacementTest = () => {
             )}
 
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
+
         </div>
 
     );

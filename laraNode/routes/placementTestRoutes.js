@@ -48,6 +48,8 @@ placementTestRoute.post('/fetchTestTopicIdsAndQnNums', placementTestContoller.fe
 
 placementTestRoute.post('/savePlacementTestResults', placementTestContoller.savePlacementTestResults);
 
+placementTestRoute.get('/getPlacementTestResultsByEmail/:email', placementTestContoller.getPlacementTestResultsByEmail);
+
 placementTestRoute.get('/getAllResults', placementTestContoller.getAllResults);
 
 placementTestRoute.post('/getAllResultsByTestId', placementTestContoller.getAllResultsByTestId);

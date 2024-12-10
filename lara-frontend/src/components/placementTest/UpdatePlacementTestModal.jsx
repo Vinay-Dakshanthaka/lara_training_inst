@@ -16,6 +16,7 @@ const UpdatePlacementTestModal = ({ placement_test_id, show, handleClose }) => {
         channel_link: "",
         test_title: "",
         certificate_name: "",
+        issue_certificate: false,
     });
 
     console.log("Received placment test id in update modal : ", placement_test_id)
@@ -47,6 +48,7 @@ const UpdatePlacementTestModal = ({ placement_test_id, show, handleClose }) => {
                 channel_link: data.whatsAppChannelLink,
                 test_title: data.test_title,
                 certificate_name: data.certificate_name,
+                issue_certificate: data.issue_certificate,
             });
 
             setTopics(Array.isArray(data.topics) ? data.topics : []); // Ensure topics is always an array
@@ -201,6 +203,16 @@ const UpdatePlacementTestModal = ({ placement_test_id, show, handleClose }) => {
                             label="Monitored Test"
                             name="is_Monitored"
                             checked={formData.is_Monitored}
+                            onChange={handleChange}
+                        />
+                    </Form.Group>
+                   
+                    <Form.Group controlId="isIssueCertificate" className="mt-3">
+                        <Form.Check
+                            type="checkbox"
+                            label="Provide Certificate"
+                            name="issue_certificate"
+                            checked={formData.issue_certificate}
                             onChange={handleChange}
                         />
                     </Form.Group>

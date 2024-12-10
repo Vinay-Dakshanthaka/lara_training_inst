@@ -7,6 +7,7 @@ import DsaSection from './homeComponents/DsaSection';
 import RecruitersCarousel from './homeComponents/RecruitersCarousel';
 import CourseDetails from './homeComponents/CourseDetails';
 import './home.css'
+import PlacementTestStudentResults from './student/PlacementTestStudentResults';
 
 const Home = () => {
   // Define animation variants for the sections
@@ -21,6 +22,7 @@ const Home = () => {
 
   return (
     <>
+      {/* <PlacementTestStudentResults />  */}
       <motion.div
         variants={sectionVariants}
         initial="hidden"

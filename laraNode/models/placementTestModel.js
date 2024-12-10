@@ -98,6 +98,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
+        issue_certificate: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true
+        },
         whatsAppChannelLink: {
             type: DataTypes.STRING,
             allowNull: true,
@@ -143,3 +147,9 @@ module.exports = (sequelize, DataTypes) => {
 //     test_title = 'Test';
 
 // SET SQL_SAFE_UPDATES = 1;  -- Restore safe update mode after running the update
+
+
+
+
+// ALTER table laradb.placementtests 
+// add column issue_certificate BOOLEAN DEFAULT TRUE;

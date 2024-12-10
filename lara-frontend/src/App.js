@@ -73,6 +73,7 @@ import ChromeOnlyMessage from './components/ChromeOnlyMessage';
 import TestNotActiveYet from './components/TestNotActiveYet';
 import RecruiterDashboard from './components/recruiter/RecruiterDashboard';
 import SaveWhatsAppChannelModal from './components/placementTest/SaveWhatsAppChannelModal';
+import ExternalStudentsResults from './components/ExternalStudentsResults';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -155,6 +156,7 @@ const App = () => {
             <Route path='studentHome/weekly-test-results/:wt_id' element={<AllStudentsWeeklyTestResults />} />
             <Route path='weekly-test-student-performance/:student_id' element={<WeeklyTestPerformanceForAdmin />} />
             <Route path='/add-whatsApp-link' element={<SaveWhatsAppChannelModal />} />
+            <Route path='/external-test-results' element={<ExternalStudentsResults />} />
 
           </Routes>
         </div>
