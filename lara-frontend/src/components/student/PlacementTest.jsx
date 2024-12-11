@@ -1392,7 +1392,7 @@ const PlacementTest = () => {
             {/* Student details form modal */}
             <Modal show={modalOpen} >
                 <Modal.Header >
-                    <Modal.Title>{showForm ? "Please Fill the Form" : `Join Our WhatsApp Channel`}</Modal.Title>
+                    <Modal.Title>{showForm ? "Please Fill the Form" : `Please adhere to the rules`}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {!showForm ? (
