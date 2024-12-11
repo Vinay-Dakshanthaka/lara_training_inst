@@ -20,6 +20,7 @@ function DefaultNavbar() {
             <Nav.Link as={Link} to="/">Home</Nav.Link>
             <Nav.Link as={Link} to="about">About</Nav.Link>
             <Nav.Link as={Link} to="course">Course</Nav.Link>
+            <Nav.Link as={Link} to="external-test-results">Results</Nav.Link>
             <button className='btn btn-primary m-1' onClick={login}>Login</button>
           </Nav>
         </Navbar.Collapse>

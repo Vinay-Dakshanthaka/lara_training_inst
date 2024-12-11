@@ -553,7 +553,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Form, Modal, Row, Col, Card, Table, Alert } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -564,10 +564,13 @@ import "jspdf-autotable";
 import logoUrl from "./laralogo.png";
 import qrCodeUrl from "./qr_code_whatsApp.png"
 import { WhatsApp } from '@mui/icons-material';
+import QRCodeDisplay from './QRCodeDisplay';
+import PlacementTestStudentResults from './PlacementTestStudentResults';
 
 
 const PlacementTest = () => {
     const [loading, setLoading] = useState(true);
+    const [testDetails, setTestDetails] = useState()
     const [questions, setQuestions] = useState([]);
     const [answers, setAnswers] = useState({});
     const [totalMarks, setTotalMarks] = useState(0);
@@ -593,12 +596,16 @@ const PlacementTest = () => {
     const navigate = useNavigate();
     const [isCameraOn, setIsCameraOn] = useState(true);
     const [isMonitored, setIsMonitored] = useState(false);
+    const [isIssueCertificate, setIsIssueCertificate] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState(null);
 
     let marksForCertificate;
 
     const showAlert = () => {
         alert("Allow camera and microphone access inorder to attend the test")
     }
+
+    //code to prevent open new tab and opening the context menu 
 
     useEffect(() => {
         const handleVisibilityChange = async () => {
@@ -680,7 +687,7 @@ const PlacementTest = () => {
             cleanupListeners();
         };
     }, []);
-
+    // code to prevent open new tab and opening the context menu ends 
 
     useEffect(() => {
         const fetchTestDetails = async () => {
@@ -688,20 +695,22 @@ const PlacementTest = () => {
                 const response1 = await axios.post(`${baseURL}/api/placement-test/fetchTestTopicIdsAndQnNums`, {
                     encrypted_test_id: test_id,
                 });
-    
-                const { topic_ids, number_of_questions, show_result, is_Monitored } = response1.data;
-    
+                console.log("Fetch test details ", response1.data)
+                setTestDetails(response1.data)
+                const { topic_ids, number_of_questions, show_result, is_Monitored, whatsAppChannelLink, test_title, certificate_name, issue_certificate } = response1.data;
+
                 setShowResult(show_result);
                 setIsMonitored(is_Monitored);
-    
+                setIsIssueCertificate(issue_certificate)
+
                 if (!show_result) {
                     setShowSummary(false);
                 }
-    
+
                 const response2 = await axios.post(`${baseURL}/api/cumulative-test/fetchQuestionsByTestId`, {
                     placement_test_id: test_id,
                 });
-    
+
                 const questionsWithOptions = response2.data.map((question) => ({
                     ...question,
                     options: question.QuestionOptions.map((opt) => ({
@@ -710,27 +719,27 @@ const PlacementTest = () => {
                     })),
                     correct_answers: question.CorrectAnswers.map((ans) => ans.answer_description),
                 }));
-    
+
                 // Shuffle questions
                 const shuffledQuestions = shuffleArray(questionsWithOptions);
-    
+
                 setQuestions(shuffledQuestions);
-    
+
                 const totalMarks = shuffledQuestions.reduce(
                     (sum, question) => sum + question.no_of_marks_allocated,
                     0
                 );
                 setTotalMarks(totalMarks);
-    
+
                 // Set the timer based on the number of questions
                 const initialTime = number_of_questions * 60; // 1 minute per question
                 setRemainingTime(initialTime);
-    
+
                 setLoading(false);
             } catch (error) {
                 if (error.response) {
                     if (error.response.status === 403) {
-                        navigate('/not-found');
+                        navigate('/test-not-active');
                     } else if (error.response.status === 404) {
                         navigate('/not-found');
                     }
@@ -740,9 +749,9 @@ const PlacementTest = () => {
                 }
             }
         };
-    
+
         fetchTestDetails();
-    
+
         return () => {
             // Clean up the timer when the component unmounts
             if (timerRef.current) {
@@ -750,7 +759,7 @@ const PlacementTest = () => {
             }
         };
     }, [test_id]);
-    
+
     // Utility function to shuffle the array
     const shuffleArray = (array) => {
         const shuffled = [...array]; // Create a copy to avoid mutating the original array
@@ -760,7 +769,7 @@ const PlacementTest = () => {
         }
         return shuffled;
     };
-    
+
 
     useEffect(() => {
         if (autoSubmit) {
@@ -841,7 +850,10 @@ const PlacementTest = () => {
             setIsMonitored(false);
             setIsCameraOn(false);
             setShowSummary(true);
-            generateCertificate();
+            if (isIssueCertificate) {
+                generateCertificate();
+            }
+
             if (!showResult) {
                 // Display a message for pending results
                 alert('Your result will be updated soon.');
@@ -876,17 +888,17 @@ const PlacementTest = () => {
 
     const sendPdfToEmail = async (pdfBlob) => {
         const { name, email } = formData;
-    
+
         if (!name || !email) {
             alert("Name and email are required.");
             return;
         }
-    
+
         const formPayload = new FormData();
         formPayload.append("pdf", pdfBlob, `${name}_Certificate.pdf`);
         formPayload.append("email", email);
         formPayload.append("name", name);
-    
+
         try {
             const response = await axios.post(
                 `${baseURL}/api/placement-test/send-certificate-to-email`,
@@ -895,7 +907,7 @@ const PlacementTest = () => {
                     headers: { "Content-Type": "multipart/form-data" },
                 }
             );
-    
+
             if (response.status === 200) {
                 toast.success("The certificate has been sent to your registered email")
             }
@@ -905,9 +917,9 @@ const PlacementTest = () => {
             toast.warning("Sorry!! We are Unable to send the certificate to you email!")
         }
     };
-    
-    
-      
+
+
+
 
     const generateCertificate = () => {
         const doc = new jsPDF("landscape"); // Set landscape layout
@@ -971,13 +983,30 @@ const PlacementTest = () => {
                 doc.setFontSize(28);
                 doc.setTextColor(255); // White text for certificate title
                 doc.text(
-                    "CERTIFICATE OF COMPLETION",
+                    "CERTIFICATE OF RECOGNITION",
                     centerX,
                     60,
                     null,
                     null,
                     "center"
                 );
+
+                doc.setFont("times", "italic");
+                doc.setFontSize(18); // Slightly smaller font for additional line
+                doc.setTextColor(255); // White text
+
+                // Fallback to "Logical Reasoning" if certificate_name is not available
+                const certificateName = testDetails.certificate_name || "Logical Reasoning";
+
+                doc.text(
+                    `in ${certificateName}`,
+                    centerX,
+                    70, // Adjusted Y position to be below the title
+                    null,
+                    null,
+                    "center"
+                );
+
 
                 // Recipient Details
                 doc.setFont("times", "italic");
@@ -1024,7 +1053,7 @@ const PlacementTest = () => {
 
                 // Table Content
                 const tableStartY = 125; // Start position for the table
-                const columnSpacing = 100;
+                const columnSpacing = 70;
                 const rowSpacing = 8;
                 const tableData = [
                     { label: "Email:", value: formData.email },
@@ -1072,10 +1101,14 @@ const PlacementTest = () => {
                 doc.setTextColor(0, 0, 0); // Black text for message
                 doc.text("Join our whatsApp channel for more updates", qrCodeX + 0, qrCodeY + 45);
 
-                // Save Certificate
-                doc.save(`${formData.name}_Lara_Technologies_Certificate.pdf`);
+                // // Save Certificate
+                // doc.save(`${formData.name}_Lara_Technologies_Certificate.pdf`);
 
-                const pdfBlob = doc.output("blob"); // Generate PDF as a Blob
+                // const pdfBlob = doc.output("blob"); // Generate PDF as a Blob
+
+                const pdfBlob = doc.output("blob");
+                const pdfObjectUrl = URL.createObjectURL(pdfBlob);
+                setPdfUrl(pdfObjectUrl);
                 sendPdfToEmail(pdfBlob);
             })
             .catch((err) => {
@@ -1173,7 +1206,13 @@ const PlacementTest = () => {
             {/* Camera monitoring */}
             {isMonitored && <OnlineTestMonitoring isCameraOn={isMonitored} style={{ marginLeft: '80%', marginTop: '-8rem', position: 'fixed' }} />}
 
-            <h2>Test</h2>
+            <h2>{
+                testDetails ? (
+                    <>{testDetails.test_title}</>
+                ) : (
+                    <>Test</>
+                )
+            }</h2>
 
             {/* Total Marks and Timer */}
             <div className="d-flex justify-content-between">
@@ -1185,34 +1224,36 @@ const PlacementTest = () => {
             {!showSummary && !testResults && (
                 <>
                     {questions.map((question, index) => (
-                        <Form key={question.cumulative_question_id} className="mb-4 p-3 rounded shadow-sm border">
-                            <Form.Group as={Row} className="align-items-start">
-                                <Form.Label column sm="12" className="position-relative">
-                                    <pre style={{ maxWidth: '90%', whiteSpace: 'pre-wrap', fontFamily: 'inherit', marginBottom: '10px', fontSize: '1rem' }}>
-                                        <code> {index + 1}. <br />{question.question_description}</code>
-                                    </pre>
-                                    <span className="position-absolute top-0 end-0 bg-light px-2 py-1 rounded" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
-                                        Marks: {question.no_of_marks_allocated}
-                                    </span>
-                                </Form.Label>
-                                <Col sm="12">
-                                    {question.options.map((option, idx) => (
-                                        <Form.Check
-                                            key={idx}
-                                            type="checkbox"
-                                            label={option.option_description}
-                                            name={`question-${index}`}
-                                            value={option.option_description}
-                                            checked={answers[question.cumulative_question_id]?.includes(option.option_description)}
-                                            onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value, e.target.checked)}
-                                            className="mb-2 lead "
-                                            style={{ paddingLeft: '1.5rem', fontSize: '0.95rem', fontWeight: '400', }}
-                                        />
-                                    ))}
-                                </Col>
-                            </Form.Group>
-                        </Form>
+                        <>
+                            <Form key={question.cumulative_question_id} className="mb-4 p-3 rounded shadow-sm border">
+                                <Form.Group as={Row} className="align-items-start">
+                                    <Form.Label column sm="12" className="position-relative">
+                                        <pre style={{ maxWidth: '90%', whiteSpace: 'pre-wrap', fontFamily: 'inherit', marginBottom: '10px', fontSize: '1rem' }}>
+                                            <code> {index + 1}. <br />{question.question_description}</code>
+                                        </pre>
+                                        <span className="position-absolute top-0 end-0 bg-light px-2 py-1 rounded" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+                                            Marks: {question.no_of_marks_allocated}
+                                        </span>
+                                    </Form.Label>
+                                    <Col sm="12">
+                                        {question.options.map((option, idx) => (
+                                            <Form.Check
+                                                key={idx}
+                                                type="checkbox"
+                                                label={option.option_description}
+                                                name={`question-${index}`}
+                                                value={option.option_description}
+                                                checked={answers[question.cumulative_question_id]?.includes(option.option_description)}
+                                                onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value, e.target.checked)}
+                                                className="mb-2 lead "
+                                                style={{ paddingLeft: '1.5rem', fontSize: '0.95rem', fontWeight: '400', }}
+                                            />
+                                        ))}
+                                    </Col>
+                                </Form.Group>
+                            </Form>
 
+                        </>
                     ))}
                 </>
             )}
@@ -1251,7 +1292,42 @@ const PlacementTest = () => {
                                     <td>{totalMarks}</td>
                                 </tr>
                             </tbody>
+                            <h4 className='text-center my-3'>
+                                To View Your Previouslsy attended test results
+                                <Link to="/external-test-results" target="_blank" rel="noopener noreferrer">
+                                    Click Here
+                                </Link>
+
+                            </h4>
                         </Table>
+
+                        <div className='text-center'>
+                            {/* <button onClick={generateCertificate} className="btn btn-primary">
+                Generate Certificate
+            </button> */}
+                            {pdfUrl && (
+                                <a href={pdfUrl} download={`${formData.name}_Lara_Technologies_Certificate.pdf`} className="btn btn-success mt-3">
+                                    Download Certificate
+                                </a>
+                            )}
+                        </div>
+
+                        <div className="container">
+                            {testDetails ? (
+                                <>
+                                    <p className='h4 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
+                                    <QRCodeDisplay link={testDetails.whatsAppChannelLink} />
+                                </>
+                            ) : (
+                                <>
+                                    <p className='h4 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
+                                    <img src={qrCodeUrl} alt="WhatsApp channel link" width={200} height={200} />
+                                </>
+                            )
+                            }
+                        </div>
+
+
 
                         {/* Detailed results for each question */}
                         <Table responsive bordered hover className="mt-4 ">
@@ -1320,13 +1396,36 @@ const PlacementTest = () => {
                 </Modal.Header>
                 <Modal.Body>
                     {!showForm ? (
-                        <div className="container text-center">
-                            <img src={qrCodeUrl} alt="WhatsApp channel link" width={200} height={200} />
-                            <p>
-                                Scan and Join our <WhatsApp className="text-success" /> channel <br />
-                                Place Where we share our knowledge
-                            </p>
-                            <Button variant="primary" onClick={() => setShowForm(true)}>
+                        <div className="container ">
+                            {/* {testDetails ? (
+                                <>
+                                    <p className='h6 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
+                                    <QRCodeDisplay link={testDetails.whatsAppChannelLink} />
+                                </>
+                            ) : (
+                                <>
+                                    <p className='h6 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
+                                    <img src={qrCodeUrl} alt="WhatsApp channel link" width={200} height={200} />
+                                </>
+                            )
+                            } */}
+                            <Alert variant="info" className="mt-4">
+                                <Alert.Heading>Info</Alert.Heading>
+                                <p>Please Allow the camera and microphone to attend the test. If asked.</p>
+                            </Alert>
+                            <Alert variant="danger" className="mt-4">
+                                <Alert.Heading>Warning</Alert.Heading>
+                                <div>
+                                    Please be aware that any form of malpractice during the test, such as:
+                                    <ul>
+                                        <li>Switching to a different tab or leaving the test window</li>
+                                        <li>Your face should always face towards the screen</li>
+                                        <li>Ensure that you stay within the test environment until you submit the test</li>
+                                    </ul>
+                                    The test will be monitored by the system. If any malpractice is found, the test will be TERMINATED! Adhere to the rules at all times to avoid disqualification.
+                                </div>
+                            </Alert>
+                            <Button variant="primary my-3" onClick={() => setShowForm(true)}>
                                 Next
                             </Button>
                         </div>
@@ -1391,7 +1490,7 @@ const PlacementTest = () => {
                                     {savingStudent ? "Saving..." : "Submit"}
                                 </Button>
                             </Form>
-                            <Alert variant="info" className="mt-4">
+                            {/* <Alert variant="info" className="mt-4">
                                 <Alert.Heading>Info</Alert.Heading>
                                 <p>Please Allow the camera and microphone to attend the test.</p>
                             </Alert>
@@ -1406,7 +1505,7 @@ const PlacementTest = () => {
                                     </ul>
                                     The test will be monitored by the system. If any malpractice is found, the test will be TERMINATED! Adhere to the rules at all times to avoid disqualification.
                                 </div>
-                            </Alert>
+                            </Alert> */}
                         </>
                     )}
                 </Modal.Body>
@@ -1420,6 +1519,7 @@ const PlacementTest = () => {
             )}
 
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
+
         </div>
 
     );

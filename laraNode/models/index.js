@@ -199,8 +199,9 @@ db.WeeklyTestQuestionAssignment = require('./weeklyTestQuestionAssignment.js')(s
 db.WeeklyTestQuestionMapping = require('./weeklyTestQuestionMapping.js')(sequelize, DataTypes);  
 db.StudentAnswer = require('./weeklyTestStudentAnswers.js')(sequelize, DataTypes);  
 db.WeeklyTestFinalSubmission = require('./weeklyTestFinalSubmissionModel.js')(sequelize, DataTypes);  
-
-
+db.WhatsAppChannelLinks = require('./whatsAppChannelLinksModel.js')(sequelize, DataTypes);  
+db.PlacementTestCreator = require('./placementTestCreator.js')(sequelize, DataTypes);
+db.StudentWhatsAppLinks = require('./StudentWhatsAppLinks.js')(sequelize, DataTypes);
 
 // Define associations  
 db.Student.hasOne(db.Profile, {
@@ -498,6 +499,30 @@ db.StudentAnswer.belongsTo(db.Student, {
     foreignKey: 'student_id',
     as: 'Student'
 });
+
+// Add the association to PlacementTestCreator
+db.PlacementTest.hasMany(db.PlacementTestCreator, {
+    foreignKey: 'placement_test_id',
+    as: 'Creators'
+});
+
+db.Student.hasMany(db.PlacementTestCreator, {
+    foreignKey: 'student_id',
+    as: 'CreatedTests'
+});
+
+db.WhatsAppChannelLinks.belongsToMany(db.Student, {
+    through: db.StudentWhatsAppLinks,
+    foreignKey: 'channel_id',
+    otherKey: 'student_id',
+});
+
+db.Student.belongsToMany(db.WhatsAppChannelLinks, {
+    through: db.StudentWhatsAppLinks,
+    foreignKey: 'student_id',
+    otherKey: 'channel_id',
+});
+
 
 // Call associate method for each model if defined
 Object.keys(db).forEach(modelName => {

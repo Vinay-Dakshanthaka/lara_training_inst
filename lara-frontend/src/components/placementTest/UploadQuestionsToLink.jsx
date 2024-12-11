@@ -257,10 +257,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { baseURL } from '../config';
 import 'react-toastify/dist/ReactToastify.css';
-import { Form, Button, Container, Row, Col, Modal, Spinner } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Modal, Spinner, Table } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import image from '../cumulativeTest/excel-sheet-example.png';
-import excehlsheetWitoutId from './excelsheet_without_topic_id.xlsx'
+import excehlsheetWitoutId from './excelsheet_without_topic_id.xlsx';
 import { Link, useParams } from 'react-router-dom';
 import UploadQuestionsToLinkByTopicIds from './UploadQuestionsToLinkByTopicIds';
 
@@ -273,6 +273,7 @@ const UploadQuestionsToLink = () => {
     const { test_id } = useParams();
     const [placementTestDetails, setPlacementTestDetails] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [uploadResponse, setUploadResponse] = useState(null);
 
     useEffect(() => {
         const fetchPlacementTestDetails = async () => {
@@ -375,7 +376,7 @@ const UploadQuestionsToLink = () => {
             const formData = new FormData();
             formData.append('file', file);
 
-            await axios.post(`${baseURL}/api/placement-test/upload-questions-link`, formData, {
+            const response = await axios.post(`${baseURL}/api/placement-test/upload-questions-link`, formData, {
                 params: {
                     topic_id: selectedTopic,
                     placement_test_id: test_id
@@ -384,6 +385,7 @@ const UploadQuestionsToLink = () => {
             });
 
             toast.success("Questions uploaded successfully!");
+            setUploadResponse(response.data); // Save the API response
         } catch (error) {
             console.error('Error uploading questions:', error);
             toast.error("Something went wrong while uploading the questions.");
@@ -423,13 +425,12 @@ const UploadQuestionsToLink = () => {
             <Row>
                 <Col md={6}>
                     <Form onSubmit={handleUpload}>
-
                         <Col md={6} className="mb-3">
                             <h5>Subject: {topics.length > 0 ? topics[0].subject_name : "N/A"}</h5>
                         </Col>
 
                         <p className="lead">
-                            Upload questoins by selecting specific topic
+                            Upload questions by selecting a specific topic
                         </p>
                         <Form.Group controlId="topicSelect">
                             <Form.Label>Select Topic</Form.Label>
@@ -472,6 +473,35 @@ const UploadQuestionsToLink = () => {
                 </Col>
             </Row>
 
+            {uploadResponse && (
+                <div className="mt-4">
+                    <h5>Upload Summary</h5>
+                    <p>Total Questions: {uploadResponse.summary.totalQuestions}</p>
+                    <p>Successfully Uploaded: {uploadResponse.summary.successfullyUploaded}</p>
+                    <p>Successfully Assigned: {uploadResponse.summary.successfullyAssigned}</p>
+                    <p>Skipped Questions: {uploadResponse.summary.skippedQuestionsCount}</p>
+
+                    {uploadResponse.skippedQuestions.length > 0 && (
+                        <Table striped bordered hover>
+                            <thead>
+                                <tr>
+                                    <th>Question</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {uploadResponse.skippedQuestions.map((q, index) => (
+                                    <tr key={index}>
+                                        <td>{q.questionText}</td>
+                                        <td>{q.reason}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+                    )}
+                </div>
+            )}
+
             <Modal show={showModal} onHide={handleCloseModal} fullscreen>
                 <Modal.Header closeButton>
                     <Modal.Title>Example Excel Sheet</Modal.Title>
@@ -492,3 +522,4 @@ const UploadQuestionsToLink = () => {
 };
 
 export default UploadQuestionsToLink;
+

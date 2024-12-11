@@ -213,6 +213,7 @@ const AssignRole = () => {
                   <option value="STUDENT">STUDENT</option>
                   <option value="TRAINER">TRAINER</option>
                   <option value="PLACEMENT OFFICER">PLACEMENT OFFICER</option>
+                  <option value="RECRUITER">RECRUITER</option>
                 </select>
               </td>
               <td>

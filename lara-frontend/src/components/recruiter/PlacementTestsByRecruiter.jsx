@@ -19,7 +19,7 @@
 //     useEffect(() => {
 //         const fetchPlacementTests = async () => {
 //             try {
-//                 const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+//                 const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`);
 //                 const sortedTests = response.data.placementTests.sort((a, b) => b.is_Active - a.is_Active);
 //                 setPlacementTests(sortedTests);
 //             } catch (error) {
@@ -51,7 +51,7 @@
 //                 is_Active: true
 //             });
 //             toast.success('Link activated successfully');
-//             const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+//             const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`);
 //             const sortedTests = response.data.placementTests.sort((a, b) => b.is_Active - a.is_Active);
 //             setPlacementTests(sortedTests);
 //         } catch (error) {
@@ -74,7 +74,7 @@
 //             });
 //             toast.success('Number of questions updated successfully');
 //             setShowModal(false);
-//             const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+//             const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`);
 //             setPlacementTests(response.data.placementTests);
 //         } catch (error) {
 //             console.error('Error updating number of questions:', error);
@@ -260,10 +260,9 @@ import { BsCopy, BsPencil } from 'react-icons/bs';
 import { OverlayTrigger, Tooltip, Badge, Modal, Button, Form, Pagination, Table, Alert } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './allPlacementTest.css';
-import UpdatePlacementTestModal from './UpdatePlacementTestModal';
+import UpdatePlacementTestModal from '../placementTest/UpdatePlacementTestModal';
 
-const AllPlacementTests = () => {
+const PlacementTestsByRecruiter = () => {
     const [placementTests, setPlacementTests] = useState([]);
     const [selectedTest, setSelectedTest] = useState(null);
     const [newQuestionCount, setNewQuestionCount] = useState('');
@@ -274,27 +273,36 @@ const AllPlacementTests = () => {
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [selectedTestId, setSelectedTestId] = useState(null);
 
-    const handleOpenModal = (testId) => {
-        setSelectedTestId(testId); // Set the selected test ID
-        setShowUpdateModal(true); // Open the modal
-    };
-
-    const handleCloseModal = () => {
-        setShowUpdateModal(false); // Close the modal
-        setSelectedTestId(null); // Reset the selected ID
-    };
-
     const [alert, setAlert] = useState({
         show: false,
         message: '',
         variant: '', // 'success' or 'danger'
     });
 
+    const handleOpenModal = (testId) => {
+        setSelectedTestId(testId);
+        setShowUpdateModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowUpdateModal(false);
+        setSelectedTestId(null);
+    };
 
     useEffect(() => {
         const fetchPlacementTests = async () => {
             try {
-                const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    throw new Error("No token provided.");
+                }
+
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                };
+                const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`, config);
                 console.log(response, "-----------------------------------responseof fecthpalcemnsttests");
 
                 // Sort first by is_Active (active tests first), then by placement_test_id in descending order
@@ -306,7 +314,6 @@ const AllPlacementTests = () => {
                 });
 
                 setPlacementTests(sortedTests);
-                console.log("placement test details : ", sortedTests)
             } catch (error) {
                 console.error('Error fetching placement tests:', error);
             }
@@ -334,12 +341,22 @@ const AllPlacementTests = () => {
     // const activateLink = async (placement_test_id) => {
     //     console.log(placement_test_id, "--------------------------placement_test_id");
     //     try {
+    //         const token = localStorage.getItem("token");
+    //         if (!token) {
+    //             throw new Error("No token provided.");
+    //         }
+
+    //         const config = {
+    //             headers: {
+    //                 Authorization: `Bearer ${token}`,
+    //             },
+    //         };
     //         await axios.post(`${baseURL}/api/placement-test/disable-link`, {
     //             test_id: placement_test_id,
     //             is_Active: true
     //         });
     //         toast.success('Link activated successfully');
-    //         const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+    //         const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`, config);
     //         // console.log(response,"-------------------------------------------");
     //         const sortedTests = response.data.placementTests.sort((a, b) => b.is_Active - a.is_Active);
     //         setPlacementTests(sortedTests);
@@ -367,7 +384,19 @@ const AllPlacementTests = () => {
             });
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+
+            const token = localStorage.getItem("token");
+            if (!token) {
+                throw new Error("No token provided.");
+            }
+
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+
+            const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`, config);
             // console.log(response, "-----------------------------------responseof fecthpalcemnsttests");
 
             // Sort first by is_Active (active tests first), then by placement_test_id in descending order
@@ -377,6 +406,7 @@ const AllPlacementTests = () => {
                 }
                 return b.is_Active - a.is_Active; // Active tests will be sorted first
             });
+
             setPlacementTests(sortedTests);
         } catch (error) {
             console.error('Error toggling link status:', error);
@@ -389,7 +419,6 @@ const AllPlacementTests = () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
-
 
     const handleEditClick = (test) => {
         console.log(test, "-------------------")
@@ -406,7 +435,25 @@ const AllPlacementTests = () => {
             });
             toast.success('Number of questions updated successfully');
             setShowModal(false);
-            const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
+            const token = localStorage.getItem("token");
+            if (!token) {
+                throw new Error("No token provided.");
+            }
+
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+            const response = await axios.get(`${baseURL}/api/placement-test/getAllPlacementTestsByCreator`, config);
+             // Sort first by is_Active (active tests first), then by placement_test_id in descending order
+             const sortedTests = response.data.placementTests.sort((a, b) => {
+                if (b.is_Active === a.is_Active) {
+                    return b.placement_test_id - a.placement_test_id; // If both have same active status, sort by test ID
+                }
+                return b.is_Active - a.is_Active; // Active tests will be sorted first
+            });
+
             setPlacementTests(response.data.placementTests);
         } catch (error) {
             console.error('Error updating number of questions:', error);
@@ -503,7 +550,7 @@ const AllPlacementTests = () => {
 
     return (
         <div className="container mt-5">
-            <ToastContainer autoClose />
+            <ToastContainer />
             {alert.show && (
                 <Alert variant={alert.variant} onClose={() => setAlert({ show: false })} dismissible>
                     {alert.message}
@@ -518,7 +565,7 @@ const AllPlacementTests = () => {
                             <th style={{ width: 'fit-content' }}>Test Link</th>
                             <th>Number of Questions</th>
                             <th>Camera Monitoring</th>
-                            <th>Update Details</th>
+                            <th>Update</th>
                             <th>Results</th>
                             <th>Add Existing Questions</th>
                             <th>Add New Questions</th>
@@ -530,10 +577,7 @@ const AllPlacementTests = () => {
                     <tbody>
                         {currentTests.map(test => (
                             <tr key={test.placement_test_id} className={test.is_Active ? 'table-success animate-to-top' : ''}>
-                                <td>
-                                    {test.placement_test_id}
-                                    {test.placement_test_id === Math.max(...placementTests.map(t => t.placement_test_id)) && <Badge bg="info">New</Badge>}
-                                </td>
+                                <td>{test.placement_test_id} {test.placement_test_id === Math.max(...placementTests.map(t => t.placement_test_id)) && <Badge bg="info">New</Badge>}</td>
                                 <td className="test-link-cell">
                                     <OverlayTrigger
                                         placement="top"
@@ -565,11 +609,17 @@ const AllPlacementTests = () => {
                                 </td>
                                 <td>
                                     <button
-                                        onClick={() => handleOpenModal(test.placement_test_id)}
+                                        onClick={() => handleOpenModal(1)} // Pass the test ID here
                                         className="btn btn-primary"
                                     >
-                                        Update details
+                                        Update Placement Test
                                     </button>
+
+                                    <UpdatePlacementTestModal
+                                        placement_test_id={test.placement_test_id}
+                                        show={showUpdateModal}
+                                        handleClose={handleCloseModal}
+                                    />
                                 </td>
                                 <td>
                                     <Link to={`/get-result/${test.placement_test_id}`}>
@@ -605,16 +655,10 @@ const AllPlacementTests = () => {
                                     </button>
                                 </td>
                             </tr>
-
                         ))}
                     </tbody>
                 </Table>
             </div>
-            <UpdatePlacementTestModal
-                placement_test_id={selectedTestId}
-                show={showUpdateModal}
-                handleClose={handleCloseModal}
-            />
 
             {/* Bootstrap Pagination */}
             <Pagination className="justify-content-center" style={{ overflowX: 'auto' }}>
@@ -656,4 +700,4 @@ const AllPlacementTests = () => {
         </div>
     );
 };
-export default AllPlacementTests;
+export default PlacementTestsByRecruiter;

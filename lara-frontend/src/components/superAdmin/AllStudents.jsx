@@ -157,7 +157,7 @@ const AllStudents = () => {
   
   return (
     <div className='table-responsive'>
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+      <ToastContainer position="top-right"  hideProgressBar />
       <h1>All Student Details</h1>
       {/* {alertMessage && (
         <div className={`alert ${isSuccess ? 'alert-success' : 'alert-danger'} alert-dismissible fade show`} role="alert">
@@ -216,6 +216,7 @@ const AllStudents = () => {
                   <option value="TRAINER">TRAINER</option>
                   <option value="ADMIN">ADMIN</option>
                   <option value="PLACEMENT OFFICER">PLACEMENT OFFICER</option>
+                  <option value="RECRUITER">RECRUITER</option>
                 </select>
               </td>
               <td>

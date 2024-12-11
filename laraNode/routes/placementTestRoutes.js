@@ -14,15 +14,41 @@ const uploadQuestionImage = multer({ dest: 'cumulative_question_images/' });
 const nodemailer = require('nodemailer');
 const logoPath = path.join(__dirname, 'laralogo.png');
 
-placementTestRoute.post('/create-test-link', placementTestContoller.createPlacementTestLink);
+placementTestRoute.post('/create-test-link', verifyToken,  placementTestContoller.createPlacementTestLink);
+
+placementTestRoute.put('/updatePlacementTest/:placement_test_id', verifyToken,  placementTestContoller.updatePlacementTest);
+
+placementTestRoute.post('/saveWhatsAppChannelLink', placementTestContoller.saveWhatsAppChannelLink);
+
+placementTestRoute.post('/assignWhatsAppChannelToStudent', placementTestContoller.assignWhatsAppChannelToStudent);
+
+placementTestRoute.get('/getAllStudentsWithWhatsAppChannelLinks', placementTestContoller.getAllStudentsWithWhatsAppChannelLinks);
+
+placementTestRoute.get('/getStudentWithWhatsAppChannelLinks', verifyToken, placementTestContoller.getStudentWithWhatsAppChannelLinks);
+
+placementTestRoute.get('/getAllWhatsAppChannelLinks', placementTestContoller.getAllWhatsAppChannelLinks);
+
+placementTestRoute.put('/updateWhatsAppChannelLink/:id', placementTestContoller.updateWhatsAppChannelLink);
+
+placementTestRoute.get('/getPlacementTestDetailsById/:placement_test_id', placementTestContoller.getPlacementTestDetailsById);
+
+placementTestRoute.delete('/deleteWhatsAppChannelLink/:id', placementTestContoller.deleteWhatsAppChannelLink);
+
+placementTestRoute.get('/fetchWhatsAppChannelLinks', placementTestContoller.fetchWhatsAppChannelLinks);
+
+placementTestRoute.get('/fetchWhatsAppChannelLinkById/:channel_id', placementTestContoller.fetchWhatsAppChannelLinkById);
 
 placementTestRoute.post('/save-placement-test-student', placementTestContoller.savePlacementTestStudent);
 
 placementTestRoute.get('/get-all-placement-tests', placementTestContoller.getAllPlacementTests);
 
+placementTestRoute.get('/getAllPlacementTestsByCreator',verifyToken, placementTestContoller.getAllPlacementTestsByCreator);
+
 placementTestRoute.post('/fetchTestTopicIdsAndQnNums', placementTestContoller.fetchTestTopicIdsAndQnNums);
 
 placementTestRoute.post('/savePlacementTestResults', placementTestContoller.savePlacementTestResults);
+
+placementTestRoute.get('/getPlacementTestResultsByEmail/:email', placementTestContoller.getPlacementTestResultsByEmail);
 
 placementTestRoute.get('/getAllResults', placementTestContoller.getAllResults);
 
@@ -48,23 +74,59 @@ placementTestRoute.post('/getTopicsByPlacementTestId', placementTestContoller.ge
 
 placementTestRoute.post('/getPlacementTestById', placementTestContoller.getPlacementTestById);
 
+// placementTestRoute.post('/upload-questions-link', upload.single('file'), async (req, res) => {
+//     const topic_id = req.query.topic_id;
+//     const placement_test_id = req.query.placement_test_id; // Add placement_test_id if needed
+//     const filePath = req.file.path;
+
+//     if (!topic_id) {
+//         return res.status(400).send({ message: "topic_id query parameter is required." });
+//     }
+
+//     try {
+//         await placementTestContoller.uploadAndAssignQuestionsToLink(filePath, topic_id, placement_test_id);
+//         res.status(200).send({ message: "Excel data processed and questions assigned successfully." });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send({ message: error.message });
+//     }
+// });
+
 placementTestRoute.post('/upload-questions-link', upload.single('file'), async (req, res) => {
     const topic_id = req.query.topic_id;
-    const placement_test_id = req.query.placement_test_id; // Add placement_test_id if needed
-    const filePath = req.file.path;
+    const placement_test_id = req.query.placement_test_id; // Optional
+    const filePath = req.file?.path;
 
     if (!topic_id) {
-        return res.status(400).send({ message: "topic_id query parameter is required." });
+        return res.status(400).send({ 
+            message: "The 'topic_id' query parameter is required." 
+        });
+    }
+
+    if (!filePath) {
+        return res.status(400).send({ 
+            message: "No file uploaded. Please upload a valid Excel file." 
+        });
     }
 
     try {
-        await placementTestContoller.uploadAndAssignQuestionsToLink(filePath, topic_id, placement_test_id);
-        res.status(200).send({ message: "Excel data processed and questions assigned successfully." });
+        // Call the controller method to process the file
+        const response = await placementTestContoller.uploadAndAssignQuestionsToLink(filePath, topic_id, placement_test_id);
+
+        res.status(200).send({
+            message: "Excel data processed successfully.",
+            summary: response.summary,
+            skippedQuestions: response.skippedQuestions
+        });
     } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: error.message });
+        console.error('Error processing questions:', error);
+        res.status(500).send({
+            message: "An error occurred while processing the Excel file.",
+            error: error.message
+        });
     }
 });
+
 
 placementTestRoute.post('/upload-questions-by-excel-topics', uploadCertificate.single('file'), async (req, res) => {
     const { link_topic_ids } = req.body;

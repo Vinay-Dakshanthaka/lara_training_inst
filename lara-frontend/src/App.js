@@ -71,6 +71,9 @@ import AllStudentsWeeklyTestResults from './components/weeklyTest/AllStudentsWee
 import WeeklyTestPerformanceForAdmin from './components/weeklyTest/weeklyTestStudentAnswerSubmission/WeeklyTestPerformanceForAdmin';
 import ChromeOnlyMessage from './components/ChromeOnlyMessage';
 import TestNotActiveYet from './components/TestNotActiveYet';
+import RecruiterDashboard from './components/recruiter/RecruiterDashboard';
+import SaveWhatsAppChannelModal from './components/placementTest/SaveWhatsAppChannelModal';
+import ExternalStudentsResults from './components/ExternalStudentsResults';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -97,6 +100,7 @@ const App = () => {
             <Route path="/adminDashboard" element={<AdminDashboard />} />
             <Route path="/trainerDashboard" element={<TrainerDashboard />} />
             <Route path="/placementOfficerDashboard" element={<PlacementOfficerDashboard />} />
+            <Route path="/recruiterDashboard" element={<RecruiterDashboard />} />
             <Route path="/passwodResetForm" element={<PasswordResetForm />} />
             <Route path="/resetPassword" element={<ResetPassword />} />
             <Route path='/createNewBatch' element={<CreateNewBatch />} />
@@ -151,6 +155,8 @@ const App = () => {
             <Route path='studentHome/weeklytest-detailed-summary/:wt_id' element={<WeeklyTestStudentDetailedSummary />} />
             <Route path='studentHome/weekly-test-results/:wt_id' element={<AllStudentsWeeklyTestResults />} />
             <Route path='weekly-test-student-performance/:student_id' element={<WeeklyTestPerformanceForAdmin />} />
+            <Route path='/add-whatsApp-link' element={<SaveWhatsAppChannelModal />} />
+            <Route path='/external-test-results' element={<ExternalStudentsResults />} />
 
           </Routes>
         </div>

@@ -3,10 +3,9 @@ import { Button, Form, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { baseURL } from '../config';
-import WhatsAppChannelDropdown from './WhatsAppChannelDropdown';
-import SaveWhatsAppChannelModal from './SaveWhatsAppChannelModal';
+import WhatsAppChannelDropdownForRecruiter from './WhatsAppChannelDropdownForRecruiter';
 
-const CreateTestLink = () => {
+const RecruiterCreateTestLink = () => {
     const [subjects, setSubjects] = useState([]);
     const [topics, setTopics] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
@@ -20,7 +19,6 @@ const CreateTestLink = () => {
     const [description, setDescription] = useState('');
     const [showResult, setShowResult] = useState(true);
     const [isMonitored, setIsMonitored] = useState(false); // State for isMonitored
-    const [isIssueCertificate, setIsIssueCertificate] = useState(false); // State for provide certificate
     const [newTestLink, setNewTestLink] = useState(''); // New state for test link
     const [alert, setAlert] = useState({ show: false, message: '', variant: '' }); // State for Bootstrap alerts
     const [testTitle, setTestTitle] = useState('');
@@ -197,7 +195,6 @@ const CreateTestLink = () => {
                     test_title: testTitle,
                     channel_link: channelLink,
                     certificate_name: certificateName,
-                    issue_certificate:isIssueCertificate
                 },
                 config
             );
@@ -299,8 +296,9 @@ const CreateTestLink = () => {
 
             <div className="row">
             <div className='col-auto'>
-                <WhatsAppChannelDropdown onSelectChannel={handleChannelSelect} />
-                <Link to='/add-whatsApp-link' className='btn btn-success my-3'>Add WhatsApp Channel</Link>
+                <WhatsAppChannelDropdownForRecruiter onSelectChannel={handleChannelSelect} />
+                {/* <WhatsAppChannelDropdown onSelectChannel={handleChannelSelect} />
+                <Link to='/add-whatsApp-link' className='btn btn-success my-3'>Add WhatsApp Channel</Link> */}
             </div>
             </div>
 
@@ -383,14 +381,6 @@ const CreateTestLink = () => {
                     onChange={() => setIsMonitored(!isMonitored)}
                 />
             </Form.Group>
-            <Form.Group controlId="formIssueCertificate" className="mt-4">
-                <Form.Check
-                    type="checkbox"
-                    label="Provide Certificate "
-                    checked={isIssueCertificate}
-                    onChange={() => setIsIssueCertificate(!isIssueCertificate)}
-                />
-            </Form.Group>
 
             <Button className="btn btn-success mt-4 w-100" onClick={handleCreateLink}>
                 Create Test Link
@@ -400,4 +390,4 @@ const CreateTestLink = () => {
     );
 };
 
-export default CreateTestLink;
+export default RecruiterCreateTestLink;
