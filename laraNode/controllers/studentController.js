@@ -95,6 +95,7 @@ const getStudentDetailsById = async (req, res) => {
 const verifyByEmailAndPassword = async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log(req.body,"--------------body")
         const student = await Student.findOne({ where: { email } });
         if (!student) {
             return res.status(404).send({ message: 'Student not found.' });
@@ -102,6 +103,7 @@ const verifyByEmailAndPassword = async (req, res) => {
 
         // Compare the provided password with the hashed password in the database
         const passwordMatch = await bcrypt.compare(password, student.password);
+        console.log(passwordMatch,"-------------------passwordmacth")
         if (passwordMatch) {
             // Generate JWT token
             const token = jwt.sign({ id: student.id, email: student.email }, jwtSecret );

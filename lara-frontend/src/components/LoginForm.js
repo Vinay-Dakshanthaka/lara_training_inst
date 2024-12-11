@@ -80,6 +80,7 @@ const LoginForm = () => {
         }
       }
     } catch (error) {
+      console.error(error)
       toast.error('Failed to login. Please check your credentials.');
     }
   };
