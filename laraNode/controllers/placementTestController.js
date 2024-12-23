@@ -269,6 +269,7 @@ const createPlacementTestLink = async (req, res) => {
             issue_certificate,
         } = req.body;
 
+            console.log(req.body,"------------------------------------")
         // Get studentId from the request (assuming it's set via middleware or is part of the request)
         const studentId = req.studentId;
 
@@ -286,7 +287,7 @@ const createPlacementTestLink = async (req, res) => {
         if (topics.length !== topic_ids.length) {
             return res.status(400).send({ message: 'One or more topic IDs are invalid' });
         }
-
+        console.log("-------------------------------------------------------")
         // Create a new PlacementTest
         const newTest = await PlacementTest.create({
             test_link: '', // Initially empty, will be updated later
@@ -301,7 +302,7 @@ const createPlacementTestLink = async (req, res) => {
             is_Monitored: is_Monitored !== undefined ? is_Monitored : false, // Default to false if not provided
             issue_certificate: issue_certificate !== undefined ? issue_certificate : false, // Default to false if not provided
         });
-
+          console.log(newTest,"-----------------------newtest")
         // Generate the test link with the placement_test_id
         const test_link = `${baseURL}/test/${newTest.placement_test_id}`;
         newTest.test_link = test_link;

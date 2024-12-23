@@ -390,9 +390,9 @@ const AllPlacementTests = () => {
         }
     };
 
-
+       
     const handleEditClick = (test) => {
-        console.log(test, "-------------------")
+        console.log(test, "------------------------test")
         setSelectedTest(test);
         setNewQuestionCount(test.number_of_questions);
         setShowModal(true);
@@ -416,6 +416,12 @@ const AllPlacementTests = () => {
 
     const handleMonitoredChange = async (test) => {
         try {
+            if (!test || !test.placement_test_id || typeof test.is_Monitored === 'undefined') {
+                console.error('Invalid test object:', test);
+                toast.error('Failed to update monitored status: Invalid test object');
+                return;
+              }
+              
             const updatedStatus = !test.is_Monitored;
             await axios.post(`${baseURL}/api/placement-test/updateIsMonitored`, {
                 test_id: test.placement_test_id,

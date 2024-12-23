@@ -1215,10 +1215,18 @@ const PlacementTest = () => {
             }</h2>
 
             {/* Total Marks and Timer */}
-            <div className="d-flex justify-content-between">
-                <div>Total Marks: {totalMarks}</div>
-                <div className="fw-bolder">Time Remaining: {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, '0')}</div>
-            </div>
+              {/* Fixed Total Marks and Time Remaining */}
+    <div style={{ marginLeft: '80%', marginTop: '-6rem', position: 'fixed' }}>
+    {/* Total Marks */}
+    <div>
+        Total Marks: {totalMarks}
+    </div>
+
+    {/* Time Remaining */}
+    <div >
+        Time Remaining: {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, '0')}
+    </div>
+</div>
 
             {/* Questions and options */}
             {!showSummary && !testResults && (
@@ -1236,20 +1244,19 @@ const PlacementTest = () => {
                                         </span>
                                     </Form.Label>
                                     <Col sm="12">
-                                        {question.options.map((option, idx) => (
-                                            <Form.Check
-                                                key={idx}
-                                                type="checkbox"
-                                                label={option.option_description}
-                                                name={`question-${index}`}
-                                                value={option.option_description}
-                                                checked={answers[question.cumulative_question_id]?.includes(option.option_description)}
-                                                onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value, e.target.checked)}
-                                                className="mb-2 lead "
-                                                style={{ paddingLeft: '1.5rem', fontSize: '0.95rem', fontWeight: '400', }}
-                                            />
-                                        ))}
-                                    </Col>
+                                       {question.options.map((option, idx) => (
+        <Form.Check
+            key={idx}
+            type="checkbox"
+            label={<pre>{option.option_description}</pre>} 
+            name={`question-${index}`}
+            value={option.option_description}
+            checked={answers[question.cumulative_question_id]?.includes(option.option_description)}
+            onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value, e.target.checked)}
+            className="mb-2 lead "
+            style={{ paddingLeft: '1.5rem', fontSize: '0.95rem', fontWeight: '400' }}/>
+              ))}
+              </Col>
                                 </Form.Group>
                             </Form>
 

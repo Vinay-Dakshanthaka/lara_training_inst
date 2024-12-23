@@ -10,10 +10,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const corsOptions = {
+    origin: 'http://localhost:3000',
     // origin: 'https://www.laragrooming.com',
     // origin: ['https://www.laragrooming.com', 'https://laragrooming.com'],
-    origin: ['https://www.laragrooming.com', 'http://localhost:3000'],
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+    // origin: ['https://www.laragrooming.com', 'http://localhost:3000'],
+    // optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
   };
   
 // // Enable CORS 
