@@ -2,7 +2,7 @@ import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { FaFacebook, FaYoutube, FaInstagram, FaLinkedin, FaTwitter } from 'react-icons/fa';
 import logo from '../resources/images/laralogo.webp';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './footer.css'
 
 const Footer = () => {
@@ -23,6 +23,13 @@ const Footer = () => {
         break;
     }
   };
+
+  const location = useLocation();
+  
+      // Hide the Navbar on '/join-channel'
+      if (location.pathname === "/join-channel") {
+        return null;
+      }
 
   return (
     <footer className="bg-footer text-light py-5">

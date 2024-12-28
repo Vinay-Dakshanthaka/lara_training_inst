@@ -74,6 +74,7 @@ import TestNotActiveYet from './components/TestNotActiveYet';
 import RecruiterDashboard from './components/recruiter/RecruiterDashboard';
 import SaveWhatsAppChannelModal from './components/placementTest/SaveWhatsAppChannelModal';
 import ExternalStudentsResults from './components/ExternalStudentsResults';
+import WhatsAppJoin from './components/student/WhatsAppJoin';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -92,6 +93,7 @@ const App = () => {
             <Route path='course' element={<Course />} />
             <Route path='terms' element={<TermsAndCondition />} />
             <Route path="/login" element={<LoginForm />} />
+            <Route path="/join-channel" element={<WhatsAppJoin />} />
             <Route path="/signup" element={<SignUpForm />} />
             <Route path="/studentHome" element={<StudentHome />} />
             <Route path="/updateProfile" element={<UpdateProfile />} />
