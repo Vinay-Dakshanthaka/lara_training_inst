@@ -49,6 +49,7 @@ placementTestRoute.post('/fetchTestTopicIdsAndQnNums', placementTestContoller.fe
 placementTestRoute.post('/savePlacementTestResults', placementTestContoller.savePlacementTestResults);
 
 placementTestRoute.get('/getPlacementTestResultsByEmail/:email', placementTestContoller.getPlacementTestResultsByEmail);
+placementTestRoute.put('/updateEmail/:email', placementTestContoller.updateStudentEmail);
 
 placementTestRoute.get('/getAllResults', placementTestContoller.getAllResults);
 
@@ -169,7 +170,7 @@ placementTestRoute.post(
 
         try {
             const { email, name } = req.body;
-
+             console.log(req.body,"------------------------------------")
             console.log("Request Body:", req.body);
             console.log("Uploaded File:", req.file);
 
@@ -230,7 +231,7 @@ placementTestRoute.post(
                     },
                 ],
             };            
-
+               console.log(mailOptions,"----------------mailoptions")
             await transporter.sendMail(mailOptions);
 
             // Clean up temporary file
