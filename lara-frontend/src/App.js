@@ -75,6 +75,7 @@ import RecruiterDashboard from './components/recruiter/RecruiterDashboard';
 import SaveWhatsAppChannelModal from './components/placementTest/SaveWhatsAppChannelModal';
 import ExternalStudentsResults from './components/ExternalStudentsResults';
 import WhatsAppJoin from './components/student/WhatsAppJoin';
+import UpdateStudentEmail from './components/admin/UpdateStudentEmail';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -125,6 +126,8 @@ const App = () => {
             <Route path="/internal-test/:test_id" element={<InternalTest />} />
             <Route path="/malpractice-detected" element={<PlacementTestError />} />
             <Route path="/create-test-link" element={<CreateTestLink />} />
+            <Route path="/updateStudentEmail" element={<UpdateStudentEmail />} />
+
             <Route path="/not-found" element={<NotFound />} />
             <Route path="/test-not-active" element={<TestNotActiveYet />} />
             <Route path="/chrome-only" element={<ChromeOnlyMessage />} />
@@ -159,6 +162,7 @@ const App = () => {
             <Route path='weekly-test-student-performance/:student_id' element={<WeeklyTestPerformanceForAdmin />} />
             <Route path='/add-whatsApp-link' element={<SaveWhatsAppChannelModal />} />
             <Route path='/external-test-results' element={<ExternalStudentsResults />} />
+
 
           </Routes>
         </div>
