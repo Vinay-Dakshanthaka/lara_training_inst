@@ -202,6 +202,12 @@ db.WeeklyTestFinalSubmission = require('./weeklyTestFinalSubmissionModel.js')(se
 db.WhatsAppChannelLinks = require('./whatsAppChannelLinksModel.js')(sequelize, DataTypes);  
 db.PlacementTestCreator = require('./placementTestCreator.js')(sequelize, DataTypes);
 db.StudentWhatsAppLinks = require('./StudentWhatsAppLinks.js')(sequelize, DataTypes);
+db.PaperBasedTestResults = require('./paperBasedTestResults.js')(sequelize,DataTypes);
+
+
+db.Student.hasMany(db.PaperBasedTestResults, { foreignKey: 'studentId' });
+db.PaperBasedTestResults.belongsTo(db.Student, { foreignKey: 'studentId' });
+
 
 // Define associations  
 db.Student.hasOne(db.Profile, {
