@@ -12,6 +12,7 @@ const WeeklyTestQuestionMapping = db.WeeklyTestQuestionMapping;
 const Student = db.Student;
 const StudentAnswer = db.StudentAnswer;
 const WeeklyTestFinalSubmission = db.WeeklyTestFinalSubmission;
+const {  BatchTestLinks } = require('../models'); 
 
 const createWeeklyTestLink = async (req, res) => {
     try {
@@ -1907,7 +1908,19 @@ const getStudentAndActiveTestsWithAttendance = async (req, res) => {
     const studentId = req.studentId;  
 
     try {
-        // Step 1: Fetch all active weekly tests
+        // Step 1: Fetch student's batch
+        const studentBatch = await db.Student_Batch.findOne({
+            where: { student_id: studentId },
+            attributes: ['batch_id']
+        });
+
+        if (!studentBatch) {
+            return res.status(404).send({ message: 'Student batch not found' });
+        }
+
+        const batchId = studentBatch.batch_id;
+
+        // Step 2: Fetch active weekly tests related to the student's batch
         const activeTests = await WeeklyTest.findAll({
             where: { is_active: true },
             include: [
@@ -1915,15 +1928,21 @@ const getStudentAndActiveTestsWithAttendance = async (req, res) => {
                     model: WeeklyTestTopics,
                     as: 'TestWeekly',
                     include: [{ model: Topic, as: 'TopicAssociation' }]
+                },
+                {
+                    model: BatchTestLinks,
+                    required: true,  // Ensures only linked batch tests are included
+                    where: { batch_id: batchId }  // Filters tests for the student's batch
                 }
             ]
         });
+        
 
         if (!activeTests || activeTests.length === 0) {
-            return res.status(404).send({ message: 'No active weekly tests found' });
+            return res.status(404).send({ message: 'No active weekly tests found for this batch' });
         }
 
-        // Step 2: Process each test for student attendance & marks
+        // Step 3: Process each test for student attendance & marks
         const testsWithAttendance = await Promise.all(activeTests.map(async (test) => {
             const studentAttendance = await StudentAnswer.findOne({
                 where: { wt_id: test.wt_id, student_id: studentId },
@@ -2002,7 +2021,7 @@ const getStudentAndActiveTestsWithAttendance = async (req, res) => {
             };
         }));
 
-        // Step 3: Fetch student details
+        // Step 4: Fetch student details
         const student = await Student.findOne({
             where: { id: studentId },
             attributes: ['id', 'name', 'email', 'phoneNumber']
@@ -2032,6 +2051,137 @@ const getStudentAndActiveTestsWithAttendance = async (req, res) => {
         return res.status(500).send({ message: 'Error fetching details', error: error.message });
     }
 };
+
+
+// const getStudentAndActiveTestsWithAttendance = async (req, res) => {
+//     const studentId = req.studentId;  
+
+//     try {
+//         // Step 1: Fetch all active weekly tests
+//         const activeTests = await WeeklyTest.findAll({
+//             where: { is_active: true },
+//             include: [
+//                 {
+//                     model: WeeklyTestTopics,
+//                     as: 'TestWeekly',
+//                     include: [{ model: Topic, as: 'TopicAssociation' }]
+//                 }
+//             ]
+//         });
+
+//         if (!activeTests || activeTests.length === 0) {
+//             return res.status(404).send({ message: 'No active weekly tests found' });
+//         }
+
+//         // Step 2: Process each test for student attendance & marks
+//         const testsWithAttendance = await Promise.all(activeTests.map(async (test) => {
+//             const studentAttendance = await StudentAnswer.findOne({
+//                 where: { wt_id: test.wt_id, student_id: studentId },
+//                 attributes: ['student_id']
+//             });
+
+//             // Fetch student answers for this test
+//             const studentAnswers = await StudentAnswer.findAll({
+//                 where: { wt_id: test.wt_id, student_id: studentId },
+//                 attributes: ['question_id', 'answer', 'marks']
+//             });
+
+//             let obtainedMarks = 0;
+//             let totalAvailableMarks = 0;
+
+//             if (studentAnswers.length > 0) {
+//                 const existingMarks = studentAnswers.some(answer => answer.marks !== null);
+
+//                 if (existingMarks) {
+//                     obtainedMarks = studentAnswers.reduce((total, answer) => total + (Number(answer.marks) || 0), 0);
+//                 } else {
+//                     // Auto-calculate marks if marks are not present
+//                     const questionIds = studentAnswers.map(answer => answer.question_id);
+//                     const studentResponses = studentAnswers.map(answer => answer.answer.toLowerCase());
+
+//                     // Fetch questions and their marks
+//                     const questions = await WeeklyTestQuestion.findAll({
+//                         where: { wt_question_id: questionIds },
+//                         attributes: ['wt_question_id', 'marks']
+//                     });
+
+//                     // Fetch keywords for each question
+//                     const keywordsData = await WeeklyTestQuestionAnswer.findAll({
+//                         where: { wt_question_id: questionIds },
+//                         attributes: ['wt_question_id', 'keywords']
+//                     });
+
+//                     // Map keywords
+//                     const keywordsMap = {};
+//                     keywordsData.forEach(({ wt_question_id, keywords }) => {
+//                         keywordsMap[wt_question_id] = keywords.toLowerCase().split(',').map(k => k.trim());
+//                     });
+
+//                     // Strip HTML tags and extra spaces
+//                     const cleanText = (text) => text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+
+//                     // Calculate marks based on keyword matching
+//                     studentAnswers.forEach(({ question_id, answer }) => {
+//                         const studentResponse = cleanText(answer.toLowerCase());
+//                         const keywords = keywordsMap[question_id] || [];
+
+//                         // Check if any keyword exists in student response
+//                         const isCorrect = keywords.some(keyword => studentResponse.includes(keyword));
+
+//                         if (isCorrect) {
+//                             const question = questions.find(q => q.wt_question_id === question_id);
+//                             obtainedMarks += question ? question.marks : 0;
+//                         }
+//                     });
+//                 }
+//             }
+
+//             // Fetch total marks available for this test
+//             totalAvailableMarks = await WeeklyTestQuestion.sum('marks', {
+//                 where: { wt_question_id: studentAnswers.map(a => a.question_id) }
+//             });
+
+//             return {
+//                 test_id: test.wt_id,
+//                 test_link: test.wt_link,
+//                 test_date: new Date(test.test_date).toLocaleDateString(),
+//                 test_description: test.wt_description,
+//                 has_attended: !!studentAttendance,
+//                 obtained_marks: studentAttendance ? obtainedMarks : null,
+//                 total_available_marks: totalAvailableMarks
+//             };
+//         }));
+
+//         // Step 3: Fetch student details
+//         const student = await Student.findOne({
+//             where: { id: studentId },
+//             attributes: ['id', 'name', 'email', 'phoneNumber']
+//         });
+
+//         if (!student) {
+//             return res.status(404).send({ message: 'Student not found' });
+//         }
+
+//         // Count number of tests attended
+//         const attendedTestsCount = testsWithAttendance.filter(test => test.has_attended).length;
+
+//         return res.status(200).send({
+//             message: 'Student and active test details fetched successfully',
+//             student: {
+//                 student_id: student.id,
+//                 student_name: student.name,
+//                 student_email: student.email,
+//                 student_phone: student.phoneNumber,
+//                 attended_tests_count: attendedTestsCount
+//             },
+//             active_tests: testsWithAttendance
+//         });
+
+//     } catch (error) {
+//         console.error('Error fetching student and active test details:', error);
+//         return res.status(500).send({ message: 'Error fetching details', error: error.message });
+//     }
+// };
 
 
 const getStudentsWeeklyTestDetailedSummary = async (req, res) => {
@@ -2630,6 +2780,88 @@ const getStudentAndActiveTestsWithAttendanceForAdmin = async (req, res) => {
     }
 };
 
+// const deleteinternaltests = async (req, res) => {
+//     try {
+//         const { wt_id } = req.params;
+//         const batchTestLinks = await db.BatchTestLinks.findAll({
+//             where: {
+//                 wt_id: wt_id
+//             }
+//         });
+
+//         if (batchTestLinks.length > 0) {
+//             await db.BatchTestLinks.destroy({
+//                 where: {
+//                     wt_id: wt_id
+//                 }
+//             });
+//             console.log(`Deleted associated BatchTestLinks for wt_id: ${wt_id}`);
+//         }
+//         const test = await db.WeeklyTest.findByPk(wt_id);
+
+//         if (!test) {
+//             return res.status(404).json({ message: 'Test not found' });
+//         }
+//         await test.destroy();
+
+//         return res.status(200).json({ message: 'Test and associated BatchTestLinks deleted successfully' });
+
+//     } catch (error) {
+//         console.error('Error deleting internal test:', error);
+//         return res.status(500).json({ message: 'Something went wrong while deleting the test' });
+//     }
+// };
+
+const deleteinternaltests = async (req, res) => {
+    try {
+        const { wt_id } = req.params;
+
+        // 1. Check and delete `weeklytestfinalsubmissions` if any exist
+        const finalSubmissions = await db.WeeklyTestFinalSubmission.findAll({
+            where: { wt_id: wt_id }
+        });
+
+        if (finalSubmissions.length > 0) {
+            await db.WeeklyTestFinalSubmission.destroy({
+                where: { wt_id: wt_id }
+            });
+            console.log(`Deleted associated WeeklyTestFinalSubmissions for wt_id: ${wt_id}`);
+        }
+
+        // 2. Delete records from `studentanswers` before removing the weekly test
+        await db.StudentAnswer.destroy({
+            where: { wt_id: wt_id }
+        });
+
+        console.log(`Deleted associated StudentAnswers for wt_id: ${wt_id}`);
+
+        // 3. Delete associated BatchTestLinks (child records)
+        await db.BatchTestLinks.destroy({
+            where: { wt_id: wt_id }
+        });
+
+        console.log(`Deleted associated BatchTestLinks for wt_id: ${wt_id}`);
+
+        // 4. Find and delete the WeeklyTest record
+        const test = await db.WeeklyTest.findByPk(wt_id);
+        console.log(test, "----------------test");
+
+        if (!test) {
+            return res.status(404).json({ message: 'Test not found' });
+        }
+
+        await test.destroy();
+
+        return res.status(200).json({ message: 'Test and associated data deleted successfully' });
+
+    } catch (error) {
+        console.error('Error deleting internal test:', error);
+        return res.status(500).json({ message: 'Something went wrong while deleting the test' });
+    }
+};
+
+
+
 module.exports = {
     createWeeklyTestLink,
     updateWeeklyTest,
@@ -2662,4 +2894,5 @@ module.exports = {
     getStudentsWeeklyTestDetailedSummary,
     getAllStudentResultsForWeeklyTest,
     getAllIndividualStudentResultsForTest,
+    deleteinternaltests,
 }

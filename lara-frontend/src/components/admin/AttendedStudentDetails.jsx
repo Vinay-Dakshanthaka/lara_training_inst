@@ -108,6 +108,11 @@
 // };
 
 // export default AttendedStudentDetails;import React, { useState, useEffect } from "react";
+
+
+
+
+
 import axios from "axios";
 import { baseURL } from "../config";
 import { jsPDF } from "jspdf";
@@ -174,19 +179,98 @@ const AttendedStudentDetails = () => {
     setSelectedStudent(student);
   };
 
+  // const downloadCertificate = () => {
+  //   if (!selectedStudent) return;
+
+  //   const input = document.getElementById("certificate-container");
+  //   html2canvas(input, { scale: 2 }).then((canvas) => {
+  //     const imgData = canvas.toDataURL("image/png");
+  //     const pdf = new jsPDF("p", "mm", "a4");
+  //     const imgWidth = 190;
+  //     const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  //     pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+  //     pdf.save(`Certificate_${selectedStudent.name}.pdf`);
+  //   });
+  // };
+
+
   const downloadCertificate = () => {
     if (!selectedStudent) return;
 
-    const input = document.getElementById("certificate-container");
-    html2canvas(input, { scale: 2 }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 190;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-      pdf.save(`Certificate_${selectedStudent.name}.pdf`);
+    const doc = new jsPDF("landscape"); // Landscape format
+    const presentDate = new Date().toLocaleString();
+
+    // Background Design
+    doc.setFillColor(76, 149, 228); // Blue background
+    doc.rect(0, 0, 297, 210, "F"); // Full-page rectangle
+    doc.setFillColor(255, 173, 63); // Orange curve
+    doc.circle(297, 105, 150, "F");
+
+    // Title
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const centerX = pageWidth / 2;
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(28);
+    doc.setTextColor(255);
+    doc.text("CERTIFICATE OF ACHIEVEMENT", centerX, 50, null, null, "center");
+
+    doc.setFont("times", "italic");
+    doc.setFontSize(20);
+    doc.text("Proudly Presented to", centerX, 65, null, null, "center");
+
+    // Student Name
+    doc.setFont("times", "bold");
+    doc.setFontSize(26);
+    doc.setTextColor(0, 0, 0); // Black for name
+    doc.text(selectedStudent.name, centerX, 80, null, null, "center");
+
+    // Determine Performance Statement
+    let performanceStatement = "Keep pushing your limits!";
+    let percentage = selectedStudent.percentage || 0;
+
+    if (percentage >= 90) {
+        performanceStatement = "Outstanding Performance! Keep up the great work!";
+    } else if (percentage >= 75) {
+        performanceStatement = "Great Achievement! You're on the right path!";
+    } else if (percentage >= 50) {
+        performanceStatement = "Good Effort! Keep improving!";
+    } else {
+        performanceStatement = "Needs Improvement. Keep striving for excellence!";
+    }
+
+    // Student Performance Details
+    doc.setFont("times", "normal");
+    doc.setFontSize(16);
+    doc.setTextColor(40, 40, 40);
+
+    const performanceData = [
+        { label: "Total Marks Obtained:", value: selectedStudent.totalMarks || "N/A" },
+        { label: "Percentage:", value: percentage ? `${percentage}%` : "N/A" },
+        { label: "No. of Tests Attended:", value: selectedStudent.totalTests || "N/A" },
+    ];
+
+    let startY = 100;
+    performanceData.forEach((item, index) => {
+        doc.text(`${item.label} ${item.value}`, centerX, startY + index * 10, null, null, "center");
     });
-  };
+
+    // Performance Message
+    doc.setFont("times", "italic");
+    doc.setFontSize(18);
+    doc.setTextColor(0, 0, 150);
+    doc.text(performanceStatement, centerX, startY + 40, null, null, "center");
+
+    // Footer
+    doc.setFont("times", "italic");
+    doc.setFontSize(10);
+    doc.setTextColor(200, 200, 200);
+    doc.text(`Generated on ${presentDate}`, centerX, 180, null, null, "center");
+
+    // Save Certificate
+    doc.save(`Performance_Certificate_${selectedStudent.name}.pdf`);
+};
+
 
   const getFeedback = (percentage) => {
     // Remove '%' if present and convert to number
@@ -309,10 +393,7 @@ const AttendedStudentDetails = () => {
   </div>
 </div>
       </div>
-  
-
-  
-      <h3>Attended Students</h3>
+       <h3>Attended Students</h3>
       {attendedStudents.length > 0 ? (
         <table className="table table-bordered">
           <thead className="table-dark">
@@ -351,16 +432,39 @@ const AttendedStudentDetails = () => {
       )}
   
       {selectedStudent && (
-        <div className="certificate mt-4 p-3 border" id="certificate-container">
-          <h2 className="text-center">Certificate of Achievement</h2>
-          <p><strong>Student Name:</strong> {selectedStudent.name}</p>
-          <p><strong>Total Tests Attended:</strong> {selectedStudent.totalTests}</p>
-          <p><strong>Marks Obtained:</strong> {selectedStudent.totalMarksObtained}</p>
-          <p><strong>Total Marks:</strong> {selectedStudent.totalMarks}</p>
-          <p><strong>Percentage:</strong> {selectedStudent.percentage}%</p>
-          <p><strong>Feedback:</strong> {getFeedback(selectedStudent.percentage)}</p>
-          <p className="text-center">Congratulations on your achievement!</p>
-        </div>
+        // <div className="certificate mt-4 p-3 border" id="certificate-container">
+        //   <h2 className="text-center">Certificate of Achievement</h2>
+        //   <p><strong>Student Name:</strong> {selectedStudent.name}</p>
+        //   <p><strong>Total Tests Attended:</strong> {selectedStudent.totalTests}</p>
+        //   <p><strong>Marks Obtained:</strong> {selectedStudent.totalMarksObtained}</p>
+        //   <p><strong>Total Marks:</strong> {selectedStudent.totalMarks}</p>
+        //   <p><strong>Percentage:</strong> {selectedStudent.percentage}%</p>
+        //   <p><strong>Feedback:</strong> {getFeedback(selectedStudent.percentage)}</p>
+        //   <p className="text-center">Congratulations on your achievement!</p>
+        // </div>
+        <div className="certificate mt-4 p-4 border rounded shadow-lg bg-light text-center" id="certificate-container">
+        <h2 className="text-primary">Certificate of Achievement</h2>
+        <hr />
+        <p className="font-italic">This certificate is proudly awarded to</p>
+        <h3 className="text-dark font-weight-bold">{selectedStudent.name}</h3>
+        <p>for demonstrating exceptional dedication and academic excellence.</p>
+  
+        <p>
+          Having attended <strong>{selectedStudent.totalTests}</strong> tests, {selectedStudent.name} secured an impressive 
+          <strong> {selectedStudent.totalMarksObtained} out of {selectedStudent.totalMarks}</strong> marks, 
+          achieving an outstanding <strong>{selectedStudent.percentage}%</strong>.
+        </p>
+  
+        <p>
+          This achievement reflects a strong commitment to learning and continuous improvement. 
+          Keep striving for success and reaching new milestones.
+        </p>
+  
+        <p><strong>Feedback:</strong> {getFeedback(selectedStudent.percentage)}</p>
+  
+        <hr />
+        <p className="text-success font-weight-bold">Congratulations on this well-deserved accomplishment!</p>
+      </div>
       )}
   
       {selectedStudent && (

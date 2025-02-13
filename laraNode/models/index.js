@@ -207,7 +207,7 @@ db.PaperBasedTestResults = require('./paperBasedTestResults.js')(sequelize,DataT
 
 db.Student.hasMany(db.PaperBasedTestResults, { foreignKey: 'studentId' });
 db.PaperBasedTestResults.belongsTo(db.Student, { foreignKey: 'studentId' });
-
+db.BatchTestLinks = require('./batchTestLinkModel.js')(sequelize,DataTypes);
 
 // Define associations  
 db.Student.hasOne(db.Profile, {
@@ -529,6 +529,12 @@ db.Student.belongsToMany(db.WhatsAppChannelLinks, {
     otherKey: 'channel_id',
 });
 
+db.BatchTestLinks.belongsTo(db.InternalTest, { foreignKey: 'internal_test_id' });
+db.BatchTestLinks.belongsTo(db.WeeklyTest, { foreignKey: 'wt_id' });
+db.WeeklyTest.hasMany(db.BatchTestLinks, { foreignKey: 'wt_id' });
+
+db.Batch.hasMany(db.BatchTestLinks, { foreignKey: 'batch_id' });
+db.InternalTest.hasMany(db.BatchTestLinks, { foreignKey: 'internal_test_id' });
 
 // Call associate method for each model if defined
 Object.keys(db).forEach(modelName => {

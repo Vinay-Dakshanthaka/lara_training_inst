@@ -66,6 +66,10 @@ weeklyTestRouter.get('/getAllStudentResultsForWeeklyTest/:wt_id',  weeklyTestCon
 
 weeklyTestRouter.get('/getAllIndividualStudentResultsForTest/:wt_id',  weeklyTestController.getAllIndividualStudentResultsForTest);
 
+
+weeklyTestRouter.delete('/deleteinternaltests/:wt_id', weeklyTestController.deleteinternaltests);
+
+
 weeklyTestRouter.post('/upload-questions', upload.single('file'), async (req, res) => {
     const { wt_id, topic_id } = req.body;
     const filePath = req.file.path;

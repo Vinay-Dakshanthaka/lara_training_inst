@@ -39,6 +39,17 @@ internalTestRoute.get('/getAllStudentsPerformance',verifyToken, internalTestCont
 
 internalTestRoute.post('/getAllInternalTestResultsByTestId',verifyToken, internalTestController.getAllInternalTestResultsByTestId); 
 
+
+internalTestRoute.delete('/deleteinternaltest/:internal_test_id', internalTestController.deleteinternaltests); 
+
+internalTestRoute.post('/assignBatchToInternalTest', internalTestController.assignBatchToInternalTest); 
+
+internalTestRoute.get('/internal-test/:internal_test_id', internalTestController.getBatchesByInternalTestId);
+
+internalTestRoute.get('/weekly-test/:wt_id', internalTestController.getBatchesByWeeklyTestId); 
+
+internalTestRoute.post('/assignBatchToWeeklyTest', internalTestController.assignBatchToWeeklyTest);
+
 internalTestRoute.post('/upload-questions-link', upload.single('file'), async (req, res) => {
     const topic_id = req.query.topic_id;
     const internal_test_id = req.query.internal_test_id;
