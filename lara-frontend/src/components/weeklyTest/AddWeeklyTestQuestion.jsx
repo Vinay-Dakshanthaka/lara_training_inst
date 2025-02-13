@@ -93,6 +93,8 @@ const AddWeeklyTestQuestion = () => {
                 marks: '',
                 minutes: '',
             });
+
+            console.log(data,"-----------------------------")
             setSelectedTopics([]);
         } catch (error) {
             setError(error.response?.data.message || 'Error saving question');
@@ -144,6 +146,17 @@ const AddWeeklyTestQuestion = () => {
                         rows={3}
                         name="wt_question_description"
                         value={questionData.wt_question_description}
+                        onChange={handleInputChange}
+                        required
+                    />
+                </Form.Group>
+                <Form.Group controlId="formDescription" className="mt-4">
+                    <Form.Label>Question Keywords</Form.Label>
+                    <Form.Control
+                        as="textarea"
+                        rows={3}
+                        name="wt_question_keywords"
+                        value={questionData.wt_question_keywords}
                         onChange={handleInputChange}
                         required
                     />

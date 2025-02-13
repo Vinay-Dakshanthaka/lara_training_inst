@@ -10,27 +10,34 @@ const AllStudentsWeeklyTestResults = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [results, setResults] = useState(null);
-    const [filteredResults, setFilteredResults] = useState(null); // For search functionality
+    const [filteredResults, setFilteredResults] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortOrder, setSortOrder] = useState('desc'); // Default sort order for marks
+    const [sortOrder, setSortOrder] = useState('desc');
 
     useEffect(() => {
         const fetchResults = async () => {
             try {
                 const response = await axios.get(`${baseURL}/api/weekly-test/getAllIndividualStudentResultsForTest/${wt_id}`);
+    
+                const modifiedResults = response.data.student_results.map(student => ({
+                    ...student,
+                    obtained_marks: 
+                        typeof student.obtained_marks === "string" && /^[01]+$/.test(student.obtained_marks) 
+                            ? parseInt(student.obtained_marks, 2) || 0  // Convert binary to decimal
+                            : Number(student.obtained_marks) || 0 // Ensure it's a number
+                }));
                 setResults(response.data);
-                setFilteredResults(response.data.student_results); // Initially show all results
+                setFilteredResults(modifiedResults);
             } catch (err) {
                 setError(err.response ? err.response.data.message : 'An error occurred while fetching data');
-                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
         fetchResults();
     }, [wt_id]);
+    
 
-    // Search Filter Handler
     useEffect(() => {
         if (results) {
             const filtered = results.student_results.filter(student =>
@@ -42,7 +49,6 @@ const AllStudentsWeeklyTestResults = () => {
         }
     }, [searchTerm, results]);
 
-    // Sorting Handler (Asc/Desc by Marks)
     const handleSortByMarks = () => {
         const sortedResults = [...filteredResults].sort((a, b) => {
             return sortOrder === 'asc'
@@ -53,7 +59,6 @@ const AllStudentsWeeklyTestResults = () => {
         setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     };
 
-    // Export to Excel Handler
     const handleExportToExcel = () => {
         const dataToExport = filteredResults.map(student => ({
             Student_Name: student.student_name,
@@ -61,20 +66,17 @@ const AllStudentsWeeklyTestResults = () => {
             Total_Available_Marks: student.total_available_marks
         }));
 
-        // Add metadata (test description and date)
         const worksheetData = [
             ['Test Description:', results.weekly_test.test_description],
             ['Test Date:', results.weekly_test.test_date],
-            [], // Empty row for separation
-            ['Student Name', 'Marks Obtained', 'Total Available Marks'], // Headers
-            ...dataToExport.map(row => [row.Student_Name, row.Marks_Obtained, row.Total_Available_Marks]) // Data
+            [],
+            ['Student Name', 'Marks Obtained', 'Total Available Marks'],
+            ...dataToExport.map(row => [row.Student_Name, row.Marks_Obtained, row.Total_Available_Marks])
         ];
 
         const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
-
-        // Download as Excel file
         XLSX.writeFile(workbook, `Weekly_test_${results.weekly_test.test_date}.xlsx`);
     };
 
@@ -103,21 +105,16 @@ const AllStudentsWeeklyTestResults = () => {
                 <>
                     <h4>{results.weekly_test.test_description}</h4>
                     <p><strong>Date:</strong> {results.weekly_test.test_date}</p>
-
-                    {/* Search Input */}
                     <div className="row">
-
-                    <Form.Control
-                        type="text"
-                        placeholder="Search by name, email or phone"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="mb-3 col-7"
-                    />
-                    <Button onClick={handleExportToExcel} className="mb-3 col-5">Download Results as Excel</Button>
+                        <Form.Control
+                            type="text"
+                            placeholder="Search by name, email or phone"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="mb-3 col-7"
+                        />
+                        <Button onClick={handleExportToExcel} className="mb-3 col-5">Download Results as Excel</Button>
                     </div>
-
-                    {/* Table with sorting */}
                     <Table striped bordered hover responsive>
                         <thead>
                             <tr>
@@ -150,8 +147,6 @@ const AllStudentsWeeklyTestResults = () => {
                             )}
                         </tbody>
                     </Table>
-
-                    {/* Export to Excel Button */}
                 </>
             )}
         </Container>
