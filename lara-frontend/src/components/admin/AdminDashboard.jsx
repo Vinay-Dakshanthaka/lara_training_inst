@@ -94,10 +94,10 @@ const AdminDashboard = () => {
         <Tab eventKey="assignWhatsAppChannel" title="Assign WhatsApp channel">
           <AssignWhatsAppChannel />
         </Tab>
-        <Tab eventKey="updateStudentEmail" title=" UpdateStudentEmail">
+        <Tab eventKey="updateStudentEmail" title=" Update Student Email">
           <UpdateStudentEmail />
         </Tab>
-        <Tab eventKey="paperBasedTestResults" title=" paperBasedTestResults">
+        <Tab eventKey="paperBasedTestResults" title="Upload Test Resuts">
           <PaperBasedTestResults />
         </Tab>
       </Tabs>

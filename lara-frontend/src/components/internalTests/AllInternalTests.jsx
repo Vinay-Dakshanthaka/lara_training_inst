@@ -192,7 +192,8 @@ const AllInternalTests = () => {
                                         overlay={<Tooltip id={`tooltip-${test.internal_test_id}`}>{test.internal_test_link}</Tooltip>}
                                     >
                                         <p className="test-link-text" style={{ width: 'fit-content', textWrap: 'wrap' }}>
-                                            {test.internal_test_link}&nbsp;
+                                            {/* {test.internal_test_link}&nbsp; */}
+                                            {test.test_description ? test.test_description : "N/A"}&nbsp;
                                             <button
                                                 className="btn btn-link"
                                                 onClick={() => copyLinkToClipboard(test.internal_test_link)}
