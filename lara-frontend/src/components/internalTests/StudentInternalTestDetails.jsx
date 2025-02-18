@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Badge, Container, Pagination, Button } from 'react-bootstrap';
+import { Table, Badge, Container, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { baseURL } from '../config';
 import { Link } from 'react-router-dom';
+import Paginate from '../../components/common/Paginate';
 
 const ITEMS_PER_PAGE = 5; // Adjust the number of items per page
 
 const StudentInternalTestDetails = () => {
-    
     const [tests, setTests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(ITEMS_PER_PAGE);
 
     useEffect(() => {
         fetchTestDetails();
@@ -24,22 +25,26 @@ const StudentInternalTestDetails = () => {
             if (!token) {
                 throw new Error("No token provided.");
             }
-
+    
             const config = {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             };
-
+    
             const response = await axios.get(`${baseURL}/api/internal-test/getStudentInternalTestDetails`, config);
-            // Format dates here before setting the state
+    
+            console.log("API Response:", response.data); // Debugging log
+    
+            if (!response.data || !response.data.internalTests) {
+                throw new Error("Invalid response structure");
+            }
+    
             const formattedTests = response.data.internalTests.map(test => ({
                 ...test,
                 formatted_date: new Date(test.test_date).toISOString().split('T')[0]
             }));
-           
-            console.log("internal test ", response.data)
-          
+    
             setTests(formattedTests);
         } catch (error) {
             console.error('Error fetching test details:', error);
@@ -47,14 +52,17 @@ const StudentInternalTestDetails = () => {
         } finally {
             setLoading(false);
         }
-    };
+    };    
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
     };
 
-    const paginatedTests = tests.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-    const totalPages = Math.ceil(tests.length / ITEMS_PER_PAGE);
+    // Pagination logic
+    const indexOfLastTest = currentPage * itemsPerPage;
+    const indexOfFirstTest = indexOfLastTest - itemsPerPage;
+    const currentTests = tests.slice(indexOfFirstTest, indexOfLastTest); // Paginated tests
+    const totalPages = Math.ceil(tests.length / itemsPerPage);
 
     if (loading) {
         return <div>Loading...</div>;
@@ -76,7 +84,7 @@ const StudentInternalTestDetails = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {paginatedTests
+                    {currentTests
                         .filter((test) => test.is_active) // Filter out inactive tests
                         .map((test) => (
                             <tr key={test.internal_test_id}>
@@ -111,19 +119,15 @@ const StudentInternalTestDetails = () => {
                         ))}
                 </tbody>
             </Table>
-            <Pagination className="justify-content-center mt-4">
-                {[...Array(totalPages)].map((_, index) => (
-                    <Pagination.Item
-                        key={index + 1}
-                        active={index + 1 === currentPage}
-                        onClick={() => handlePageChange(index + 1)}
-                    >
-                        {index + 1}
-                    </Pagination.Item>
-                ))}
-            </Pagination>
-        </Container>
 
+            {/* Pagination */}
+            <Paginate
+                currentPage={currentPage}
+                totalItems={tests.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+            />
+        </Container>
     );
 };
 

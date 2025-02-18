@@ -7,9 +7,9 @@ import { BsCopy, BsPencil } from 'react-icons/bs';
 import { OverlayTrigger, Tooltip, Badge, Modal, Button, Form } from 'react-bootstrap';
 import { toast, ToastContainer as ToastifyContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Paginate from '../common/Paginate';
 // import './allInternalTests.css'; // Un-comment if you have styles
 import { BsTrash } from 'react-icons/bs';
+import Paginate from '../common/Paginate';
 
 
 
@@ -22,17 +22,13 @@ const AllInternalTests = () => {
     const [newIsMonitored, setNewIsMonitored] = useState(false);
     const [newIsActive, setNewIsActive] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [totalTests, setTotalTests] = useState(0);
-
+    
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(5); // Adjust as needed
 
     const navigate = useNavigate();
 
-    const handleBatches = () => {
-        console.log("Handling batches");
-    };
     
     useEffect(() => {
         const fetchInternalTests = async () => {
@@ -155,6 +151,18 @@ const AllInternalTests = () => {
     const currentTests = internalTests.slice(indexOfFirstTest, indexOfLastTest);
     const totalPages = Math.ceil(internalTests.length / itemsPerPage);
 
+     // This function will be triggered when the button is clicked
+  const handleBatches = (internalTestId) => {
+    // Navigate to the BatchDetails component with the internal_test_id as a URL parameter
+    navigate(`/batch-details/${internalTestId}`);
+  };
+   // Handle page change
+   const handlePageChange = (page) => {
+       setCurrentPage(page);
+   };
+    
+ 
+
     return (
         <div className="container mt-5 responsive">
             <ToastifyContainer />
@@ -167,10 +175,13 @@ const AllInternalTests = () => {
                             <th style={{ width: 'fit-content' }}>Test Link</th>
                             <th>Number of Questions</th>
                             <th>Edit</th>
+                            <th>Assign Batchs</th>
+                            <th>Results</th>
                             <th>Assign Questions</th>
                             <th>Add New Questions </th>
                             <th>Upload Questions </th>
                             <th>Edit Questions </th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -246,14 +257,20 @@ const AllInternalTests = () => {
                                         Edit Questions
                                     </Link>
                                 </td>
+                                <td><button
+                                   className="btn btn-danger ms-2 m-1"
+                                  onClick={() => deassignTestLink(test.internal_test_id)}
+                                  >
+                                <BsTrash />
+                                </button></td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
 
-            {/* Pagination controls
-            <div className="pagination">
+            {/* Pagination controls */}
+            {/* <div className="pagination">
                 <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
@@ -268,12 +285,13 @@ const AllInternalTests = () => {
                     Next
                 </button>
             </div> */}
-                {/* Pagination component */}
-                <Paginate
+
+               {/* Pagination */}
+               <Paginate
                 currentPage={currentPage}
-                totalItems={totalTests}
+                totalItems={internalTests.length}
                 itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
+                onPageChange={handlePageChange}
             />
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>

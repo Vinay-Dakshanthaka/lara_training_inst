@@ -530,6 +530,12 @@ db.Student.belongsToMany(db.WhatsAppChannelLinks, {
     otherKey: 'channel_id',
 });
 
+db.BatchTestLinks.belongsTo(db.InternalTest, { foreignKey: 'internal_test_id' });
+db.BatchTestLinks.belongsTo(db.WeeklyTest, { foreignKey: 'wt_id' });
+db.WeeklyTest.hasMany(db.BatchTestLinks, { foreignKey: 'wt_id' });
+
+db.Batch.hasMany(db.BatchTestLinks, { foreignKey: 'batch_id' });
+db.InternalTest.hasMany(db.BatchTestLinks, { foreignKey: 'internal_test_id' });
 
 // Call associate method for each model if defined
 Object.keys(db).forEach(modelName => {

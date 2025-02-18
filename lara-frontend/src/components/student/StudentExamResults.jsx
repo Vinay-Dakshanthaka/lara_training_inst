@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { baseURL } from "../config"; // Your backend URL config
+import Paginate from "../common/Paginate";  // Assuming Paginate component is in this path
 
 const StudentExamResults = () => {
     const [examResults, setExamResults] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [resultsPerPage] = useState(5);  // Number of results per page
 
     useEffect(() => {
         const fetchExamResults = async () => {
@@ -18,7 +21,7 @@ const StudentExamResults = () => {
                         Authorization: `Bearer ${token}`,
                     },
                 };
-                
+
                 const response = await axios.get(`${baseURL}/api/paper-based-exams/exam-results`, config);
                 setExamResults(response.data.results);
                 setLoading(false);
@@ -34,9 +37,15 @@ const StudentExamResults = () => {
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
 
-    
+    // Pagination Logic
+    const indexOfLastResult = currentPage * resultsPerPage;
+    const indexOfFirstResult = indexOfLastResult - resultsPerPage;
+    const currentResults = examResults.slice(indexOfFirstResult, indexOfLastResult);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
     const dateCount = {};
-    examResults.forEach((result) => {
+    currentResults.forEach((result) => {
         const formattedDate = new Date(result.conducted_date).toLocaleDateString("en-GB");
         dateCount[formattedDate] = (dateCount[formattedDate] || 0) + 1;
     });
@@ -51,7 +60,6 @@ const StudentExamResults = () => {
                 <div>No exam results found.</div>
             ) : (
                 <table className="table table-bordered responsive">
-                    
                     <thead>
                         <tr>
                             <th>Subject</th>
@@ -62,7 +70,7 @@ const StudentExamResults = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {examResults.map((result, index) => {
+                        {currentResults.map((result, index) => {
                             const formattedDate = new Date(result.conducted_date).toLocaleDateString("en-GB");
 
                             const rowSpanValue = dateTracker[formattedDate] ? 0 : dateCount[formattedDate];
@@ -75,7 +83,6 @@ const StudentExamResults = () => {
                                     <td>{result.obtainedMarks}</td>
                                     <td>{result.totalMarks}</td>
 
-                                    
                                     {rowSpanValue > 0 ? (
                                         <td rowSpan={rowSpanValue} className="text-center align-middle">
                                             {formattedDate}
@@ -87,6 +94,16 @@ const StudentExamResults = () => {
                     </tbody>
                 </table>
             )}
+
+            {/* Pagination */}
+            <div className="d-flex justify-content-center">
+                <Paginate
+                    currentPage={currentPage}
+                    totalItems={examResults.length}
+                    itemsPerPage={resultsPerPage}
+                    onPageChange={paginate}
+                />
+            </div>
         </div>
     );
 };
