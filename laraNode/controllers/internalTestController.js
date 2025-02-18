@@ -1636,4 +1636,9 @@ module.exports = {
     getAllStudentsPerformance,
     getStudentPerformanceForAdmin,
     getAllInternalTestResultsByTestId,
+    deleteinternaltests,
+    assignBatchToInternalTest,
+    getBatchesByInternalTestId,
+    getBatchesByWeeklyTestId,
+    assignBatchToWeeklyTest,
 }

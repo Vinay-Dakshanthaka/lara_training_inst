@@ -22,13 +22,17 @@ const AllInternalTests = () => {
     const [newIsMonitored, setNewIsMonitored] = useState(false);
     const [newIsActive, setNewIsActive] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    
+    const [totalTests, setTotalTests] = useState(0);
+
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(5); // Adjust as needed
 
     const navigate = useNavigate();
 
+    const handleBatches = () => {
+        console.log("Handling batches");
+    };
     
     useEffect(() => {
         const fetchInternalTests = async () => {

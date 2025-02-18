@@ -1,3 +1,74 @@
+// import React, { useState, useEffect } from "react";
+// import axios from "axios";
+// import { Table, Container } from "react-bootstrap";
+// import { baseURL } from "../../config";
+
+// const ActiveWeeklyTests = () => {
+//   const [activeTests, setActiveTests] = useState([]);
+
+//   useEffect(() => {
+//     axios
+//       .get(`${baseURL}/api/weekly-test/getAllActiveWeeklyTests`)
+//       .then((response) => {
+//         setActiveTests(response.data.tests); 
+//       })
+//       .catch((error) => {
+//         console.error("Error fetching active weekly tests:", error);
+//       });
+//   }, [token]);
+  
+//   // Paginate tests
+//   const indexOfLastTest = currentPage * testsPerPage;
+//   const indexOfFirstTest = indexOfLastTest - testsPerPage;
+//   const currentTests = activeTests.slice(indexOfFirstTest, indexOfLastTest);
+
+//   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+//   if (loading) {
+//     return <Container className="mt-4">Loading...</Container>;
+//   }
+
+//   return (
+//     <Container className="mt-4">
+//       <h2>Active Weekly Tests</h2>
+//       <Table striped bordered hover responsive>
+//         <thead>
+//           <tr>
+//             <th>Test ID</th>
+//             <th>Test Description</th>
+//             <th>Test Date</th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {activeTests.length === 0 ? (
+//             <tr>
+//               <td colSpan="3" className="text-center">
+//                 No active weekly tests available.
+//               </td>
+//             </tr>
+//           ) : (
+//             activeTests.map((test) => (
+//               <tr key={test.wt_id}>
+//                 <td>{test.wt_id}</td>
+//                 <td>
+//                   {/* Test link */}
+//                   <a href={test.wt_link} target="_blank" rel="noopener noreferrer">
+//                     {test.wt_description}
+//                   </a>
+//                 </td>
+//                 <td>{new Date(test.test_date).toLocaleDateString()}</td>
+//               </tr>
+//             ))
+//           )}
+//         </tbody>
+//       </Table>
+//     </Container>
+//   );
+// };
+
+// export default ActiveWeeklyTests;
+
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Table, Container } from "react-bootstrap";
@@ -5,18 +76,26 @@ import { baseURL } from "../../config";
 
 const ActiveWeeklyTests = () => {
   const [activeTests, setActiveTests] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const testsPerPage = 5;
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
 
   useEffect(() => {
     axios
-      .get(`${baseURL}/api/weekly-test/getAllActiveWeeklyTests`)
+      .get(`${baseURL}/api/weekly-test/getAllActiveWeeklyTests`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((response) => {
-        setActiveTests(response.data.tests); 
+        setActiveTests(response.data.tests);
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching active weekly tests:", error);
+        setLoading(false);
       });
-  }, [token]);
-  
+  }, []);
+
   // Paginate tests
   const indexOfLastTest = currentPage * testsPerPage;
   const indexOfFirstTest = indexOfLastTest - testsPerPage;
@@ -47,7 +126,7 @@ const ActiveWeeklyTests = () => {
               </td>
             </tr>
           ) : (
-            activeTests.map((test) => (
+            currentTests.map((test) => (
               <tr key={test.wt_id}>
                 <td>{test.wt_id}</td>
                 <td>

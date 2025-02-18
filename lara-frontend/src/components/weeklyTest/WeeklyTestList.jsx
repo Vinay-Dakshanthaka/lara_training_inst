@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import { BsTrash } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
+import Paginate from '../common/Paginate';
 
 
 const WeeklyTestList = () => {
