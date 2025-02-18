@@ -202,6 +202,12 @@ db.WeeklyTestFinalSubmission = require('./weeklyTestFinalSubmissionModel.js')(se
 db.WhatsAppChannelLinks = require('./whatsAppChannelLinksModel.js')(sequelize, DataTypes);  
 db.PlacementTestCreator = require('./placementTestCreator.js')(sequelize, DataTypes);
 db.StudentWhatsAppLinks = require('./StudentWhatsAppLinks.js')(sequelize, DataTypes);
+db.PaperBasedTestResults = require('./paperBasedTestResults.js')(sequelize,DataTypes);
+
+
+db.Student.hasMany(db.PaperBasedTestResults, { foreignKey: 'studentId' });
+db.PaperBasedTestResults.belongsTo(db.Student, { foreignKey: 'studentId' });
+db.BatchTestLinks = require('./batchTestLinkModel.js')(sequelize,DataTypes);
 db.Transaction = require('./transactionModel.js')(sequelize,DataTypes);
 
 
@@ -523,15 +529,6 @@ db.Student.belongsToMany(db.WhatsAppChannelLinks, {
     foreignKey: 'student_id',
     otherKey: 'channel_id',
 });
-
-
-    // db.Transaction.belongsTo(db.Student, {
-    //   foreignKey: 'student_id', // The foreign key in the Transaction table
-    //   targetKey: 'id' // The key it relates to in the Student table
-    // });
-
-    
-  
 
 
 // Call associate method for each model if defined

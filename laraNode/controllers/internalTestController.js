@@ -19,6 +19,7 @@ const CumulativeQuestionInternalTest = db.CumulativeQuestionInternalTest;
 const InternalTestResult = db.InternalTestResult;
 const OptionsTable = db.Option;
 const { baseURL } = require('./baseURLConfig')
+const { Batch, BatchTestLinks,  WeeklyTest } = require('../models'); 
 
 const createInternalTestLink = async (req, res) => {
     try {
@@ -851,11 +852,37 @@ const fetchInternalTestResults = async (req, res) => {
 //     }
 // };
 
-
 const getStudentInternalTestDetails = async (req, res) => {
     try {
-        // Fetch all InternalTests including associated topics in descending order by internal_test_id
+        const student_id = req.studentId;
+
+        // Step 1: Find the batch(es) the student belongs to
+        const studentBatches = await db.Student_Batch.findAll({
+            where: { student_id },
+            attributes: ['batch_id']
+        });
+
+        if (!studentBatches || studentBatches.length === 0) {
+            return res.status(404).send({ message: 'Student is not assigned to any batch' });
+        }
+
+        const batchIds = studentBatches.map(batch => batch.batch_id);
+
+        // Step 2: Fetch internal test IDs linked to the student's batch(es)
+        const batchTestLinks = await BatchTestLinks.findAll({
+            where: { batch_id: batchIds },
+            attributes: ['internal_test_id']
+        });
+
+        if (!batchTestLinks || batchTestLinks.length === 0) {
+            return res.status(404).send({ message: 'No internal tests linked to student batches' });
+        }
+
+        const internalTestIds = batchTestLinks.map(link => link.internal_test_id);
+
+        // Step 3: Fetch internal tests that belong to those internal test IDs
         const internalTests = await InternalTest.findAll({
+            where: { internal_test_id: internalTestIds },
             include: [
                 {
                     model: InternalTestTopic,
@@ -863,34 +890,29 @@ const getStudentInternalTestDetails = async (req, res) => {
                     include: [
                         {
                             model: Topic,
-                            as: 'InternalTestTopic' // This alias should match the one defined in your association
+                            as: 'InternalTestTopic'
                         }
                     ]
                 }
             ],
-            order: [['internal_test_id', 'DESC']], // Order by internal_test_id descending
+            order: [['internal_test_id', 'DESC']],
         });
 
-        // Check if there are no internal tests
         if (!internalTests || internalTests.length === 0) {
             return res.status(404).send({ message: 'No internal tests found' });
         }
 
-        // Get student_id from the request
-        const student_id = req.studentId;
-
-        // Fetch attended tests for the student including marks obtained and total marks
+        // Step 4: Fetch attended tests for the student
         const attendedTests = await InternalTestResult.findAll({
             where: { student_id },
-            attributes: ['internal_test_id', 'marks_obtained', 'total_marks'], 
+            attributes: ['internal_test_id', 'marks_obtained', 'total_marks'],
         });
 
-        // Convert attendedTests to a Map for easier lookup
         const attendedTestMap = new Map(attendedTests.map(result => [result.internal_test_id, result]));
 
-        // Prepare response data to send back, filtering out tests with 0 questions or no assigned topics
+        // Step 5: Format response
         const formattedTests = internalTests
-            .filter(test => test.number_of_questions > 0 && test.TestTopics.length > 0) // Exclude tests with no questions or no associated topics
+            .filter(test => test.number_of_questions > 0 && test.TestTopics.length > 0)
             .map(test => ({
                 internal_test_id: test.internal_test_id,
                 internal_test_link: test.internal_test_link,
@@ -904,20 +926,88 @@ const getStudentInternalTestDetails = async (req, res) => {
                 updated_at: test.updatedAt,
                 topics: test.TestTopics.map(topicData => ({
                     topic_id: topicData.topic_id,
-                    topic_name: topicData.InternalTestTopic ? topicData.InternalTestTopic.name : null // Access the topic name correctly based on the alias
+                    topic_name: topicData.InternalTestTopic ? topicData.InternalTestTopic.name : null
                 })),
                 attended: attendedTestMap.has(test.internal_test_id) ? {
                     marks_obtained: attendedTestMap.get(test.internal_test_id).marks_obtained,
                     total_marks: attendedTestMap.get(test.internal_test_id).total_marks
-                } : null // Set the attended details based on presence in attendedTestMap
+                } : null
             }));
 
         return res.status(200).send({ message: 'Internal tests fetched successfully', internalTests: formattedTests });
+
     } catch (error) {
         console.error('Error fetching internal tests:', error.stack);
         return res.status(500).send({ message: error.message });
     }
 };
+
+// const getStudentInternalTestDetails = async (req, res) => {
+//     try {
+//         // Fetch all InternalTests including associated topics in descending order by internal_test_id
+//         const internalTests = await InternalTest.findAll({
+//             include: [
+//                 {
+//                     model: InternalTestTopic,
+//                     as: 'TestTopics',
+//                     include: [
+//                         {
+//                             model: Topic,
+//                             as: 'InternalTestTopic' // This alias should match the one defined in your association
+//                         }
+//                     ]
+//                 }
+//             ],
+//             order: [['internal_test_id', 'DESC']], // Order by internal_test_id descending
+//         });
+
+//         // Check if there are no internal tests
+//         if (!internalTests || internalTests.length === 0) {
+//             return res.status(404).send({ message: 'No internal tests found' });
+//         }
+
+//         // Get student_id from the request
+//         const student_id = req.studentId;
+
+//         // Fetch attended tests for the student including marks obtained and total marks
+//         const attendedTests = await InternalTestResult.findAll({
+//             where: { student_id },
+//             attributes: ['internal_test_id', 'marks_obtained', 'total_marks'], 
+//         });
+
+//         // Convert attendedTests to a Map for easier lookup
+//         const attendedTestMap = new Map(attendedTests.map(result => [result.internal_test_id, result]));
+
+//         // Prepare response data to send back, filtering out tests with 0 questions or no assigned topics
+//         const formattedTests = internalTests
+//             .filter(test => test.number_of_questions > 0 && test.TestTopics.length > 0) // Exclude tests with no questions or no associated topics
+//             .map(test => ({
+//                 internal_test_id: test.internal_test_id,
+//                 internal_test_link: test.internal_test_link,
+//                 number_of_questions: test.number_of_questions,
+//                 test_description: test.test_description,
+//                 show_result: test.show_result,
+//                 is_active: test.is_active,
+//                 is_monitored: test.is_monitored,
+//                 test_date: test.test_date,
+//                 created_at: test.createdAt,
+//                 updated_at: test.updatedAt,
+//                 topics: test.TestTopics.map(topicData => ({
+//                     topic_id: topicData.topic_id,
+//                     topic_name: topicData.InternalTestTopic ? topicData.InternalTestTopic.name : null // Access the topic name correctly based on the alias
+//                 })),
+//                 attended: attendedTestMap.has(test.internal_test_id) ? {
+//                     marks_obtained: attendedTestMap.get(test.internal_test_id).marks_obtained,
+//                     total_marks: attendedTestMap.get(test.internal_test_id).total_marks
+//                 } : null // Set the attended details based on presence in attendedTestMap
+//             }));
+
+//         return res.status(200).send({ message: 'Internal tests fetched successfully', internalTests: formattedTests });
+//     } catch (error) {
+//         console.error('Error fetching internal tests:', error.stack);
+//         return res.status(500).send({ message: error.message });
+//     }
+// };
 
 
 const getStudentInternalTestDetailsBySdId = async (req, res) => {
@@ -1318,6 +1408,213 @@ const getAllInternalTestResultsByTestId = async (req, res) => {
 
 
 
+const deleteinternaltests = async (req, res) => {
+    try {
+        const { internal_test_id } = req.params;
+        const batchTestLinks = await db.BatchTestLinks.findAll({
+            where: {
+                internal_test_id: internal_test_id
+            }
+        });
+
+        if (batchTestLinks.length > 0) {
+            await db.BatchTestLinks.destroy({
+                where: {
+                    internal_test_id: internal_test_id
+                }
+            });
+            console.log(`Deleted associated BatchTestLinks for internal_test_id: ${internal_test_id}`);
+        }
+        const test = await InternalTest.findByPk(internal_test_id);
+
+        if (!test) {
+            return res.status(404).json({ message: 'Test not found' });
+        }
+        await test.destroy();
+
+        return res.status(200).json({ message: 'Test and associated BatchTestLinks deleted successfully' });
+
+    } catch (error) {
+        console.error('Error deleting internal test:', error);
+        return res.status(500).json({ message: 'Something went wrong while deleting the test' });
+    }
+};
+
+const assignBatchToInternalTest = async (req, res) => {
+    const { internal_test_id, batch_ids } = req.body; // Destructure batch_ids as an array
+      console.log(req.body,"---------------------------req.body")
+    try {
+      // Ensure batch_ids is an array and contains at least one batch_id
+      if (!Array.isArray(batch_ids) || batch_ids.length === 0) {
+        return res.status(400).json({ message: 'Invalid batch_ids array provided.' });
+      }
+  
+      // Initialize an array to store results of each assignment attempt
+      const assignmentResults = [];
+  
+      // Loop through each batch_id and attempt the assignment
+      for (let batch_id of batch_ids) {
+        // Check if the batch is already assigned to the internal_test_id
+        const existingLink = await db.BatchTestLinks.findOne({
+          where: { internal_test_id, batch_id }
+        });
+  
+        if (existingLink) {
+          assignmentResults.push({ batch_id, message: 'Batch is already assigned to this internal test.' });
+          continue; // Skip to the next batch_id if already assigned
+        }
+  
+        // Check if the batch exists in the Batch table
+        const batch = await db.Batch.findByPk(batch_id);
+        if (!batch) {
+          assignmentResults.push({ batch_id, message: 'Batch not found.' });
+          continue; // Skip to the next batch_id if batch does not exist
+        }
+  
+        // Create the new BatchTestLinks entry to assign the batch to the internal test
+        const newBatchTestLink = await db.BatchTestLinks.create({
+          internal_test_id,
+          batch_id
+        });
+  
+        assignmentResults.push({ batch_id, message: 'Batch successfully assigned.', data: newBatchTestLink });
+      }
+  
+      // Return a response with the results of all batch assignments
+      return res.status(200).json({
+        message: 'Batch assignment process completed.',
+        results: assignmentResults
+      });
+  
+    } catch (error) {
+      // Catch any errors and log them
+      console.error('Error assigning batches to internal test:', error);
+      return res.status(500).json({ message: 'Error assigning batches to internal test.' });
+    }
+  };
+
+  const getBatchesByInternalTestId = async (req, res) => {
+    const { internal_test_id } = req.params; // Assuming internal_test_id is passed as a parameter in the route
+
+    try {
+        // Fetch assigned batches linked to the InternalTest
+        const assignedBatches = await db.Batch.findAll({
+            include: [{
+                model: BatchTestLinks,
+                where: { internal_test_id },
+                required: true,  // Only fetch batches that are assigned
+            }]
+        });
+        console.log(assignedBatches, "-------------------assignedBatches");
+
+        // Fetch unassigned batches (those not linked to this internal_test_id)
+        const unassignedBatches = await Batch.findAll({
+            where: {
+                batch_id: {
+                    [Op.notIn]: assignedBatches.map(batch => batch.batch_id) // Exclude assigned batches
+                }
+            }
+        });
+        console.log(unassignedBatches, "--------------------unassignedBatches");
+
+        return res.status(200).json({
+            assignedBatches,
+            unassignedBatches
+        });
+    } catch (error) {
+        console.error('Error fetching batches:', error);
+        return res.status(500).send({ message: 'Error fetching batch details' });
+    }
+};
+
+const getBatchesByWeeklyTestId = async (req, res) => {
+    const { wt_id } = req.params; // Assuming internal_test_id is passed as a parameter in the route
+
+    try {
+        // Fetch assigned batches linked to the WeeklyTest
+        const assignedBatches = await Batch.findAll({
+            include: [{
+                model: BatchTestLinks,
+                where: { wt_id },
+                required: true,  // Only fetch batches that are assigned
+            }]
+        });
+        console.log(assignedBatches, "-------------------assignedBatches");
+
+        // Fetch unassigned batches (those not linked to this internal_test_id)
+        const unassignedBatches = await Batch.findAll({
+            where: {
+                batch_id: {
+                    [Op.notIn]: assignedBatches.map(batch => batch.batch_id) // Exclude assigned batches
+                }
+            }
+        });
+        console.log(unassignedBatches, "--------------------unassignedBatches");
+
+        return res.status(200).json({
+            assignedBatches,
+            unassignedBatches
+        });
+    } catch (error) {
+        console.error('Error fetching batches:', error);
+        return res.status(500).send({ message: 'Error fetching batch details' });
+    }
+};
+
+// Method to assign an unassigned batch to a given internal_test_id
+const assignBatchToWeeklyTest = async (req, res) => {
+    const { wt_id, batch_ids } = req.body; // Destructure batch_ids as an array
+  
+    try {
+      // Ensure batch_ids is an array and contains at least one batch_id
+      if (!Array.isArray(batch_ids) || batch_ids.length === 0) {
+        return res.status(400).json({ message: 'Invalid batch_ids array provided.' });
+      }
+  
+      // Initialize an array to store results of each assignment attempt
+      const assignmentResults = [];
+  
+      // Loop through each batch_id and attempt the assignment
+      for (let batch_id of batch_ids) {
+        // Check if the batch is already assigned to the weekly test (wt_id)
+        const existingLink = await BatchTestLinks.findOne({
+          where: { wt_id, batch_id }
+        });
+  
+        if (existingLink) {
+          assignmentResults.push({ batch_id, message: 'Batch is already assigned to this weekly test.' });
+          continue; // Skip to the next batch_id if already assigned
+        }
+  
+        // Check if the batch exists in the Batch table
+        const batch = await Batch.findByPk(batch_id);
+        if (!batch) {
+          assignmentResults.push({ batch_id, message: 'Batch not found.' });
+          continue; // Skip to the next batch_id if batch does not exist
+        }
+  
+        // Create the new BatchTestLinks entry to assign the batch to the weekly test
+        const newBatchTestLink = await BatchTestLinks.create({
+          wt_id,
+          batch_id
+        });
+  
+        assignmentResults.push({ batch_id, message: 'Batch successfully assigned to weekly test.', data: newBatchTestLink });
+      }
+  
+      // Return a response with the results of all batch assignments
+      return res.status(200).json({
+        message: 'Batch assignment process completed.',
+        results: assignmentResults
+      });
+  
+    } catch (error) {
+      // Catch any errors and log them
+      console.error('Error assigning batches to weekly test:', error);
+      return res.status(500).json({ message: 'Error assigning batches to weekly test.' });
+    }
+  };
+  
 
 module.exports = {
     createInternalTestLink,
@@ -1339,5 +1636,4 @@ module.exports = {
     getAllStudentsPerformance,
     getStudentPerformanceForAdmin,
     getAllInternalTestResultsByTestId,
-  
 }

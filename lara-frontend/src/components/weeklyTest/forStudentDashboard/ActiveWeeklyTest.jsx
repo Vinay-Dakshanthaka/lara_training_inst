@@ -15,7 +15,18 @@ const ActiveWeeklyTests = () => {
       .catch((error) => {
         console.error("Error fetching active weekly tests:", error);
       });
-  }, []); 
+  }, [token]);
+  
+  // Paginate tests
+  const indexOfLastTest = currentPage * testsPerPage;
+  const indexOfFirstTest = indexOfLastTest - testsPerPage;
+  const currentTests = activeTests.slice(indexOfFirstTest, indexOfLastTest);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  if (loading) {
+    return <Container className="mt-4">Loading...</Container>;
+  }
 
   return (
     <Container className="mt-4">

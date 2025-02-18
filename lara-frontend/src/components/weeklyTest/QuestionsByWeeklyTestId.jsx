@@ -35,6 +35,7 @@ const QuestionsByWeeklyTestId = () => {
       try {
         const response = await axios.get(`${baseURL}/api/weekly-test/getQuestionsByWeeklyTestId/${wt_id}`);
         setQuestions(response.data.questions);
+        console.log(response.data,"----------------------questions")
         setLoading(false);
       } catch (error) {
         setError(error.message);
@@ -82,6 +83,7 @@ const QuestionsByWeeklyTestId = () => {
             <tr>
               <th>#</th>
               <th>Description</th>
+              <th>Keywords</th>
               <th>Marks</th>
               <th>Minutes</th>
               <th>Topic</th>
@@ -94,6 +96,12 @@ const QuestionsByWeeklyTestId = () => {
               <tr key={question.wt_question_id}>
                 <td>{index + 1}</td>
                 <td><pre>{question.wt_question_description}</pre></td>
+                <td>
+                  {question.TestQuestionAnswerDetails.length > 0 
+                    ? question.TestQuestionAnswerDetails[0].keywords 
+                    : "N/A"}
+                </td>
+
                 <td>{question.marks}</td>
                 <td>{question.minutes}</td>
                 <td>{question.TopicDetails.name}</td>

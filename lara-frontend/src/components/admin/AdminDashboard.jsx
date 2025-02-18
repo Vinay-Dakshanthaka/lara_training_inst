@@ -20,6 +20,8 @@ import AllPlacementTests from '../placementTest/AllPlacementTests';
 import InternalTestsDashboard from '../internalTests/InternalTestsDashboard';
 import AssignWhatsAppChannel from '../placementTest/AssignWhatsAppChannel';
 import { ToastContainer } from 'react-toastify';
+import UpdateStudentEmail from './UpdateStudentEmail';
+import PaperBasedTestResults from './PaperBasedTestResults';
 import TransactionDetails from './TransactionDetails';
 
 const AdminDashboard = () => {
@@ -92,9 +94,6 @@ const AdminDashboard = () => {
         </Tab>
         <Tab eventKey="assignWhatsAppChannel" title="Assign WhatsApp channel">
           <AssignWhatsAppChannel />
-        </Tab>
-        <Tab eventKey="transactionDetails" title="Transcation Details">
-          <TransactionDetails />
         </Tab>
       </Tabs>
     </div>

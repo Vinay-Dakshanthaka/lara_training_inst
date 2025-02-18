@@ -1026,7 +1026,7 @@ const getPlacementTestResultsByEmail = async (req, res) => {
                 {
                     model: PlacementTest, 
                     as:'PlacementTest',
-                    attributes: ['test_title', 'start_time'], 
+                    attributes: ['test_title', 'start_time','certificate_name'], 
                 },
             ],
             order: [['createdAt', 'DESC']], // Optional: order by most recent results
@@ -1048,6 +1048,40 @@ const getPlacementTestResultsByEmail = async (req, res) => {
     }
 };
 
+const updateStudentEmail = async (req, res) => {
+    try {
+        const { email } = req.params; // Existing email to find the student
+        const { newEmail } = req.body; // New email to update
+
+        // Check if newEmail is provided and valid
+        if (!newEmail || !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(newEmail)) {
+            return res.status(400).send({ message: "Please provide a valid new email address." });
+        }
+
+        // Find the student by email
+        const placementStudent = await PlacementTestStudent.findOne({
+            where: { email },
+            attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number', 'university_name', 'college_name'], // Add necessary student attributes
+        });
+
+        // Check if student exists
+        if (!placementStudent) {
+            return res.status(404).send({ message: "Student with this email not found." });
+        }
+
+        // Update the student's email address
+        placementStudent.email = newEmail;
+        await placementStudent.save();
+
+        return res.status(200).send({
+            message: "Student email updated successfully.",
+            student: placementStudent // Send back the updated student details
+        });
+
+    } catch (error) {
+        return res.status(500).send({ message: error.message });
+    }
+};
 
 
 const getAllResults = async (req, res) => {
@@ -2232,6 +2266,7 @@ const uploadAndAssignQuestionsByExcelTopics = async (filePath, link_topic_ids, n
 
 
 
+
 module.exports = {
     createPlacementTestLink,
     savePlacementTestStudent,
@@ -2265,4 +2300,5 @@ module.exports = {
     uploadAndAssignQuestionsToLink,
     saveOneQuestionAndAddToLink,
     uploadAndAssignQuestionsByExcelTopics,
+    updateStudentEmail,
 }

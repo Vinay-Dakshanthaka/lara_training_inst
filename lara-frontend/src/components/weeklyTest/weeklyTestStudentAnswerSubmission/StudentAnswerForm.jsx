@@ -122,7 +122,8 @@ const StudentAnswerForm = () => {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-
+        console.log(config,"-------------config");
+        console.log( wt_id,"----------",  answerArray,"-------------------------------------")
       await axios.post(`${baseURL}/api/weekly-test/saveStudentAnswer`, { wt_id, answers: answerArray }, config);
       toast.success('Answer saved successfully!');
 

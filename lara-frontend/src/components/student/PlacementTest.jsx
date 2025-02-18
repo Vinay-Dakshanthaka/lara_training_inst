@@ -566,11 +566,13 @@ import qrCodeUrl from "./qr_code_whatsApp.png"
 import { WhatsApp } from '@mui/icons-material';
 import QRCodeDisplay from './QRCodeDisplay';
 import PlacementTestStudentResults from './PlacementTestStudentResults';
+import TestNotActiveYet from '../TestNotActiveYet';
 
 
 const PlacementTest = () => {
     const [loading, setLoading] = useState(true);
     const [testDetails, setTestDetails] = useState()
+    const [isTestActive, setIsTestActive] = useState(false);
     const [questions, setQuestions] = useState([]);
     const [answers, setAnswers] = useState({});
     const [totalMarks, setTotalMarks] = useState(0);
@@ -643,7 +645,7 @@ const PlacementTest = () => {
         };
     }, [navigate, showSummary]);
 
-        useEffect(() => {
+    useEffect(() => {
         const disableRightClick = (event) => {
             event.preventDefault();
         };
@@ -698,7 +700,7 @@ const PlacementTest = () => {
                 console.log("Fetch test details ", response1.data)
                 setTestDetails(response1.data)
                 const { topic_ids, number_of_questions, show_result, is_Monitored, whatsAppChannelLink, test_title, certificate_name, issue_certificate } = response1.data;
-
+                setIsTestActive(true);
                 setShowResult(show_result);
                 setIsMonitored(is_Monitored);
                 setIsIssueCertificate(issue_certificate)
@@ -739,7 +741,9 @@ const PlacementTest = () => {
             } catch (error) {
                 if (error.response) {
                     if (error.response.status === 403) {
-                        navigate('/test-not-active');
+                        setLoading(false)
+                        setIsTestActive(false);
+                        // navigate('/test-not-active');
                     } else if (error.response.status === 404) {
                         navigate('/not-found');
                     }
@@ -1202,332 +1206,371 @@ const PlacementTest = () => {
     }
 
     return (
-        <div className="container mt-5">
-            {/* Camera monitoring */}
-            {isMonitored && <OnlineTestMonitoring isCameraOn={isMonitored} style={{ marginLeft: '80%', marginTop: '-8rem', position: 'fixed' }} />}
-
-            <h2>{
-                testDetails ? (
-                    <>{testDetails.test_title}</>
-                ) : (
-                    <>Test</>
-                )
-            }</h2>
-
-            {/* Total Marks and Timer */}
-              {/* Fixed Total Marks and Time Remaining */}
-    <div style={{ marginLeft: '80%', marginTop: '-6rem', position: 'fixed' }}>
-    {/* Total Marks */}
-    <div>
-        Total Marks: {totalMarks}
-    </div>
-
-    {/* Time Remaining */}
-    <div >
-        Time Remaining: {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, '0')}
-    </div>
-</div>
-
-            {/* Questions and options */}
-            {!showSummary && !testResults && (
+        <>
+            {isTestActive ? (
                 <>
-                    {questions.map((question, index) => (
-                        <>
-                            <Form key={question.cumulative_question_id} className="mb-4 p-3 rounded shadow-sm border">
-                                <Form.Group as={Row} className="align-items-start">
-                                    <Form.Label column sm="12" className="position-relative">
-                                        <pre style={{ maxWidth: '90%', whiteSpace: 'pre-wrap', fontFamily: 'inherit', marginBottom: '10px', fontSize: '1rem' }}>
-                                            <code> {index + 1}. <br />{question.question_description}</code>
-                                        </pre>
-                                        <span className="position-absolute top-0 end-0 bg-light px-2 py-1 rounded" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
-                                            Marks: {question.no_of_marks_allocated}
-                                        </span>
-                                    </Form.Label>
-                                    <Col sm="12">
-                                       {question.options.map((option, idx) => (
-        <Form.Check
-            key={idx}
-            type="checkbox"
-            label={<pre>{option.option_description}</pre>} 
-            name={`question-${index}`}
-            value={option.option_description}
-            checked={answers[question.cumulative_question_id]?.includes(option.option_description)}
-            onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value, e.target.checked)}
-            className="mb-2 lead "
-            style={{ paddingLeft: '1.5rem', fontSize: '0.95rem', fontWeight: '400' }}/>
-              ))}
-              </Col>
-                                </Form.Group>
-                            </Form>
+                    <div className="container mt-5">
+                        {/* Camera monitoring */}
+                        {isMonitored && <OnlineTestMonitoring isCameraOn={isMonitored} style={{ marginLeft: '80%', marginTop: '-8rem', position: 'fixed' }} />}
 
-                        </>
-                    ))}
-                </>
-            )}
+                        <h2>{
+                            testDetails ? (
+                                <>{testDetails.test_title}</>
+                            ) : (
+                                <>Test</>
+                            )
+                        }</h2>
 
-            {/* Summary and detailed results */}
-            {showSummary && showResult && (
-                <Card className="mt-5 shadow">
-                    <Card.Header>
-                        <h3>Summary</h3>
-                    </Card.Header>
-                    <Card.Body className="p-4 bg-light">
-                        <Table bordered hover>
-                            <tbody>
-                                <tr>
-                                    <td className="font-weight-bold text-primary">Total Questions</td>
-                                    <td>{questions.length}</td>
-                                </tr>
-                                <tr>
-                                    <td className="font-weight-bold text-success">Answered Questions</td>
-                                    <td>{getAnsweredQuestionsCount()}</td>
-                                </tr>
-                                <tr>
-                                    <td className="font-weight-bold text-warning">Unanswered Questions</td>
-                                    <td>{getUnansweredQuestionsCount()}</td>
-                                </tr>
-                                <tr>
-                                    <td className="font-weight-bold text-danger">Wrong Answers</td>
-                                    <td>{getWrongAnswersCount()}</td>
-                                </tr>
-                                <tr>
-                                    <td className="font-weight-bold text-info">Marks Obtained</td>
-                                    <td className='fs-4'>{obtainedMarks}</td>
-                                </tr>
-                                <tr>
-                                    <td className="font-weight-bold text-secondary">Total Marks</td>
-                                    <td>{totalMarks}</td>
-                                </tr>
-                            </tbody>
-                            <h4 className='text-center my-3'>
-                                To View Your Previouslsy attended test results
-                                <Link to="/external-test-results" target="_blank" rel="noopener noreferrer">
-                                    Click Here
-                                </Link>
+                        {/* Total Marks and Timer */}
+                        <div className="d-flex justify-content-between">
+                            <div>Total Marks: {totalMarks}</div>
+                            <div className="fw-bolder">Time Remaining: {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, '0')}</div>
+                        </div>
 
-                            </h4>
-                        </Table>
+                        {/* Questions and options */}
+                        {!showSummary && !testResults && (
+                            <>
+                                {questions.map((question, index) => (
+                                    <>
+                                        <Form key={question.cumulative_question_id} className="mb-4 p-3 rounded shadow-sm border">
+                                            <Form.Group as={Row} className="align-items-start">
+                                                <Form.Label column sm="12" className="position-relative">
+                                                    <pre style={{ maxWidth: '90%', whiteSpace: 'pre-wrap', fontFamily: 'inherit', marginBottom: '10px', fontSize: '1rem' }}>
+                                                        <code> {index + 1}. <br />{question.question_description}</code>
+                                                    </pre>
+                                                    <span className="position-absolute top-0 end-0 bg-light px-2 py-1 rounded" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+                                                        Marks: {question.no_of_marks_allocated}
+                                                    </span>
+                                                </Form.Label>
+                                                <Col sm="12">
+                                                    {question.options.map((option, idx) => (
+                                                        <Form.Check
+                                                            key={idx}
+                                                            type="checkbox"
+                                                            label={option.option_description}
+                                                            name={`question-${index}`}
+                                                            value={option.option_description}
+                                                            checked={answers[question.cumulative_question_id]?.includes(option.option_description)}
+                                                            onChange={(e) => handleAnswerChange(question.cumulative_question_id, e.target.value, e.target.checked)}
+                                                            className="mb-2 lead "
+                                                            style={{ paddingLeft: '1.5rem', fontSize: '0.95rem', fontWeight: '400', }}
+                                                        />
+                                                    ))}
+                                                </Col>
+                                            </Form.Group>
+                                        </Form>
 
-                        <div className='text-center'>
-                            {/* <button onClick={generateCertificate} className="btn btn-primary">
+                                    </>
+                                ))}
+                            </>
+                        )}
+
+                        {/* Summary and detailed results */}
+                        {showSummary && showResult && (
+                            <Card className="mt-5 shadow">
+                                <Card.Header>
+                                    <h3>Summary</h3>
+                                </Card.Header>
+                                <Card.Body className="p-4 bg-light">
+                                    <Table bordered hover>
+                                        <tbody>
+                                            <tr>
+                                                <td className="font-weight-bold text-primary">Total Questions</td>
+                                                <td>{questions.length}</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="font-weight-bold text-success">Answered Questions</td>
+                                                <td>{getAnsweredQuestionsCount()}</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="font-weight-bold text-warning">Unanswered Questions</td>
+                                                <td>{getUnansweredQuestionsCount()}</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="font-weight-bold text-danger">Wrong Answers</td>
+                                                <td>{getWrongAnswersCount()}</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="font-weight-bold text-info">Marks Obtained</td>
+                                                <td className='fs-4'>{obtainedMarks}</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="font-weight-bold text-secondary">Total Marks</td>
+                                                <td>{totalMarks}</td>
+                                            </tr>
+                                        </tbody>
+                                        <h4 className='text-center my-3'>
+                                            To View Your Previouslsy attended test results
+                                            <Link to="/external-test-results" target="_blank" rel="noopener noreferrer">
+                                                Click Here
+                                            </Link>
+
+                                        </h4>
+                                    </Table>
+
+                                    <div className='text-center'>
+                                        {/* <button onClick={generateCertificate} className="btn btn-primary">
                 Generate Certificate
             </button> */}
-                            {pdfUrl && (
-                                <a href={pdfUrl} download={`${formData.name}_Lara_Technologies_Certificate.pdf`} className="btn btn-success mt-3">
-                                    Download Certificate
-                                </a>
-                            )}
-                        </div>
+                                        {pdfUrl && (
+                                            <a href={pdfUrl} download={`${formData.name}_Lara_Technologies_Certificate.pdf`} className="btn btn-success mt-3">
+                                                Download Certificate
+                                            </a>
+                                        )}
+                                    </div>
 
-                        <div className="container">
-                            {testDetails ? (
-                                <>
-                                    <p className='h4 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
-                                    <QRCodeDisplay link={testDetails.whatsAppChannelLink} />
-                                </>
-                            ) : (
-                                <>
-                                    <p className='h4 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
-                                    <img src={qrCodeUrl} alt="WhatsApp channel link" width={200} height={200} />
-                                </>
-                            )
-                            }
-                        </div>
+                                    <div className="container">
+                                        {testDetails ? (
+                                            <>
+                                                <div className='text-center'>
 
-
-
-                        {/* Detailed results for each question */}
-                        <Table responsive bordered hover className="mt-4 ">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Question</th>
-                                    <th>Available Options</th>
-                                    <th>Your Answers</th>
-                                    <th>Correct Answers</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {questions.map((question, index) => (
-                                    <tr key={question.cumulative_question_id}>
-                                        <td>{index + 1}</td>
-                                        <td className='responsive'>
-                                            <pre className='lead text-dark' style={{ maxWidth: '40vw', whiteSpace: 'pre-wrap', fontFamily: 'inherit', marginBottom: '10px', fontSize: '1rem' }}>
-                                                <code> {index + 1}. <br />{question.question_description}</code>
-                                            </pre>
-                                        </td>
-                                        <td>
-                                            <div className="d-grid gap-2">
-                                                {question.options.map((option, idx) => (
-                                                    <div key={idx} className="p-2 border rounded">
-                                                        {option.option_description}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            {answers[question.cumulative_question_id]?.length > 0
-                                                ? answers[question.cumulative_question_id].map((answer, idx) => (
-                                                    <div key={idx} className={`p-2 rounded ${question.correct_answers.includes(answer) ? 'bg-success text-white' : 'bg-danger text-white'}`}>
-                                                        {answer}
-                                                    </div>
-                                                ))
-                                                : <div className="p-2 rounded bg-secondary text-white my-1">Not Attended</div>
-                                            }
-                                        </td>
-                                        <td>
-                                            {question.correct_answers.map((correctAnswer, idx) => (
-                                                <div key={idx} className="p-2 rounded bg-success text-white my-1">
-                                                    {correctAnswer}
+                                                    <p className='h4 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
+                                                    <QRCodeDisplay link={testDetails.whatsAppChannelLink} />
+                                                    <a
+                                                        href="https://whatsapp.com/channel/0029Var9Wub30LKJP7fK7y06"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn btn-success mt-4"
+                                                        style={{
+                                                            textDecoration: "none",
+                                                            fontWeight: "bold",
+                                                        }}
+                                                    >
+                                                        Join Our WhatsApp Channel
+                                                    </a>
                                                 </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className='text-center'>
+                                                    <p className='h4 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
+                                                    <img src={qrCodeUrl} alt="WhatsApp channel link" width={200} height={200} />
+                                                    <a
+                                                        href="https://whatsapp.com/channel/0029Var9Wub30LKJP7fK7y06"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn btn-success mt-2"
+                                                        style={{
+                                                            textDecoration: "none",
+                                                            fontWeight: "bold",
+                                                        }}
+                                                    >
+                                                        Join Our WhatsApp Channel
+                                                    </a>
+                                                </div>
+                                            </>
+                                        )
+                                        }
+                                    </div>
+
+
+
+                                    {/* Detailed results for each question */}
+                                    <Table responsive bordered hover className="mt-4 ">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Question</th>
+                                                <th>Available Options</th>
+                                                <th>Your Answers</th>
+                                                <th>Correct Answers</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {questions.map((question, index) => (
+                                                <tr key={question.cumulative_question_id}>
+                                                    <td>{index + 1}</td>
+                                                    <td className='responsive'>
+                                                        <pre className='lead text-dark' style={{ maxWidth: '40vw', whiteSpace: 'pre-wrap', fontFamily: 'inherit', marginBottom: '10px', fontSize: '1rem' }}>
+                                                            <code> {index + 1}. <br />{question.question_description}</code>
+                                                        </pre>
+                                                    </td>
+                                                    <td>
+                                                        <div className="d-grid gap-2">
+                                                            {question.options.map((option, idx) => (
+                                                                <div key={idx} className="p-2 border rounded">
+                                                                    {option.option_description}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        {answers[question.cumulative_question_id]?.length > 0
+                                                            ? answers[question.cumulative_question_id].map((answer, idx) => (
+                                                                <div key={idx} className={`p-2 rounded ${question.correct_answers.includes(answer) ? 'bg-success text-white' : 'bg-danger text-white'}`}>
+                                                                    {answer}
+                                                                </div>
+                                                            ))
+                                                            : <div className="p-2 rounded bg-secondary text-white my-1">Not Attended</div>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        {question.correct_answers.map((correctAnswer, idx) => (
+                                                            <div key={idx} className="p-2 rounded bg-success text-white my-1">
+                                                                {correctAnswer}
+                                                            </div>
+                                                        ))}
+                                                    </td>
+                                                </tr>
                                             ))}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </Card.Body>
-                </Card>
-            )}
+                                        </tbody>
+                                    </Table>
+                                </Card.Body>
+                            </Card>
+                        )}
 
 
-            {/* Message if results are not available */}
-            {showSummary && !showResult && (
-                <h3 className="text-info text-center">Your result will be updated soon.</h3>
-            )}
+                        {/* Message if results are not available */}
+                        {showSummary && !showResult && (
+                            <h3 className="text-info text-center">Your result will be updated soon.</h3>
+                        )}
 
-            {/* Student details form modal */}
-            <Modal show={modalOpen} >
-                <Modal.Header >
-                    <Modal.Title>{showForm ? "Please Fill the Form" : `Please adhere to the rules`}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    {!showForm ? (
-                        <div className="container ">
-                            {/* {testDetails ? (
-                                <>
-                                    <p className='h6 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
-                                    <QRCodeDisplay link={testDetails.whatsAppChannelLink} />
-                                </>
-                            ) : (
-                                <>
-                                    <p className='h6 my-3'>Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.</p>
-                                    <img src={qrCodeUrl} alt="WhatsApp channel link" width={200} height={200} />
-                                </>
-                            )
-                            } */}
-                            <Alert variant="info" className="mt-4">
-                                <Alert.Heading>Info</Alert.Heading>
-                                <p>Please Allow the camera and microphone to attend the test. If asked.</p>
-                            </Alert>
-                            <Alert variant="danger" className="mt-4">
-                                <Alert.Heading>Warning</Alert.Heading>
-                                <div>
-                                    Please be aware that any form of malpractice during the test, such as:
-                                    <ul>
-                                        <li>Switching to a different tab or leaving the test window</li>
-                                        <li>Your face should always face towards the screen</li>
-                                        <li>Ensure that you stay within the test environment until you submit the test</li>
-                                    </ul>
-                                    The test will be monitored by the system. If any malpractice is found, the test will be TERMINATED! Adhere to the rules at all times to avoid disqualification.
+                        {/* Student details form modal */}
+                        <Modal show={modalOpen} size="lg">
+                            <Modal.Header className="bg-warning d-flex align-items-center justify-content-center">
+                                <div className="d-flex align-items-center w-100">
+                                    {/* Logo Section */}
+                                    <img
+                                        src={logoUrl}
+                                        alt="Lara Logo"
+                                        className="img-fluid me-3"
+                                        style={{ maxWidth: "100px", height: "auto" }}
+                                    />
+                                    {/* Title Section */}
+                                    <div className="text-primary bolder fs-5 text-nowrap">
+                                        {showForm ? "Please Fill the Form" : "Please adhere to the rules"}
+                                    </div>
                                 </div>
-                            </Alert>
-                            <Button variant="primary my-3" onClick={() => setShowForm(true)}>
-                                Next
+                            </Modal.Header>
+
+                            <Modal.Body>
+                                <div className="container">
+                                    {/* Top Section: QR Code and Form */}
+                                    <div className="row">
+                                        {/* Left Section: QR Code */}
+                                        <div className="col-md-6 d-flex flex-column align-items-center justify-content-center ">
+                                            <p className="h6 text-center mb-3">
+                                                Scan the QR code and join our WhatsApp channel where we share valuable knowledge, tips, and free resources to help you improve and succeed.
+                                            </p>
+                                            {testDetails ? (
+                                                <QRCodeDisplay link={testDetails.whatsAppChannelLink} />
+                                            ) : (
+                                                <img
+                                                    src={qrCodeUrl}
+                                                    alt="WhatsApp channel link"
+                                                    className="img-fluid"
+                                                    style={{ maxWidth: "200px", maxHeight: "200px" }}
+                                                />
+                                            )}
+                                        </div>
+
+                                        {/* Right Section: Form */}
+                                        <div className="col-md-6 mt-4">
+                                            <Form onSubmit={handleSaveStudent}>
+                                                <Form.Group controlId="name">
+                                                    <Form.Label>Name</Form.Label>
+                                                    <Form.Control
+                                                        type="text"
+                                                        name="name"
+                                                        value={formData.name}
+                                                        onChange={handleChange}
+                                                        required
+                                                    />
+                                                </Form.Group>
+                                                <Form.Group controlId="email" className="mt-2">
+                                                    <Form.Label>Email</Form.Label>
+                                                    <Form.Control
+                                                        type="email"
+                                                        name="email"
+                                                        value={formData.email}
+                                                        onChange={handleChange}
+                                                        required
+                                                    />
+                                                </Form.Group>
+                                                <Form.Group controlId="phone_number" className="mt-2">
+                                                    <Form.Label>Phone Number</Form.Label>
+                                                    <Form.Control
+                                                        type="text"
+                                                        name="phone_number"
+                                                        value={formData.phone_number}
+                                                        onChange={handleChange}
+                                                        required
+                                                    />
+                                                </Form.Group>
+                                                <Form.Group controlId="university_name" className="mt-2">
+                                                    <Form.Label>University Name</Form.Label>
+                                                    <Form.Control
+                                                        type="text"
+                                                        name="university_name"
+                                                        value={formData.university_name}
+                                                        onChange={handleChange}
+                                                    />
+                                                </Form.Group>
+                                                <Form.Group controlId="college_name" className="mt-2">
+                                                    <Form.Label>College Name</Form.Label>
+                                                    <Form.Control
+                                                        type="text"
+                                                        name="college_name"
+                                                        value={formData.college_name}
+                                                        onChange={handleChange}
+                                                    />
+                                                </Form.Group>
+                                                {saveError && <p className="text-danger mt-2">{saveError}</p>}
+                                                <Button
+                                                    variant="primary"
+                                                    type="submit"
+                                                    disabled={savingStudent}
+                                                    className="mt-3 w-100"
+                                                >
+                                                    {savingStudent ? "Saving..." : "Submit"}
+                                                </Button>
+                                            </Form>
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom Section: Alerts */}
+                                    <div className="row mt-4">
+                                        <div className="col-12">
+                                            <Alert variant="info">
+                                                <Alert.Heading>Info</Alert.Heading>
+                                                <p>Please allow the camera and microphone to attend the test. If asked.</p>
+                                            </Alert>
+                                            <Alert variant="danger" className="mt-3">
+                                                <Alert.Heading>Warning</Alert.Heading>
+                                                <div>
+                                                    Please be aware that any form of malpractice during the test, such as:
+                                                    <ul>
+                                                        <li>Switching to a different tab or leaving the test window</li>
+                                                        <li>Your face should always face towards the screen</li>
+                                                        <li>Ensure that you stay within the test environment until you submit the test</li>
+                                                    </ul>
+                                                    The test will be monitored by the system. If any malpractice is found, the test will be TERMINATED! Adhere to the rules at all times to avoid disqualification.
+                                                </div>
+                                            </Alert>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Modal.Body>
+                        </Modal>
+
+                        {/* Submit button */}
+                        {!showSummary && (
+                            <Button variant="success" onClick={handleSubmitTest}>
+                                Submit Test
                             </Button>
-                        </div>
-                    ) : (
-                        <>
-                            <Form onSubmit={handleSaveStudent}>
-                                <Form.Group controlId="name">
-                                    <Form.Label>Name</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                                <Form.Group controlId="email">
-                                    <Form.Label>Email</Form.Label>
-                                    <Form.Control
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                                <Form.Group controlId="phone_number">
-                                    <Form.Label>Phone Number</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="phone_number"
-                                        value={formData.phone_number}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                                <Form.Group controlId="university_name">
-                                    <Form.Label>University Name</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="university_name"
-                                        value={formData.university_name}
-                                        onChange={handleChange}
-                                    />
-                                </Form.Group>
-                                <Form.Group controlId="college_name">
-                                    <Form.Label>College Name</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="college_name"
-                                        value={formData.college_name}
-                                        onChange={handleChange}
-                                    />
-                                </Form.Group>
-                                {saveError && <p className="text-danger">{saveError}</p>}
-                                <Button
-                                    variant="primary"
-                                    type="submit"
-                                    disabled={savingStudent}
-                                    style={{ marginTop: "5px" }}
-                                >
-                                    {savingStudent ? "Saving..." : "Submit"}
-                                </Button>
-                            </Form>
-                            {/* <Alert variant="info" className="mt-4">
-                                <Alert.Heading>Info</Alert.Heading>
-                                <p>Please Allow the camera and microphone to attend the test.</p>
-                            </Alert>
-                            <Alert variant="danger" className="mt-4">
-                                <Alert.Heading>Warning</Alert.Heading>
-                                <div>
-                                    Please be aware that any form of malpractice during the test, such as:
-                                    <ul>
-                                        <li>Switching to a different tab or leaving the test window</li>
-                                        <li>Your face should always face towards the screen</li>
-                                        <li>Ensure that you stay within the test environment until you submit the test</li>
-                                    </ul>
-                                    The test will be monitored by the system. If any malpractice is found, the test will be TERMINATED! Adhere to the rules at all times to avoid disqualification.
-                                </div>
-                            </Alert> */}
-                        </>
-                    )}
-                </Modal.Body>
-            </Modal>
+                        )}
 
-            {/* Submit button */}
-            {!showSummary && (
-                <Button variant="success" onClick={handleSubmitTest}>
-                    Submit Test
-                </Button>
+                        <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
+
+                    </div>
+                </>
+            ) : (
+                <>
+                <TestNotActiveYet />
+                </>
             )}
+        </>
 
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
-
-        </div>
 
     );
 };

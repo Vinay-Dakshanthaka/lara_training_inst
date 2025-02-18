@@ -74,8 +74,12 @@ import TestNotActiveYet from './components/TestNotActiveYet';
 import RecruiterDashboard from './components/recruiter/RecruiterDashboard';
 import SaveWhatsAppChannelModal from './components/placementTest/SaveWhatsAppChannelModal';
 import ExternalStudentsResults from './components/ExternalStudentsResults';
-import PaymentForm from './components/student/PaymentForm';
-import DeleteinternaltestLink from './components/internalTests/DeleteinternaltestLink';
+import WhatsAppJoin from './components/student/WhatsAppJoin';
+import UpdateStudentEmail from './components/admin/UpdateStudentEmail';
+// import PaperBasedExcelSheet from './components/admin/PaperBasedExcelSheet';
+import PaperBasedTestResults from './components/admin/PaperBasedTestResults';
+import AssignBatches from './components/internalTests/AssignBatchs';
+import AssignBatchsTowt from './components/weeklyTest/AssignBatchsTowt';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -94,6 +98,7 @@ const App = () => {
             <Route path='course' element={<Course />} />
             <Route path='terms' element={<TermsAndCondition />} />
             <Route path="/login" element={<LoginForm />} />
+            <Route path="/join-channel" element={<WhatsAppJoin />} />
             <Route path="/signup" element={<SignUpForm />} />
             <Route path="/studentHome" element={<StudentHome />} />
             <Route path="/updateProfile" element={<UpdateProfile />} />
@@ -125,6 +130,10 @@ const App = () => {
             <Route path="/internal-test/:test_id" element={<InternalTest />} />
             <Route path="/malpractice-detected" element={<PlacementTestError />} />
             <Route path="/create-test-link" element={<CreateTestLink />} />
+            <Route path="/updateStudentEmail" element={<UpdateStudentEmail />} />
+            <Route path="/paperBasedTestResults" element={<PaperBasedTestResults />} />
+            {/* <Route path="/paper-excel" element={<PaperBasedExcelSheet />} /> */}
+
             <Route path="/not-found" element={<NotFound />} />
             <Route path="/test-not-active" element={<TestNotActiveYet />} />
             <Route path="/chrome-only" element={<ChromeOnlyMessage />} />
@@ -160,7 +169,6 @@ const App = () => {
             <Route path='weekly-test-student-performance/:student_id' element={<WeeklyTestPerformanceForAdmin />} />
             <Route path='/add-whatsApp-link' element={<SaveWhatsAppChannelModal />} />
             <Route path='/external-test-results' element={<ExternalStudentsResults />} />
-            <Route path='/payFee' element={<PaymentForm  /> } />
 
           </Routes>
         </div>

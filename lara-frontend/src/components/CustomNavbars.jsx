@@ -3,7 +3,7 @@ import axios from 'axios';
 import { AppBar, Box, Container, Toolbar, IconButton, Typography, Menu, MenuItem, Button, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import defaultProfileImage from "../components/default-profile.png";
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import logoImage from "../resources/images/laralogo.webp";
 import { baseURL } from './config';
 import 'react-toastify/dist/ReactToastify.css';
@@ -115,7 +115,12 @@ function CustomNavbars() {
         fetchProfileImage();
     }, [isLoggedIn]);
 
+    const location = useLocation();
 
+    // Hide the Navbar on '/join-channel'
+    if (location.pathname === "/join-channel") {
+      return null;
+    }
 
     return (
         <AppBar position="static" sx={{ backgroundColor: '#347ddb', color: '#fff' }} className=''>
