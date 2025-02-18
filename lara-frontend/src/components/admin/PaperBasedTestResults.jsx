@@ -3,7 +3,7 @@ import PaperBasedExcelSheet from "./PaperBasedExcelSheet"; // Import the compone
 import AttendedStudentDetails from "./AttendedStudentDetails";
 
 function PaperBasedTestResults() {
-  const [activeComponent, setActiveComponent] = useState(null);
+  const [activeComponent, setActiveComponent] = useState("AttendedStudentDetails");
 
   return (
     <div className="container mt-4">
@@ -25,7 +25,7 @@ function PaperBasedTestResults() {
                 className="nav-link custom-link btn btn-link text-left"
                 onClick={() => setActiveComponent("AttendedStudentDetails")}
               >
-                AttendedStudentDetails
+                Student Wise Performance 
               </button>
             </li>
           </ul>
