@@ -21,6 +21,7 @@ import InternalTestsDashboard from '../internalTests/InternalTestsDashboard';
 import AssignWhatsAppChannel from '../placementTest/AssignWhatsAppChannel';
 import { ToastContainer } from 'react-toastify';
 import UpdateStudentEmail from './UpdateStudentEmail';
+import PaperBasedTestResults from './PaperBasedTestResults';
 
 const AdminDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');
@@ -93,8 +94,11 @@ const AdminDashboard = () => {
         <Tab eventKey="assignWhatsAppChannel" title="Assign WhatsApp channel">
           <AssignWhatsAppChannel />
         </Tab>
-        <Tab eventKey="updateStudentEmail" title=" UpdateStudentEmail">
+        <Tab eventKey="updateStudentEmail" title=" Update Student Email">
           <UpdateStudentEmail />
+        </Tab>
+        <Tab eventKey="paperBasedTestResults" title="Upload Test Resuts">
+          <PaperBasedTestResults />
         </Tab>
       </Tabs>
     </div>

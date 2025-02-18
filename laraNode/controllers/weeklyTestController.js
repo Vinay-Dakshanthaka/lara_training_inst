@@ -1,4 +1,5 @@
 const db = require('../models');
+const weeklyTestQuestionAnswer = require('../models/weeklyTestQuestionAnswer');
 const { baseURL } = require('./baseURLConfig');
 const xlsx = require('xlsx');
 
@@ -11,6 +12,7 @@ const WeeklyTestQuestionMapping = db.WeeklyTestQuestionMapping;
 const Student = db.Student;
 const StudentAnswer = db.StudentAnswer;
 const WeeklyTestFinalSubmission = db.WeeklyTestFinalSubmission;
+const {  BatchTestLinks } = require('../models'); 
 
 const createWeeklyTestLink = async (req, res) => {
     try {
@@ -176,18 +178,67 @@ const getAllWeeklyTests = async (req, res) => {
 };
 
 const saveQuestionHandler = async (req, res) => {
-    const { questionData, wt_id } = req.body;
+    try {
+        const { questionData, wt_id } = req.body;
+        console.log(questionData, "---------------------------- questionData");
 
-    // Call the service function to save the question and mapping
-    const result = await saveWeeklyTestQuestionWithMapping(questionData, wt_id);
+        // Extract necessary fields
+        const { wt_question_keywords } = questionData;
+        console.log(wt_question_keywords, "----------------- wt_question_keywords");
 
-    // Return the appropriate response based on the result
-    if (result.success) {
-        return res.status(201).send({ message: result.message, question: result.newQuestion });
-    } else {
-        return res.status(500).send({ message: result.message, error: result.error });
+        // Save the question and mapping
+        const result = await saveWeeklyTestQuestionWithMapping(questionData, wt_id);
+        console.log(result, "-------------------------------- saving question");
+
+        if (result.success) {
+            const wt_question_id = result.newQuestion?.dataValues?.wt_question_id;
+            console.log(wt_question_id, "----------------------- wt_question_id");
+
+            if (wt_question_id && wt_question_keywords) { 
+                console.log("🔍 Inserting keywords:", wt_question_keywords);
+
+                const keywords = await db.WeeklyTestQuestionAnswer.create({
+                    wt_question_id: wt_question_id,
+                    keywords: wt_question_keywords?.toString() || "ntg",
+                }, { 
+                    fields: ["wt_question_id", "keywords"]  
+                });
+
+                console.log("✅ Answer saved successfully.", keywords);
+            } else {
+                console.log("⚠️ Skipping answer saving as no question ID is available.");
+            }
+
+            return res.status(200).send({ 
+                message: result.message, 
+                question: result.newQuestion 
+            });
+        } else {
+            return res.status(500).send({ message: result.message, error: result.error });
+        }
+    } catch (error) {
+        console.error("❌ Error saving question:", error);
+        return res.status(500).send({ message: "Internal server error", error: error.message });
     }
 };
+
+
+
+
+
+// const saveQuestionHandler = async (req, res) => {
+//     const { questionData, wt_id } = req.body;
+//       console.log(questionData,"----------------------------questiondata");
+//     // Call the service function to save the question and mapping
+//     const result = await saveWeeklyTestQuestionWithMapping(questionData, wt_id);
+   
+//     // Return the appropriate response based on the result
+//     if (result.success) {
+//         return res.status(201).send({ message: result.message, question: result.newQuestion });
+//     } else {
+//         return res.status(500).send({ message: result.message, error: result.error });
+//     }
+// };
 
 const saveWeeklyTestQuestionWithMapping = async (questionData, wt_id) => {
     const { wt_question_description, marks, minutes, topic_id } = questionData;
@@ -261,6 +312,8 @@ const saveWeeklyTestQuestionWithMapping = async (questionData, wt_id) => {
 
 // };
 
+
+
 const getQuestionsByWeeklyTestId = async (req, res) => {
     const { wt_id } = req.params;
 
@@ -271,13 +324,19 @@ const getQuestionsByWeeklyTestId = async (req, res) => {
             attributes: ['wt_question_id']  // Only select the question IDs
         });
 
+        console.log(questionMappings,"--------------------------questionmapping")
+
         // Check if any questions are associated with the test
         if (!questionMappings || questionMappings.length === 0) {
             return res.status(404).send({ message: 'No questions found for this test' });
         }
 
         // Extract the question IDs from the mappings
-        const questionIds = questionMappings.map(mapping => mapping.wt_question_id);
+        // const questionIds = questionMappings.map(mapping => mapping.wt_question_id);
+        const questionIds = questionMappings.map(mapping => mapping.dataValues.wt_question_id);
+
+        console.log(questionIds,"----------------------questionids")
+
 
         // Step 2: Fetch the questions from the WeeklyTestQuestion table using the IDs
         const questions = await WeeklyTestQuestion.findAll({
@@ -289,14 +348,21 @@ const getQuestionsByWeeklyTestId = async (req, res) => {
                     model: Topic,  // Include the Topic details
                     as: 'TopicDetails',
                     attributes: ['name']
+                },
+                {
+                    model: WeeklyTestQuestionAnswer,  
+                    as: 'TestQuestionAnswerDetails',  // Updated alias
+                    attributes: ['keywords']  // Fetch only keywords
                 }
-            ]
+            ],
+        
         });
-        // console.log("Type of questions ===",typeof questions)
-
+               
+           
+           console.log(questions,"----------------------------------questions")
         // Calculate total marks
         const totalMarks = questions.reduce((total, question) => total + question.marks, 0);
-        console.log("type of returen ==-=-===>>>>", typeof totalMarks )
+
         return res.status(200).send({
             message: 'Questions fetched successfully',
             totalMarks,
@@ -310,8 +376,60 @@ const getQuestionsByWeeklyTestId = async (req, res) => {
             error: error.message
         });
     }
-
 };
+
+
+// const getQuestionsByWeeklyTestId = async (req, res) => {
+//     const { wt_id } = req.params;
+
+//     try {
+//         // Step 1: Get all the question IDs from the WeeklyTestQuestionMapping table
+//         const questionMappings = await WeeklyTestQuestionMapping.findAll({
+//             where: { wt_id },
+//             attributes: ['wt_question_id']  // Only select the question IDs
+//         });
+
+//         // Check if any questions are associated with the test
+//         if (!questionMappings || questionMappings.length === 0) {
+//             return res.status(404).send({ message: 'No questions found for this test' });
+//         }
+
+//         // Extract the question IDs from the mappings
+//         const questionIds = questionMappings.map(mapping => mapping.wt_question_id);
+
+//         // Step 2: Fetch the questions from the WeeklyTestQuestion table using the IDs
+//         const questions = await WeeklyTestQuestion.findAll({
+//             where: {
+//                 wt_question_id: questionIds
+//             },
+//             include: [
+//                 {
+//                     model: Topic,  // Include the Topic details
+//                     as: 'TopicDetails',
+//                     attributes: ['name']
+//                 }
+//             ]
+//         });
+//         // console.log("Type of questions ===",typeof questions)
+
+//         // Calculate total marks
+//         const totalMarks = questions.reduce((total, question) => total + question.marks, 0);
+//         console.log("type of returen ==-=-===>>>>", typeof totalMarks )
+//         return res.status(200).send({
+//             message: 'Questions fetched successfully',
+//             totalMarks,
+//             questions
+//         });
+
+//     } catch (error) {
+//         console.error('Error fetching questions by weekly test ID:', error);
+//         return res.status(500).send({
+//             message: 'Error fetching questions',
+//             error: error.message
+//         });
+//     }
+
+// };
 
 
 const getQuestionById = async (req, res) => {
@@ -328,6 +446,10 @@ const getQuestionById = async (req, res) => {
                     model: Topic,  // Include the Topic details
                     as: 'TopicDetails',
                     attributes: ['name']
+                },{
+                    model: WeeklyTestQuestionAnswer,  
+                    as: 'TestQuestionAnswerDetails',  
+                    attributes: ['keywords']
                 }
             ]
         });
@@ -922,20 +1044,65 @@ const getStudentAnswer = async (req, res) => {
 };
 
 
+// const updateQuestionHandler = async (req, res) => {
+//     const { question_id } = req.params;  
+//     const questionData = req.body;  
+
+//     // Call the service function to update the question
+//     const result = await updateWeeklyTestQuestion(question_id, questionData);
+
+//     // Return the appropriate response based on the result
+//     if (result.success) {
+//         return res.status(200).send({ message: result.message, updatedQuestion: result.updatedQuestion });
+//     } else {
+//         return res.status(400).send({ message: result.message, error: result.error });
+//     }
+// };
+
 const updateQuestionHandler = async (req, res) => {
     const { question_id } = req.params;  
-    const questionData = req.body;  
+    const { wt_question_description, marks, minutes, keywords } = req.body;
 
-    // Call the service function to update the question
-    const result = await updateWeeklyTestQuestion(question_id, questionData);
+    try {
+        // Ensure keywords are processed correctly as a string
+        const keywordsString = Array.isArray(keywords) ? keywords.join(", ") : keywords;
 
-    // Return the appropriate response based on the result
-    if (result.success) {
-        return res.status(200).send({ message: result.message, updatedQuestion: result.updatedQuestion });
-    } else {
-        return res.status(400).send({ message: result.message, error: result.error });
+        // Update the main WeeklyTestQuestion fields
+        await WeeklyTestQuestion.update(
+            { wt_question_description, marks, minutes },
+            { where: { wt_question_id: question_id } }
+        );
+
+        // Update or insert keywords in WeeklyTestQuestionAnswer (assuming one row per question)
+        const existingRecord = await WeeklyTestQuestionAnswer.findOne({
+            where: { wt_question_id: question_id }
+        });
+
+        if (existingRecord) {
+            // Update existing keywords entry
+            await WeeklyTestQuestionAnswer.update(
+                { keywords: keywordsString },
+                { where: { wt_question_id: question_id } }
+            );
+        } else {
+            // Insert new record if no existing entry
+            await WeeklyTestQuestionAnswer.create({
+                wt_question_id: question_id,
+                keywords: keywordsString
+            });
+        }
+
+        return res.status(200).json({
+            message: 'Question and keywords updated successfully!',
+        });
+    } catch (error) {
+        return res.status(400).json({
+            message: 'Error updating question',
+            error: error.message
+        });
     }
 };
+
 
 
 const updateWeeklyTestQuestion = async (question_id, questionData) => {
@@ -1605,62 +1772,109 @@ const getAllActiveWeeklyTests = async (req, res) => {
     }
 };
 
+
 // const getStudentAndActiveTestsWithAttendance = async (req, res) => {
-//     const studentId = req.studentId;  // Get student ID from request (assuming it's authenticated)
+//     const studentId = req.studentId;  
 
 //     try {
 //         // Step 1: Fetch all active weekly tests
 //         const activeTests = await WeeklyTest.findAll({
-//             where: {
-//                 is_active: true  // Only fetch active tests
-//             },
+//             where: { is_active: true },
 //             include: [
 //                 {
 //                     model: WeeklyTestTopics,
 //                     as: 'TestWeekly',
-//                     include: [
-//                         {
-//                             model: Topic,
-//                             as: 'TopicAssociation'
-//                         }
-//                     ]
+//                     include: [{ model: Topic, as: 'TopicAssociation' }]
 //                 }
 //             ]
 //         });
 
-//         // If no active tests are found
 //         if (!activeTests || activeTests.length === 0) {
 //             return res.status(404).send({ message: 'No active weekly tests found' });
 //         }
 
-//         // Step 2: Check attendance for each test
+//         // Step 2: Process each test for student attendance & marks
 //         const testsWithAttendance = await Promise.all(activeTests.map(async (test) => {
-//             // Check if the student attended this test
 //             const studentAttendance = await StudentAnswer.findOne({
-//                 where: {
-//                     wt_id: test.wt_id,
-//                     student_id: studentId  // Check for this specific student in the weekly test
-//                 },
-//                 attributes: ['student_id']  // Only need the student_id to check attendance
+//                 where: { wt_id: test.wt_id, student_id: studentId },
+//                 attributes: ['student_id']
 //             });
 
-//             // Mark whether the student attended or not
-//             const hasAttended = studentAttendance ? true : false;
+//             // Fetch student answers for this test
+//             const studentAnswers = await StudentAnswer.findAll({
+//                 where: { wt_id: test.wt_id, student_id: studentId },
+//                 attributes: ['question_id', 'answer', 'marks']
+//             });
+
+//             let obtainedMarks = 0;
+//             let totalAvailableMarks = 0;
+
+//             // If student has answers, check if marks are already stored
+//             if (studentAnswers.length > 0) {
+//                 const existingMarks = studentAnswers.some(answer => answer.marks !== null);
+
+//                 if (existingMarks) {
+//                     // Sum up obtained marks from the database
+//                     obtainedMarks = studentAnswers.reduce((total, answer) => total + (Number(answer.marks) || 0), 0);
+//                 } else {
+//                     // Auto-calculate marks if marks are not present
+//                     const questionIds = studentAnswers.map(answer => answer.question_id);
+//                     const studentResponses = studentAnswers.map(answer => answer.answer.toLowerCase());
+
+//                     // Fetch questions and their marks
+//                     const questions = await WeeklyTestQuestion.findAll({
+//                         where: { wt_question_id: questionIds },
+//                         attributes: ['wt_question_id', 'marks']
+//                     });
+
+//                     // Fetch keywords for each question
+//                     const keywordsData = await WeeklyTestQuestionAnswer.findAll({
+//                         where: { wt_question_id: questionIds },
+//                         attributes: ['wt_question_id', 'keywords']
+//                     });
+
+//                     // Map keywords
+//                     const keywordsMap = {};
+//                     keywordsData.forEach(({ wt_question_id, keywords }) => {
+//                         keywordsMap[wt_question_id] = keywords.toLowerCase().split(',');
+//                     });
+
+//                     // Strip HTML tags function
+//                     const stripHtmlTags = (html) => html.replace(/<[^>]*>/g, '').trim();
+
+//                     // Calculate marks based on keyword matching
+//                     studentAnswers.forEach(({ question_id, answer }) => {
+//                         const studentResponse = stripHtmlTags(answer).toLowerCase();
+//                         const keywords = keywordsMap[question_id] || [];
+
+//                         const matchedKeywords = keywords.filter(keyword => studentResponse.includes(keyword));
+//                         if (matchedKeywords.length > 0) {
+//                             const question = questions.find(q => q.wt_question_id === question_id);
+//                             obtainedMarks += question ? question.marks : 0;
+//                         }
+//                     });
+//                 }
+//             }
+
+//             // Calculate total available marks
+//             totalAvailableMarks = await WeeklyTestQuestion.sum('marks', {
+//                 where: { wt_question_id: studentAnswers.map(a => a.question_id) }
+//             });
 
 //             return {
 //                 test_id: test.wt_id,
 //                 test_link: test.wt_link,
 //                 test_date: new Date(test.test_date).toLocaleDateString(),
 //                 test_description: test.wt_description,
-//                 has_attended: hasAttended,
+//                 has_attended: !!studentAttendance,
+//                 obtained_marks: studentAttendance ? obtainedMarks : null,
+//                 total_available_marks: totalAvailableMarks
 //             };
 //         }));
 
-//         // Step 3: Fetch student details
+//         // Fetch student details
 //         const student = await Student.findOne({
-//             where: {
-//                 id: studentId
-//             },
+//             where: { id: studentId },
 //             attributes: ['id', 'name', 'email', 'phoneNumber']
 //         });
 
@@ -1668,10 +1882,9 @@ const getAllActiveWeeklyTests = async (req, res) => {
 //             return res.status(404).send({ message: 'Student not found' });
 //         }
 
-//         // Step 4: Count number of tests attended by the student
+//         // Count number of tests attended
 //         const attendedTestsCount = testsWithAttendance.filter(test => test.has_attended).length;
 
-//         // Step 5: Send the response with active test details and attendance status
 //         return res.status(200).send({
 //             message: 'Student and active test details fetched successfully',
 //             student: {
@@ -1679,106 +1892,138 @@ const getAllActiveWeeklyTests = async (req, res) => {
 //                 student_name: student.name,
 //                 student_email: student.email,
 //                 student_phone: student.phoneNumber,
-//                 attended_tests_count: attendedTestsCount  // Add the count of attended tests
+//                 attended_tests_count: attendedTestsCount
 //             },
 //             active_tests: testsWithAttendance
 //         });
 
 //     } catch (error) {
 //         console.error('Error fetching student and active test details:', error);
-//         return res.status(500).send({
-//             message: 'Error fetching student and active test details',
-//             error: error.message
-//         });
+//         return res.status(500).send({ message: 'Error fetching details', error: error.message });
 //     }
 // };
 
+
 const getStudentAndActiveTestsWithAttendance = async (req, res) => {
-    const studentId = req.studentId;  // Get student ID from request (assuming it's authenticated)
+    const studentId = req.studentId;  
 
     try {
-        // Step 1: Fetch all active weekly tests
+        // Step 1: Fetch student's batch
+        const studentBatch = await db.Student_Batch.findOne({
+            where: { student_id: studentId },
+            attributes: ['batch_id']
+        });
+
+        if (!studentBatch) {
+            return res.status(404).send({ message: 'Student batch not found' });
+        }
+
+        const batchId = studentBatch.batch_id;
+
+        // Step 2: Fetch active weekly tests related to the student's batch
         const activeTests = await WeeklyTest.findAll({
-            where: {
-                is_active: true  // Only fetch active tests
-            },
+            where: { is_active: true },
             include: [
                 {
                     model: WeeklyTestTopics,
                     as: 'TestWeekly',
-                    include: [
-                        {
-                            model: Topic,
-                            as: 'TopicAssociation'
-                        }
-                    ]
+                    include: [{ model: Topic, as: 'TopicAssociation' }]
+                },
+                {
+                    model: BatchTestLinks,
+                    required: true,  // Ensures only linked batch tests are included
+                    where: { batch_id: batchId }  // Filters tests for the student's batch
                 }
             ]
         });
+        
 
-        // If no active tests are found
         if (!activeTests || activeTests.length === 0) {
-            return res.status(404).send({ message: 'No active weekly tests found' });
+            return res.status(404).send({ message: 'No active weekly tests found for this batch' });
         }
 
-        // Step 2: Check attendance, obtained marks, and total available marks for each test
+        // Step 3: Process each test for student attendance & marks
         const testsWithAttendance = await Promise.all(activeTests.map(async (test) => {
-            // Check if the student attended this test
             const studentAttendance = await StudentAnswer.findOne({
-                where: {
-                    wt_id: test.wt_id,
-                    student_id: studentId  // Check for this specific student in the weekly test
-                },
-                attributes: ['student_id']  // Only need the student_id to check attendance
+                where: { wt_id: test.wt_id, student_id: studentId },
+                attributes: ['student_id']
             });
 
-            // Calculate the obtained marks for this test
-            const studentMarks = await StudentAnswer.findAll({
-                where: {
-                    wt_id: test.wt_id,
-                    student_id: studentId
-                },
-                attributes: ['marks']  
+            // Fetch student answers for this test
+            const studentAnswers = await StudentAnswer.findAll({
+                where: { wt_id: test.wt_id, student_id: studentId },
+                attributes: ['question_id', 'answer', 'marks']
             });
 
-            // Sum up the obtained marks
-            const totalObtainedMarks = studentMarks.reduce((total, answer) => total + (answer.marks || 0), 0);
+            let obtainedMarks = 0;
+            let totalAvailableMarks = 0;
 
-            // Step 3: Calculate total available marks for this test
-            const questionMappings = await WeeklyTestQuestionMapping.findAll({
-                where: { wt_id: test.wt_id },
-                attributes: ['wt_question_id']
+            if (studentAnswers.length > 0) {
+                const existingMarks = studentAnswers.some(answer => answer.marks !== null);
+
+                if (existingMarks) {
+                    obtainedMarks = studentAnswers.reduce((total, answer) => total + (Number(answer.marks) || 0), 0);
+                } else {
+                    // Auto-calculate marks if marks are not present
+                    const questionIds = studentAnswers.map(answer => answer.question_id);
+                    const studentResponses = studentAnswers.map(answer => answer.answer.toLowerCase());
+
+                    // Fetch questions and their marks
+                    const questions = await WeeklyTestQuestion.findAll({
+                        where: { wt_question_id: questionIds },
+                        attributes: ['wt_question_id', 'marks']
+                    });
+
+                    // Fetch keywords for each question
+                    const keywordsData = await WeeklyTestQuestionAnswer.findAll({
+                        where: { wt_question_id: questionIds },
+                        attributes: ['wt_question_id', 'keywords']
+                    });
+
+                    // Map keywords
+                    const keywordsMap = {};
+                    keywordsData.forEach(({ wt_question_id, keywords }) => {
+                        keywordsMap[wt_question_id] = keywords.toLowerCase().split(',').map(k => k.trim());
+                    });
+
+                    // Strip HTML tags and extra spaces
+                    const cleanText = (text) => text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+
+                    // Calculate marks based on keyword matching
+                    studentAnswers.forEach(({ question_id, answer }) => {
+                        const studentResponse = cleanText(answer.toLowerCase());
+                        const keywords = keywordsMap[question_id] || [];
+
+                        // Check if any keyword exists in student response
+                        const isCorrect = keywords.some(keyword => studentResponse.includes(keyword));
+
+                        if (isCorrect) {
+                            const question = questions.find(q => q.wt_question_id === question_id);
+                            obtainedMarks += question ? question.marks : 0;
+                        }
+                    });
+                }
+            }
+
+            // Fetch total marks available for this test
+            totalAvailableMarks = await WeeklyTestQuestion.sum('marks', {
+                where: { wt_question_id: studentAnswers.map(a => a.question_id) }
             });
-
-            const questionIds = questionMappings.map(mapping => mapping.wt_question_id);
-
-            const questions = await WeeklyTestQuestion.findAll({
-                where: { wt_question_id: questionIds },
-                attributes: ['marks']
-            });
-
-            // Sum up total available marks
-            const totalAvailableMarks = questions.reduce((total, question) => total + question.marks, 0);
-
-            // Mark whether the student attended or not
-            const hasAttended = studentAttendance ? true : false;
 
             return {
                 test_id: test.wt_id,
                 test_link: test.wt_link,
                 test_date: new Date(test.test_date).toLocaleDateString(),
                 test_description: test.wt_description,
-                has_attended: hasAttended,
-                obtained_marks: hasAttended ? totalObtainedMarks : null,  // Only include marks if attended
-                total_available_marks: totalAvailableMarks  // Include total available marks
+                has_attended: !!studentAttendance,
+                obtained_marks: studentAttendance ? obtainedMarks : null,
+                total_available_marks: totalAvailableMarks
             };
         }));
 
         // Step 4: Fetch student details
         const student = await Student.findOne({
-            where: {
-                id: studentId
-            },
+            where: { id: studentId },
             attributes: ['id', 'name', 'email', 'phoneNumber']
         });
 
@@ -1786,10 +2031,9 @@ const getStudentAndActiveTestsWithAttendance = async (req, res) => {
             return res.status(404).send({ message: 'Student not found' });
         }
 
-        // Step 5: Count number of tests attended by the student
+        // Count number of tests attended
         const attendedTestsCount = testsWithAttendance.filter(test => test.has_attended).length;
 
-        // Step 6: Send the response with active test details, attendance status, obtained marks, and total available marks
         return res.status(200).send({
             message: 'Student and active test details fetched successfully',
             student: {
@@ -1797,19 +2041,148 @@ const getStudentAndActiveTestsWithAttendance = async (req, res) => {
                 student_name: student.name,
                 student_email: student.email,
                 student_phone: student.phoneNumber,
-                attended_tests_count: attendedTestsCount  // Add the count of attended tests
+                attended_tests_count: attendedTestsCount
             },
             active_tests: testsWithAttendance
         });
 
     } catch (error) {
         console.error('Error fetching student and active test details:', error);
-        return res.status(500).send({
-            message: 'Error fetching student and active test details',
-            error: error.message
-        });
+        return res.status(500).send({ message: 'Error fetching details', error: error.message });
     }
 };
+
+
+// const getStudentAndActiveTestsWithAttendance = async (req, res) => {
+//     const studentId = req.studentId;  
+
+//     try {
+//         // Step 1: Fetch all active weekly tests
+//         const activeTests = await WeeklyTest.findAll({
+//             where: { is_active: true },
+//             include: [
+//                 {
+//                     model: WeeklyTestTopics,
+//                     as: 'TestWeekly',
+//                     include: [{ model: Topic, as: 'TopicAssociation' }]
+//                 }
+//             ]
+//         });
+
+//         if (!activeTests || activeTests.length === 0) {
+//             return res.status(404).send({ message: 'No active weekly tests found' });
+//         }
+
+//         // Step 2: Process each test for student attendance & marks
+//         const testsWithAttendance = await Promise.all(activeTests.map(async (test) => {
+//             const studentAttendance = await StudentAnswer.findOne({
+//                 where: { wt_id: test.wt_id, student_id: studentId },
+//                 attributes: ['student_id']
+//             });
+
+//             // Fetch student answers for this test
+//             const studentAnswers = await StudentAnswer.findAll({
+//                 where: { wt_id: test.wt_id, student_id: studentId },
+//                 attributes: ['question_id', 'answer', 'marks']
+//             });
+
+//             let obtainedMarks = 0;
+//             let totalAvailableMarks = 0;
+
+//             if (studentAnswers.length > 0) {
+//                 const existingMarks = studentAnswers.some(answer => answer.marks !== null);
+
+//                 if (existingMarks) {
+//                     obtainedMarks = studentAnswers.reduce((total, answer) => total + (Number(answer.marks) || 0), 0);
+//                 } else {
+//                     // Auto-calculate marks if marks are not present
+//                     const questionIds = studentAnswers.map(answer => answer.question_id);
+//                     const studentResponses = studentAnswers.map(answer => answer.answer.toLowerCase());
+
+//                     // Fetch questions and their marks
+//                     const questions = await WeeklyTestQuestion.findAll({
+//                         where: { wt_question_id: questionIds },
+//                         attributes: ['wt_question_id', 'marks']
+//                     });
+
+//                     // Fetch keywords for each question
+//                     const keywordsData = await WeeklyTestQuestionAnswer.findAll({
+//                         where: { wt_question_id: questionIds },
+//                         attributes: ['wt_question_id', 'keywords']
+//                     });
+
+//                     // Map keywords
+//                     const keywordsMap = {};
+//                     keywordsData.forEach(({ wt_question_id, keywords }) => {
+//                         keywordsMap[wt_question_id] = keywords.toLowerCase().split(',').map(k => k.trim());
+//                     });
+
+//                     // Strip HTML tags and extra spaces
+//                     const cleanText = (text) => text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+
+//                     // Calculate marks based on keyword matching
+//                     studentAnswers.forEach(({ question_id, answer }) => {
+//                         const studentResponse = cleanText(answer.toLowerCase());
+//                         const keywords = keywordsMap[question_id] || [];
+
+//                         // Check if any keyword exists in student response
+//                         const isCorrect = keywords.some(keyword => studentResponse.includes(keyword));
+
+//                         if (isCorrect) {
+//                             const question = questions.find(q => q.wt_question_id === question_id);
+//                             obtainedMarks += question ? question.marks : 0;
+//                         }
+//                     });
+//                 }
+//             }
+
+//             // Fetch total marks available for this test
+//             totalAvailableMarks = await WeeklyTestQuestion.sum('marks', {
+//                 where: { wt_question_id: studentAnswers.map(a => a.question_id) }
+//             });
+
+//             return {
+//                 test_id: test.wt_id,
+//                 test_link: test.wt_link,
+//                 test_date: new Date(test.test_date).toLocaleDateString(),
+//                 test_description: test.wt_description,
+//                 has_attended: !!studentAttendance,
+//                 obtained_marks: studentAttendance ? obtainedMarks : null,
+//                 total_available_marks: totalAvailableMarks
+//             };
+//         }));
+
+//         // Step 3: Fetch student details
+//         const student = await Student.findOne({
+//             where: { id: studentId },
+//             attributes: ['id', 'name', 'email', 'phoneNumber']
+//         });
+
+//         if (!student) {
+//             return res.status(404).send({ message: 'Student not found' });
+//         }
+
+//         // Count number of tests attended
+//         const attendedTestsCount = testsWithAttendance.filter(test => test.has_attended).length;
+
+//         return res.status(200).send({
+//             message: 'Student and active test details fetched successfully',
+//             student: {
+//                 student_id: student.id,
+//                 student_name: student.name,
+//                 student_email: student.email,
+//                 student_phone: student.phoneNumber,
+//                 attended_tests_count: attendedTestsCount
+//             },
+//             active_tests: testsWithAttendance
+//         });
+
+//     } catch (error) {
+//         console.error('Error fetching student and active test details:', error);
+//         return res.status(500).send({ message: 'Error fetching details', error: error.message });
+//     }
+// };
+
 
 const getStudentsWeeklyTestDetailedSummary = async (req, res) => {
     const { wt_id} = req.params;  // Receive wt_id 
@@ -1949,8 +2322,105 @@ const getAllStudentResultsForWeeklyTest = async (req, res) => {
     }
 };
 
+
+// const getAllIndividualStudentResultsForTest = async (req, res) => {
+//     const { wt_id } = req.params; // Extract test ID from request parameters
+
+//     try {
+//         // Step 1: Fetch the weekly test details
+//         const weeklyTest = await WeeklyTest.findByPk(wt_id, {
+//             include: [
+//                 {
+//                     model: WeeklyTestTopics,
+//                     as: 'TestWeekly',
+//                     include: [
+//                         {
+//                             model: Topic,
+//                             as: 'TopicAssociation'
+//                         }
+//                     ]
+//                 }
+//             ]
+//         });
+
+//         if (!weeklyTest) {
+//             return res.status(404).send({ message: 'Weekly test not found' });
+//         }
+
+//         // Step 2: Calculate total available marks for the test
+//         const questionMappings = await WeeklyTestQuestionMapping.findAll({
+//             where: { wt_id: wt_id },
+//             attributes: ['wt_question_id']
+//         });
+
+//         const questionIds = questionMappings.map(mapping => mapping.wt_question_id);
+
+//         const questions = await WeeklyTestQuestion.findAll({
+//             where: { wt_question_id: questionIds },
+//             attributes: ['marks']
+//         });
+
+
+
+//         const totalAvailableMarks = questions.reduce((total, question) => total + (Number(question.marks) || 0), 0);
+
+//         // Step 3: Fetch student answers and their marks for the test
+//         const studentAnswers = await StudentAnswer.findAll({
+//             where: { wt_id: wt_id },
+//             include: [
+//                 {
+//                     model: Student,
+//                     as: 'Student',
+//                     attributes: ['id', 'name', 'email', 'phoneNumber']
+//                 }
+//             ]
+//         });
+
+//         // Step 4: Organize results by student
+//         const studentResults = studentAnswers.reduce((acc, answer) => {
+//             const studentId = answer.student_id;
+//             if (!acc[studentId]) {
+//                 acc[studentId] = {
+//                     student_id: answer.Student.id,
+//                     student_name: answer.Student.name,
+//                     student_email: answer.Student.email,
+//                     student_phone: answer.Student.phoneNumber,
+//                     obtained_marks: 0
+//                 };
+//             }
+//             acc[studentId].obtained_marks += Number(answer.marks) || 0; // Ensure obtained_marks is stored as a number
+//             return acc;
+//         }, {});
+
+//         // Convert studentResults object into an array
+//         const resultsFormatted = Object.values(studentResults).map(result => ({
+//             ...result,
+//             total_available_marks: totalAvailableMarks // Include total available marks for each student
+//         }));
+
+//         // Step 5: Send the response with individual student results
+//         return res.status(200).send({
+//             message: 'Individual student results fetched successfully for the weekly test',
+//             weekly_test: {
+//                 test_id: weeklyTest.wt_id,
+//                 test_link: weeklyTest.wt_link,
+//                 test_date: new Date(weeklyTest.test_date).toLocaleDateString(),
+//                 test_description: weeklyTest.wt_description
+//             },
+//             student_results: resultsFormatted
+//         });
+
+//     } catch (error) {
+//         console.error('Error fetching individual student results:', error);
+//         return res.status(500).send({
+//             message: 'Error fetching individual student results',
+//             error: error.message
+//         });
+//     }
+// };
+
 const getAllIndividualStudentResultsForTest = async (req, res) => {
-    const { wt_id } = req.params;  // Assuming wt_id is passed as a route parameter
+    const { wt_id } = req.params;
 
     try {
         // Step 1: Fetch the weekly test details
@@ -1975,7 +2445,7 @@ const getAllIndividualStudentResultsForTest = async (req, res) => {
 
         // Step 2: Calculate total available marks for the test
         const questionMappings = await WeeklyTestQuestionMapping.findAll({
-            where: { wt_id: wt_id },
+            where: { wt_id },
             attributes: ['wt_question_id']
         });
 
@@ -1983,24 +2453,37 @@ const getAllIndividualStudentResultsForTest = async (req, res) => {
 
         const questions = await WeeklyTestQuestion.findAll({
             where: { wt_question_id: questionIds },
-            attributes: ['marks']
+            attributes: ['wt_question_id', 'marks']
         });
 
-        const totalAvailableMarks = questions.reduce((total, question) => total + question.marks, 0);
+        const totalAvailableMarks = questions.reduce((total, question) => total + (Number(question.marks) || 0), 0);
 
-        // Step 3: Fetch student answers and their marks for the test
+        // Step 3: Fetch student answers
         const studentAnswers = await StudentAnswer.findAll({
-            where: { wt_id: wt_id },
+            where: { wt_id },
             include: [
                 {
                     model: Student,
-                    as:'Student',
+                    as: 'Student',
                     attributes: ['id', 'name', 'email', 'phoneNumber']
                 }
             ]
         });
 
-        // Step 4: Organize results by student
+        // Step 4: Fetch keywords for auto-marking if marks are missing
+        const keywordsData = await WeeklyTestQuestionAnswer.findAll({
+            where: { wt_question_id: questionIds },
+            attributes: ['wt_question_id', 'keywords']
+        });
+
+        const keywordsMap = {};
+        keywordsData.forEach(({ wt_question_id, keywords }) => {
+            keywordsMap[wt_question_id] = keywords.toLowerCase().split(',').map(k => k.trim());
+        });
+
+        const stripHtmlTags = (html) => html.replace(/<[^>]*>/g, '').trim();
+
+        // Step 5: Calculate student marks
         const studentResults = studentAnswers.reduce((acc, answer) => {
             const studentId = answer.student_id;
             if (!acc[studentId]) {
@@ -2012,24 +2495,38 @@ const getAllIndividualStudentResultsForTest = async (req, res) => {
                     obtained_marks: 0
                 };
             }
-            acc[studentId].obtained_marks += answer.marks || 0;  // Accumulate obtained marks
+
+            if (answer.marks !== null) {
+                acc[studentId].obtained_marks += Number(answer.marks) || 0;
+            } else {
+                // Auto-calculate marks if missing
+                const studentResponse = stripHtmlTags(answer.answer).toLowerCase();
+                const keywords = keywordsMap[answer.question_id] || [];
+
+                // Check if the student response contains any of the expected keywords
+                const matchedKeywords = keywords.some(keyword => studentResponse.includes(keyword));
+                if (matchedKeywords) {
+                    const question = questions.find(q => q.wt_question_id === answer.question_id);
+                    acc[studentId].obtained_marks += question ? Number(question.marks) : 0;
+                }
+            }
+
             return acc;
         }, {});
 
-        // Convert studentResults object into an array
         const resultsFormatted = Object.values(studentResults).map(result => ({
             ...result,
-            total_available_marks: totalAvailableMarks  // Include total available marks for each student
+            total_available_marks: totalAvailableMarks
         }));
 
-        // Step 5: Send the response with individual student results
         return res.status(200).send({
             message: 'Individual student results fetched successfully for the weekly test',
             weekly_test: {
                 test_id: weeklyTest.wt_id,
                 test_link: weeklyTest.wt_link,
                 test_date: new Date(weeklyTest.test_date).toLocaleDateString(),
-                test_description: weeklyTest.wt_description
+                test_description: weeklyTest.wt_description,
+                total_available_marks: totalAvailableMarks // Displaying total marks before exam
             },
             student_results: resultsFormatted
         });
@@ -2042,6 +2539,128 @@ const getAllIndividualStudentResultsForTest = async (req, res) => {
         });
     }
 };
+
+
+// const getAllIndividualStudentResultsForTest = async (req, res) => {
+//     const { wt_id } = req.params;
+
+//     try {
+//         // Step 1: Fetch the weekly test details
+//         const weeklyTest = await WeeklyTest.findByPk(wt_id, {
+//             include: [
+//                 {
+//                     model: WeeklyTestTopics,
+//                     as: 'TestWeekly',
+//                     include: [
+//                         {
+//                             model: Topic,
+//                             as: 'TopicAssociation'
+//                         }
+//                     ]
+//                 }
+//             ]
+//         });
+
+//         if (!weeklyTest) {
+//             return res.status(404).send({ message: 'Weekly test not found' });
+//         }
+
+//         // Step 2: Calculate total available marks for the test
+//         const questionMappings = await WeeklyTestQuestionMapping.findAll({
+//             where: { wt_id },
+//             attributes: ['wt_question_id']
+//         });
+
+//         const questionIds = questionMappings.map(mapping => mapping.wt_question_id);
+
+//         const questions = await WeeklyTestQuestion.findAll({
+//             where: { wt_question_id: questionIds },
+//             attributes: ['wt_question_id', 'marks']
+//         });
+
+//         const totalAvailableMarks = questions.reduce((total, question) => total + (Number(question.marks) || 0), 0);
+
+//         // Step 3: Fetch student answers
+//         const studentAnswers = await StudentAnswer.findAll({
+//             where: { wt_id },
+//             include: [
+//                 {
+//                     model: Student,
+//                     as: 'Student',
+//                     attributes: ['id', 'name', 'email', 'phoneNumber']
+//                 }
+//             ]
+//         });
+
+//         // Step 4: Fetch keywords for auto-marking if marks are missing
+//         const keywordsData = await WeeklyTestQuestionAnswer.findAll({
+//             where: { wt_question_id: questionIds },
+//             attributes: ['wt_question_id', 'keywords']
+//         });
+
+//         const keywordsMap = {};
+//         keywordsData.forEach(({ wt_question_id, keywords }) => {
+//             keywordsMap[wt_question_id] = keywords.toLowerCase().split(',');
+//         });
+
+//         const stripHtmlTags = (html) => html.replace(/<[^>]*>/g, '').trim();
+
+//         // Step 5: Calculate student marks
+//         const studentResults = studentAnswers.reduce((acc, answer) => {
+//             const studentId = answer.student_id;
+//             if (!acc[studentId]) {
+//                 acc[studentId] = {
+//                     student_id: answer.Student.id,
+//                     student_name: answer.Student.name,
+//                     student_email: answer.Student.email,
+//                     student_phone: answer.Student.phoneNumber,
+//                     obtained_marks: 0
+//                 };
+//             }
+
+//             if (answer.marks !== null) {
+//                 acc[studentId].obtained_marks += Number(answer.marks) || 0;
+//             } else {
+//                 // Auto-calculate marks if missing
+//                 const studentResponse = stripHtmlTags(answer.answer).toLowerCase();
+//                 const keywords = keywordsMap[answer.question_id] || [];
+
+//                 const matchedKeywords = keywords.filter(keyword => studentResponse.includes(keyword));
+//                 if (matchedKeywords.length > 0) {
+//                     const question = questions.find(q => q.wt_question_id === answer.question_id);
+//                     acc[studentId].obtained_marks += question ? Number(question.marks) : 0;
+//                 }
+//             }
+
+//             return acc;
+//         }, {});
+
+//         const resultsFormatted = Object.values(studentResults).map(result => ({
+//             ...result,
+//             total_available_marks: totalAvailableMarks
+//         }));
+
+//         return res.status(200).send({
+//             message: 'Individual student results fetched successfully for the weekly test',
+//             weekly_test: {
+//                 test_id: weeklyTest.wt_id,
+//                 test_link: weeklyTest.wt_link,
+//                 test_date: new Date(weeklyTest.test_date).toLocaleDateString(),
+//                 test_description: weeklyTest.wt_description,
+//                 total_available_marks: totalAvailableMarks // Displaying total marks before exam
+//             },
+//             student_results: resultsFormatted
+//         });
+
+//     } catch (error) {
+//         console.error('Error fetching individual student results:', error);
+//         return res.status(500).send({
+//             message: 'Error fetching individual student results',
+//             error: error.message
+//         });
+//     }
+// };
+
 
 const getStudentAndActiveTestsWithAttendanceForAdmin = async (req, res) => {
     const { studentId } = req.params;
@@ -2161,6 +2780,88 @@ const getStudentAndActiveTestsWithAttendanceForAdmin = async (req, res) => {
     }
 };
 
+// const deleteinternaltests = async (req, res) => {
+//     try {
+//         const { wt_id } = req.params;
+//         const batchTestLinks = await db.BatchTestLinks.findAll({
+//             where: {
+//                 wt_id: wt_id
+//             }
+//         });
+
+//         if (batchTestLinks.length > 0) {
+//             await db.BatchTestLinks.destroy({
+//                 where: {
+//                     wt_id: wt_id
+//                 }
+//             });
+//             console.log(`Deleted associated BatchTestLinks for wt_id: ${wt_id}`);
+//         }
+//         const test = await db.WeeklyTest.findByPk(wt_id);
+
+//         if (!test) {
+//             return res.status(404).json({ message: 'Test not found' });
+//         }
+//         await test.destroy();
+
+//         return res.status(200).json({ message: 'Test and associated BatchTestLinks deleted successfully' });
+
+//     } catch (error) {
+//         console.error('Error deleting internal test:', error);
+//         return res.status(500).json({ message: 'Something went wrong while deleting the test' });
+//     }
+// };
+
+const deleteinternaltests = async (req, res) => {
+    try {
+        const { wt_id } = req.params;
+
+        // 1. Check and delete `weeklytestfinalsubmissions` if any exist
+        const finalSubmissions = await db.WeeklyTestFinalSubmission.findAll({
+            where: { wt_id: wt_id }
+        });
+
+        if (finalSubmissions.length > 0) {
+            await db.WeeklyTestFinalSubmission.destroy({
+                where: { wt_id: wt_id }
+            });
+            console.log(`Deleted associated WeeklyTestFinalSubmissions for wt_id: ${wt_id}`);
+        }
+
+        // 2. Delete records from `studentanswers` before removing the weekly test
+        await db.StudentAnswer.destroy({
+            where: { wt_id: wt_id }
+        });
+
+        console.log(`Deleted associated StudentAnswers for wt_id: ${wt_id}`);
+
+        // 3. Delete associated BatchTestLinks (child records)
+        await db.BatchTestLinks.destroy({
+            where: { wt_id: wt_id }
+        });
+
+        console.log(`Deleted associated BatchTestLinks for wt_id: ${wt_id}`);
+
+        // 4. Find and delete the WeeklyTest record
+        const test = await db.WeeklyTest.findByPk(wt_id);
+        console.log(test, "----------------test");
+
+        if (!test) {
+            return res.status(404).json({ message: 'Test not found' });
+        }
+
+        await test.destroy();
+
+        return res.status(200).json({ message: 'Test and associated data deleted successfully' });
+
+    } catch (error) {
+        console.error('Error deleting internal test:', error);
+        return res.status(500).json({ message: 'Something went wrong while deleting the test' });
+    }
+};
+
+
+
 module.exports = {
     createWeeklyTestLink,
     updateWeeklyTest,
@@ -2193,4 +2894,5 @@ module.exports = {
     getStudentsWeeklyTestDetailedSummary,
     getAllStudentResultsForWeeklyTest,
     getAllIndividualStudentResultsForTest,
+    deleteinternaltests,
 }

@@ -6,6 +6,9 @@ import UpdateWeeklyTest from './UpdateWeeklyTest'; // Import the UpdateWeeklyTes
 import { BsCopy } from 'react-icons/bs';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import { BsTrash } from 'react-icons/bs';
+import { useNavigate } from 'react-router-dom';
+
 
 const WeeklyTestList = () => {
     const [tests, setTests] = useState([]);
@@ -15,6 +18,8 @@ const WeeklyTestList = () => {
     const [showModal, setShowModal] = useState(false);  // For modal visibility
     const [currentPage, setCurrentPage] = useState(1);
     const [testsPerPage] = useState(5);  // Number of tests per page
+
+    const navigate = useNavigate(); 
 
     // Fetch tests from API
     useEffect(() => {
@@ -88,6 +93,26 @@ const WeeklyTestList = () => {
             });
     };
 
+
+    const deassignTestLink = async (wt_id) => {
+        try {
+          const response = await axios.delete(`${baseURL}/api/weekly-test/deleteinternaltests/${wt_id}`);
+    
+          console.log(response.data, "------------------------------response data");
+          toast.success(response.data.message);
+          alert("Test Link Deleted Succussfully...")
+        } catch (error) {
+          console.error('Error deleting internal test:', error);
+          alert("Error deleting internal test")
+          toast.error('An error occurred while deleting the test.');
+        }
+      };
+
+      const handleBatches = (wt_id) => {
+        // Navigate to the BatchDetails component with the internal_test_id as a URL parameter
+        navigate(`/batch-details-wt/${wt_id}`);
+      };
+
     return (
         <div className="container mt-4">
             <h3>All Weekly Tests</h3>
@@ -100,11 +125,13 @@ const WeeklyTestList = () => {
                             <th>Test Description</th>
                             <th>Topics</th>
                             <th>Edit</th>
+                            <th>view Batchs</th>
                             <th>Results</th>
                             <th>Add Question</th>
                             <th>Edit Question</th>
                             <th>Upload Question</th>
                             <th>Provide Answer</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -146,6 +173,15 @@ const WeeklyTestList = () => {
                                         </Button>
                                     </td>
                                     <td>
+                                    <button
+                          onClick={() => handleBatches(test.wt_id)} 
+                          className="btn btn-success"
+                          >
+                          View Batch Details
+                          </button>
+
+                                    </td>
+                                    <td>
                                         <Link to={`/studentHome/weekly-test-results/${test.wt_id}`}>Results</Link>
                                     </td>
                                     <td>
@@ -160,6 +196,12 @@ const WeeklyTestList = () => {
                                     <td>
                                         <Link to={`/test-answer-form/${test.wt_id}`}>Provide answer</Link>
                                     </td>
+                                    <td><button
+                                    className="btn btn-danger ms-2 m-1"
+                                    onClick={() => deassignTestLink(test.wt_id)}
+                                    >
+                                    <BsTrash />
+                                    </button></td>
                                     
                                 </tr>
                             ) : null

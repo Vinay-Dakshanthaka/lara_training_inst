@@ -7,10 +7,15 @@ module.exports = (sequelize, DataTypes) => {
         },
         answer: {
             type: DataTypes.TEXT,
-            allowNull: false
+            allowNull: true
+        },
+        keywords : {
+            type: DataTypes.TEXT,
+            allowNull : true
         }
-    }, {
-        timestamps: false,
+    },
+    {
+        timestamps: true,
         tableName: 'WeeklyTestQuestionAnswers'
     });
 
@@ -23,3 +28,10 @@ module.exports = (sequelize, DataTypes) => {
 
     return WeeklyTestQuestionAnswer;
 };
+
+// ALTER TABLE WeeklyTestQuestionAnswers add COLUMN keywords TEXT;
+
+
+// ALTER TABLE laradb.weeklytestquestionanswers
+// ADD COLUMN createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+// ADD COLUMN updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;

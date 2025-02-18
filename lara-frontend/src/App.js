@@ -76,6 +76,10 @@ import SaveWhatsAppChannelModal from './components/placementTest/SaveWhatsAppCha
 import ExternalStudentsResults from './components/ExternalStudentsResults';
 import WhatsAppJoin from './components/student/WhatsAppJoin';
 import UpdateStudentEmail from './components/admin/UpdateStudentEmail';
+// import PaperBasedExcelSheet from './components/admin/PaperBasedExcelSheet';
+import PaperBasedTestResults from './components/admin/PaperBasedTestResults';
+import AssignBatches from './components/internalTests/AssignBatchs';
+import AssignBatchsTowt from './components/weeklyTest/AssignBatchsTowt';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -127,6 +131,8 @@ const App = () => {
             <Route path="/malpractice-detected" element={<PlacementTestError />} />
             <Route path="/create-test-link" element={<CreateTestLink />} />
             <Route path="/updateStudentEmail" element={<UpdateStudentEmail />} />
+            <Route path="/paperBasedTestResults" element={<PaperBasedTestResults />} />
+            {/* <Route path="/paper-excel" element={<PaperBasedExcelSheet />} /> */}
 
             <Route path="/not-found" element={<NotFound />} />
             <Route path="/test-not-active" element={<TestNotActiveYet />} />
@@ -162,7 +168,8 @@ const App = () => {
             <Route path='weekly-test-student-performance/:student_id' element={<WeeklyTestPerformanceForAdmin />} />
             <Route path='/add-whatsApp-link' element={<SaveWhatsAppChannelModal />} />
             <Route path='/external-test-results' element={<ExternalStudentsResults />} />
-
+            <Route path="batch-details/:internal_test_id" element={<AssignBatches />} />
+            <Route path="batch-details-wt/:wt_id" element={<AssignBatchsTowt />} />
 
           </Routes>
         </div>
