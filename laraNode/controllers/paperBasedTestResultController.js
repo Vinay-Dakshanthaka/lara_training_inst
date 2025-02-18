@@ -13,10 +13,86 @@ const isValidEmail = (email) => {
 };
 
 // Upload Excel File and Store Data
+// const uploadTestResults = async (req, res) => {
+//     try {
+//         if (!req.file) {
+//             return res.status(400).json({ message: "No file uploaded!" });
+//         }
+
+//         // Read Excel file
+//         const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+//         const sheetName = workbook.SheetNames[0];
+//         const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+//         const skippedRecords = [];
+
+//         for (let row of data) {
+//             try {
+//                 const { email, obtainedMarks, totalMarks, subjectName, topicName } = row;
+
+//                 if (!email || !isValidEmail(email) || !totalMarks || !subjectName || !topicName) {
+//                     skippedRecords.push({ email: email || "N/A", reason: "Invalid data format or missing fields" });
+//                     continue;
+//                 }
+
+//                 // Check if the student exists
+//                 const student = await Student.findOne({ where: { email: email } });
+
+//                 if (!student) {
+//                     skippedRecords.push({ email, reason: "Student email not found in database" });
+//                     continue; // Skip storing data if student doesn't exist
+//                 }
+
+//                 // Log safely after checking student exists
+//                 console.log(student.email, "-------------------- student email exists");
+
+//                 // Store test result only if student exists
+//                 await paperBasedTestResults.create({
+//                     studentId: student.id,
+//                     email: student.email,
+//                     obtainedMarks: obtainedMarks || 0,
+//                     totalMarks: totalMarks || 12,
+//                     subjectName: subjectName || "core java",
+//                     topicName: topicName || "basics",
+//                 });
+
+//             } catch (err) {
+//                 console.error("Skipping row due to error:", err.message);
+//                 skippedRecords.push({ email: row.email || "Unknown", reason: err.message });
+//             }
+//         }
+
+//         console.log(skippedRecords, "------------------------ Skipped Records");
+
+//         res.status(200).json({
+//             message: "Data processed successfully!",
+//             skippedRecords, // Send skipped emails and reasons to frontend
+//         });
+
+//     } catch (error) {
+//         console.error("Error processing file:", error);
+
+//         if (error.message && error.message.includes("email is not defined")) {
+//             return res.status(200).json({
+//                 message: "Data processed with errors!",
+//                 skippedRecords,
+//             });
+//         }
+
+//         res.status(500).json({ message: "Internal server error", error });
+//     }
+// };
+
 const uploadTestResults = async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: "No file uploaded!" });
+        }
+
+        const conducted_date = req.body.conducted_date; // Extract conducted_date
+        console.log(conducted_date,"----------------conducted_date")
+        if (!conducted_date) {
+            return res.status(400).json({ message: "Conducted date is required!" });
         }
 
         // Read Excel file
@@ -34,19 +110,16 @@ const uploadTestResults = async (req, res) => {
                     skippedRecords.push({ email: email || "N/A", reason: "Invalid data format or missing fields" });
                     continue;
                 }
-
+                
                 // Check if the student exists
                 const student = await Student.findOne({ where: { email: email } });
 
                 if (!student) {
                     skippedRecords.push({ email, reason: "Student email not found in database" });
-                    continue; // Skip storing data if student doesn't exist
+                    continue;
                 }
-
-                // Log safely after checking student exists
-                console.log(student.email, "-------------------- student email exists");
-
-                // Store test result only if student exists
+                     console.log(conducted_date,"--------------conducted_date2222")
+                // Store test result
                 await paperBasedTestResults.create({
                     studentId: student.id,
                     email: student.email,
@@ -54,6 +127,10 @@ const uploadTestResults = async (req, res) => {
                     totalMarks: totalMarks || 12,
                     subjectName: subjectName || "core java",
                     topicName: topicName || "basics",
+                    conducted_date:conducted_date,  // Store conducted_date
+                    createdAt: new Date(), // Set createdAt manually
+                    updatedAt: new Date()  // Set updatedAt manually
+                
                 });
 
             } catch (err) {
@@ -62,26 +139,18 @@ const uploadTestResults = async (req, res) => {
             }
         }
 
-        console.log(skippedRecords, "------------------------ Skipped Records");
-
         res.status(200).json({
             message: "Data processed successfully!",
-            skippedRecords, // Send skipped emails and reasons to frontend
+            skippedRecords,
         });
 
     } catch (error) {
         console.error("Error processing file:", error);
 
-        if (error.message && error.message.includes("email is not defined")) {
-            return res.status(200).json({
-                message: "Data processed with errors!",
-                skippedRecords,
-            });
-        }
-
         res.status(500).json({ message: "Internal server error", error });
     }
 };
+
 
 
 // const getAttendedStudentsByBatch = async (req, res) => {
@@ -266,98 +335,83 @@ const getAttendedStudentsByBatch = async (req, res) => {
   }
 };
 
+// Controller to get all exam results for a student
+const getStudentExamResults = async (req, res) => {
+    try {
+    
+        const studentId = req.studentId; 
+        console.log(studentId,"----------------studentid")
 
+        if (!studentId) {
+            return res.status(400).json({ message: "Student ID not found!" });
+        }
 
+        // Fetch all exam results for the given studentId
+        const results = await paperBasedTestResults.findAll({
+            where: { studentId: studentId },
+            order: [["conducted_date", "DESC"]],  // Sort by conducted date (most recent first)
+        });
+
+        if (!results || results.length === 0) {
+            return res.status(404).json({ message: "No exam results found for this student." });
+        }
+
+        res.status(200).json({
+            message: "Exam results fetched successfully!",
+            results,
+        });
+    } catch (error) {
+        console.error("Error fetching exam results:", error);
+        res.status(500).json({ message: "Internal server error", error });
+    }
+};
+
+const getAllStudentsExamAtteneded = async (req, res) => {
+    try {
+        // Fetch unique student IDs from the test results
+        const uniqueStudentIds = await paperBasedTestResults.findAll({
+            attributes: ['studentId'],
+            group: ['studentId']
+        });
+         
+        const studentIds = uniqueStudentIds.map(record => record.studentId);
+
+        // Fetch student details along with their exam stats
+        const studentStats = await Promise.all(studentIds.map(async (studentId) => {
+            const student = await Student.findOne({ where: { id: studentId } });
+            if (!student) return null;
+
+            const results = await paperBasedTestResults.findAll({
+                where: { studentId },
+                attributes: ['obtainedMarks', 'totalMarks'],
+            });
+
+            const totalExams = results.length;
+            const totalObtainedMarks = results.reduce((sum, record) => sum + record.obtainedMarks, 0);
+            const totalMarks = results.reduce((sum, record) => sum + record.totalMarks, 0);
+            const percentage = totalMarks > 0 ? ((totalObtainedMarks / totalMarks) * 100).toFixed(2) : 0;
+
+            return {
+                id:studentId,
+                name: student.name,
+                totalTests :totalExams,
+                totalMarksObtained:totalObtainedMarks,
+                totalMarks,
+                percentage: `${percentage}%`
+            };
+        }));
+
+        res.status(200).json({ success: true, data: studentStats.filter(stat => stat !== null) });
+    } catch (error) {
+        console.error("Error fetching student exam stats:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
 
 module.exports = { uploadTestResults,
                   getAttendedStudentsByBatch,
                   getBatchResults,
-                  
+                  getStudentExamResults,
+                  getAllStudentsExamAtteneded,
  };
 
-
-// const XLSX = require("xlsx");
-// const  { Student }  = require("../models"); 
-// const db = require('../models');
-// const { Op } = require("sequelize");
-// const paperBasedTestResults = db.PaperBasedTestResults;
-
-
-// // Email validation function
-// const isValidEmail = (email) => {
-//     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-// };
-
-// // Upload Excel File and Store Data
-// const uploadTestResults = async (req, res) => {
-//     try {
-//         if (!req.file) {
-//             return res.status(400).json({ message: "No file uploaded!" });
-//         }
-
-//         // Read Excel file
-//         const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
-//         const sheetName = workbook.SheetNames[0];
-//         const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-//         const skippedRecords = [];
-
-//         for (let row of data) {
-//             try {
-//                 const { email, obtainedMarks, totalMarks, subjectName, topicName } = row;
-//                 console.log(row,"----------------------------------------")
-//                 console.log(obtainedMarks,"--------------------obtained marks")
-//                 if (!email || !isValidEmail(email) || !totalMarks || !subjectName || !topicName) {
-//                     skippedRecords.push({ email: email || "N/A", reason: "Invalid data" });
-//                     continue;
-//                 }
-              
-
-//                 // Check if the student exists
-//                 const student = await Student.findOne({ where: { email: email } });
-//                 console.log(student.email,"--------------------studentemail")
-//                 console.log(student.id, "--------------------------------studentid");
-//                 console.log(email,"---------------emailrow")
-//                 if (!student) {
-//                     skippedRecords.push({ email : email, reason: "Student email not found in database" });
-//                     continue;
-//                 }
-//                 else { // Store test result
-//                     let results =  await paperBasedTestResults.create({
-//                     studentId: student.id || 1,
-//                     email: student.email || 'hello@gmail.com',
-//                     obtainedMarks: obtainedMarks || 0,
-//                     totalMarks: totalMarks || 12,
-//                     subjectName: subjectName || 'core java',
-//                     topicName:topicName || 'basics'
-//                 });
-//             }
-//                 // console.log(results,"-----------------------fghjk")
-//             } catch (err) {
-//                 console.error("Skipping row due to error:", err.message);
-//                 skippedRecords.push({ email: email, reason: err.message });
-//             }
-//         }
-
-//         console.log(skippedRecords, "------------------------final");
-
-//         res.status(200).json({
-//             message: "Data processed successfully!",
-//             skippedRecords
-//         });
-
-//     } catch (error) {
-//         if(error == " ReferenceError: email is not defined"){
-//             res.status(200).json({
-//                 message: "Data processed successfully!",
-//                 skippedRecords
-//             });
-//         }
-//         else{
-//         console.error("Error processing file:", error);
-//         res.status(500).json({ message: "Internal server error", error });
-//         }
-//     }
-// };
-
-// module.exports = { uploadTestResults };

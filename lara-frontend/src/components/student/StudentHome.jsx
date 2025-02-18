@@ -11,6 +11,7 @@ import StudentInternalTestDetails from "../internalTests/StudentInternalTestDeta
 import StudentPerformanceDashboard from "../internalTests/StudentPerformanceDashboard";
 import ActiveWeeklyTests from "../weeklyTest/forStudentDashboard/ActiveWeeklyTest";
 import WeeklyTestPerformanceChart from "../weeklyTest/forStudentDashboard/WeeklyTestPerformanceChart";
+import StudentExamResults from "./StudentExamResults";
 
 const FeedbackButton = ({ onClick }) => {
   return (
@@ -546,6 +547,7 @@ const StudentHome = () => {
         <StudentInternalTestDetails />
         <WeeklyTestPerformanceChart />
         <ActiveWeeklyTests />
+        <StudentExamResults />
         {/* <PlacementTestTableForStudent /> */}
 
         {/* Education Details */}
