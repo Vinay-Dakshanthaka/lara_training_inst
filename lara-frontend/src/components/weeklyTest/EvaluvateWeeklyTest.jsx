@@ -6,6 +6,7 @@ import UpdateWeeklyTest from './UpdateWeeklyTest'; // Import the UpdateWeeklyTes
 import { BsCopy } from 'react-icons/bs';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import Paginate from '../common/Paginate';
 
 const EvaluvateWeeklyTest = () => {
     const [tests, setTests] = useState([]);
@@ -13,6 +14,8 @@ const EvaluvateWeeklyTest = () => {
     const [error, setError] = useState(null);
     const [selectedTest, setSelectedTest] = useState(null);  // For selected test
     const [showModal, setShowModal] = useState(false);  // For modal visibility
+    const [currentPage, setCurrentPage] = useState([]);
+    const testsPerPage = 5;
 
     useEffect(() => {
         const fetchWeeklyTests = async () => {
@@ -80,10 +83,17 @@ const EvaluvateWeeklyTest = () => {
             });
     };
 
+
+    const indexOfLastTest = currentPage * testsPerPage;
+    const indexOfFirstTest = indexOfLastTest - testsPerPage;
+    const currentTests = tests.slice(indexOfFirstTest, indexOfLastTest);
+
+
     return (
         <div className="container mt-4">
             <h3>All Weekly Tests</h3>
             {tests.length > 0 ? (
+                <>
                 <Table striped bordered hover responsive className="mt-4">
                     <thead>
                         <tr>
@@ -97,10 +107,13 @@ const EvaluvateWeeklyTest = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {tests && tests.map((test, index) => (
+                        {/* {tests && tests.map((test, index) => ( */}
+                        {currentTests.map((test, index) => (
+
                             test && test.wt_id ? (  // Check if test and wt_id exist before rendering
                                 <tr key={test.wt_id}>
-                                    <td>{index + 1}</td>
+                                   <td>{indexOfFirstTest + index + 1}</td>
+
                                     <td className="test-link-cell">
                                     <OverlayTrigger
                                         placement="top"
@@ -148,12 +161,20 @@ const EvaluvateWeeklyTest = () => {
                     </tbody>
 
                 </Table>
+                <Paginate
+                itemsPerPage={testsPerPage}
+                totalItems={tests.length}
+                onPageChange={setCurrentPage} // Ensures pagination works properly
+                currentPage={currentPage}
+            />
+
+                </>   
             ) : (
                 <Alert variant="info" className="mt-4 text-center">
                     No Weekly Tests Found
                 </Alert>
             )}
-
+           
             {/* Modal to edit selected weekly test */}
             {selectedTest && (
                 <Modal show={showModal} onHide={handleCloseModal} size="lg">
@@ -167,6 +188,8 @@ const EvaluvateWeeklyTest = () => {
                 </Modal>
             )}
         </div>
+
+        
     );
 };
 

@@ -4,11 +4,13 @@ const multer = require('multer');
 const fs = require('fs');
 
 
-const {Op} = require('sequelize');
+const {Op, where} = require('sequelize');
 const Student = db.Student;
 const InternalTest = db.InternalTest;
 const InternalTestTopic = db.InternalTestTopic;
 const PlacementTestStudent = db.PlacementTestStudent;
+const Student_Batch = db.Student_Batch;
+const StudentTest = db.StudentTest;
 const Topic = db.Topic;
 const PlacementTestResult = db.PlacementTestResult;
 const CumulativeQuestion = db.CumulativeQuestion;
@@ -22,7 +24,7 @@ const createInternalTestLink = async (req, res) => {
     try {
         const { number_of_questions, show_result, is_active, is_monitored, topic_ids,test_description,test_date } = req.body;
 
-        if (!number_of_questions || !Array.isArray(topic_ids) || topic_ids.length === 0) {
+        if (!number_of_questions || !Array.isArray(topic_ids) || topic_ids.length === 0 ) {
             return res.status(400).send({ message: 'Required fields are missing or invalid' });
         }
 
@@ -36,7 +38,7 @@ const createInternalTestLink = async (req, res) => {
         if (topics.length !== topic_ids.length) {
             return res.status(400).send({ message: 'One or more topic IDs are invalid' });
         }
-
+      
         // Create a new InternalTest
         const newTest = await InternalTest.create({
             internal_test_link: '', // Initially empty, will be updated later
@@ -849,6 +851,7 @@ const fetchInternalTestResults = async (req, res) => {
 //     }
 // };
 
+
 const getStudentInternalTestDetails = async (req, res) => {
     try {
         // Fetch all InternalTests including associated topics in descending order by internal_test_id
@@ -1315,6 +1318,7 @@ const getAllInternalTestResultsByTestId = async (req, res) => {
 
 
 
+
 module.exports = {
     createInternalTestLink,
     updateInternalTestLink,
@@ -1335,4 +1339,5 @@ module.exports = {
     getAllStudentsPerformance,
     getStudentPerformanceForAdmin,
     getAllInternalTestResultsByTestId,
+  
 }

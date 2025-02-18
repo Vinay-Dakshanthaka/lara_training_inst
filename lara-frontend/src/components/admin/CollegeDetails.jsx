@@ -205,9 +205,12 @@ const CollegeDetails = () => {
                         ))}
                     </tbody>
                 </table>
+                
             ) : (
                 <p>No students found for this college.</p>
             )}
+
+            
 
             {/* Add College Modal */}
             <Modal show={showAddModal} onHide={handleAddModalClose}>

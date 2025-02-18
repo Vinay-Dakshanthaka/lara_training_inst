@@ -5,6 +5,7 @@ import moment from 'moment';
 import * as XLSX from 'xlsx';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Paginate from '../common/Paginate';
 
 const Attendance = () => {
   const [students, setStudents] = useState([]);
@@ -14,6 +15,9 @@ const Attendance = () => {
   const [selectedDate, setSelectedDate] = useState(1); // Default to the 1st day of the month
   const [searchEmail, setSearchEmail] = useState('');
   const [searchName, setSearchName] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Adjust based on your requirement
+
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -235,6 +239,16 @@ const Attendance = () => {
     }
   };
 
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const getPaginatedStudents = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return students.slice(startIndex, endIndex);
+  };
+
   return (
     <div className="container">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
@@ -290,6 +304,12 @@ const Attendance = () => {
             {renderAttendanceSheet()}
           </tbody>
         </table>
+          <Paginate
+        currentPage={currentPage}
+        totalItems={students.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+      />
       </div>
     </div>
   );

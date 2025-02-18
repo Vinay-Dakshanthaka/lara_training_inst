@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table, Badge, Container, Pagination, Button } from 'react-bootstrap';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { baseURL } from '../config';
 import { Link } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 const ITEMS_PER_PAGE = 5; // Adjust the number of items per page
 
 const StudentInternalTestDetails = () => {
+    
     const [tests, setTests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -36,7 +37,9 @@ const StudentInternalTestDetails = () => {
                 ...test,
                 formatted_date: new Date(test.test_date).toISOString().split('T')[0]
             }));
+           
             console.log("internal test ", response.data)
+          
             setTests(formattedTests);
         } catch (error) {
             console.error('Error fetching test details:', error);
@@ -63,6 +66,7 @@ const StudentInternalTestDetails = () => {
     <Table striped bordered hover responsive className="mt-4">
         <thead>
             <tr>
+                
                 <th>Test Link</th>
                 <th>Number of Questions</th>
                 <th>Date</th>

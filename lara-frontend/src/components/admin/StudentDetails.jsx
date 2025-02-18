@@ -4,11 +4,12 @@ import { Pagination, Modal, Button, Toast } from 'react-bootstrap';
 import { BsTrash } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import {baseURL}  from '../config';
+import Paginate from '../common/Paginate';
 
 const StudentDetails = () => {
   const [students, setStudents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [studentsPerPage] = useState(10);
+  const [studentsPerPage] = useState(5);
   const [searchValue, setSearchValue] = useState('');
   const [searchCriteria, setSearchCriteria] = useState('name');
   const [batchDetails, setBatchDetails] = useState([]);
@@ -70,6 +71,12 @@ const StudentDetails = () => {
   useEffect(() => {
     fetchBatchDetails();
   }, []);
+
+  // const indexOfLastStudent = currentPage * studentsPerPage;
+  // const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+  // const currentStudents = students.slice(indexOfFirstStudent, indexOfLastStudent);
+
+  // const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const indexOfLastStudent = currentPage * studentsPerPage;
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
@@ -308,7 +315,7 @@ const StudentDetails = () => {
           ))}
         </tbody>
       </table>
-      <div className='text-center'>
+      {/* <div className='text-center'>
         <Pagination>
           {studentsPerPage !== 0 &&
             Array.from({ length: Math.ceil(students.length / studentsPerPage) }).map((_, index) => (
@@ -317,7 +324,14 @@ const StudentDetails = () => {
               </Pagination.Item>
             ))}
         </Pagination>
-      </div>
+      </div> */}
+       <Paginate
+        currentPage={currentPage}
+        totalItems={students.length}
+        itemsPerPage={studentsPerPage}
+        onPageChange={paginate}
+        visiblePages={5}
+      />
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Add to Batch</Modal.Title>

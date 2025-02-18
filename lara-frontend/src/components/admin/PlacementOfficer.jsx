@@ -4,10 +4,13 @@ import axios from 'axios'; // Make sure axios is imported
 import { baseURL } from '../config';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Paginate from '../common/Paginate';
 
 const PlacementOfficer = () => {
     const [students, setStudents] = useState([]);
     const [colleges, setColleges] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1); // Start at page 1
+    const [itemsPerPage] = useState(5); // Number of items per page
 
     const fetchStudents = async () => {
         try {
@@ -136,7 +139,14 @@ const PlacementOfficer = () => {
             )
         );
     };
+   // Pagination logic
+   const indexOfLastStudent = currentPage * itemsPerPage;
+   const indexOfFirstStudent = indexOfLastStudent - itemsPerPage;
+   const currentStudents = students.slice(indexOfFirstStudent, indexOfLastStudent);
 
+   const handlePageChange = (pageNumber) => {
+       setCurrentPage(pageNumber);
+   };
     return (
         <Container className='table-responsive'>
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
@@ -152,8 +162,8 @@ const PlacementOfficer = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {students.length > 0 ? (
-                        students.map(student => (
+                    {currentStudents.length > 0 ? (
+                        currentStudents.map(student => (
                             <tr key={student.id}>
                                 <td>{student.name}</td>
                                 <td>{student.email}</td>
@@ -183,7 +193,14 @@ const PlacementOfficer = () => {
                     )}
                 </tbody>
             </Table>
-
+       
+      {/* Pagination component */}
+      <Paginate
+                currentPage={currentPage}
+                totalItems={students.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+            />
         </Container>
     );
 }

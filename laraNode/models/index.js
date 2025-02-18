@@ -202,6 +202,8 @@ db.WeeklyTestFinalSubmission = require('./weeklyTestFinalSubmissionModel.js')(se
 db.WhatsAppChannelLinks = require('./whatsAppChannelLinksModel.js')(sequelize, DataTypes);  
 db.PlacementTestCreator = require('./placementTestCreator.js')(sequelize, DataTypes);
 db.StudentWhatsAppLinks = require('./StudentWhatsAppLinks.js')(sequelize, DataTypes);
+db.Transaction = require('./transactionModel.js')(sequelize,DataTypes);
+
 
 // Define associations  
 db.Student.hasOne(db.Profile, {
@@ -216,8 +218,6 @@ db.Profile.belongsTo(db.Student, {
 });
 
 
-// db.Student.belongsToMany(db.Batch, { through: db.Student_Batch }); // Define many-to-many association
-// db.Batch.belongsToMany(db.Student, { through: db.Student_Batch }); // Define many-to-many association
 
 // db.Student.belongsToMany(db.Batch, {
 //     through: db.Student_Batch,
@@ -234,6 +234,7 @@ db.Profile.belongsTo(db.Student, {
 // Define the association between Student and Batch
 db.Student.belongsToMany(db.Batch, { through: 'Student_Batch', foreignKey: 'student_id' });
 db.Batch.belongsToMany(db.Student, { through: 'Student_Batch', foreignKey: 'batch_id' });
+
 
 // Define associations for Student (Trainer) to Batch
 db.Student.belongsToMany(db.Batch, {
@@ -522,6 +523,15 @@ db.Student.belongsToMany(db.WhatsAppChannelLinks, {
     foreignKey: 'student_id',
     otherKey: 'channel_id',
 });
+
+
+    // db.Transaction.belongsTo(db.Student, {
+    //   foreignKey: 'student_id', // The foreign key in the Transaction table
+    //   targetKey: 'id' // The key it relates to in the Student table
+    // });
+
+    
+  
 
 
 // Call associate method for each model if defined

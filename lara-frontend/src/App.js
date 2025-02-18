@@ -74,6 +74,8 @@ import TestNotActiveYet from './components/TestNotActiveYet';
 import RecruiterDashboard from './components/recruiter/RecruiterDashboard';
 import SaveWhatsAppChannelModal from './components/placementTest/SaveWhatsAppChannelModal';
 import ExternalStudentsResults from './components/ExternalStudentsResults';
+import PaymentForm from './components/student/PaymentForm';
+import DeleteinternaltestLink from './components/internalTests/DeleteinternaltestLink';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -136,7 +138,8 @@ const App = () => {
             <Route path="/upload-excel-internal-test-link/:internal_test_id" element={<UploadQuestionsToInternalTestLink />} />
             <Route path="/edit-quesitons/:test_id" element={<EditTestLinkQuestions />} />
             <Route path="/detailed-internal-result/:internal_test_id" element={<DetailedInternalTestResult />} />
-            <Route path="/edit-internal-quesitons/:internal_test_id" element={<EditTestInternalTestLinkQuestions />} />
+            {/* <Route path="/delete-internal-testlink/:internal_test_id" element={<DeleteinternaltestLink />} /> */}
+            <Route path="/delete-internal-test/:internal_test_id" element={<EditTestInternalTestLinkQuestions />} />
             <Route path="/test-links" element={<AllPlacementTests />} />
             <Route path="/student-performance/:student_id" element={<StudentPerformanceForAdmin />} />
             {/* <Route path="/add-question" element={<AddQuestion />} /> */}
@@ -157,6 +160,7 @@ const App = () => {
             <Route path='weekly-test-student-performance/:student_id' element={<WeeklyTestPerformanceForAdmin />} />
             <Route path='/add-whatsApp-link' element={<SaveWhatsAppChannelModal />} />
             <Route path='/external-test-results' element={<ExternalStudentsResults />} />
+            <Route path='/payFee' element={<PaymentForm  /> } />
 
           </Routes>
         </div>

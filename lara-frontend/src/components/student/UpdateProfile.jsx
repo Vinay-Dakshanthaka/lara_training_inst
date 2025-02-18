@@ -5,10 +5,11 @@ import {baseURL}  from '../config';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
 import BackButton from '../BackButton';
-
+// import PaymentForm from './PaymentForm';
 
 const UpdateProfile = () => {
   const { studentId } = useParams();
+  console.log(studentId,"studentId----------------------------update")
   const navigate = useNavigate()
   const [errorMessage, setErrorMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
@@ -33,7 +34,7 @@ const UpdateProfile = () => {
     city: '',
     district: '',
     state: '',
-    country: ''
+    country: '',
   });
 
   const [nameError, setNameError] = useState('');
@@ -51,6 +52,7 @@ const UpdateProfile = () => {
 
   const [pincode, setPincode] = useState('');
   const [details, setDetails] = useState(null);
+
 
   // auto fill the address details by pincode 
   const fetchLocationDetails = async () => {
@@ -160,6 +162,8 @@ const UpdateProfile = () => {
     }
   };
 
+ 
+  
   const validateName = (name) => {
     return name.trim().length < 3 ? "Name must contain at least 3 characters" : "";
   };
@@ -330,8 +334,7 @@ const validateYOP = (yop) => {
     }
   };
   
-
-
+  
   return (
     <div className="mt-4">
       <BackButton />
@@ -344,6 +347,7 @@ const validateYOP = (yop) => {
         </div>
     </div>
     } */}
+ 
    <form className="container-md">
   <div className="card mb-4">
     <div className="card-body">
@@ -508,6 +512,8 @@ const validateYOP = (yop) => {
       
     </div>
   </div>
+   
+
 
   <ToastContainer position="top-right" autoClose={3000}  />
 
@@ -522,7 +528,7 @@ const validateYOP = (yop) => {
       </button>
     </div>
 </form>
-
+{/* <PaymentForm  /> */}
   </div>
   
   );

@@ -111,6 +111,8 @@ const assignPlacementOfficerToCollege = async (req, res) => {
     try {
         const { college_id, placement_officer_id } = req.body; // Extract college_id and placement_officer_id from the request body
         const studentId = req.studentId;
+        console.log(req.body,"----------------------req.body");
+        console.log(studentId,"----------------------studnetid");
 
         // Fetch user from database
         const user = await Student.findByPk(studentId);

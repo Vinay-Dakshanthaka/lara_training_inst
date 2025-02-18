@@ -6,6 +6,7 @@ import UpdateWeeklyTest from './UpdateWeeklyTest'; // Import the UpdateWeeklyTes
 import { BsCopy } from 'react-icons/bs';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import Paginate from '../common/Paginate';
 
 const WeeklyTestList = () => {
     const [tests, setTests] = useState([]);
@@ -172,14 +173,21 @@ const WeeklyTestList = () => {
                 </Alert>
             )}
 
+                    <Paginate
+                        currentPage={currentPage}
+                        totalItems={tests.length}
+                        itemsPerPage={testsPerPage}
+                        onPageChange={paginate}
+                    />
+
             {/* Pagination */}
-            <Pagination>
+            {/* <Pagination>
                 {[...Array(Math.ceil(tests.length / testsPerPage)).keys()].map((num) => (
                     <Pagination.Item key={num + 1} active={num + 1 === currentPage} onClick={() => paginate(num + 1)}>
                         {num + 1}
                     </Pagination.Item>
                 ))}
-            </Pagination>
+            </Pagination> */}
 
             {/* Modal to edit selected weekly test */}
             {selectedTest && (

@@ -27,14 +27,14 @@ const cumulativeTestRouter = require('./routes/cumulativeTestRoutes.js')
 const placementTestRoute = require('./routes/placementTestRoutes.js')
 const internalTestRoute = require('./routes/internalTestRoute.js')
 const weeklyTestRoute = require('./routes/weeklyTestRoutes.js')
-
+const transaction = require('./routes/transactionRoutes.js')
 
 app.use('/api/student', router);
 app.use('/api/cumulative-test',cumulativeTestRouter)
 app.use('/api/placement-test', placementTestRoute);
 app.use('/api/internal-test', internalTestRoute);
 app.use('/api/weekly-test',weeklyTestRoute);
-
+app.use('/api/transaction',transaction);
 
 // Static Images Folder
 app.use('/Images', express.static('./Images'));

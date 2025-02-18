@@ -6,6 +6,7 @@ import { BsCopy, BsPencil } from 'react-icons/bs';
 import { OverlayTrigger, Tooltip, Badge, Modal, Button, Form } from 'react-bootstrap';
 import { toast, ToastContainer as ToastifyContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Paginate from '../common/Paginate';
 // import './allInternalTests.css'; // Un-comment if you have styles
 
 const AllInternalTests = () => {
@@ -121,12 +122,12 @@ const AllInternalTests = () => {
             });
     };
 
-    // Pagination logic
-    const indexOfLastTest = currentPage * itemsPerPage;
-    const indexOfFirstTest = indexOfLastTest - itemsPerPage;
-    const currentTests = internalTests.slice(indexOfFirstTest, indexOfLastTest);
-    const totalPages = Math.ceil(internalTests.length / itemsPerPage);
-
+      // Pagination logic
+      const indexOfLastTest = currentPage * itemsPerPage;
+      const indexOfFirstTest = indexOfLastTest - itemsPerPage;
+      const currentTests = internalTests.slice(indexOfFirstTest, indexOfLastTest);
+      const totalTests = internalTests.length;
+      
     return (
         <div className="container mt-5 responsive">
             <ToastifyContainer />
@@ -139,10 +140,12 @@ const AllInternalTests = () => {
                             <th style={{ width: 'fit-content' }}>Test Link</th>
                             <th>Number of Questions</th>
                             <th>Edit</th>
+                            <th>Result</th>
                             <th>Assign Questions</th>
                             <th>Add New Questions </th>
                             <th>Upload Questions </th>
                             <th>Edit Questions </th>
+                            <th>Delete</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -208,13 +211,16 @@ const AllInternalTests = () => {
                                         Edit Questions
                                     </Link>
                                 </td>
+                                {/* <td>
+                                    <Link to={`/delete-internal-testlink/${test.internal_test_id}`} className="btn btn-primary">Delete Link</Link>
+                                </td> */}
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
 
-            {/* Pagination controls */}
+            {/* Pagination controls
             <div className="pagination">
                 <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -229,7 +235,14 @@ const AllInternalTests = () => {
                 >
                     Next
                 </button>
-            </div>
+            </div> */}
+                {/* Pagination component */}
+                <Paginate
+                currentPage={currentPage}
+                totalItems={totalTests}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+            />
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>

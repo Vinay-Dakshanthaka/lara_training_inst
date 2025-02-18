@@ -213,7 +213,7 @@ const StudentHome = () => {
   const [studentDetails, setStudentDetails] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
-  const [imagePath, setImagePath] = useState("");
+  // const [imagePath, setImagePath] = useState("");
   const [image, setImage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [imageFile, setImageFile] = useState(null);
@@ -476,18 +476,22 @@ const StudentHome = () => {
                   </h1>
                   <p className="card-text">
                     <BsFillEnvelopeFill size={20} className="text-primary m-2" />
-                    {studentDetails.email}
+                    {studentDetails}
                   </p>
                   <p className="card-text">
                     <BsPhone size={20} className="text-primary m-2" />
                     {studentDetails.phoneNumber}
                   </p>
                 </div>
-                <div className="text-center">
-                  <Link to={`/updateProfile`} className=" col-4 text-center">
+                <div className="text-center justify-center">
+                  <Link to={`/updateProfile`} className=" col-4 text-center me-5">
                     Click Here to Update Your Details
                   </Link>
+                  <Link to={`/payFee`} className=" col-4 text-center">
+                    Click Here to Pay Fee
+                  </Link>
                 </div>
+                
               </div>
             </div>
           </div>
