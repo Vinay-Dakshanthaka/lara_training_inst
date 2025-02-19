@@ -6,7 +6,8 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Toast from 'react-bootstrap/Toast';
 import { BsTrash } from 'react-icons/bs';
-import {baseURL}  from '../config';
+import { baseURL } from '../config';
+import Paginate from '../../components/common/Paginate'; // Assuming the Paginate component is in the same folder
 
 const TrainerDetails = () => {
   const [trainerData, setTrainerData] = useState([]);
@@ -18,8 +19,12 @@ const TrainerDetails = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [toastVariant, setToastVariant] = useState('success');
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 2; // Number of trainers per page
+
   const fetchData = () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (!token) {
       return;
     }
@@ -30,17 +35,17 @@ const TrainerDetails = () => {
       },
     };
 
-    axios.get(`${baseURL}/api/student/fetchAllTrainerAndBatch`, config)
-      .then(response => {
+    axios
+      .get(`${baseURL}/api/student/fetchAllTrainerAndBatch`, config)
+      .then((response) => {
         setTrainerData(response.data);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error fetching data:', error);
       });
 
     fetchAvailableBatches();
   };
-
 
   useEffect(() => {
     fetchData();
@@ -48,14 +53,17 @@ const TrainerDetails = () => {
 
   const fetchAvailableBatches = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
 
-      const response = await axios.get(`${baseURL}/api/student/getAllBatches`, config);
+      const response = await axios.get(
+        `${baseURL}/api/student/getAllBatches`,
+        config
+      );
       setAvailableBatches(response.data);
     } catch (error) {
       console.error('Error fetching available batches:', error);
@@ -64,7 +72,7 @@ const TrainerDetails = () => {
 
   const assignToBatch = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -72,8 +80,12 @@ const TrainerDetails = () => {
       };
 
       const trainerId = selectedTrainer.trainer.id;
-      const batchIds = selectedBatches.map(batch => batch.batch_id);
-      const response = await axios.post(`${baseURL}/api/student/assignBatchesToTrainer`, { trainerId, batchIds }, config);
+      const batchIds = selectedBatches.map((batch) => batch.batch_id);
+      await axios.post(
+        `${baseURL}/api/student/assignBatchesToTrainer`,
+        { trainerId, batchIds },
+        config
+      );
       setToastMessage('Batches assigned successfully');
       setToastVariant('success');
       setShowToast(true);
@@ -95,13 +107,17 @@ const TrainerDetails = () => {
 
   const deassignTrainerFromBatch = async (trainerId, batchId) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.post(`${baseURL}/api/student/deassignBatchFromTrainer`, { trainerId, batchId }, config);
+      await axios.post(
+        `${baseURL}/api/student/deassignBatchFromTrainer`,
+        { trainerId, batchId },
+        config
+      );
       setToastMessage('Batch de-assigned successfully');
       setToastVariant('success');
       setShowToast(true);
@@ -113,6 +129,12 @@ const TrainerDetails = () => {
       setShowToast(true);
     }
   };
+
+  // Pagination logic
+  const indexOfLastTrainer = currentPage * itemsPerPage;
+  const indexOfFirstTrainer = indexOfLastTrainer - itemsPerPage;
+  const currentTrainers = trainerData.slice(indexOfFirstTrainer, indexOfLastTrainer);
+
   return (
     <div className='table-responsive'>
       <h2>Trainer Details</h2>
@@ -127,7 +149,7 @@ const TrainerDetails = () => {
           </tr>
         </thead>
         <tbody>
-          {trainerData.map(trainerInfo => (
+          {currentTrainers.map((trainerInfo) => (
             <tr key={trainerInfo.trainer.id}>
               <td>{trainerInfo.trainer.name}</td>
               <td>{trainerInfo.trainer.email}</td>
@@ -135,11 +157,19 @@ const TrainerDetails = () => {
               <td>
                 {trainerInfo.batches.length > 0 ? (
                   <ul>
-                    {trainerInfo.batches.map(batch => (
+                    {trainerInfo.batches.map((batch) => (
                       <li key={batch.batch_id}>
-                        <div className="d-flex align-items-center justify-content-between">
+                        <div className='d-flex align-items-center justify-content-between'>
                           <span>{batch.batch_name}</span>
-                          <button className="btn btn-danger ms-2 m-1" onClick={() => deassignTrainerFromBatch(trainerInfo.trainer.id, batch.batch_id)}>
+                          <button
+                            className='btn btn-danger ms-2 m-1'
+                            onClick={() =>
+                              deassignTrainerFromBatch(
+                                trainerInfo.trainer.id,
+                                batch.batch_id
+                              )
+                            }
+                          >
                             <BsTrash />
                           </button>
                         </div>
@@ -147,15 +177,18 @@ const TrainerDetails = () => {
                     ))}
                   </ul>
                 ) : (
-                  "No batches"
+                  'No batches'
                 )}
               </td>
 
               <td>
-                <Button variant="primary" onClick={() => {
-                  setSelectedTrainer(trainerInfo);
-                  setShowModal(true);
-                }}>
+                <Button
+                  variant='primary'
+                  onClick={() => {
+                    setSelectedTrainer(trainerInfo);
+                    setShowModal(true);
+                  }}
+                >
                   Assign Batch
                 </Button>
               </td>
@@ -163,6 +196,14 @@ const TrainerDetails = () => {
           ))}
         </tbody>
       </Table>
+
+      {/* Pagination Component */}
+      <Paginate
+        currentPage={currentPage}
+        totalItems={trainerData.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage} // Update the page number when a new page is selected
+      />
 
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
@@ -175,22 +216,31 @@ const TrainerDetails = () => {
             <p><strong>Phone Number: </strong>{selectedTrainer && selectedTrainer.trainer.phoneNumber}</p>
           </div>
           <Form>
-            {availableBatches.map(batch => {
-              const isAssigned = selectedTrainer && selectedTrainer.batches.some(tBatch => tBatch.batch_id === batch.batch_id);
+            {availableBatches.map((batch) => {
+              const isAssigned =
+                selectedTrainer &&
+                selectedTrainer.batches.some(
+                  (tBatch) => tBatch.batch_id === batch.batch_id
+                );
               if (!isAssigned) {
                 return (
                   <Form.Check
                     key={batch.batch_id}
-                    type="checkbox"
+                    type='checkbox'
                     id={`batch-${batch.batch_id}`}
                     label={batch.batch_name}
                     onChange={(e) => {
                       const checked = e.target.checked;
                       const batchId = batch.batch_id;
                       if (checked) {
-                        setSelectedBatches(prevSelectedBatches => [...prevSelectedBatches, batch]);
+                        setSelectedBatches((prevSelectedBatches) => [
+                          ...prevSelectedBatches,
+                          batch,
+                        ]);
                       } else {
-                        setSelectedBatches(prevSelectedBatches => prevSelectedBatches.filter(b => b.batch_id !== batchId));
+                        setSelectedBatches((prevSelectedBatches) =>
+                          prevSelectedBatches.filter((b) => b.batch_id !== batchId)
+                        );
                       }
                     }}
                   />
@@ -201,10 +251,10 @@ const TrainerDetails = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
+          <Button variant='secondary' onClick={handleCloseModal}>
             Close
           </Button>
-          <Button variant="primary" onClick={assignToBatch}>
+          <Button variant='primary' onClick={assignToBatch}>
             Assign to Batch
           </Button>
         </Modal.Footer>
@@ -220,14 +270,18 @@ const TrainerDetails = () => {
           top: '3rem',
           right: '1rem',
           minWidth: '200px', // Adjust width as needed
-          zIndex: 9999 // Ensure it's on top of other content
+          zIndex: 9999, // Ensure it's on top of other content
         }}
       >
-        <Toast.Body style={{ backgroundColor: toastVariant === 'success' ? '#28a745' : '#dc3545', color: '#fff' }}>
+        <Toast.Body
+          style={{
+            backgroundColor: toastVariant === 'success' ? '#28a745' : '#dc3545',
+            color: '#fff',
+          }}
+        >
           {toastMessage}
         </Toast.Body>
       </Toast>
-
     </div>
   );
 };

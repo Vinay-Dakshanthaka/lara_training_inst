@@ -5,6 +5,7 @@ import { baseURL } from '../config';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
 import { BsPencil, BsTrash } from 'react-icons/bs';
+import Paginate from '../common/Paginate';
 
 const AddSubject = () => {
     const [subjectName, setSubjectName] = useState('');
@@ -276,6 +277,21 @@ const AddSubject = () => {
         fetchSubjects();
     }, []);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5; // Set the number of items per page
+  
+    // Calculate the index of the last and first item on the current page
+    const indexOfLastSubject = currentPage * itemsPerPage;
+    const indexOfFirstSubject = indexOfLastSubject - itemsPerPage;
+  
+    // Slice the subjects array to show only the current page items
+    const currentSubjects = subjects.slice(indexOfFirstSubject, indexOfLastSubject);
+  
+    // Handle page change
+    const handlePageChange = (pageNumber) => {
+      setCurrentPage(pageNumber);
+    };
+
     return (
         <>
              <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
@@ -292,7 +308,7 @@ const AddSubject = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {subjects.map((subject) => (
+                {currentSubjects.map((subject) => (
                         <tr key={subject.id}>
                             <td>
                                 <Row>
@@ -349,7 +365,13 @@ const AddSubject = () => {
                     ))}
                 </tbody>
             </Table>
-
+                   {/* Pagination Component */}
+      <Paginate
+        currentPage={currentPage}
+        totalItems={subjects.length} // Total number of subjects
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+      />
             <Modal show={showSubjectModal} onHide={handleCloseModals} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>{isEditMode ? 'Edit Subject' : 'Add Subject'}</Modal.Title>

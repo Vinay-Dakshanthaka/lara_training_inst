@@ -345,19 +345,24 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { baseURL } from '../config';
 import * as XLSX from 'xlsx';
+import Paginate from '../common/Paginate';
 
 const AttendedStudentDetails = () => {
   const [batches, setBatches] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState("");
   const [attendedStudents, setAttendedStudents] = useState([]);
   const [allStudents, setAllStudents] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); 
   const [error, setError] = useState("");
   const [batchResults, setBatchResults] = useState("");
   const [overallTotalMarks, setOverallTotalMarks] = useState("");
   const [overallObtainedMarks, setOverallObtainedMarks] = useState("");
   const [totalBatchPercentage, setTotalBatchPercentage] = useState("");
   const [showModal, setShowModal] = useState(false);
+
+    // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -487,6 +492,13 @@ const AttendedStudentDetails = () => {
     }
   };
 
+     // Pagination logic
+  const getPagedData = () => {
+    const data = selectedBatch ? attendedStudents : allStudents;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return data.slice(startIndex, startIndex + itemsPerPage);
+  };
+
   return (
     <div className="container mt-4">
       <h2 className="mb-3">Student Exam Results</h2>
@@ -534,9 +546,9 @@ const AttendedStudentDetails = () => {
             </tr>
           </thead>
           <tbody>
-            {(selectedBatch ? attendedStudents : allStudents).map((student, index) => (
+            {getPagedData().map((student, index) => (
               <tr key={student.studentId}>
-                <td>{index + 1}</td>
+                <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td>{student.name}</td>
                 <td>{student.totalTests}</td>
                 <td>{student.totalMarksObtained}</td>
@@ -548,6 +560,14 @@ const AttendedStudentDetails = () => {
           </tbody>
         </table>
       )}
+       {/* Pagination Controls */}
+       <Paginate
+        currentPage={currentPage}
+        totalItems={selectedBatch ? attendedStudents.length : allStudents.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={(page) => setCurrentPage(page)}
+      />
+    
     </div>
   );
 };
