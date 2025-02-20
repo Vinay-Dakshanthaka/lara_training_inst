@@ -478,10 +478,10 @@ const StudentHome = () => {
                     <BsFillEnvelopeFill size={20} className="text-primary m-2" />
                     {studentDetails.email}
                   </p>
-                  <p className="card-text">
+                  {/* <p className="card-text">
                     <BsPhone size={20} className="text-primary m-2" />
                     {studentDetails.phoneNumber}
-                  </p>
+                  </p> */}
                 </div>
                 <div className="text-center">
                   <Link to={`/updateProfile`} className=" col-4 text-center">
