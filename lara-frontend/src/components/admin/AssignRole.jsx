@@ -4,6 +4,7 @@ import { Pagination } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
  import {baseURL}  from '../config';
+import Paginate from '../common/Paginate';
 
 const AssignRole = () => {
   const [students, setStudents] = useState([]);
@@ -223,7 +224,7 @@ const AssignRole = () => {
           ))}
         </tbody>
       </table>
-      <div className='text-center'>
+      {/* <div className='text-center'>
         <Pagination>
           {studentsPerPage !== 0 &&
             Array.from({ length: Math.ceil(students.length / studentsPerPage) }).map((_, index) => (
@@ -232,7 +233,14 @@ const AssignRole = () => {
               </Pagination.Item>
             ))}
         </Pagination>
-      </div>
+      </div> */}
+       {/* Add the Paginate component here */}
+       <Paginate
+        currentPage={currentPage}
+        totalItems={students.length}
+        itemsPerPage={studentsPerPage}
+        onPageChange={paginate}
+      />
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { baseURL } from '../config';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import Paginate from '../../components/common/Paginate'; 
 
 const CollegeDetails = () => {
     const [collegeDetails, setCollegeDetails] = useState([]);
@@ -14,7 +15,14 @@ const CollegeDetails = () => {
     const [newCollege, setNewCollege] = useState({ college_name: '', place: '' });
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [collegeIdToDelete, setCollegeIdToDelete] = useState(null);
-    const [studentsList, setStudentsList] = useState({})
+    const [studentsList, setStudentsList] = useState([]);
+    
+    // Pagination states for colleges and students
+    const [collegeCurrentPage, setCollegeCurrentPage] = useState(1);
+    const [studentsCurrentPage, setStudentsCurrentPage] = useState(1);
+    const collegeItemsPerPage = 5;
+    const studentsItemsPerPage = 2;
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -149,13 +157,21 @@ const CollegeDetails = () => {
 
             const response = await axios.post(`${baseURL}/api/student/getAllStudentsByCollegeId`, { collegeId }, config);
             setStudentsList(response.data);
-            console.log("student list :", response.data)
         } catch (error) {
             console.error('Error fetching students by college ID:', error);
             toast.error('Something went wrong');
         }
     };
 
+    // Pagination for college table
+    const indexOfLastCollege = collegeCurrentPage * collegeItemsPerPage;
+    const indexOfFirstCollege = indexOfLastCollege - collegeItemsPerPage;
+    const currentColleges = collegeDetails.slice(indexOfFirstCollege, indexOfLastCollege);
+
+    // Pagination for students table
+    const indexOfLastStudent = studentsCurrentPage * studentsItemsPerPage;
+    const indexOfFirstStudent = indexOfLastStudent - studentsItemsPerPage;
+    const currentStudents = studentsList.slice(indexOfFirstStudent, indexOfLastStudent);
 
     return (
         <div>
@@ -172,7 +188,7 @@ const CollegeDetails = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {collegeDetails.map(college => (
+                    {currentColleges.map(college => (
                         <tr key={college.id}>
                             <td>{college.college_name}</td>
                             <td>{college.place}</td>
@@ -185,7 +201,17 @@ const CollegeDetails = () => {
                     ))}
                 </tbody>
             </table>
+
+            {/* Pagination for Colleges */}
+            <Paginate
+                currentPage={collegeCurrentPage}
+                totalItems={collegeDetails.length}
+                itemsPerPage={collegeItemsPerPage}
+                onPageChange={setCollegeCurrentPage}
+            />
+
             <hr />
+
             {studentsList.length > 0 ? (
                 <table className="table table-striped m-3">
                     <thead>
@@ -196,7 +222,7 @@ const CollegeDetails = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {studentsList.map(student => (
+                        {currentStudents.map(student => (
                             <tr key={student.id}>
                                 <td>{student.name}</td>
                                 <td>{student.email}</td>
@@ -207,6 +233,16 @@ const CollegeDetails = () => {
                 </table>
             ) : (
                 <p>No students found for this college.</p>
+            )}
+
+            {/* Pagination for Students */}
+            {studentsList.length > 0 && (
+                <Paginate
+                    currentPage={studentsCurrentPage}
+                    totalItems={studentsList.length}
+                    itemsPerPage={studentsItemsPerPage}
+                    onPageChange={setStudentsCurrentPage}
+                />
             )}
 
             {/* Add College Modal */}
@@ -251,6 +287,7 @@ const CollegeDetails = () => {
                 </Modal.Footer>
             </Modal>
 
+            {/* Delete Confirmation Modal */}
             <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Confirmation</Modal.Title>

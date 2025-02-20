@@ -13,10 +13,11 @@ const corsOptions = {
     origin: 'http://localhost:3000',
     // origin: 'https://www.laragrooming.com',
     // origin: ['https://www.laragrooming.com', 'https://laragrooming.com'],
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+    // origin: ['https://www.laragrooming.com', 'http://localhost:3000'],
+    // optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
   };
   
-// // // Enable CORS 
+// Enable CORS 
 app.use(cors(corsOptions)); 
 // app.use(cors());  
 
@@ -26,6 +27,7 @@ const cumulativeTestRouter = require('./routes/cumulativeTestRoutes.js')
 const placementTestRoute = require('./routes/placementTestRoutes.js')
 const internalTestRoute = require('./routes/internalTestRoute.js')
 const weeklyTestRoute = require('./routes/weeklyTestRoutes.js')
+const transaction = require('./routes/transactionRoutes.js')
 const paperBasedTestrouter = require('./routes/paperBasedTestResultRoutes.js')
 
 app.use('/api/student', router);
@@ -33,6 +35,7 @@ app.use('/api/cumulative-test',cumulativeTestRouter)
 app.use('/api/placement-test', placementTestRoute);
 app.use('/api/internal-test', internalTestRoute);
 app.use('/api/weekly-test',weeklyTestRoute);
+app.use('/api/transaction',transaction);
 app.use('/api/paper-based-exams',paperBasedTestrouter);
 
 // Static Images Folder

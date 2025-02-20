@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Table, Container, Badge, Pagination } from "react-bootstrap";
+import { Table, Container, Badge } from "react-bootstrap";
 import { baseURL } from "../../config";
 import { Link } from "react-router-dom";
+import Paginate from "../../common/Paginate";  // Assuming your Paginate component is in this path
 
 const ActiveWeeklyTests = () => {
   const [activeTests, setActiveTests] = useState([]);
@@ -29,10 +30,9 @@ const ActiveWeeklyTests = () => {
       .get(`${baseURL}/api/weekly-test/getStudentAndActiveTestsWithAttendance`, config)
       .then((response) => {
         setStudentDetails(response.data.student);
-        console.log(response.data)
+        console.log(response.data);
         // Sort tests by test_id in descending order (latest first)
         const sortedTests = response.data.active_tests.sort((a, b) => b.test_id - a.test_id);
-
         setActiveTests(sortedTests);
         setLoading(false);
       })
@@ -41,7 +41,7 @@ const ActiveWeeklyTests = () => {
         setLoading(false);
       });
   }, [token]);
-  
+
   // Paginate tests
   const indexOfLastTest = currentPage * testsPerPage;
   const indexOfFirstTest = indexOfLastTest - testsPerPage;
@@ -59,7 +59,6 @@ const ActiveWeeklyTests = () => {
       <Table striped bordered hover responsive>
         <thead>
           <tr>
-            {/* <th>Test ID</th> */}
             <th>Test Description</th>
             <th>Test Date</th>
             <th>Total Marks</th>
@@ -78,7 +77,6 @@ const ActiveWeeklyTests = () => {
           ) : (
             currentTests.map((test) => (
               <tr key={test.test_id}>
-                {/* <td>{test.test_id}</td> */}
                 <td>
                   <a href={test.test_link} target="_blank" rel="noopener noreferrer">
                     {test.test_description}
@@ -114,13 +112,12 @@ const ActiveWeeklyTests = () => {
 
       {/* Pagination */}
       <div className="d-flex align-items-center justify-content-center">
-        <Pagination>
-          {[...Array(Math.ceil(activeTests.length / testsPerPage)).keys()].map((num) => (
-            <Pagination.Item key={num + 1} active={num + 1 === currentPage} onClick={() => paginate(num + 1)}>
-              {num + 1}
-            </Pagination.Item>
-          ))}
-        </Pagination>
+        <Paginate
+          currentPage={currentPage}
+          totalItems={activeTests.length}
+          itemsPerPage={testsPerPage}
+          onPageChange={paginate}
+        />
       </div>
     </Container>
   );

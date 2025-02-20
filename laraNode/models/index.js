@@ -208,6 +208,8 @@ db.PaperBasedTestResults = require('./paperBasedTestResults.js')(sequelize,DataT
 db.Student.hasMany(db.PaperBasedTestResults, { foreignKey: 'studentId' });
 db.PaperBasedTestResults.belongsTo(db.Student, { foreignKey: 'studentId' });
 db.BatchTestLinks = require('./batchTestLinkModel.js')(sequelize,DataTypes);
+db.Transaction = require('./transactionModel.js')(sequelize,DataTypes);
+
 
 // Define associations  
 db.Student.hasOne(db.Profile, {
@@ -222,8 +224,6 @@ db.Profile.belongsTo(db.Student, {
 });
 
 
-// db.Student.belongsToMany(db.Batch, { through: db.Student_Batch }); // Define many-to-many association
-// db.Batch.belongsToMany(db.Student, { through: db.Student_Batch }); // Define many-to-many association
 
 // db.Student.belongsToMany(db.Batch, {
 //     through: db.Student_Batch,
@@ -240,6 +240,7 @@ db.Profile.belongsTo(db.Student, {
 // Define the association between Student and Batch
 db.Student.belongsToMany(db.Batch, { through: 'Student_Batch', foreignKey: 'student_id' });
 db.Batch.belongsToMany(db.Student, { through: 'Student_Batch', foreignKey: 'batch_id' });
+
 
 // Define associations for Student (Trainer) to Batch
 db.Student.belongsToMany(db.Batch, {

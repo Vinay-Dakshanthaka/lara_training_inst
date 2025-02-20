@@ -481,7 +481,7 @@ const PlacementTestsByRecruiter = () => {
         }
     };
 
-    // Pagination logic
+    
     // Pagination logic
     const totalPages = Math.ceil(placementTests.length / testsPerPage);
     const indexOfLastTest = currentPage * testsPerPage;

@@ -201,7 +201,7 @@ const CreateTestLink = () => {
                 },
                 config
             );
-
+            console.log(response.data,"---------------------------");
             // Set the test link in state
             setNewTestLink(response.data.newTest.test_link);
             setAlert({ show: true, message: 'Link Created Successfully', variant: 'success' });

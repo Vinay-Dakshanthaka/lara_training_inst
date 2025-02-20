@@ -90,6 +90,8 @@ const AddQuestion = () => {
         }));
     };
 
+   
+
     const addOptionField = () => {
         setQuestionData((prevData) => ({
             ...prevData,
@@ -260,41 +262,43 @@ const AddQuestion = () => {
                         </Row>
 
                         <Row>
-                            {questionData.options.map((option, index) => (
-                                <Form.Group controlId={`option${index}`} as={Col} md="6" className="mb-3" key={index}>
-                                    <Form.Label>{`Option ${index + 1}`}</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={option}
-                                        onChange={(e) => handleOptionChange(index, e.target.value)}
-                                    />
-                                </Form.Group>
-                            ))}
-                            <div className="text-center">
-                                <Button variant="secondary" onClick={addOptionField} className="mb-3 col-6">
-                                    Add one more option
-                                </Button>
-                            </div>
-                        </Row>
+                {questionData.options.map((option, index) => (
+                    <Form.Group controlId={`option${index}`} as={Col} md="6" className="mb-3" key={index}>
+                        <Form.Label>{`Option ${index + 1}`}</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            value={option}
+                            onChange={(e) => handleOptionChange(index, e.target.value)}
+                        />
+                    </Form.Group>
+                ))}
+                <div className="text-center">
+                    <Button variant="secondary" onClick={addOptionField} className="mb-3 col-6">
+                        Add one more option
+                    </Button>
+                </div>
+            </Row>
 
-                        <Row>
-                            <Form.Group as={Col} md="12" className="mb-3">
-                                <Form.Label>Correct Option(s)</Form.Label>
-                                <div>
-                                    {questionData.options.map((option, index) => (
-                                        <Form.Check
-                                            type="checkbox"
-                                            name="correct_option"
-                                            label={option || `Option ${index + 1}`}
-                                            value={option}
-                                            checked={questionData.correct_options.includes(option)}
-                                            onChange={(e) => handleCorrectOptionChange(option, e.target.checked)}
-                                            key={index}
-                                        />
-                                    ))}
-                                </div>
-                            </Form.Group>
-                        </Row>
+            <Row>
+                <Form.Group as={Col} md="12" className="mb-3">
+                    <Form.Label>Correct Option(s)</Form.Label>
+                    <div>
+                        {questionData.options.map((option, index) => (
+                            <Form.Check
+                                type="checkbox"
+                                name="correct_option"
+                                label={<pre>{option || `Option ${index + 1}`}</pre>} // Render options with line breaks
+                                // label={option || `Option ${index + 1}`}
+                                value={option}
+                                checked={questionData.correct_options.includes(option)}
+                                onChange={(e) => handleCorrectOptionChange(option, e.target.checked)}
+                                key={index}
+                            />
+                        ))}
+                    </div>
+                </Form.Group>
+            </Row>
                         <div className="text-center">
                             <Button variant="primary" type="submit" className="col-6">
                                 Add Question

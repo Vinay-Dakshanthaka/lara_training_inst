@@ -3,12 +3,17 @@ import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Table, Container, Alert, Spinner, Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { baseURL } from '../../config'; 
+import Paginate from '../../common/Paginate'; 
 
 const WeeklyTestAttendedStudentsList = () => {
   const { wt_id } = useParams(); 
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 2;
 
   useEffect(() => {
     const fetchStudentEvaluationStatus = async () => {
@@ -43,6 +48,11 @@ const WeeklyTestAttendedStudentsList = () => {
     );
   }
 
+  // Pagination Logic
+  const indexOfLastStudent = currentPage * itemsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - itemsPerPage;
+  const currentStudents = students.slice(indexOfFirstStudent, indexOfLastStudent);
+
   return (
     <Container className="my-4">
       <h2 className="mb-4">Student Details</h2>
@@ -58,14 +68,14 @@ const WeeklyTestAttendedStudentsList = () => {
           </tr>
         </thead>
         <tbody>
-          {students.map((student, index) => (
+          {currentStudents.map((student, index) => (
             <tr key={student.student_id}>
-              <td>{index + 1}</td>
+              <td>{indexOfFirstStudent + index + 1}</td>
               <td>{student.student_name}</td>
               <td>{student.student_email}</td>
               <td>{student.student_phone}</td>
               <td>
-              <Link to={`/evaluvate-student-answers/${wt_id}/${student.student_id}`}>Evaluvate</Link>
+                <Link to={`/evaluvate-student-answers/${wt_id}/${student.student_id}`}>Evaluate</Link>
               </td>
               <td>
                 {student.is_evaluation_done ? (
@@ -83,6 +93,14 @@ const WeeklyTestAttendedStudentsList = () => {
           ))}
         </tbody>
       </Table>
+
+      {/* Pagination Component */}
+      <Paginate
+        currentPage={currentPage}
+        totalItems={students.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}  // Update the page number when a new page is selected
+      />
     </Container>
   );
 };

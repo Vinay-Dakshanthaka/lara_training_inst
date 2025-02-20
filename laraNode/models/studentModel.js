@@ -31,9 +31,10 @@ module.exports = (sequelize, DataTypes) => {
         }
     },
     {
-        timestamps: false // Disable createdAt and updatedAt
+        timestamps: false, // Disable createdAt and updatedAt
+        
     });
-
+      
     return Student;
 };
 

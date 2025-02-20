@@ -185,11 +185,17 @@ const EditTestLinkQuestions = () => {
                                    </pre>
                                 </td>
                                 <td>
-                                    {question.options.map((option, idx) => (
+                                    {/* {question.options.map((option, idx) => (
                                         <div key={idx}>
                                             {option.option_description}
                                         </div>
-                                    ))}
+                                    ))} */}
+                                    {question.options.map((option, idx) => (
+  <div key={idx}>
+    <pre>{option.option_description}</pre>
+  </div>
+))}
+
                                 </td>
                                 <td>
                                     {question.correct_answers.join(', ')}

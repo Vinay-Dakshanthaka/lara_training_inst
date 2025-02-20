@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Pagination, Form } from 'react-bootstrap';
 import {baseURL}  from '../config';
+import Paginate from '../common/Paginate';
 
 const AllStudentsProfiles = () => {
   const [studentProfiles, setStudentProfiles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [studentsPerPage] = useState(10);
+  const [studentsPerPage] = useState(5);
   const [searchType, setSearchType] = useState('specialization');
   const [searchValue, setSearchValue] = useState('');
 
@@ -15,6 +16,7 @@ const AllStudentsProfiles = () => {
   const currentStudents = studentProfiles.slice(indexOfFirstStudent, indexOfLastStudent);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
 
   const handleSearch = async () => {
     try {
@@ -85,6 +87,7 @@ const AllStudentsProfiles = () => {
           <Form.Group controlId="searchValue">
             <Form.Label>Search Value:</Form.Label>
             <Form.Control type="text" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
+
           </Form.Group>
         </div>
         <div className="col-md-4">
@@ -148,8 +151,9 @@ const AllStudentsProfiles = () => {
             ))}
           </tbody>
         </table>
+        
       </div>
-      <div className='text-center'>
+      {/* <div className='text-center'>
         <Pagination>
           {studentsPerPage !== 0 &&
             Array.from({ length: Math.ceil(studentProfiles.length / studentsPerPage) }).map((_, index) => (
@@ -158,7 +162,15 @@ const AllStudentsProfiles = () => {
               </Pagination.Item>
             ))}
         </Pagination>
-      </div>
+      </div> */}
+
+      {/* Add the Paginate component here */}
+      <Paginate
+        currentPage={currentPage}
+        totalItems={studentProfiles.length}
+        itemsPerPage={studentsPerPage}
+        onPageChange={paginate}
+      />
     </div>
   );
 };

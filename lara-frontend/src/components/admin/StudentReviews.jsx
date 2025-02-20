@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pagination, Button, Form, Table } from 'react-bootstrap';
 import { baseURL } from '../config';
+import Paginate from '../common/Paginate';
 
 const StudentReviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -164,13 +165,21 @@ const StudentReviews = () => {
               )}
             </tbody>
           </Table>
-          <Pagination>
+          {/* <Pagination>
             {Array.from({ length: Math.ceil(sortedReviews.length / reviewsPerPage) }).map((_, index) => (
               <Pagination.Item key={index} active={index + 1 === currentPage} onClick={() => paginate(index + 1)}>
                 {index + 1}
               </Pagination.Item>
             ))}
-          </Pagination>
+          </Pagination> */}
+
+              {/* Add the Paginate component here */}
+       <Paginate
+        currentPage={currentPage}
+        totalItems={filteredReviews.length}
+        itemsPerPage={reviewsPerPage}
+        onPageChange={paginate}
+      />
         </>
       )}
     </div>

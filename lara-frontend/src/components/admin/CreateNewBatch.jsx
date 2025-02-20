@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { baseURL } from '../config';
+import Paginate from '../../components/common/Paginate';
 
 const EditableBatch = ({ batch, onUpdate, showSuccessToast, setShowSuccessToast, showErrorToast, setShowErrorToast }) => {
   const [batchName, setBatchName] = useState('');
@@ -167,7 +168,10 @@ const CreateNewBatch = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [batchIdToDelete, setBatchIdToDelete] = useState(null);
-
+   // Pagination state
+   const [currentPage, setCurrentPage] = useState(1);
+   const itemsPerPage = 2; // Number of items per page
+ 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     // Update the corresponding state variable based on the input name
@@ -330,6 +334,11 @@ const CreateNewBatch = () => {
       )
     );
   };
+ 
+  // Pagination logic
+  const indexOfLastBatch = currentPage * itemsPerPage;
+  const indexOfFirstBatch = indexOfLastBatch - itemsPerPage;
+  const currentBatches = availableBatches.slice(indexOfFirstBatch, indexOfLastBatch);
 
   return (
     <div className="container mt-4">
@@ -341,14 +350,17 @@ const CreateNewBatch = () => {
         <Table striped bordered hover className="mt-4">
           <thead>
             <tr>
+              <th>#</th>
               <th>Batch Details</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {availableBatches.map((batch, index) => (
+          {currentBatches.map((batch,index) => (
               <tr key={batch.batch_id}>
+                <td>{index+1}</td>
                 <td>
+                
                   <div>
                     <strong>Batch Name:</strong> {batch.batch_name}
                   </div>
@@ -371,6 +383,13 @@ const CreateNewBatch = () => {
           </tbody>
 
         </Table>
+        {/* Pagination Component */}
+      <Paginate
+        currentPage={currentPage}
+        totalItems={availableBatches.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage} // Update the page number when a new page is selected
+      />
       </Container>
       <div className="d-flex justify-content-center align-items-center vh-100">
         <Form onSubmit={handleSubmit} className='card col-md-6 col-sm-8 col-10 shadow'>

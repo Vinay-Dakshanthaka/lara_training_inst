@@ -34,10 +34,19 @@ module.exports = (sequelize, DataTypes) => {
         topicName: {
             type: DataTypes.STRING,
             allowNull: false
-        }
+        },
+        conducted_date: {  // Updated field name to camelCase for consistency
+            type: DataTypes.DATE, // Use DATE or DATEONLY if time is not required
+            allowNull: true
+        },
     }, {
-        timestamps: false
+        timestamps: true
     });
 
     return PaperBasedTestResult;
 };
+
+// ALTER TABLE laradb.paperbasedtestresults
+// ADD COLUMN createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+// ADD COLUMN updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+// ADD COLUMN conducted_date DATE;

@@ -9,6 +9,7 @@ import { toast, ToastContainer as ToastifyContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 // import './allInternalTests.css'; // Un-comment if you have styles
 import { BsTrash } from 'react-icons/bs';
+import Paginate from '../common/Paginate';
 
 
 
@@ -155,6 +156,10 @@ const AllInternalTests = () => {
     // Navigate to the BatchDetails component with the internal_test_id as a URL parameter
     navigate(`/batch-details/${internalTestId}`);
   };
+   // Handle page change
+   const handlePageChange = (page) => {
+       setCurrentPage(page);
+   };
     
  
 
@@ -265,7 +270,7 @@ const AllInternalTests = () => {
             </div>
 
             {/* Pagination controls */}
-            <div className="pagination">
+            {/* <div className="pagination">
                 <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
@@ -279,7 +284,15 @@ const AllInternalTests = () => {
                 >
                     Next
                 </button>
-            </div>
+            </div> */}
+
+               {/* Pagination */}
+               <Paginate
+                currentPage={currentPage}
+                totalItems={internalTests.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+            />
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
