@@ -29,7 +29,7 @@
     "quill": "^2.0.2",
     "react": "^18.2.0",
     "react-ace": "^11.0.1",
-    "react-bootstrap": "^2.10.1",
+    "react-bootstrap": "^2.10.9",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
     "react-quill": "^2.0.0",

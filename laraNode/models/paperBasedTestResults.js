@@ -39,6 +39,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE, // Use DATE or DATEONLY if time is not required
             allowNull: true
         },
+        testName: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
     }, {
         timestamps: true
     });
@@ -50,3 +54,5 @@ module.exports = (sequelize, DataTypes) => {
 // ADD COLUMN createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 // ADD COLUMN updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 // ADD COLUMN conducted_date DATE;
+// ALTER TABLE laradb.paperbasedtestresults
+// ADD COLUMN testName VARCHAR(255);

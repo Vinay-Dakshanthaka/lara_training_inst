@@ -86,7 +86,7 @@ const AddWeeklyTestQuestion = () => {
                 questionData: { ...questionData, topic_id: selectedTopics[0] }, // Send the selected topic ID
                 wt_id,
             };
-            console.log(data,"question data-------------")
+            
 
             await axios.post(`${baseURL}/api/weekly-test/saveQuestionHandler`, data, config);
             toast.success('Question saved successfully'); // Display success toast
@@ -97,7 +97,6 @@ const AddWeeklyTestQuestion = () => {
                 minutes: '',
             });          
 
-            console.log(data,"-----------------------------")
             setSelectedTopics([]);
         } catch (error) {
             setError(error.response?.data.message || 'Error saving question');

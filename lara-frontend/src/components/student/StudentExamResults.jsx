@@ -50,12 +50,34 @@ const StudentExamResults = () => {
         dateCount[formattedDate] = (dateCount[formattedDate] || 0) + 1;
     });
 
-    let dateTracker = {}; 
+    let dateTracker = {};
+
+    // Calculate total and obtained marks for performance
+    const totalMarks = examResults.reduce((total, result) => total + result.totalMarks, 0);
+    const obtainedMarks = examResults.reduce((total, result) => total + result.obtainedMarks, 0);
+    const performancePercentage = totalMarks > 0 ? (obtainedMarks / totalMarks) * 100 : 0;
 
     return (
         <div className="container mt-4">
             <h2 className="text-center">Paper Based Exam Results</h2>
 
+            {/* Overall Performance Section */}
+            <div className="overall-performance mt-4 text-center">
+                <h4>Overall Performance</h4>
+                <div className="progress">
+                    <div
+                        className="progress-bar bg-warning"
+                        role="progressbar"
+                        style={{ width: `${performancePercentage}%` }}
+                        aria-valuenow={performancePercentage}
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                    ></div>
+                </div>
+                <p>Performance: {performancePercentage.toFixed(2)}%</p>
+            </div>
+
+            {/* Exam Results Table */}
             {examResults.length === 0 ? (
                 <div>No exam results found.</div>
             ) : (
