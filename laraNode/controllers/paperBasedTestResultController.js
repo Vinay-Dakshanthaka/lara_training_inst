@@ -4,84 +4,10 @@ const db = require("../models");
 const { Op } = require("sequelize");
 const paperBasedTestResults = db.PaperBasedTestResults;
 
-
-
-
-// Email validation function
 const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
-// Upload Excel File and Store Data
-// const uploadTestResults = async (req, res) => {
-//     try {
-//         if (!req.file) {
-//             return res.status(400).json({ message: "No file uploaded!" });
-//         }
-
-//         // Read Excel file
-//         const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
-//         const sheetName = workbook.SheetNames[0];
-//         const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-//         const skippedRecords = [];
-
-//         for (let row of data) {
-//             try {
-//                 const { email, obtainedMarks, totalMarks, subjectName, topicName } = row;
-
-//                 if (!email || !isValidEmail(email) || !totalMarks || !subjectName || !topicName) {
-//                     skippedRecords.push({ email: email || "N/A", reason: "Invalid data format or missing fields" });
-//                     continue;
-//                 }
-
-//                 // Check if the student exists
-//                 const student = await Student.findOne({ where: { email: email } });
-
-//                 if (!student) {
-//                     skippedRecords.push({ email, reason: "Student email not found in database" });
-//                     continue; // Skip storing data if student doesn't exist
-//                 }
-
-//                 // Log safely after checking student exists
-//                 console.log(student.email, "-------------------- student email exists");
-
-//                 // Store test result only if student exists
-//                 await paperBasedTestResults.create({
-//                     studentId: student.id,
-//                     email: student.email,
-//                     obtainedMarks: obtainedMarks || 0,
-//                     totalMarks: totalMarks || 12,
-//                     subjectName: subjectName || "core java",
-//                     topicName: topicName || "basics",
-//                 });
-
-//             } catch (err) {
-//                 console.error("Skipping row due to error:", err.message);
-//                 skippedRecords.push({ email: row.email || "Unknown", reason: err.message });
-//             }
-//         }
-
-//         console.log(skippedRecords, "------------------------ Skipped Records");
-
-//         res.status(200).json({
-//             message: "Data processed successfully!",
-//             skippedRecords, // Send skipped emails and reasons to frontend
-//         });
-
-//     } catch (error) {
-//         console.error("Error processing file:", error);
-
-//         if (error.message && error.message.includes("email is not defined")) {
-//             return res.status(200).json({
-//                 message: "Data processed with errors!",
-//                 skippedRecords,
-//             });
-//         }
-
-//         res.status(500).json({ message: "Internal server error", error });
-//     }
-// };
 
 const uploadTestResults = async (req, res) => {
     try {
@@ -89,8 +15,8 @@ const uploadTestResults = async (req, res) => {
             return res.status(400).json({ message: "No file uploaded!" });
         }
 
-        const conducted_date = req.body.conducted_date; // Extract conducted_date
-        console.log(conducted_date,"----------------conducted_date")
+        const conducted_date = req.body.conducted_date; 
+        
         if (!conducted_date) {
             return res.status(400).json({ message: "Conducted date is required!" });
         }
@@ -104,21 +30,32 @@ const uploadTestResults = async (req, res) => {
 
         for (let row of data) {
             try {
-                const { email, obtainedMarks, totalMarks, subjectName, topicName } = row;
+                const { email, obtainedMarks, totalMarks, subjectName, topicName, testName } = row;
 
-                if (!email || !isValidEmail(email) || !totalMarks || !subjectName || !topicName) {
+                if (!email || !isValidEmail(email) || !totalMarks || !subjectName || !topicName || !testName) {
                     skippedRecords.push({ email: email || "N/A", reason: "Invalid data format or missing fields" });
                     continue;
                 }
                 
-                // Check if the student exists
                 const student = await Student.findOne({ where: { email: email } });
 
                 if (!student) {
                     skippedRecords.push({ email, reason: "Student email not found in database" });
                     continue;
                 }
-                     console.log(conducted_date,"--------------conducted_date2222")
+                
+                const existingResult = await paperBasedTestResults.findOne({
+                    where: {
+                        email: email,
+                        testName: testName,  
+                    }
+                });
+
+                if (existingResult) {
+                    skippedRecords.push({ email, reason: "Student has already attended this test" });
+                    continue;
+                }
+
                 // Store test result
                 await paperBasedTestResults.create({
                     studentId: student.id,
@@ -127,10 +64,10 @@ const uploadTestResults = async (req, res) => {
                     totalMarks: totalMarks || 12,
                     subjectName: subjectName || "core java",
                     topicName: topicName || "basics",
-                    conducted_date:conducted_date,  // Store conducted_date
-                    createdAt: new Date(), // Set createdAt manually
-                    updatedAt: new Date()  // Set updatedAt manually
-                
+                    conducted_date: conducted_date,  
+                    testName: testName,  
+                    createdAt: new Date(), 
+                    updatedAt: new Date()  
                 });
 
             } catch (err) {
@@ -150,50 +87,6 @@ const uploadTestResults = async (req, res) => {
         res.status(500).json({ message: "Internal server error", error });
     }
 };
-
-
-
-// const getAttendedStudentsByBatch = async (req, res) => {
-//     try {
-//         const { batchId } = req.body;
-//         console.log(req.body,"-----------------------req.")
-//         if (!batchId) {
-//             return res.status(400).json({ message: "Batch ID is required" });
-//         }
-
-//         // Fetch student IDs linked to the given batch
-//         const studentsInBatch = await Student_Batch.findAll({
-//             where: { batch_id: batchId },
-//             attributes: ["student_id"]
-//         });
-//           console.log(studentsInBatch,"-----------------students in baatch")
-//         if (!studentsInBatch.length) {
-//             return res.status(404).json({ message: "No students found in this batch" });
-//         }
-
-//         const studentIds = studentsInBatch.map(student => student.student_id);
-
-//         // Fetch students who attended the test
-//         const attendedStudents = await paperBasedTestResults.findAll({
-//             where: { studentId: studentIds }, // Compare with students in batch
-//             include: [{ model: Student, attributes: ["name"] }]
-//         });
-         
-//         console.log(attendedStudents,"-------------------------attenededstudents")
-//         if (!attendedStudents.length) {
-//             return res.status(404).json({ message: "No students attended the test" });
-//         }
-
-//         // Extract unique student names
-//         const attendedStudentNames = attendedStudents.map(result => result.Student.name);
-
-//         res.status(200).json({ attendedStudents: attendedStudentNames });
-//     } catch (error) {
-//         console.error("Error fetching attended students:", error);
-//         res.status(500).json({ message: "Internal server error" });
-//     }
-// };
-
 
 
 const getAttendedStudentsByBatch = async (req, res) => {
@@ -335,7 +228,7 @@ const getAttendedStudentsByBatch = async (req, res) => {
   }
 };
 
-// Controller to get all exam results for a student
+
 const getStudentExamResults = async (req, res) => {
     try {
     
