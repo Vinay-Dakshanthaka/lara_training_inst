@@ -180,20 +180,17 @@ const getAllWeeklyTests = async (req, res) => {
 const saveQuestionHandler = async (req, res) => {
     try {
         const { questionData, wt_id } = req.body;
-        console.log(questionData, "---------------------------- questionData");
+      
 
         // Extract necessary fields
         const { wt_question_keywords } = questionData;
-        console.log(wt_question_keywords, "----------------- wt_question_keywords");
-
+        
         // Save the question and mapping
         const result = await saveWeeklyTestQuestionWithMapping(questionData, wt_id);
-        console.log(result, "-------------------------------- saving question");
-
+       
         if (result.success) {
             const wt_question_id = result.newQuestion?.dataValues?.wt_question_id;
-            console.log(wt_question_id, "----------------------- wt_question_id");
-
+           
             if (wt_question_id && wt_question_keywords) { 
                 console.log("🔍 Inserting keywords:", wt_question_keywords);
 
