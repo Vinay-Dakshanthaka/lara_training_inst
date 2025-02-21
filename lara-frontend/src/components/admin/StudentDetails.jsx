@@ -89,6 +89,10 @@ const StudentDetails = () => {
     setSelectedBatches([]);
     setShowModal(true);
   };
+  const handleTestResults = (student) => {
+    navigate(`/testResults/${student.id || student.studentId}`);
+};
+
 
   const handleCheckboxChange = (event) => {
     const batchId = parseInt(event.target.value);
@@ -282,6 +286,7 @@ const StudentDetails = () => {
             <th>Phone Number</th>
             <th>Batches</th>
             <th>Add to Batch</th>
+            <th>Test Results</th>
           </tr>
         </thead>
         <tbody>
@@ -311,20 +316,12 @@ const StudentDetails = () => {
               <td>
                 <button className='btn btn-primary' onClick={() => handleAddToBatch(student)}>Add to Batch</button>
               </td>
+              <td> <button className='btn btn-primary' onClick={() => handleTestResults(student)}>View Results</button></td>
+            
             </tr>
           ))}
         </tbody>
       </table>
-      {/* <div className='text-center'>
-        <Pagination>
-          {studentsPerPage !== 0 &&
-            Array.from({ length: Math.ceil(students.length / studentsPerPage) }).map((_, index) => (
-              <Pagination.Item key={index + 1} active={index + 1 === currentPage} onClick={() => paginate(index + 1)}>
-                {index + 1}
-              </Pagination.Item>
-            ))}
-        </Pagination>
-      </div> */}
        <Paginate
         currentPage={currentPage}
         totalItems={students.length}

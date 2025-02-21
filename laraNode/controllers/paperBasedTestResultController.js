@@ -3,6 +3,7 @@ const { Student , Student_Batch} = require("../models");
 const db = require("../models");
 const { Op } = require("sequelize");
 const paperBasedTestResults = db.PaperBasedTestResults;
+const { Sequelize } = require('sequelize'); 
 
 const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -259,6 +260,37 @@ const getStudentExamResults = async (req, res) => {
     }
 };
 
+const getStudentIDExamResults = async (req, res) => {
+    try {
+    
+        const { id } = req.params; 
+        console.log(id, "----------------studentid");
+        
+
+        if (!id) {
+            return res.status(400).json({ message: "Student ID not found!" });
+        }
+
+        // Fetch all exam results for the given studentId
+        const results = await paperBasedTestResults.findAll({
+            where: { studentId: id },
+            order: [["conducted_date", "DESC"]],  
+        });
+          
+        if (!results || results.length === 0) {
+            return res.status(404).json({ message: "No exam results found for this student." });
+        }
+
+        res.status(200).json({
+            message: "Exam results fetched successfully!",
+            results,
+        });
+    } catch (error) {
+        console.error("Error fetching exam results:", error);
+        res.status(500).json({ message: "Internal server error", error });
+    }
+};
+
 const getAllStudentsExamAtteneded = async (req, res) => {
     try {
         // Fetch unique student IDs from the test results
@@ -301,10 +333,89 @@ const getAllStudentsExamAtteneded = async (req, res) => {
     }
 };
 
+const getUniqueTestNames = async (req, res) => {
+    try {
+        const uniqueTestNames = await paperBasedTestResults.findAll({
+            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('testName')), 'testName']], // Use DISTINCT to fetch unique test names
+            raw: true // Raw ensures that we get the result directly as an array
+        });
+            console.log(uniqueTestNames,"----------------------------uniquetestnames")
+        if (uniqueTestNames.length === 0) {
+            return res.status(404).json({ message: "No unique test names found." });
+        }
+
+        // Extracting the testNames from the returned array
+        const testNames = uniqueTestNames.map(item => item.testName);
+
+        return res.status(200).json({ uniqueTestNames: testNames });
+    } catch (error) {
+        console.error("Error fetching unique test names:", error);
+        return res.status(500).json({ message: "Server error. Could not fetch unique test names." });
+    }
+};
+
+
+const getStudentResultsByTestName = async (req, res) => {
+    const { testName } = req.params; // Assume testName is passed in the URL parameter
+
+    if (!testName) {
+        return res.status(400).json({ message: "Test name is required." });
+    }
+
+    try {
+        // Query to get the results for the selected test name
+        const results = await paperBasedTestResults.findAll({
+            where: { testName: testName },
+            attributes: [
+                'studentId',
+                'email',
+                'obtainedMarks',
+                'totalMarks',
+                'subjectName',
+                'topicName',
+                'conducted_date'
+            ]
+        });
+
+        // Check if results are found
+        if (results.length === 0) {
+            return res.status(404).json({ message: `No results found for test: ${testName}` });
+        }
+
+        // Map through results to calculate percentage and add to each student result
+        const resultsWithPercentage = results.map(result => {
+            const obtainedMarks = result.obtainedMarks || 0;
+            const totalMarks = result.totalMarks || 0;
+            const percentage = totalMarks > 0 ? (obtainedMarks / totalMarks) * 100 : 0;
+
+            return {
+                studentId: result.studentId,
+                email: result.email,
+                obtainedMarks: result.obtainedMarks,
+                totalMarks: result.totalMarks,
+                subjectName: result.subjectName,
+                topicName: result.topicName,
+                conducted_date: result.conducted_date,
+                percentage: percentage.toFixed(2), // Round to 2 decimal places
+            };
+        });
+
+        // Send success response with the results
+        return res.status(200).json({ testName, results: resultsWithPercentage });
+
+    } catch (error) {
+        console.error("Error fetching student results:", error);
+        return res.status(500).json({ message: "Server error. Could not fetch student results." });
+    }
+};
+
 module.exports = { uploadTestResults,
                   getAttendedStudentsByBatch,
                   getBatchResults,
                   getStudentExamResults,
                   getAllStudentsExamAtteneded,
+                  getUniqueTestNames,
+                  getStudentResultsByTestName,
+                  getStudentIDExamResults,
  };
 

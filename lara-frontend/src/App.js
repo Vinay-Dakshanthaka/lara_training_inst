@@ -80,6 +80,7 @@ import UpdateStudentEmail from './components/admin/UpdateStudentEmail';
 import PaperBasedTestResults from './components/admin/PaperBasedTestResults';
 import AssignBatches from './components/internalTests/AssignBatchs';
 import AssignBatchsTowt from './components/weeklyTest/AssignBatchsTowt';
+import TestResults from './components/admin/TestResults';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -159,6 +160,7 @@ const App = () => {
             <Route path='/fetch-questoins-weekly-test/:wt_id' element={<QuestionsByWeeklyTestId />} />
             <Route path='/edit-weekly-test-question/:question_id' element={<EditWeeklyTestQuestion />} />
             <Route path='/upload-questoins-weekly-test/:wt_id' element={<UploadWeeklyTestQuestions />} />
+            <Route path='/testResults/:id' element={<TestResults />} />
             <Route path='/weekly-test/:wt_id' element={<StudentAnswerForm />} />
             <Route path='/test-answer-form/:wt_id' element={<AnswerUpdateForm />} />
             <Route path='/wt-attended-student-list/:wt_id' element={<WeeklyTestAttendedStudentsList />} />
