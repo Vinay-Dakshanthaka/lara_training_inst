@@ -17,7 +17,7 @@ const TestBasedResults = () => {
         const fetchTestNames = async () => {
             try {
                 const response = await axios.get(`${baseURL}/api/paper-based-exams/getUniqueTestNames`);
-               
+                
                 if (response.data && Array.isArray(response.data.uniqueTestNames)) {
                     setTestNames(response.data.uniqueTestNames);
                 } else {
@@ -41,6 +41,7 @@ const TestBasedResults = () => {
             try {
                 const response = await axios.get(`${baseURL}/api/paper-based-exams/getStudentResultsByTestName/${selectedTestName}`);
                 setStudentResults(response.data.results);
+               
             } catch (err) {
                 setError('Failed to fetch student results.');
             } finally {
@@ -88,10 +89,10 @@ const TestBasedResults = () => {
 
             {currentResults.length > 0 && !loading && (
                 <>
-                    <table className="table table-bordered">
+                    <table className="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>Student ID</th>
+                                <th>Student Name</th>
                                 <th>Email</th>
                                 <th>Subject</th>
                                 <th>Topic</th>
@@ -105,7 +106,7 @@ const TestBasedResults = () => {
                                 const percentage = (result.obtainedMarks / result.totalMarks) * 100;
                                 return (
                                     <tr key={index}>
-                                        <td>{result.studentId}</td>
+                                        <td>{result.studentName}</td>
                                         <td>{result.email}</td>
                                         <td>{result.subjectName}</td>
                                         <td>{result.topicName}</td>

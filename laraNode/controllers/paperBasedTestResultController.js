@@ -339,7 +339,7 @@ const getUniqueTestNames = async (req, res) => {
             attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('testName')), 'testName']], // Use DISTINCT to fetch unique test names
             raw: true // Raw ensures that we get the result directly as an array
         });
-            console.log(uniqueTestNames,"----------------------------uniquetestnames")
+          
         if (uniqueTestNames.length === 0) {
             return res.status(404).json({ message: "No unique test names found." });
         }
@@ -356,51 +356,54 @@ const getUniqueTestNames = async (req, res) => {
 
 
 const getStudentResultsByTestName = async (req, res) => {
-    const { testName } = req.params; // Assume testName is passed in the URL parameter
+    const { testName } = req.params;
 
     if (!testName) {
         return res.status(400).json({ message: "Test name is required." });
     }
 
     try {
-        // Query to get the results for the selected test name
+      
         const results = await paperBasedTestResults.findAll({
-            where: { testName: testName },
+            where: { testName },
             attributes: [
-                'studentId',
                 'email',
                 'obtainedMarks',
                 'totalMarks',
                 'subjectName',
                 'topicName',
                 'conducted_date'
+            ],
+            include: [
+                {
+                    model: Student, 
+                    attributes: ['name'], 
+                }
             ]
         });
 
-        // Check if results are found
         if (results.length === 0) {
             return res.status(404).json({ message: `No results found for test: ${testName}` });
         }
 
-        // Map through results to calculate percentage and add to each student result
+        // Add percentage calculation
         const resultsWithPercentage = results.map(result => {
             const obtainedMarks = result.obtainedMarks || 0;
             const totalMarks = result.totalMarks || 0;
             const percentage = totalMarks > 0 ? (obtainedMarks / totalMarks) * 100 : 0;
 
             return {
-                studentId: result.studentId,
+                studentName: result.Student.name, 
                 email: result.email,
                 obtainedMarks: result.obtainedMarks,
                 totalMarks: result.totalMarks,
                 subjectName: result.subjectName,
                 topicName: result.topicName,
                 conducted_date: result.conducted_date,
-                percentage: percentage.toFixed(2), // Round to 2 decimal places
+                percentage: percentage.toFixed(2),
             };
         });
 
-        // Send success response with the results
         return res.status(200).json({ testName, results: resultsWithPercentage });
 
     } catch (error) {
@@ -408,6 +411,7 @@ const getStudentResultsByTestName = async (req, res) => {
         return res.status(500).json({ message: "Server error. Could not fetch student results." });
     }
 };
+
 
 module.exports = { uploadTestResults,
                   getAttendedStudentsByBatch,
