@@ -11,6 +11,9 @@ paperBasedTestrouter.post("/getAttendedStudentsByBatch",  paperBasedTestControll
 paperBasedTestrouter.post("/getBatchResults",  paperBasedTestController.getBatchResults);
 paperBasedTestrouter.get("/exam-results",verifyToken,  paperBasedTestController.getStudentExamResults);
 paperBasedTestrouter.get("/getAllStudentsExamAttended",  paperBasedTestController.getAllStudentsExamAtteneded);
+paperBasedTestrouter.get("/getUniqueTestNames",  paperBasedTestController.getUniqueTestNames);
+paperBasedTestrouter.get("/getStudentResultsByTestName/:testName",  paperBasedTestController.getStudentResultsByTestName);
+paperBasedTestrouter.get("/getStudentIDExamResults/:id",  paperBasedTestController.getStudentIDExamResults);
 
 
 module.exports = paperBasedTestrouter;

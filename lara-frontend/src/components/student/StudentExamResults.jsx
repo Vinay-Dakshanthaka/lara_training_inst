@@ -77,6 +77,21 @@ const StudentExamResults = () => {
                 <p>Performance: {performancePercentage.toFixed(2)}%</p>
             </div>
 
+            {/* Simple Pie Chart for Marks Distribution using Bootstrap */}
+            {/* <div className="pie-chart mt-4 text-center">
+                <h4>Marks Distribution</h4>
+                <div
+                    className="rounded-circle"
+                    style={{
+                        width: "150px",
+                        height: "150px",
+                        background: `conic-gradient(#4caf50 ${performancePercentage}%, #ccc ${performancePercentage}% 100%)`,
+                        margin: "20px auto",
+                    }}
+                ></div>
+                <p>{obtainedMarks}/{totalMarks} Obtained</p>
+            </div> */}
+
             {/* Exam Results Table */}
             {examResults.length === 0 ? (
                 <div>No exam results found.</div>

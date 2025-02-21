@@ -150,7 +150,7 @@ const AttendedStudentDetails = () => {
     }
   };
 
-     // Pagination logic
+  
   const getPagedData = () => {
     const data = selectedBatch ? attendedStudents : allStudents;
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -159,7 +159,7 @@ const AttendedStudentDetails = () => {
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-3">Student Exam Results</h2>
+      <h2 className="mb-3">Student's PaperBased Exam  Results</h2>
       <div className="mb-3">
         <label className="form-label">Select a Batch:</label>
         <select className="form-select" value={selectedBatch} onChange={(e) => setSelectedBatch(e.target.value)}>
