@@ -203,7 +203,7 @@ const saveQuestionHandler = async (req, res) => {
 
                 console.log("✅ Answer saved successfully.", keywords);
             } else {
-                console.log("⚠️ Skipping answer saving as no question ID is available.");
+                console.log("⚠ Skipping answer saving as no question ID is available.");
             }
 
             return res.status(200).send({ 

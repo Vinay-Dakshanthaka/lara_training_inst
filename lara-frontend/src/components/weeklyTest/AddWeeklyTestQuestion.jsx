@@ -11,7 +11,6 @@ const AddWeeklyTestQuestion = () => {
     const { wt_id } = useParams(); // Get wt_id from URL params
     const [questionData, setQuestionData] = useState({
         wt_question_description: '',
-        wt_question_keywords: '',
         marks: '',
         minutes: '',
     });
@@ -63,12 +62,12 @@ const AddWeeklyTestQuestion = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setQuestionData((prev) => ({ ...prev, [name]: value }));
-    
+
+        // If marks are updated, set minutes to the same value initially
         if (name === 'marks') {
-            setQuestionData((prev) => ({ ...prev, minutes: value })); // Sync marks with minutes
+            setQuestionData((prev) => ({ ...prev, minutes: value }));
         }
     };
-    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -86,17 +85,16 @@ const AddWeeklyTestQuestion = () => {
                 questionData: { ...questionData, topic_id: selectedTopics[0] }, // Send the selected topic ID
                 wt_id,
             };
-            
 
             await axios.post(`${baseURL}/api/weekly-test/saveQuestionHandler`, data, config);
             toast.success('Question saved successfully'); // Display success toast
             setQuestionData({
                 wt_question_description: '',
-                wt_question_keywords: '', 
                 marks: '',
                 minutes: '',
-            });          
+            });
 
+            console.log(data,"-----------------------------")
             setSelectedTopics([]);
         } catch (error) {
             setError(error.response?.data.message || 'Error saving question');
