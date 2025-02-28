@@ -934,10 +934,59 @@ const saveStudentAnswer = async (req, res) => {
     }
 };
 
+// const saveFinalSubmission = async (req, res) => {
+//     try {
+//         const student_id = req.studentId; // Get the student ID from the request (assume it's part of the JWT)
+//         const { wt_id } = req.body;
+
+//         // Validate input fields
+//         if (!wt_id || !student_id) {
+//             return res.status(400).send({ message: 'Weekly test ID and student ID are required' });
+//         }
+
+//         // Validate that the weekly test exists
+//         const weeklyTest = await WeeklyTest.findByPk(wt_id);
+//         if (!weeklyTest) {
+//             return res.status(404).send({ message: 'Weekly test not found' });
+//         }
+
+//         // Check if there's already a final submission for this student and weekly test
+//         const finalSubmission = await WeeklyTestFinalSubmission.findOne({
+//             where: {
+//                 wt_id,
+//                 student_id
+//             }
+//         });
+
+//         if (finalSubmission) {
+//             // If final submission already exists and is set to true, don't allow further submissions
+//             if (finalSubmission.final_submission) {
+//                 return res.status(403).send({ message: 'Final submission has already been made. No changes allowed.' });
+//             }
+
+//             // Update the existing record to set final_submission to true
+//             await finalSubmission.update({ final_submission: true });
+//         } else {
+//             // Create a new final submission entry
+//             await WeeklyTestFinalSubmission.create({
+//                 wt_id,
+//                 student_id,
+//                 final_submission: true
+//             });
+//         }
+
+//         return res.status(200).send({ message: 'Final submission saved successfully' });
+//     } catch (error) {
+//         console.error('Error saving final submission:', error.stack);
+//         return res.status(500).send({ message: 'An error occurred while saving the final submission' });
+//     }
+// };
+
+
 const saveFinalSubmission = async (req, res) => {
     try {
-        const student_id = req.studentId; // Get the student ID from the request (assume it's part of the JWT)
-        const { wt_id } = req.body;
+        const student_id = req.studentId; // Get the student ID from JWT
+        const { wt_id, latitude, longitude } = req.body;
 
         // Validate input fields
         if (!wt_id || !student_id) {
@@ -958,29 +1007,86 @@ const saveFinalSubmission = async (req, res) => {
             }
         });
 
+        // Default values for location tracking
+        let attended_in_institute = false;
+
+        // If location is shared, validate it
+        if (latitude && longitude) {
+            const instituteLatitude = 12.916758;  // Lara Institute coordinates
+            const instituteLongitude = 77.611898;
+            const allowedRangeMeters = 200; // Allow 200m range for institute attendance
+
+            // Round latitude and longitude to 3 decimal places for comparison
+            const roundedLatitude = parseFloat(latitude).toFixed(3);
+            const roundedLongitude = parseFloat(longitude).toFixed(3);
+            const roundedInstituteLatitude = instituteLatitude.toFixed(3);
+            const roundedInstituteLongitude = instituteLongitude.toFixed(3);
+
+            console.log(`Received Location: ${roundedLatitude}, ${roundedLongitude}`);
+            console.log(`Institute Location: ${roundedInstituteLatitude}, ${roundedInstituteLongitude}`);
+
+            // Compare rounded values
+            attended_in_institute =
+                roundedLatitude === roundedInstituteLatitude &&
+                roundedLongitude === roundedInstituteLongitude;
+        }
+
         if (finalSubmission) {
             // If final submission already exists and is set to true, don't allow further submissions
             if (finalSubmission.final_submission) {
                 return res.status(403).send({ message: 'Final submission has already been made. No changes allowed.' });
             }
 
-            // Update the existing record to set final_submission to true
-            await finalSubmission.update({ final_submission: true });
+            // Update the existing record to set final_submission to true and store location (if provided)
+            await finalSubmission.update({ 
+                final_submission: true, 
+                latitude: latitude || finalSubmission.latitude, 
+                longitude: longitude || finalSubmission.longitude, 
+                attended_in_institute 
+            });
         } else {
             // Create a new final submission entry
             await WeeklyTestFinalSubmission.create({
                 wt_id,
                 student_id,
-                final_submission: true
+                final_submission: true,
+                latitude: latitude || null,
+                longitude: longitude || null,
+                attended_in_institute
             });
         }
 
-        return res.status(200).send({ message: 'Final submission saved successfully' });
+        return res.status(200).send({ message: 'Final submission saved successfully', attended_in_institute });
     } catch (error) {
         console.error('Error saving final submission:', error.stack);
         return res.status(500).send({ message: 'An error occurred while saving the final submission' });
     }
 };
+
+/**
+ * Function to check if a location is within a certain range of the institute.
+ * Uses the Haversine formula to calculate the distance between two coordinates.
+ */
+const isWithinRange = (lat1, lon1, lat2, lon2, maxDistanceMeters) => {
+    const toRadians = (degrees) => (degrees * Math.PI) / 180;
+    const R = 6371000; // Earth's radius in meters
+
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c; // Distance in meters
+
+    console.log(`Calculated Distance: ${distance} meters`); // Debugging distance calculation
+
+    return distance <= maxDistanceMeters;
+};
+
+
 
 const getStudentAnswer = async (req, res) => {
     try {
@@ -1198,7 +1304,8 @@ const getCorrectAnswerForQuestion = async (req, res) => {
             // If the correct answer exists, return it
             return res.status(200).send({
                 message: 'Correct answer fetched successfully',
-                answer: correctAnswer.answer
+                answer: correctAnswer.answer,
+                keywords: correctAnswer.keywords
             });
         } else {
             // If no correct answer exists, return null
@@ -1536,54 +1643,122 @@ const getStudentDetailsByWeeklyTestId = async (req, res) => {
     }
 };
 
+// const getStudentEvaluationStatusByWeeklyTestId = async (req, res) => {
+//     const { wt_id } = req.params;  // Receive wt_id from the request
+
+//     try {
+//         // Step 1: Get all unique student IDs who attended the weekly test
+//         const studentIds = await StudentAnswer.findAll({
+//             where: { wt_id },
+//             attributes: [[db.sequelize.fn('DISTINCT', db.sequelize.col('student_id')), 'student_id']]
+//         });
+
+//         // If no student answers found for this test
+//         if (!studentIds || studentIds.length === 0) {
+//             return res.status(404).send({ message: 'No students found for this test' });
+//         }
+
+//         // Extract student IDs
+//         const studentIdsArray = studentIds.map(student => student.student_id);
+
+//         // Step 2: Fetch student details from Students table
+//         const students = await Student.findAll({
+//             where: {
+//                 id: studentIdsArray
+//             },
+//             attributes: ['id', 'name', 'email', 'phoneNumber']  // Adjust attributes as per your Student model
+//         });
+
+//         // Step 3: For each student, check if all attended questions have marks and comments
+//         const studentsWithEvaluationStatus = await Promise.all(students.map(async (student) => {
+//             // Get all answers for this student in this weekly test
+//             const studentAnswers = await StudentAnswer.findAll({
+//                 where: {
+//                     wt_id,
+//                     student_id: student.id
+//                 },
+//                 attributes: ['marks', 'comment']
+//             });
+
+//             // Check if any answer is missing marks or comment
+//             const isEvaluationDone = studentAnswers.every(answer => answer.marks !== null && answer.comment !== null);
+
+//             return {
+//                 student_id: student.id,
+//                 student_name: student.name,
+//                 student_email: student.email,
+//                 student_phone: student.phoneNumber,
+//                 is_evaluation_done: isEvaluationDone
+//             };
+//         }));
+
+//         return res.status(200).send({
+//             message: 'Student evaluation status fetched successfully',
+//             students: studentsWithEvaluationStatus
+//         });
+
+//     } catch (error) {
+//         console.error('Error fetching student evaluation status:', error);
+//         return res.status(500).send({
+//             message: 'Error fetching student evaluation status',
+//             error: error.message
+//         });
+//     }
+// };
+
+
 const getStudentEvaluationStatusByWeeklyTestId = async (req, res) => {
-    const { wt_id } = req.params;  // Receive wt_id from the request
+    const { wt_id } = req.params; // Receive wt_id from the request
 
     try {
-        // Step 1: Get all unique student IDs who attended the weekly test
-        const studentIds = await StudentAnswer.findAll({
-            where: { wt_id },
-            attributes: [[db.sequelize.fn('DISTINCT', db.sequelize.col('student_id')), 'student_id']]
+        // Step 1: Get all unique student IDs who attended and finalized the weekly test
+        const finalSubmissions = await WeeklyTestFinalSubmission.findAll({
+            where: { wt_id, final_submission: true },
+            attributes: ['student_id', 'latitude', 'longitude', 'attended_in_institute']
         });
 
-        // If no student answers found for this test
-        if (!studentIds || studentIds.length === 0) {
-            return res.status(404).send({ message: 'No students found for this test' });
+        // Extract student IDs who have finalized their submission
+        const studentIdsArray = finalSubmissions.map(sub => sub.student_id);
+
+        // If no final submissions found for this test
+        if (!studentIdsArray.length) {
+            return res.status(404).send({ message: 'No students with final submission found for this test' });
         }
 
-        // Extract student IDs
-        const studentIdsArray = studentIds.map(student => student.student_id);
-
-        // Step 2: Fetch student details from Students table
+        // Step 2: Fetch student details
         const students = await Student.findAll({
-            where: {
-                id: studentIdsArray
-            },
-            attributes: ['id', 'name', 'email', 'phoneNumber']  // Adjust attributes as per your Student model
+            where: { id: studentIdsArray },
+            attributes: ['id', 'name', 'email', 'phoneNumber']
         });
 
-        // Step 3: For each student, check if all attended questions have marks and comments
-        const studentsWithEvaluationStatus = await Promise.all(students.map(async (student) => {
-            // Get all answers for this student in this weekly test
-            const studentAnswers = await StudentAnswer.findAll({
-                where: {
-                    wt_id,
-                    student_id: student.id
-                },
-                attributes: ['marks', 'comment']
-            });
+        // Step 3: Fetch all student answers for this test in one go
+        const studentAnswers = await StudentAnswer.findAll({
+            where: { wt_id, student_id: studentIdsArray },
+            attributes: ['student_id', 'marks', 'comment']
+        });
 
-            // Check if any answer is missing marks or comment
-            const isEvaluationDone = studentAnswers.every(answer => answer.marks !== null && answer.comment !== null);
+        // Step 4: Process student data
+        const studentsWithEvaluationStatus = students.map(student => {
+            // Get all answers for the student
+            const answers = studentAnswers.filter(ans => ans.student_id === student.id);
+
+            // Check if all answers have marks and comments
+            const isEvaluationDone = answers.every(ans => ans.marks !== null && ans.comment !== null);
+
+            // Find final submission details for location info
+            const finalSubmission = finalSubmissions.find(sub => sub.student_id === student.id);
 
             return {
                 student_id: student.id,
                 student_name: student.name,
                 student_email: student.email,
                 student_phone: student.phoneNumber,
-                is_evaluation_done: isEvaluationDone
+                is_evaluation_done: isEvaluationDone,
+                attended_in_institute: finalSubmission?.attended_in_institute || false,
+                latitude: finalSubmission?.latitude || null,
+                longitude: finalSubmission?.longitude || null
             };
-        }));
+        });
 
         return res.status(200).send({
             message: 'Student evaluation status fetched successfully',
@@ -2061,6 +2236,127 @@ const getAllStudentResultsForWeeklyTest = async (req, res) => {
 };
 
 
+// const getAllIndividualStudentResultsForTest = async (req, res) => {
+//     const { wt_id } = req.params;
+
+//     try {
+//         // Step 1: Fetch the weekly test details
+//         const weeklyTest = await WeeklyTest.findByPk(wt_id, {
+//             include: [
+//                 {
+//                     model: WeeklyTestTopics,
+//                     as: 'TestWeekly',
+//                     include: [
+//                         {
+//                             model: Topic,
+//                             as: 'TopicAssociation'
+//                         }
+//                     ]
+//                 }
+//             ]
+//         });
+
+//         if (!weeklyTest) {
+//             return res.status(404).send({ message: 'Weekly test not found' });
+//         }
+
+//         // Step 2: Calculate total available marks for the test
+//         const questionMappings = await WeeklyTestQuestionMapping.findAll({
+//             where: { wt_id },
+//             attributes: ['wt_question_id']
+//         });
+
+//         const questionIds = questionMappings.map(mapping => mapping.wt_question_id);
+
+//         const questions = await WeeklyTestQuestion.findAll({
+//             where: { wt_question_id: questionIds },
+//             attributes: ['wt_question_id', 'marks']
+//         });
+
+//         const totalAvailableMarks = questions.reduce((total, question) => total + (Number(question.marks) || 0), 0);
+
+//         // Step 3: Fetch student answers
+//         const studentAnswers = await StudentAnswer.findAll({
+//             where: { wt_id },
+//             include: [
+//                 {
+//                     model: Student,
+//                     as: 'Student',
+//                     attributes: ['id', 'name', 'email', 'phoneNumber']
+//                 }
+//             ]
+//         });
+
+//         // Step 4: Fetch keywords for auto-marking if marks are missing
+//         const keywordsData = await WeeklyTestQuestionAnswer.findAll({
+//             where: { wt_question_id: questionIds },
+//             attributes: ['wt_question_id', 'keywords']
+//         });
+
+//         const keywordsMap = {};
+//         keywordsData.forEach(({ wt_question_id, keywords }) => {
+//             keywordsMap[wt_question_id] = keywords.toLowerCase().split(',').map(k => k.trim());
+//         });
+
+//         const stripHtmlTags = (html) => html.replace(/<[^>]*>/g, '').trim();
+
+//         // Step 5: Calculate student marks
+//         const studentResults = studentAnswers.reduce((acc, answer) => {
+//             const studentId = answer.student_id;
+//             if (!acc[studentId]) {
+//                 acc[studentId] = {
+//                     student_id: answer.Student.id,
+//                     student_name: answer.Student.name,
+//                     student_email: answer.Student.email,
+//                     student_phone: answer.Student.phoneNumber,
+//                     obtained_marks: 0
+//                 };
+//             }
+
+//             if (answer.marks !== null) {
+//                 acc[studentId].obtained_marks += Number(answer.marks) || 0;
+//             } else {
+//                 // Auto-calculate marks if missing
+//                 const studentResponse = stripHtmlTags(answer.answer).toLowerCase();
+//                 const keywords = keywordsMap[answer.question_id] || [];
+
+//                 // Check if the student response contains any of the expected keywords
+//                 const matchedKeywords = keywords.some(keyword => studentResponse.includes(keyword));
+//                 if (matchedKeywords) {
+//                     const question = questions.find(q => q.wt_question_id === answer.question_id);
+//                     acc[studentId].obtained_marks += question ? Number(question.marks) : 0;
+//                 }
+//             }
+
+//             return acc;
+//         }, {});
+
+//         const resultsFormatted = Object.values(studentResults).map(result => ({
+//             ...result,
+//             total_available_marks: totalAvailableMarks
+//         }));
+
+//         return res.status(200).send({
+//             message: 'Individual student results fetched successfully for the weekly test',
+//             weekly_test: {
+//                 test_id: weeklyTest.wt_id,
+//                 test_link: weeklyTest.wt_link,
+//                 test_date: new Date(weeklyTest.test_date).toLocaleDateString(),
+//                 test_description: weeklyTest.wt_description,
+//                 total_available_marks: totalAvailableMarks // Displaying total marks before exam
+//             },
+//             student_results: resultsFormatted
+//         });
+
+//     } catch (error) {
+//         console.error('Error fetching individual student results:', error);
+//         return res.status(500).send({
+//             message: 'Error fetching individual student results',
+//             error: error.message
+//         });
+//     }
+// };
+
 const getAllIndividualStudentResultsForTest = async (req, res) => {
     const { wt_id } = req.params;
 
@@ -2112,7 +2408,24 @@ const getAllIndividualStudentResultsForTest = async (req, res) => {
             ]
         });
 
-        // Step 4: Fetch keywords for auto-marking if marks are missing
+        // Step 4: Fetch WeeklyTestFinalSubmission details for students
+        const finalSubmissions = await WeeklyTestFinalSubmission.findAll({
+            where: { wt_id },
+            attributes: ['student_id', 'final_submission', 'latitude', 'longitude', 'attended_in_institute']
+        });
+
+        // Convert final submissions into a lookup object
+        const finalSubmissionsMap = {};
+        finalSubmissions.forEach(sub => {
+            finalSubmissionsMap[sub.student_id] = {
+                final_submission: sub.final_submission,
+                latitude: sub.latitude,
+                longitude: sub.longitude,
+                attended_in_institute: sub.attended_in_institute
+            };
+        });
+
+        // Step 5: Fetch keywords for auto-marking if marks are missing
         const keywordsData = await WeeklyTestQuestionAnswer.findAll({
             where: { wt_question_id: questionIds },
             attributes: ['wt_question_id', 'keywords']
@@ -2125,7 +2438,7 @@ const getAllIndividualStudentResultsForTest = async (req, res) => {
 
         const stripHtmlTags = (html) => html.replace(/<[^>]*>/g, '').trim();
 
-        // Step 5: Calculate student marks
+        // Step 6: Calculate student marks
         const studentResults = studentAnswers.reduce((acc, answer) => {
             const studentId = answer.student_id;
             if (!acc[studentId]) {
@@ -2134,7 +2447,11 @@ const getAllIndividualStudentResultsForTest = async (req, res) => {
                     student_name: answer.Student.name,
                     student_email: answer.Student.email,
                     student_phone: answer.Student.phoneNumber,
-                    obtained_marks: 0
+                    obtained_marks: 0,
+                    final_submission: false, // Default value
+                    latitude: null,
+                    longitude: null,
+                    attended_in_institute: false
                 };
             }
 
@@ -2151,6 +2468,14 @@ const getAllIndividualStudentResultsForTest = async (req, res) => {
                     const question = questions.find(q => q.wt_question_id === answer.question_id);
                     acc[studentId].obtained_marks += question ? Number(question.marks) : 0;
                 }
+            }
+
+            // Add final submission details if available
+            if (finalSubmissionsMap[studentId]) {
+                acc[studentId] = {
+                    ...acc[studentId],
+                    ...finalSubmissionsMap[studentId] // Merge submission details
+                };
             }
 
             return acc;
@@ -2181,6 +2506,7 @@ const getAllIndividualStudentResultsForTest = async (req, res) => {
         });
     }
 };
+
 
 const getStudentAndActiveTestsWithAttendanceForAdmin = async (req, res) => {
     const { studentId } = req.params;

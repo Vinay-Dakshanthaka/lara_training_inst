@@ -105,7 +105,9 @@ router.post('/assignBatchesToTrainer',verifyToken,batchController.assignBatchesT
 
 router.post('/getStudentsByBatchId',verifyToken,batchController.getStudentsByBatchId)
 
-router.post('/getBatchsByStudentId',verifyToken,batchController.getBatchsByStudentId)
+router.post('/getBatchsByStudentId',verifyToken,batchController.getBatchsByStudentId);
+
+router.post('/assignUniqueIdsToExistingStudents',batchController.assignUniqueIdsToExistingStudents);
 
 router.post('/saveReview',verifyToken,reviewController.saveReview)
 

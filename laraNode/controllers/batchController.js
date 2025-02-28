@@ -1,5 +1,7 @@
 const db = require('../models');
 const jwt = require('jsonwebtoken');
+const moment = require("moment");
+
 
 const Student = db.Student;
 const Profile = db.Profile;
@@ -160,45 +162,183 @@ const getAllBatches = async (req, res) => {
 
 const assignBatchesToStudent = async (req, res) => {
     try {
-        const { studentId, batchIds } = req.body; // Extract studentId and batchIds from the request body
+        const { studentId, batchIds } = req.body;
 
         if (!studentId) {
-            return res.status(400).json({ error: 'Missing studentId in request body' });
+            return res.status(400).json({ error: "Missing studentId in request body" });
         }
 
-        // Fetch the student from the database using the studentId
+        // Fetch student from database
         const student = await Student.findByPk(studentId);
 
-        // Ensure the student exists
         if (!student) {
-            return res.status(404).json({ error: 'Student not found' });
+            return res.status(404).json({ error: "Student not found" });
         }
 
-        // Fetch the batches from the database using the batchIds
+        // Fetch batches
         const batches = await Batch.findAll({
-            where: {
-                batch_id: batchIds
-            }
+            where: { batch_id: batchIds },
         });
 
-        // Ensure all batchIds exist
         if (batches.length !== batchIds.length) {
-            return res.status(404).json({ error: 'One or more batches not found' });
+            return res.status(404).json({ error: "One or more batches not found" });
         }
 
-        // Associate the student with the batches
-        await Promise.all(batches.map(async batch => {
-            // Create association in Student_Batch table
-            await student.addBatch(batch);
-        }));
+        // If student already has a unique ID (and it's not TEMP or null), do not regenerate
+        if (student.uniqueStudentId && !student.uniqueStudentId.startsWith("TEMP")) {
+            return res.status(200).json({ message: "Batches assigned to student, unique ID remains unchanged." });
+        }
 
-        res.status(200).json({ message: 'Batches assigned to student successfully.' });
+        // Pick the first batch for ID generation
+        const batch = batches[0];
+
+        // Generate a unique ID
+        const newUniqueId = await generateUniqueStudentId(batch.batch_name, student.sequelize);
+
+        // Update student record with the new uniqueStudentId
+        await student.update({ uniqueStudentId: newUniqueId });
+
+        res.status(200).json({ message: "Batches assigned to student and unique ID generated successfully.", uniqueStudentId: newUniqueId });
     } catch (error) {
-        console.error('Failed to assign batches to student.', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error("Failed to assign batches to student.", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 };
 
+/**
+ * Function to generate the uniqueStudentId
+ * Format: {First 3 Letters of Batch Name}{Year}{Auto-Increment}
+ */
+async function generateUniqueStudentId(batchName, sequelize) {
+    const batchPrefix = batchName.substring(0, 3).toUpperCase(); // First 3 letters of batch name
+    const currentYear = moment().format("YYYY"); // Current year
+
+    // Find the latest student ID with the same prefix and year
+    const lastStudent = await sequelize.models.Student.findOne({
+        where: {
+            uniqueStudentId: {
+                [sequelize.Sequelize.Op.like]: `${batchPrefix}${currentYear}%`,
+            },
+        },
+        order: [["uniqueStudentId", "DESC"]],
+    });
+
+    let newNumber = 1;
+
+    if (lastStudent) {
+        const lastId = lastStudent.uniqueStudentId;
+        const lastNumber = parseInt(lastId.substring(7), 10) || 0; // Extract numeric part (after prefix and year)
+        newNumber = lastNumber + 1;
+    }
+
+    // Maintain length: 00001, 00002, ..., 99999, then expands to 100000+
+    const newNumberStr = String(newNumber).padStart(5, "0");
+
+    return `${batchPrefix}${currentYear}${newNumberStr}`;
+}
+
+
+// -----------------------code to genereate uniqueStudentId for existing students ------------------- 
+
+const assignUniqueIdsToExistingStudents = async (req, res) => {
+    try {
+        const students = await Student.findAll({ where: { uniqueStudentId: null } });
+        if (students.length === 0) {
+            return res.status(200).json({ message: "No students found with null uniqueStudentId." });
+        }
+
+        const skippedStudents = [];
+        const updatedStudents = [];
+
+        for (const student of students) {
+            try {
+                // Find assigned batches
+                const batches = await student.getBatches();
+                let newUniqueId;
+                
+                if (batches.length > 0) {
+                    // Pick the first batch for ID generation
+                    const batch = batches[0];
+                    newUniqueId = await generateUniqueStudentId(batch.batch_name, student.sequelize);
+                } else {
+                    // Generate a TEMP ID if no batch is assigned
+                    newUniqueId = await generateTempStudentId(student.sequelize);
+                }
+                
+                await student.update({ uniqueStudentId: newUniqueId });
+                updatedStudents.push({ studentId: student.id, uniqueStudentId: newUniqueId });
+            } catch (error) {
+                console.error(`Failed to generate unique ID for student ${student.id}:`, error);
+                skippedStudents.push({ studentId: student.id, reason: error.message });
+            }
+        }
+
+        res.status(200).json({
+            message: "Unique IDs assigned successfully, with some exceptions.",
+            updatedStudents,
+            skippedStudents,
+        });
+    } catch (error) {
+        console.error("Error assigning unique IDs to students:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+/**
+ * Function to generate a unique student ID based on batch name.
+ * Format: {First 3 Letters of Batch Name}{Year}{Auto-Increment}
+ */
+async function generateUniqueStudentId(batchName, sequelize) {
+    const batchPrefix = batchName.substring(0, 3).toUpperCase();
+    const currentYear = moment().format("YYYY");
+
+    const lastStudent = await sequelize.models.Student.findOne({
+        where: {
+            uniqueStudentId: {
+                [sequelize.Sequelize.Op.like]: `${batchPrefix}${currentYear}%`,
+            },
+        },
+        order: [["uniqueStudentId", "DESC"]],
+    });
+
+    let newNumber = 1;
+    if (lastStudent) {
+        const lastId = lastStudent.uniqueStudentId;
+        const lastNumber = parseInt(lastId.substring(7), 10) || 0;
+        newNumber = lastNumber + 1;
+    }
+
+    return `${batchPrefix}${currentYear}${String(newNumber).padStart(5, "0")}`;
+}
+
+/**
+ * Function to generate a temporary unique student ID.
+ * Format: TEMP{Year}{Auto-Increment}
+ */
+async function generateTempStudentId(sequelize) {
+    const currentYear = moment().format("YYYY");
+    
+    const lastTempStudent = await sequelize.models.Student.findOne({
+        where: {
+            uniqueStudentId: {
+                [sequelize.Sequelize.Op.like]: `TEMP${currentYear}%`,
+            },
+        },
+        order: [["uniqueStudentId", "DESC"]],
+    });
+
+    let newNumber = 1;
+    if (lastTempStudent) {
+        const lastId = lastTempStudent.uniqueStudentId;
+        const lastNumber = parseInt(lastId.substring(8), 10) || 0;
+        newNumber = lastNumber + 1;
+    }
+
+    return `TEMP${currentYear}${String(newNumber).padStart(5, "0")}`;
+}
+
+
+// -----------------------code to genereate uniqueStudentId for existing students ------------------- 
 
 
 
@@ -1082,5 +1222,6 @@ module.exports = {
     // fetchStudentsAndBatchFromTrainer,
     assignBatchesToTrainer,
     getStudentsByBatchId,
-    getBatchsByStudentId
+    getBatchsByStudentId,
+    assignUniqueIdsToExistingStudents
 }

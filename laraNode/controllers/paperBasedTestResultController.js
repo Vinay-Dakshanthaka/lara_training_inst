@@ -5,9 +5,9 @@ const { Op } = require("sequelize");
 const paperBasedTestResults = db.PaperBasedTestResults;
 const { Sequelize } = require('sequelize'); 
 
-const isValidEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-};
+// const isValidEmail = (email) => {
+//     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+// };
 
 
 const uploadTestResults = async (req, res) => {
@@ -16,8 +16,8 @@ const uploadTestResults = async (req, res) => {
             return res.status(400).json({ message: "No file uploaded!" });
         }
 
-        const conducted_date = req.body.conducted_date; 
-        
+        const conducted_date = req.body.conducted_date;
+
         if (!conducted_date) {
             return res.status(400).json({ message: "Conducted date is required!" });
         }
@@ -28,66 +28,83 @@ const uploadTestResults = async (req, res) => {
         const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
         const skippedRecords = [];
+        const updatedRecords = [];
+        const insertedRecords = [];
 
         for (let row of data) {
             try {
-                const { email, obtainedMarks, totalMarks, subjectName, topicName, testName } = row;
+                const { studentId, obtainedMarks, totalMarks, subjectName, topicName, testName } = row;
 
-                if (!email || !isValidEmail(email) || !totalMarks || !subjectName || !topicName || !testName) {
-                    skippedRecords.push({ email: email || "N/A", reason: "Invalid data format or missing fields" });
+                if (!studentId || !totalMarks || !subjectName || !topicName || !testName) {
+                    skippedRecords.push({ studentId: studentId || "N/A", reason: "Invalid data format or missing fields" });
                     continue;
                 }
-                
-                const student = await Student.findOne({ where: { email: email } });
+
+                // Find student using uniqueStudentId
+                const student = await Student.findOne({ where: { uniqueStudentId: studentId } });
 
                 if (!student) {
-                    skippedRecords.push({ email, reason: "Student email not found in database" });
+                    skippedRecords.push({ studentId, reason: "Student with the provided ID not found" });
                     continue;
                 }
-                
+
+                // Check if the test result already exists
                 const existingResult = await paperBasedTestResults.findOne({
                     where: {
-                        email: email,
-                        testName: testName,  
+                        uniqueStudentId: student.uniqueStudentId,
+                        testName: testName,
                     }
                 });
 
                 if (existingResult) {
-                    skippedRecords.push({ email, reason: "Student has already attended this test" });
-                    continue;
-                }
+                    // Update the existing test result
+                    await existingResult.update({
+                        obtainedMarks: obtainedMarks || existingResult.obtainedMarks,
+                        totalMarks: totalMarks || existingResult.totalMarks,
+                        subjectName: subjectName || existingResult.subjectName,
+                        topicName: topicName || existingResult.topicName,
+                        conducted_date: conducted_date || existingResult.conducted_date,
+                        updatedAt: new Date(),
+                    });
 
-                // Store test result
-                await paperBasedTestResults.create({
-                    studentId: student.id,
-                    email: student.email,
-                    obtainedMarks: obtainedMarks || 0,
-                    totalMarks: totalMarks || 12,
-                    subjectName: subjectName || "core java",
-                    topicName: topicName || "basics",
-                    conducted_date: conducted_date,  
-                    testName: testName,  
-                    createdAt: new Date(), 
-                    updatedAt: new Date()  
-                });
+                    updatedRecords.push({ studentId, message: "Test result updated successfully" });
+                } else {
+                    // Insert a new test result
+                    await paperBasedTestResults.create({
+                        studentId: student.id,
+                        uniqueStudentId: student.uniqueStudentId,
+                        obtainedMarks: obtainedMarks || 0,
+                        totalMarks: totalMarks || 12,
+                        subjectName: subjectName || "core java",
+                        topicName: topicName || "basics",
+                        conducted_date: conducted_date,
+                        testName: testName,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    });
+
+                    insertedRecords.push({ studentId, message: "Test result added successfully" });
+                }
 
             } catch (err) {
                 console.error("Skipping row due to error:", err.message);
-                skippedRecords.push({ email: row.email || "Unknown", reason: err.message });
+                skippedRecords.push({ studentId: row.studentId || "Unknown", reason: err.message });
             }
         }
 
         res.status(200).json({
             message: "Data processed successfully!",
+            updatedRecords,
+            insertedRecords,
             skippedRecords,
         });
 
     } catch (error) {
         console.error("Error processing file:", error);
-
         res.status(500).json({ message: "Internal server error", error });
     }
 };
+
 
 
 const getAttendedStudentsByBatch = async (req, res) => {
@@ -367,7 +384,7 @@ const getStudentResultsByTestName = async (req, res) => {
         const results = await paperBasedTestResults.findAll({
             where: { testName },
             attributes: [
-                'email',
+                'uniqueStudentId',
                 'obtainedMarks',
                 'totalMarks',
                 'subjectName',
@@ -394,7 +411,7 @@ const getStudentResultsByTestName = async (req, res) => {
 
             return {
                 studentName: result.Student.name, 
-                email: result.email,
+                uniqueStudentId: result.uniqueStudentId,
                 obtainedMarks: result.obtainedMarks,
                 totalMarks: result.totalMarks,
                 subjectName: result.subjectName,

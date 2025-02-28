@@ -14,10 +14,10 @@ module.exports = (sequelize, DataTypes) => {
             },
             onDelete: "CASCADE"
         },
-        email: {
+        uniqueStudentId: {
             type: DataTypes.STRING,
             allowNull: false,
-            
+            unique: true
         },
         obtainedMarks: {
             type: DataTypes.INTEGER,

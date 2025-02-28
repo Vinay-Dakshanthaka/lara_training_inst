@@ -32,7 +32,7 @@ const saveStudent = async (req, res) => {
             email,
             phoneNumber,
             password: hashedPassword, // Stores the hashed password in the database
-            role: "STUDENT"
+            role: "STUDENT",
         };
 
         const student = await Student.create(studentInfo);
@@ -356,7 +356,9 @@ const getAllStudentDetails = async (req, res) => {
         }
 
         // Fetch all students
-        const allStudents = await Student.findAll();
+        const allStudents = await Student.findAll(
+            { order: [["id", "DESC"]]}
+        );
 
         // Return the student details as a JSON response
         res.json(allStudents);

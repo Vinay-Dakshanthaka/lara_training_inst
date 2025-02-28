@@ -91,7 +91,12 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         timestamps: false,
         hooks: {
-            beforeCreate: async (student, options) => {
+            beforeValidate: (student) => {
+                if (!student.uniqueStudentId) {
+                    student.uniqueStudentId = "TEMP00"; // Temporary ID before DB insert
+                }
+            },
+            beforeCreate: async (student) => {
                 student.uniqueStudentId = await generateCustomId(sequelize);
             }
         }
@@ -104,32 +109,35 @@ module.exports = (sequelize, DataTypes) => {
  * Function to generate the unique ID in the format: {MONTH}{YY}{AUTO_INCREMENT}
  */
 async function generateCustomId(sequelize) {
-    const currentMonth = moment().format("MMM").toUpperCase(); 
-    const currentYear = moment().format("YY"); 
+    const prefix = "TEMP"; // Temporary prefix for new records
 
-    // Find the latest student with the same month-year pattern
+    // Find the latest student with the TEMP prefix
     const lastStudent = await sequelize.models.Student.findOne({
         where: {
             uniqueStudentId: {
-                [sequelize.Sequelize.Op.like]: `${currentMonth}${currentYear}%`
+                [sequelize.Sequelize.Op.like]: `${prefix}%`
             }
         },
         order: [['uniqueStudentId', 'DESC']]
     });
 
     let newNumber = 1;
-    
+
     if (lastStudent) {
         const lastId = lastStudent.uniqueStudentId;
-        const lastNumber = parseInt(lastId.substring(5)); // Extract numeric part
+        const lastNumber = parseInt(lastId.replace(prefix, "")); // Extract numeric part
         newNumber = lastNumber + 1;
     }
 
-    // Maintain the same length format: 0001, 0002, ..., 9999, then expands to 10000+
+    // Maintain the same length format: 0001, 0002, ..., 9999
     const newNumberStr = String(newNumber).padStart(4, '0');
 
-    return `${currentMonth}${currentYear}${newNumberStr}`;
+    return `${prefix}${newNumberStr}`;
 }
+
+
+
+
 
 
 // ALTER TABLE laradb.students
