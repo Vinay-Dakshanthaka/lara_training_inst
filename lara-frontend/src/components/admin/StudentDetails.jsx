@@ -5,6 +5,7 @@ import { BsTrash } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import {baseURL}  from '../config';
 import Paginate from '../common/Paginate';
+import AssignUniqueIds from './AssignUniqueIds';
 
 const StudentDetails = () => {
   const [students, setStudents] = useState([]);
@@ -281,6 +282,7 @@ const StudentDetails = () => {
       <table className="table">
         <thead>
           <tr>
+            <th>STD ID</th>
             <th>Name</th>
             <th>Email</th>
             <th>Phone Number</th>
@@ -292,6 +294,7 @@ const StudentDetails = () => {
         <tbody>
           {currentStudents.map(student => (
             <tr key={student.id}>
+              <td>{student.uniqueStudentId ? student.uniqueStudentId : "N/A" }</td>
               <td>{student.name}</td>
               <td>{student.email}</td>
               <td>{student.phoneNumber}</td>
@@ -382,7 +385,9 @@ const StudentDetails = () => {
         </Toast.Header>
         <Toast.Body>Failed to assign batches</Toast.Body>
       </Toast>
+      <AssignUniqueIds />
     </div>
+
   );
 };
 

@@ -295,7 +295,7 @@ const AllPlacementTests = () => {
         const fetchPlacementTests = async () => {
             try {
                 const response = await axios.get(`${baseURL}/api/placement-test/get-all-placement-tests`);
-                console.log(response, "-----------------------------------responseof fecthpalcemnsttests");
+                // console.log(response, "-----------------------------------responseof fecthpalcemnsttests");
 
                 // Sort first by is_Active (active tests first), then by placement_test_id in descending order
                 const sortedTests = response.data.placementTests.sort((a, b) => {
@@ -306,7 +306,7 @@ const AllPlacementTests = () => {
                 });
 
                 setPlacementTests(sortedTests);
-                console.log("placement test details : ", sortedTests)
+                // console.log("placement test details : ", sortedTests)
             } catch (error) {
                 console.error('Error fetching placement tests:', error);
             }

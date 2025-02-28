@@ -26,6 +26,7 @@ const StudentExamResults = () => {
                 setExamResults(response.data.results);
                 setLoading(false);
             } catch (err) {
+                // console.error("error fetchin parper test results : ", err)
                 setError("Failed to fetch exam results.");
                 setLoading(false);
             }
@@ -59,67 +60,54 @@ const StudentExamResults = () => {
 
     return (
         <div className="container mt-4">
-            <h2 className="text-center">Paper Based Exam Results</h2>
-
-            {/* Overall Performance Section */}
-            <div className="overall-performance mt-4 text-center">
-                <h4>Overall Performance</h4>
-                <div className="progress">
-                    <div
-                        className="progress-bar bg-warning"
-                        role="progressbar"
-                        style={{ width: `${performancePercentage}%` }}
-                        aria-valuenow={performancePercentage}
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                    ></div>
-                </div>
-                <p>Performance: {performancePercentage.toFixed(2)}%</p>
-            </div>
-
-            {/* Simple Pie Chart for Marks Distribution using Bootstrap */}
-            {/* <div className="pie-chart mt-4 text-center">
-                <h4>Marks Distribution</h4>
+        <h2 className="text-center">Offline Exam Results</h2>
+    
+        {/* Overall Performance Section */}
+        <div className="overall-performance mt-4 text-center">
+            <h4>Overall Performance</h4>
+            <div className="progress">
                 <div
-                    className="rounded-circle"
-                    style={{
-                        width: "150px",
-                        height: "150px",
-                        background: `conic-gradient(#4caf50 ${performancePercentage}%, #ccc ${performancePercentage}% 100%)`,
-                        margin: "20px auto",
-                    }}
+                    className="progress-bar bg-warning"
+                    role="progressbar"
+                    style={{ width: `${performancePercentage}%` }}
+                    aria-valuenow={performancePercentage}
+                    aria-valuemin="0"
+                    aria-valuemax="100"
                 ></div>
-                <p>{obtainedMarks}/{totalMarks} Obtained</p>
-            </div> */}
-
-            {/* Exam Results Table */}
-            {examResults.length === 0 ? (
-                <div>No exam results found.</div>
-            ) : (
-                <table className="table table-bordered responsive">
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>Topic</th>
-                            <th>Obtained Marks</th>
-                            <th>Total Marks</th>
-                            <th>Conducted Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentResults.map((result, index) => {
+            </div>
+            <p>Performance: {performancePercentage.toFixed(2)}%</p>
+        </div>
+    
+        {/* Exam Results Table */}
+        {examResults.length === 0 ? (
+            <div>No offline exam results found.</div>
+        ) : (
+            <table className="table table-bordered responsive">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Topic</th>
+                        <th>Obtained Marks</th>
+                        <th>Total Marks</th>
+                        <th>Conducted Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {examResults
+                        .sort((a, b) => new Date(b.conducted_date) - new Date(a.conducted_date)) // Sort by conducted date (latest first)
+                        .map((result, index) => {
                             const formattedDate = new Date(result.conducted_date).toLocaleDateString("en-GB");
-
+    
                             const rowSpanValue = dateTracker[formattedDate] ? 0 : dateCount[formattedDate];
                             dateTracker[formattedDate] = true; // Mark date as displayed
-
+    
                             return (
                                 <tr key={result.id}>
                                     <td>{result.subjectName}</td>
                                     <td>{result.topicName}</td>
                                     <td>{result.obtainedMarks}</td>
                                     <td>{result.totalMarks}</td>
-
+    
                                     {rowSpanValue > 0 ? (
                                         <td rowSpan={rowSpanValue} className="text-center align-middle">
                                             {formattedDate}
@@ -128,20 +116,21 @@ const StudentExamResults = () => {
                                 </tr>
                             );
                         })}
-                    </tbody>
-                </table>
-            )}
-
-            {/* Pagination */}
-            <div className="d-flex justify-content-center">
-                <Paginate
-                    currentPage={currentPage}
-                    totalItems={examResults.length}
-                    itemsPerPage={resultsPerPage}
-                    onPageChange={paginate}
-                />
-            </div>
+                </tbody>
+            </table>
+        )}
+    
+        {/* Pagination */}
+        <div className="d-flex justify-content-center">
+            <Paginate
+                currentPage={currentPage}
+                totalItems={examResults.length}
+                itemsPerPage={resultsPerPage}
+                onPageChange={paginate}
+            />
         </div>
+    </div>
+    
     );
 };
 

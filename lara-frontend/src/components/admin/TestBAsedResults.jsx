@@ -40,8 +40,12 @@ const TestBasedResults = () => {
 
             try {
                 const response = await axios.get(`${baseURL}/api/paper-based-exams/getStudentResultsByTestName/${selectedTestName}`);
-                setStudentResults(response.data.results);
-               
+                let results = response.data.results;
+                
+                // Sort the results by id in descending order
+                results = results.sort((a, b) => b.id - a.id);
+
+                setStudentResults(results);
             } catch (err) {
                 setError('Failed to fetch student results.');
             } finally {

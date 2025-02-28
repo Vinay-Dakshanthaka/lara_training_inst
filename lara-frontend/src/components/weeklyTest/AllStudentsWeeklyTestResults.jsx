@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Table, Container, Spinner, Alert, Button, Form } from 'react-bootstrap';
 import { baseURL } from '../config';
 import * as XLSX from 'xlsx';
+import { BsCheckCircleFill, BsXCircleFill } from 'react-icons/bs';
 
 const AllStudentsWeeklyTestResults = () => {
     const { wt_id } = useParams();
@@ -18,7 +19,7 @@ const AllStudentsWeeklyTestResults = () => {
         const fetchResults = async () => {
             try {
                 const response = await axios.get(`${baseURL}/api/weekly-test/getAllIndividualStudentResultsForTest/${wt_id}`);
-    
+                // console.log("response status : ", response)
                 const modifiedResults = response.data.student_results.map(student => ({
                     ...student,
                     obtained_marks: 
@@ -126,6 +127,7 @@ const AllStudentsWeeklyTestResults = () => {
                                     Marks Obtained {sortOrder === 'asc' ? '▲' : '▼'}
                                 </th>
                                 <th>Total Available Marks</th>
+                                <th>Attended in Lara</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -138,6 +140,7 @@ const AllStudentsWeeklyTestResults = () => {
                                         <td>{student.student_phone}</td>
                                         <td>{student.obtained_marks !== null ? student.obtained_marks : 'Not Available'}</td>
                                         <td>{student.total_available_marks}</td>
+                                        <td className='text-center'>{student.attended_in_institute ? (<><BsCheckCircleFill className='text-success h4'/></>) : ( <><BsXCircleFill className='text-danger h4'  /></>) }</td>
                                     </tr>
                                 ))
                             ) : (

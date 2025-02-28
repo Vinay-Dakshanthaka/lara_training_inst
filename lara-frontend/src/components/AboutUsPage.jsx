@@ -101,7 +101,7 @@ import { motion } from 'framer-motion';
 import './aboutUs.css';
 import RecruitersCarousel from './homeComponents/RecruitersCarousel';
 import QuestionAnswerData from './weeklyTest/weeklyTestStudentAnswerSubmission/QuestionAnswerData';
-import StudentQuestionAnswer from './weeklyTest/weeklyTestStudentAnswerSubmission/StudentQuestionAnswer';
+import StudentQuestionAnswer from './weeklyTest/weeklyTestStudentAnswerSubmission/evaluvation/StudentQuestionAnswer';
 
 const AboutUsPage = () => {
   // Framer Motion animation variants

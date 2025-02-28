@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { baseURL } from "../config";
 
 const UpdatePlacementTestModal = ({ placement_test_id, show, handleClose }) => {
-    console.log("placement_test_id in submit: ---------------1", placement_test_id);
+    // console.log("placement_test_id in submit: ---------------1", placement_test_id);
     const [formData, setFormData] = useState({
         number_of_questions: "",
         description: "",
@@ -20,7 +20,7 @@ const UpdatePlacementTestModal = ({ placement_test_id, show, handleClose }) => {
         issue_certificate: false,
     });
 
-    console.log("Received placment test id in update modal : ", placement_test_id)
+    // console.log("Received placment test id in update modal : ", placement_test_id)
 
     const [topics, setTopics] = useState([]);
 
@@ -61,7 +61,7 @@ const UpdatePlacementTestModal = ({ placement_test_id, show, handleClose }) => {
 
     // Handle form submission to update the placement test
     const handleSubmit = async (e) => {
-        console.log("placement_test_id in submit:", placement_test_id);
+        // console.log("placement_test_id in submit:", placement_test_id);
         e.preventDefault();
         try {
             const token = localStorage.getItem("token");

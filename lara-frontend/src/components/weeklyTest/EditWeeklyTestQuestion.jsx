@@ -133,28 +133,25 @@ const EditWeeklyTestQuestion = () => {
         wt_question_description: '',
         marks: '',
         minutes: '',
-        keywords: ''  // Comma-separated keywords
+        keywords: '1' // Default to 100% Matching
     });
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Fetch the question details by ID
     useEffect(() => {
         const fetchQuestion = async () => {
             try {
                 const response = await axios.get(`${baseURL}/api/weekly-test/getQuestionById/${question_id}`);
-                
                 const questionData = response.data.question;
-                const keywords = questionData.TestQuestionAnswerDetails?.map(ans => ans.keywords).join(", ") || "";
-
+                
                 setQuestion({
                     wt_question_description: questionData.wt_question_description,
                     marks: questionData.marks,
                     minutes: questionData.minutes,
-                    keywords
+                    keywords: questionData.keywords?.toString() || '1' // Ensure it's a string
                 });
-
+                
                 setLoading(false);
             } catch (error) {
                 setError(error.message);
@@ -165,7 +162,6 @@ const EditWeeklyTestQuestion = () => {
         fetchQuestion();
     }, [question_id]);
 
-    // Handle form input change
     const handleChange = (e) => {
         setQuestion({
             ...question,
@@ -173,7 +169,6 @@ const EditWeeklyTestQuestion = () => {
         });
     };
 
-    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -181,7 +176,7 @@ const EditWeeklyTestQuestion = () => {
                 wt_question_description: question.wt_question_description,
                 marks: question.marks,
                 minutes: question.minutes,
-                keywords: question.keywords.split(",").map(keyword => keyword.trim())  // Convert to an array
+                keywords: question.keywords
             });
 
             if (response.status === 200) {
@@ -237,15 +232,18 @@ const EditWeeklyTestQuestion = () => {
                         />
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="keywords" className="form-label">Keywords (comma-separated)</label>
-                        <input
-                            type="text"
+                        <label htmlFor="keywords" className="form-label">Answer Matching Criteria</label>
+                        <select
                             id="keywords"
                             name="keywords"
                             className="form-control"
                             value={question.keywords}
                             onChange={handleChange}
-                        />
+                            required
+                        >
+                            <option value="1">100% Matching</option>
+                            <option value="0">Above 60% Matching</option>
+                        </select>
                     </div>
                     <div className="mb-3">
                         <button type="submit" className="btn btn-primary">Update Question</button>

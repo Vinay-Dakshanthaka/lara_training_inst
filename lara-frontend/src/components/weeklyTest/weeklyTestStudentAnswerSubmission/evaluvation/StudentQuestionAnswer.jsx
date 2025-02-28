@@ -2,15 +2,17 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Button, Form, Container, Row, Col, Card, Collapse, ToastContainer } from "react-bootstrap";
-import { baseURL } from "../../config";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import StudentDetailsByWeeklyTestId from "../StudentDetailsByWeeklyTestId";
+import { baseURL } from "../../../config";
+import StudentDetailsByWeeklyTestId from "../../StudentDetailsByWeeklyTestId";
+import { cosineSimilarity, tokenizeAndVectorize } from "./autoEvaluvateUtils";
 
 const StudentQuestionAnswer = () => {
   const { wt_id, student_id } = useParams();
   const [questionsWithAnswers, setQuestionsWithAnswers] = useState([]);
   const [correctAnswers, setCorrectAnswers] = useState({});
+  const [answerKeywords, setAnswerKeywords] = useState({});
   const [updatedMarks, setUpdatedMarks] = useState({});
   const [updatedComment, setUpdatedComment] = useState({});
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
@@ -40,6 +42,10 @@ const StudentQuestionAnswer = () => {
         setCorrectAnswers((prev) => ({
           ...prev,
           [question_id]: response.data.answer,
+        }));
+        setAnswerKeywords((prev) => ({
+          ...prev,
+          [question_id]: response.data.keywords, // Storing keywords
         }));
       })
       .catch(() => {
@@ -106,11 +112,147 @@ const StudentQuestionAnswer = () => {
     (item) => !item.studentAnswer || !item.studentAnswer.answer
   );
 
+  // const autoEvaluateAnswers = () => {
+  //   let allUpdated = true;
+  
+  //   answeredQuestions.forEach((item) => {
+  //     const studentAnswer = item.studentAnswer.answer;
+  //     const correctAnswer = correctAnswers[item.question_id];
+  
+  //     if (studentAnswer && correctAnswer) {
+  //       // Get similarity values from the improved Levenshtein function
+  //       const similarity = getImprovedLevenshteinDistance(studentAnswer, correctAnswer);
+  
+  //       // Assuming a threshold of 80% similarity for correct answers
+  //       const wordSimilarity = parseFloat(similarity.wordSimilarityPercentage);
+  //       const levenshteinSimilarity = parseFloat(similarity.levenshteinSimilarityPercentage);
+  
+  //       // You can choose either similarity metric or both depending on your requirement
+  //       const isCorrect = levenshteinSimilarity >= 80; // or use wordSimilarity >= 80
+  
+  //       const marks = isCorrect ? item.marks : 0;
+  //       const comment = isCorrect ? "Correct Answer" : "Incorrect Answer";
+  
+  //       axios
+  //         .put(`${baseURL}/api/weekly-test/updateMarksAndCommentByStudentId/${wt_id}/${student_id}/${item.question_id}`, {
+  //           marks,
+  //           comment,
+  //         })
+  //         .then(() => {
+  //           setQuestionsWithAnswers((prev) =>
+  //             prev.map((q) =>
+  //               q.question_id === item.question_id
+  //                 ? {
+  //                     ...q,
+  //                     studentAnswer: {
+  //                       ...q.studentAnswer,
+  //                       marks,
+  //                       comment,
+  //                     },
+  //                   }
+  //                 : q
+  //             )
+  //           );
+  //         })
+  //         .catch(() => {
+  //           allUpdated = false;
+  //           toast.error("Error updating marks and comments.");
+  //         });
+  //     }
+  //   });
+  
+  //   if (allUpdated) {
+  //     toast.success("Answers auto-evaluated successfully!");
+  //   } else {
+  //     toast.error("There was an error during auto evaluation.");
+  //   }
+  // };
+  
+  const autoEvaluateAnswers = () => {
+    let allUpdated = true;
+    console.log("Starting auto evaluation of answers...");
+  
+    answeredQuestions.forEach((item, index) => {
+      console.log(`Processing question ${index + 1}: ID ${item.question_id}`);
+      const studentAnswer = item.studentAnswer.answer;
+      const correctAnswer = correctAnswers[item.question_id];
+      const answerKeyword = answerKeywords[item.question_id]
+      console.log("keywords :", answerKeyword);
+  
+      if (studentAnswer && correctAnswer) {
+        console.log(`Student Answer: ${studentAnswer}`);
+        console.log(`Correct Answer: ${correctAnswer}`);
+  
+        // Convert answers into vectorized representations
+        const studentVector = tokenizeAndVectorize(studentAnswer);
+        const correctVector = tokenizeAndVectorize(correctAnswer);
+  
+        // Compute similarity
+        const similarity = cosineSimilarity(studentVector, correctVector);
+        console.log(`Computed Similarity: ${similarity.toFixed(2)}`);
+        
+        const threshold = answerKeyword === "1" ? 0.8 : 0.6;
+        const isCorrect = similarity >= threshold;
+        console.log(`Is Answer Correct? ${isCorrect}`);
+  
+        const marks = isCorrect ? item.marks : 0;
+        const comment = isCorrect ? "Correct Answer" : "Incorrect Answer";
+  
+        console.log(`Assigning Marks: ${marks}, Comment: ${comment}`);
+  
+        axios
+          .put(
+            `${baseURL}/api/weekly-test/updateMarksAndCommentByStudentId/${wt_id}/${student_id}/${item.question_id}`,
+            {
+              marks,
+              comment,
+            }
+          )
+          .then(() => {
+            console.log(`Successfully updated marks for question ID ${item.question_id}`);
+            setQuestionsWithAnswers((prev) =>
+              prev.map((q) =>
+                q.question_id === item.question_id
+                  ? {
+                      ...q,
+                      studentAnswer: {
+                        ...q.studentAnswer,
+                        marks,
+                        comment,
+                      },
+                    }
+                  : q
+              )
+            );
+          })
+          .catch((error) => {
+            allUpdated = false;
+            console.error(`Error updating marks for question ID ${item.question_id}:`, error);
+            toast.error("Error updating marks and comments.");
+          });
+      } else {
+        console.warn(`Skipping question ID ${item.question_id} due to missing answer.`);
+      }
+    });
+  
+    if (allUpdated) {
+      console.log("Auto evaluation completed successfully!");
+      toast.success("Answers auto-evaluated successfully!");
+    } else {
+      console.error("Errors occurred during auto evaluation.");
+      toast.error("There was an error during auto evaluation.");
+    }
+  };
+  
+
   return (
     <Container fluid className="my-4">
       <Row>
         <Col md={9} className="overflow-auto" style={{ maxHeight: "100vh" }}>
           <StudentDetailsByWeeklyTestId />
+          <Button variant="primary" onClick={autoEvaluateAnswers} className="my-3 mx-3" title="Automated Evaluation">
+            Automated Evaluation 
+          </Button>
           <ToastContainer />
           <h2 className="mb-4">Student Answer Details</h2>
 
@@ -219,6 +361,8 @@ const StudentQuestionAnswer = () => {
               )}
             </div>
           </Collapse>
+
+          
         </Col>
 
         <Col md={3} className="overflow-auto" style={{ maxHeight: "100vh" }}>

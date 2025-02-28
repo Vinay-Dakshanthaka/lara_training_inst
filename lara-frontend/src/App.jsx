@@ -65,7 +65,6 @@ import UploadWeeklyTestQuestions from './components/weeklyTest/UploadWeeklyTestQ
 import StudentAnswerForm from './components/weeklyTest/weeklyTestStudentAnswerSubmission/StudentAnswerForm';
 import AnswerUpdateForm from './components/weeklyTest/weeklyTestStudentAnswerSubmission/AnswerUpdateForm';
 import WeeklyTestAttendedStudentsList from './components/weeklyTest/weeklyTestStudentAnswerSubmission/WeeklyTestAttendedStudentsList';
-import StudentQuestionAnswer from './components/weeklyTest/weeklyTestStudentAnswerSubmission/StudentQuestionAnswer';
 import WeeklyTestStudentDetailedSummary from './components/weeklyTest/WeeklyTestStudentDetailedSummary';
 import AllStudentsWeeklyTestResults from './components/weeklyTest/AllStudentsWeeklyTestResults';
 import WeeklyTestPerformanceForAdmin from './components/weeklyTest/weeklyTestStudentAnswerSubmission/WeeklyTestPerformanceForAdmin';
@@ -81,6 +80,7 @@ import PaperBasedTestResults from './components/admin/PaperBasedTestResults';
 import AssignBatches from './components/internalTests/AssignBatchs';
 import AssignBatchsTowt from './components/weeklyTest/AssignBatchsTowt';
 import TestResults from './components/admin/TestResults';
+import StudentQuestionAnswer from './components/weeklyTest/weeklyTestStudentAnswerSubmission/evaluvation/StudentQuestionAnswer';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 

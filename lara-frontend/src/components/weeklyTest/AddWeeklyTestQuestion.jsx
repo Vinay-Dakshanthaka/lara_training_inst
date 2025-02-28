@@ -13,6 +13,7 @@ const AddWeeklyTestQuestion = () => {
         wt_question_description: '',
         marks: '',
         minutes: '',
+        wt_question_keywords: '1'
     });
     const [selectedTopics, setSelectedTopics] = useState([]);
     const [availableTopics, setAvailableTopics] = useState([]);
@@ -92,6 +93,7 @@ const AddWeeklyTestQuestion = () => {
                 wt_question_description: '',
                 marks: '',
                 minutes: '',
+                wt_question_keywords: '1',
             });
 
             console.log(data,"-----------------------------")
@@ -150,16 +152,19 @@ const AddWeeklyTestQuestion = () => {
                         required
                     />
                 </Form.Group>
-                <Form.Group controlId="formDescription" className="mt-4">
-                    <Form.Label>Question Keywords</Form.Label>
+                
+                <Form.Group controlId="formKeywords" className="mt-4">
+                    <Form.Label>Answer Matching Criteria</Form.Label>
                     <Form.Control
-                        as="textarea"
-                        rows={3}
+                        as="select"
                         name="wt_question_keywords"
                         value={questionData.wt_question_keywords}
                         onChange={handleInputChange}
-                        
-                    />
+                        required
+                    >
+                        <option value="1">100% Matching</option>
+                        <option value="0">Above 60% Matching</option>
+                    </Form.Control>
                 </Form.Group>
 
                 <div className="d-flex justify-content-between">
@@ -195,3 +200,5 @@ const AddWeeklyTestQuestion = () => {
 };
 
 export default AddWeeklyTestQuestion;
+
+
