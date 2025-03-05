@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Modal, Button, Form } from 'react-bootstrap';
+import { baseURL } from '../config';
 
 const AssignBatchsTowt = () => {
   const { wt_id } = useParams(); // Get wt_id from URL parameters
@@ -18,7 +19,7 @@ const AssignBatchsTowt = () => {
   // Fetch assigned and unassigned batches
   const fetchBatches = async (wt_id) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/internal-test/weekly-test/${wt_id}`);
+      const response = await axios.get(`${baseURL}/api/internal-test/weekly-test/${wt_id}`);
       setAssignedBatches(response.data.assignedBatches || []);
       setUnassignedBatches(response.data.unassignedBatches || []);
     } catch (error) {
@@ -42,7 +43,7 @@ const AssignBatchsTowt = () => {
       const batchIds = selectedBatches.map(batch => batch.batch_id);
 
       // Send API request to assign batches
-      const response = await axios.post('http://localhost:8080/api/internal-test/assignBatchToWeeklyTest', {
+      const response = await axios.post(`${baseURL}/api/internal-test/assignBatchToWeeklyTest`, {
         wt_id,
         batch_ids: batchIds
       });

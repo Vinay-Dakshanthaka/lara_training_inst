@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Modal, Button } from 'react-bootstrap'; // Importing Modal and Button from react-bootstrap
+import { baseURL } from '../config';
 
 const AssignBatches = () => {
   const { internal_test_id } = useParams(); // Get internal_test_id from URL parameters
@@ -18,7 +19,7 @@ const AssignBatches = () => {
   // Fetch assigned and unassigned batches
   const fetchBatches = async (internalTestId) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/internal-test/internal-test/${internalTestId}`);
+      const response = await axios.get(`${baseURL}/api/internal-test/internal-test/${internalTestId}`);
       setAssignedBatches(response.data.assignedBatches || []);
       setUnassignedBatches(response.data.unassignedBatches || []);
     } catch (error) {
@@ -44,7 +45,7 @@ const AssignBatches = () => {
       const batchIds = selectedBatches.map(batch => batch.batch_id);
 
       // Send API request to assign batches
-      const response = await axios.post('http://localhost:8080/api/internal-test/assignBatchToInternalTest', {
+      const response = await axios.post(`${baseURL}/api/internal-test/assignBatchToInternalTest`, {
         internal_test_id,
         batch_ids: batchIds
       });
