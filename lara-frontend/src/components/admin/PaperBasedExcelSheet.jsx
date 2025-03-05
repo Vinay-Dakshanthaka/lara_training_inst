@@ -36,7 +36,7 @@ const PaperBasedExcelSheet = () => {
             const response = await axios.post(`${baseURL}/api/paper-based-exams/uploadTestResults`, formData, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
-
+              console.log(response.data,"-------------------")
             setSkippedEmails(response.data.skippedRecords);
             alert("File uploaded successfully!");
 
@@ -93,14 +93,14 @@ const PaperBasedExcelSheet = () => {
                     <table className="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Email ID</th>
+                                <th>Roll Number</th>
                                 <th>Reason</th>
                             </tr>
                         </thead>
                         <tbody>
                             {skippedEmails.map((item, index) => (
                                 <tr key={index}>
-                                    <td>{item.email || "N/A"}</td>
+                                    <td>{item.studentId || "N/A"}</td>
                                     <td>{item.reason}</td>
                                 </tr>
                             ))}

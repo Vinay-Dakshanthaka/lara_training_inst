@@ -232,19 +232,36 @@ const EditWeeklyTestQuestion = () => {
                         />
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="keywords" className="form-label">Answer Matching Criteria</label>
-                        <select
-                            id="keywords"
-                            name="keywords"
-                            className="form-control"
-                            value={question.keywords}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="1">100% Matching</option>
-                            <option value="0">Above 60% Matching</option>
-                        </select>
-                    </div>
+    <label htmlFor="keywords" className="form-label">Answer Matching Criteria</label>
+    <div>
+        <div className="form-check">
+            <input
+                type="radio"
+                id="matching100"
+                name="keywords"
+                value="1"
+                className="form-check-input"
+                checked={question.keywords === "1"}
+                onChange={handleChange}
+                required
+            />
+            <label htmlFor="matching100" className="form-check-label">100% Matching</label>
+        </div>
+        <div className="form-check">
+            <input
+                type="radio"
+                id="matching60"
+                name="keywords"
+                value="0"
+                className="form-check-input"
+                checked={question.keywords === "0"}
+                onChange={handleChange}
+            />
+            <label htmlFor="matching60" className="form-check-label">Above 60% Matching</label>
+        </div>
+    </div>
+</div>
+
                     <div className="mb-3">
                         <button type="submit" className="btn btn-primary">Update Question</button>
                     </div>

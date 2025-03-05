@@ -82,32 +82,58 @@ const AttendedStudentDetails = () => {
     if (numericPercentage >= 90) return "Excellent";
     if (numericPercentage >= 75) return "Good";
     if (numericPercentage >= 50) return "Average";
-    if (numericPercentage >= 35) return "Bad";
+    if (numericPercentage >= 35) return "Poor";
     return "Very Bad";
   };
+
+  // const downloadExcel = () => {
+  //   const data = selectedBatch ? attendedStudents : allStudents;
+  //   if (data.length === 0) return;
+
+  //   const batchName = selectedBatch
+  //     ? batches.find(batch => batch.batch_id === Number(selectedBatch))?.batch_name || "Batch"
+  //     : "All_Students";
+
+  //   const formattedData = data.map(student => ({
+  //     "Student Name": student.name,
+  //     "Tests Attended": student.totalTests,
+  //     "Marks Obtained": student.totalMarksObtained,
+  //     "Total Marks": student.totalMarks,
+  //     "Percentage": student.percentage,
+  //     "Feedback": getFeedback(student.percentage)
+  //   }));
+
+  //   const ws = XLSX.utils.json_to_sheet(formattedData);
+  //   const wb = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(wb, ws, "Results");
+  //   XLSX.writeFile(wb, `${batchName}_RESULTS.xlsx`);
+  // };
 
   const downloadExcel = () => {
     const data = selectedBatch ? attendedStudents : allStudents;
     if (data.length === 0) return;
 
     const batchName = selectedBatch
-      ? batches.find(batch => batch.batch_id === Number(selectedBatch))?.batch_name || "Batch"
-      : "All_Students";
+        ? batches.find(batch => batch.batch_id === Number(selectedBatch))?.batch_name || "Batch"
+        : "All_Students";
 
-    const formattedData = data.map(student => ({
-      "Student Name": student.name,
-      "Tests Attended": student.totalTests,
-      "Marks Obtained": student.totalMarksObtained,
-      "Total Marks": student.totalMarks,
-      "Percentage": student.percentage,
-      "Feedback": getFeedback(student.percentage)
-    }));
+    // Format and sort data in descending order based on Percentage
+    const formattedData = data
+        .map(student => ({
+            "Student Name": student.name,
+            // "Tests Attended": student.totalTests,
+            "Marks Obtained": student.totalMarksObtained,
+            "Total Marks": student.totalMarks,
+            "Percentage": student.percentage,
+            // "Feedback": getFeedback(student.percentage)
+        }))
+        .sort((a, b) => b.Percentage - a.Percentage);  // Sort by Percentage in descending order
 
     const ws = XLSX.utils.json_to_sheet(formattedData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Results");
     XLSX.writeFile(wb, `${batchName}_RESULTS.xlsx`);
-  };
+};
 
   const fetchBatchResults = async () => {
     if (!selectedBatch) {

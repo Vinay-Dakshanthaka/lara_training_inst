@@ -3,12 +3,14 @@ const jwt = require('jsonwebtoken');
 const moment = require("moment");
 
 
+
 const Student = db.Student;
 const Profile = db.Profile;
 const Batch = db.Batch;
 const StudentBatch = db.Student_Batch
 const StudentSubmission = db.StudentSubmission
 const BatchTrainer = db.BatchTrainer
+
 const jwtSecret = process.env.JWT_SECRET;
 
 const saveBatch = async (req, res) => {
@@ -34,7 +36,7 @@ const saveBatch = async (req, res) => {
 
         res.status(200).send(batch);
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         res.status(500).send({ message: error.message });
     }
 };
@@ -43,7 +45,7 @@ const getBatchById = async (req, res) => {
     try {
         const studentId = req.studentId;
         const {batch_id} = req.body; 
-        // console.log("batchid ",batch_id)
+        console.log("batchid ",batch_id)
         
         // Fetch user from database
         const user = await Student.findByPk(studentId);
@@ -74,15 +76,15 @@ const deleteBatch = async (req, res) => {
         // Extract the batch_id from the request parameters
         const { batch_id } = req.body;
         const studentId = req.studentId;
-        console.log("student id :", studentId)
+        // console.log("student id :", studentId)
         const user = await Student.findByPk(studentId); // Fetch user from database
         const userRole = user.role; // Get the user's role
-        console.log("role :" + userRole)
+        // console.log("role :" + userRole)
         // Check if the user role is either "ADMIN" or "SUPER ADMIN"
         if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN') {
             return res.status(403).json({ error: 'Access forbidden' });
         }
-        console.log("batch id :", batch_id)
+        // console.log("batch id :", batch_id)
         const batch = await Batch.findByPk(batch_id);
 
         // Check if the batch exists
@@ -131,7 +133,7 @@ const updateBatch = async (req, res) => {
 
         res.status(200).send(batch);
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         res.status(500).send({ message: error.message });
     }
 };
@@ -146,7 +148,7 @@ const getAllBatches = async (req, res) => {
         const studentId = req.studentId;
         const user = await Student.findByPk(studentId); // Fetch user from database
         const userRole = user.role; // Get the user's role
-        console.log("role :" + userRole)
+        // console.log("role :" + userRole)
         // Check if the user role is either "ADMIN" or 
         // if (userRole !== 'ADMIN' && userRole !== 'SUPER ADMIN') {
         //     return res.status(403).json({ error: 'Access forbidden' });
@@ -160,50 +162,142 @@ const getAllBatches = async (req, res) => {
 };
 
 
+// const assignBatchesToStudent = async (req, res) => {
+//     try {
+//         const { studentId, batchIds } = req.body;
+        // console.log(req.body,"--------------------------req.body")
+//         if (!studentId) {
+//             return res.status(400).json({ error: "Missing studentId in request body" });
+//         }
+
+//         // Fetch student from database
+//         const student = await Student.findByPk(studentId);
+        // console.log(student,"---------------")
+//         if (!student) {
+//             return res.status(404).json({ error: "Student not found" });
+//         }
+
+//         // Fetch batches
+//         const batches = await Batch.findAll({
+//             where: { batch_id: batchIds },
+//         });
+        // console.log(batches,"-------------batchs")
+//         const assingtothebatch = await studentBatchModel.create({
+//             where :{
+//                 student_id : studentId,
+//                 Batch_id : batchIds,
+
+//             }
+//         });
+        
+//         if (batches.length !== batchIds.length) {
+//             return res.status(404).json({ error: "One or more batches not found" });
+//         }
+            
+//         // If student already has a unique ID (and it's not TEMP or null), do not regenerate
+//         if (student.uniqueStudentId && !student.uniqueStudentId.startsWith("TEMP")) {
+//             return res.status(200).json({ message: "Batches assigned to student, unique ID remains unchanged." });
+//         }
+
+//         // Pick the first batch for ID generation
+//         const batch = batches[0];
+
+//         // Generate a unique ID
+//         const newUniqueId = await generateUniqueStudentId(batch.batch_name, student.sequelize);
+
+//         // Update student record with the new uniqueStudentId
+//         await student.update({ uniqueStudentId: newUniqueId });
+
+//         res.status(200).json({ message: "Batches assigned to student and unique ID generated successfully.", uniqueStudentId: newUniqueId });
+//     } catch (error) {
+//         console.error("Failed to assign batches to student.", error);
+//         res.status(500).json({ error: "Internal server error" });
+//     }
+// };
+
 const assignBatchesToStudent = async (req, res) => {
     try {
         const { studentId, batchIds } = req.body;
+        // console.log(req.body, "--------------------------req.body");
 
+        // Validate that studentId is provided
         if (!studentId) {
             return res.status(400).json({ error: "Missing studentId in request body" });
         }
 
-        // Fetch student from database
+        // Fetch student from the database
         const student = await Student.findByPk(studentId);
-
         if (!student) {
             return res.status(404).json({ error: "Student not found" });
         }
 
-        // Fetch batches
+        // Fetch batches from the database using batchIds
         const batches = await Batch.findAll({
-            where: { batch_id: batchIds },
+            where: {
+                batch_id: batchIds,
+            },
         });
+        // console.log(batches,"--------------------------------batchs")
+        if(batches.length == 0){
+            return res.status(400).json({
+                error: "batch's are not found pls add bacth's",
+            });
+        }
+        // If some batches are not found, return an error
+        // if (batches.length !== batchIds.length) {
+        //     return res.status(404).json({ error: "One or more batches not found" });
+        // }
 
-        if (batches.length !== batchIds.length) {
-            return res.status(404).json({ error: "One or more batches not found" });
+        // Check if the student is already assigned to any of the provided batches
+        const existingAssignments = await StudentBatch.findAll({
+            where: {
+                student_id: studentId,
+                batch_id: batchIds,
+            },
+        });
+        // console.log(existingAssignments,"------------------existingAssignments")
+        // If the student is already assigned to any batch, skip assignment
+        if (existingAssignments.length > 0) {
+            return res.status(400).json({
+                error: "Student is already assigned to one or more of these batches",
+            });
         }
 
-        // If student already has a unique ID (and it's not TEMP or null), do not regenerate
+        // Proceed with batch assignment using bulkCreate for Student_Batch
+        const batchAssignments = batchIds.map((batchId) => ({
+            student_id: studentId,
+            batch_id: batchId,
+        }));
+        
+        // console.log(batchAssignments,"------------------batchAssignments")
+        // Create associations in the Student_Batch table
+        await StudentBatch.bulkCreate(batchAssignments);
+
+        // If the student already has a unique ID (and it's not TEMP or null), don't regenerate it
         if (student.uniqueStudentId && !student.uniqueStudentId.startsWith("TEMP")) {
             return res.status(200).json({ message: "Batches assigned to student, unique ID remains unchanged." });
         }
 
-        // Pick the first batch for ID generation
-        const batch = batches[0];
+        // Pick the first batch for generating the unique ID (if needed)
+        const firstBatch = batches[0];
 
-        // Generate a unique ID
-        const newUniqueId = await generateUniqueStudentId(batch.batch_name, student.sequelize);
+        // Generate a new unique ID based on the first batch
+        const newUniqueId = await generateUniqueStudentId(firstBatch.batch_name, student.sequelize);
 
-        // Update student record with the new uniqueStudentId
+        // Update the student record with the new uniqueStudentId
         await student.update({ uniqueStudentId: newUniqueId });
 
-        res.status(200).json({ message: "Batches assigned to student and unique ID generated successfully.", uniqueStudentId: newUniqueId });
+        res.status(200).json({
+            message: "Batches assigned to student and unique ID generated successfully.",
+            uniqueStudentId: newUniqueId,
+        });
     } catch (error) {
         console.error("Failed to assign batches to student.", error);
         res.status(500).json({ error: "Internal server error" });
     }
 };
+
+
 
 /**
  * Function to generate the uniqueStudentId
@@ -375,7 +469,7 @@ const deassignBatchesFromStudent = async (req, res) => {
 // const getStudentBatches = async (req, res) => {
 //     try {
 //         const studentId = req.studentId;
-//         console.log('Student ID:', studentId);
+        // console.log('Student ID:', studentId);
 
 //         // Step 1: Fetch all batches with their associated trainers
 //         const allBatches = await Batch.findAll({
@@ -597,39 +691,128 @@ const getAllStudentsWithBatches = async (req, res) => {
 
 
 //controller function to get the students by batch wise 
+// const getStudentsByBatches = async (req, res) => {
+//     try {
+//         const studentId = req.studentId;
+        // console.log(studentId,"----------------------------")
+//         const user = await Student.findByPk(studentId); // Fetch user from database
+//         const userRole = user.role; // Get the user's role
+        // console.log("role :" + userRole)
+//         // Check if the user role is either "ADMIN" or "SUPER ADMIN"
+//         if (userRole !== 'ADMIN') {
+//             return res.status(403).json({ error: 'Access forbidden' });
+//         }
+//         const batchNames = req.body.batchNames;
+        // console.log(batchNames,"---------------batchnames")
+//         const students = await db.Student.findAll({
+//             include: [{
+//                 model: db.Batch,
+//                 where: {
+//                     batch_name: batchNames // Filter by batch names
+//                 },
+//                 through: {
+//                     attributes: [] // Exclude any additional attributes from the join table
+//                 }
+//             }],
+//             attributes: ['id', 'name', 'email', 'phoneNumber', 'role'] // Only select necessary attributes
+//         });
+
+        // console.log(students,"-------------------students")
+
+//         // Format the response data
+//         const studentsInBatches = students.map(student => ({
+//             id: student.id,
+//             name: student.name,
+//             email: student.email,
+//             phoneNumber: student.phoneNumber,
+//             role: student.role,
+//             batches: student.Batches // Array of associated batches
+//         }));
+            //   console.log(studentsInBatches,"--------------------studnetsbacthes")
+//         // Send the response
+//         res.status(200).json({ students: studentsInBatches });
+//     } catch (error) {
+//         console.error('Failed to fetch students by batches:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
+
+
 const getStudentsByBatches = async (req, res) => {
     try {
         const studentId = req.studentId;
-        const user = await Student.findByPk(studentId); // Fetch user from database
-        const userRole = user.role; // Get the user's role
-        console.log("role :" + userRole)
-        // Check if the user role is either "ADMIN" or "SUPER ADMIN"
+        console.log(studentId, "----------------------------");
+        const user = await db.Student.findByPk(studentId); // Fetch user from database
+        const userRole = user.role;
+        // console.log("role :" + userRole);
+
+        // Check if the user role is "ADMIN"
         if (userRole !== 'ADMIN') {
             return res.status(403).json({ error: 'Access forbidden' });
         }
+
         const batchNames = req.body.batchNames;
+        console.log(batchNames, "---------------batchnames");
+
+        // Step 1: Find batch IDs based on batch names
+        const batches = await db.Batch.findAll({
+            where: { batch_name: batchNames },
+            attributes: ['batch_id', 'batch_name']
+        });
+        console.log(batches, "-----------------------batches");
+
+        // Extract batch IDs
+        const batchIds = batches.map(batch => batch.batch_id);
+        // console.log(batchIds, "--------------------batchIds");
+
+        if (batchIds.length === 0) {
+            return res.status(404).json({ error: 'No batches found for the provided batch names' });
+        }
+
+        // Step 2: Check if students are assigned to these batches
+        const studentBatchRecords = await StudentBatch.findAll({
+            where: { batch_id: batchIds },
+            attributes: ['student_id']
+        });
+        // console.log(studentBatchRecords, "--------------------------studentBatchRecords");
+
+        // Extract student IDs
+        const studentIds = studentBatchRecords.map(record => record.student_id);
+        // console.log(studentIds, "--------------------------studentIds");
+
+        if (studentIds.length === 0) {
+            return res.status(404).json({ error: 'No students found for the provided batches' });
+        }
+
+        // Step 3: Fetch student details with batch names
         const students = await db.Student.findAll({
+            where: {
+                id: studentIds
+            },
+            attributes: ['id', 'name', 'email', 'phoneNumber', 'role', 'uniqueStudentId'],
             include: [{
                 model: db.Batch,
-                where: {
-                    batch_name: batchNames // Filter by batch names
-                },
+                attributes: ['batch_id'],
                 through: {
-                    attributes: [] // Exclude any additional attributes from the join table
+                    attributes: []  // Exclude join table details
                 }
-            }],
-            attributes: ['id', 'name', 'email', 'phoneNumber', 'role'] // Only select necessary attributes
+            }]
         });
+        
+        // console.log(students, "-------------------students");
 
-        // Format the response data
+        // Step 4: Format the response data
         const studentsInBatches = students.map(student => ({
             id: student.id,
             name: student.name,
             email: student.email,
             phoneNumber: student.phoneNumber,
             role: student.role,
-            batches: student.Batches // Array of associated batches
+            uniqueStudentId: student.uniqueStudentId,
+            batches: student.Batches.map(batch => batch.batch_name) // Extract batch names
         }));
+
+        // console.log(studentsInBatches, "--------------------studentsInBatches");
 
         // Send the response
         res.status(200).json({ students: studentsInBatches });
@@ -638,6 +821,9 @@ const getStudentsByBatches = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+
+
 
 // const assignTrainersToBatch = async (req, res) => {
 //     try {
@@ -786,7 +972,7 @@ const assignBatchesToTrainer = async (req, res) => {
 const fetchBatchesAssignedToTrainer = async (req, res) => {
     try {
         const studentId = req.studentId; // Extract studentId from the request
-        console.log('student id :', studentId)
+        // console.log('student id :', studentId)
 
         if (!studentId) {
             return res.status(400).json({ error: 'Missing studentId in request parameters' });
@@ -798,7 +984,7 @@ const fetchBatchesAssignedToTrainer = async (req, res) => {
                 trainer_id: studentId
             }
         });
-        console.log("batchTrainerEntries :", batchTrainerEntries);
+        // console.log("batchTrainerEntries :", batchTrainerEntries);
 
         // Extract batch_ids from the fetched entries
         const batchIds = batchTrainerEntries.map(entry => entry.batch_id);
@@ -809,7 +995,7 @@ const fetchBatchesAssignedToTrainer = async (req, res) => {
                 batch_id: batchIds
             }
         });
-        console.log("batches :", batches);
+        // console.log("batches :", batches);
 
         res.status(200).json({ batches });
     } catch (error) {

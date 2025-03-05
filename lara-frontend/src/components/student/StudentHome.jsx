@@ -1221,7 +1221,7 @@ const StudentHome = () => {
                 {/* Right side: Name, Email, Phone Number */}
                 <div className="col-md-6 text-left mt-3">
                   <h5 className="card-title" style={{ textTransform: "uppercase" }}>
-                    ID : {studentDetails.uniqueStudentId}
+                    Roll Number : {studentDetails.uniqueStudentId}
                   </h5>
                   <h1 className="card-title" style={{ textTransform: "uppercase" }}>
                     {profileDetails.name}

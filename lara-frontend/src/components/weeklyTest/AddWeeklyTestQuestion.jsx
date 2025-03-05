@@ -153,7 +153,7 @@ const AddWeeklyTestQuestion = () => {
                     />
                 </Form.Group>
                 
-                <Form.Group controlId="formKeywords" className="mt-4">
+                {/* <Form.Group controlId="formKeywords" className="mt-4">
                     <Form.Label>Answer Matching Criteria</Form.Label>
                     <Form.Control
                         as="select"
@@ -165,7 +165,31 @@ const AddWeeklyTestQuestion = () => {
                         <option value="1">100% Matching</option>
                         <option value="0">Above 60% Matching</option>
                     </Form.Control>
-                </Form.Group>
+                </Form.Group> */}
+
+<Form.Group controlId="formKeywords" className="mt-4">
+    <Form.Label>Answer Matching Criteria</Form.Label>
+    <div>
+        <Form.Check 
+            type="radio"
+            label="100% Matching"
+            name="wt_question_keywords"
+            value="1"
+            checked={questionData.wt_question_keywords === "1"}
+            onChange={handleInputChange}
+            required
+        />
+        <Form.Check 
+            type="radio"
+            label="Above 60% Matching"
+            name="wt_question_keywords"
+            value="0"
+            checked={questionData.wt_question_keywords === "0"}
+            onChange={handleInputChange}
+        />
+    </div>
+</Form.Group>
+
 
                 <div className="d-flex justify-content-between">
                     <Form.Group controlId="formMarks" className="mt-4 col-5">

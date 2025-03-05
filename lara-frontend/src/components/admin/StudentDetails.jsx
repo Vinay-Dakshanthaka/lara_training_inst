@@ -150,42 +150,87 @@ const StudentDetails = () => {
         },
       };
   
-      let searchUrl = '';
-      let searchParam = '';
+      const response = await axios.get(`${baseURL}/api/student/getAllStudentDetails`, config);
+      const allStudents = response.data;
   
-      switch (searchCriteria) {
-        case 'email':
-          searchUrl = `${baseURL}/api/student/searchByEmail`;
-          searchParam = 'email';
-          break;
-        case 'phoneNumber':
-          searchUrl = `${baseURL}/api/student/searchByPhoneNumber`;
-          searchParam = 'phoneNumber';
-          break;
-        case 'name':
-          searchUrl = `${baseURL}/api/student/searchByName`;
-          searchParam = 'name';
-          break;
-        default:
-          return;
-      }
+      let filteredStudents = [];
   
       if (!searchValue.trim()) {
-        const response = await axios.get(`${baseURL}/api/student/getAllStudentDetails`, config);
-        const filteredStudents = response.data.filter(student => student.role === "STUDENT");
-        setStudents(filteredStudents);
+        filteredStudents = allStudents.filter(student => student.role === "STUDENT");
       } else {
-        const response = await axios.get(searchUrl, {
-          ...config,
-          params: { [searchParam]: searchValue }
+        const lowerSearchValue = searchValue.toLowerCase();
+        
+        filteredStudents = allStudents.filter(student => {
+          switch (searchCriteria) {
+            case 'email':
+              return student.email?.toLowerCase().includes(lowerSearchValue) && student.role === "STUDENT";
+            case 'phoneNumber':
+              return student.phoneNumber?.toLowerCase().includes(lowerSearchValue) && student.role === "STUDENT";
+            case 'name':
+              return student.name?.toLowerCase().includes(lowerSearchValue) && student.role === "STUDENT";
+            case 'rollnumber':
+              return student.uniqueStudentId?.toLowerCase().includes(lowerSearchValue) && student.role === "STUDENT";
+            default:
+              return false;
+          }
         });
-        const filteredStudents = response.data.filter(student => student.role === "STUDENT");
-        setStudents(filteredStudents);
       }
+  
+      setStudents(filteredStudents);
     } catch (error) {
       console.error(error);
     }
   };
+  
+  // const handleSearch = async (searchCriteria) => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       return;
+  //     }
+  
+  //     const config = {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     };
+  
+  //     let searchUrl = '';
+  //     let searchParam = '';
+  
+  //     switch (searchCriteria) {
+  //       case 'email':
+  //         searchUrl = `${baseURL}/api/student/searchByEmail`;
+  //         searchParam = 'email';
+  //         break;
+  //       case 'phoneNumber':
+  //         searchUrl = `${baseURL}/api/student/searchByPhoneNumber`;
+  //         searchParam = 'phoneNumber';
+  //         break;
+  //       case 'name':
+  //         searchUrl = `${baseURL}/api/student/searchByName`;
+  //         searchParam = 'name';
+  //         break;
+  //       default:
+  //         return;
+  //     }
+  
+  //     if (!searchValue.trim()) {
+  //       const response = await axios.get(`${baseURL}/api/student/getAllStudentDetails`, config);
+  //       const filteredStudents = response.data.filter(student => student.role === "STUDENT");
+  //       setStudents(filteredStudents);
+  //     } else {
+  //       const response = await axios.get(searchUrl, {
+  //         ...config,
+  //         params: { [searchParam]: searchValue }
+  //       });
+  //       const filteredStudents = response.data.filter(student => student.role === "STUDENT");
+  //       setStudents(filteredStudents);
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
   
 
   const batchWiseStudents = () => {
@@ -209,6 +254,7 @@ const StudentDetails = () => {
         batchIds: selectedBatches,
       }, config);
       setShowModal(false);
+      console.log(response.data,"--------------------asigingbacthes")
       setShowSuccessToast(true);
       fetchBatchDetails();
     } catch (error) {
@@ -260,6 +306,7 @@ const StudentDetails = () => {
             <option value="email">Email</option>
             <option value="phoneNumber">Phone Number</option>
             <option value="name">Name</option>
+            <option value="rollnumber">Roll Number</option>
           </select>
         </div>
         <div className="col-md-3">
@@ -385,7 +432,7 @@ const StudentDetails = () => {
         </Toast.Header>
         <Toast.Body>Failed to assign batches</Toast.Body>
       </Toast>
-      <AssignUniqueIds />
+      {/* <AssignUniqueIds /> */}
     </div>
 
   );

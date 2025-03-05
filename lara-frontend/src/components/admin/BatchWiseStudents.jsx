@@ -56,10 +56,11 @@ const BatchWiseStudents = () => {
           Authorization: `Bearer ${token}`,
         },
       };
+      console.log(selectedBatches,"--------------------------selectedbacthes")
       const response = await axios.post(`${baseURL}/api/student/getStudentsByBatches`, {
         batchNames: selectedBatches
       }, config);
-
+       console.log(response.data,"-------------------------------------studentsbacths")
       setStudents(response.data.students);
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -97,7 +98,7 @@ const BatchWiseStudents = () => {
           <Table striped bordered hover>
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Roll Number</th>
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone Number</th>
@@ -109,7 +110,7 @@ const BatchWiseStudents = () => {
                 // Exclude super admin role
                 student.role !== "SUPER ADMIN" && (
                   <tr key={student.id}>
-                    <td>{student.id}</td>
+                    <td>{student.uniqueStudentId}</td>
                     <td>{student.name}</td>
                     <td>{student.email}</td>
                     <td>{student.phoneNumber}</td>

@@ -9,13 +9,13 @@ const { Sequelize } = require('sequelize');
 //     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 // };
 
-
 const uploadTestResults = async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: "No file uploaded!" });
         }
 
+        console.log("---------------------------------------");
         const conducted_date = req.body.conducted_date;
 
         if (!conducted_date) {
@@ -26,10 +26,13 @@ const uploadTestResults = async (req, res) => {
         const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
         const sheetName = workbook.SheetNames[0];
         const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+        console.log("--------------------------");
 
         const skippedRecords = [];
         const updatedRecords = [];
         const insertedRecords = [];
+
+        console.log("------------------------------");
 
         for (let row of data) {
             try {
@@ -40,6 +43,8 @@ const uploadTestResults = async (req, res) => {
                     continue;
                 }
 
+                console.log(row.studentId, "------------------id");
+
                 // Find student using uniqueStudentId
                 const student = await Student.findOne({ where: { uniqueStudentId: studentId } });
 
@@ -48,13 +53,17 @@ const uploadTestResults = async (req, res) => {
                     continue;
                 }
 
+                const uniqueStudentId = student.uniqueStudentId;
+
                 // Check if the test result already exists
                 const existingResult = await paperBasedTestResults.findOne({
                     where: {
-                        uniqueStudentId: student.uniqueStudentId,
+                        uniqueStudentId: uniqueStudentId,
                         testName: testName,
                     }
                 });
+
+                console.log(existingResult, "-----------------------------yes");
 
                 if (existingResult) {
                     // Update the existing test result
@@ -72,13 +81,13 @@ const uploadTestResults = async (req, res) => {
                     // Insert a new test result
                     await paperBasedTestResults.create({
                         studentId: student.id,
-                        uniqueStudentId: student.uniqueStudentId,
-                        obtainedMarks: obtainedMarks || 0,
-                        totalMarks: totalMarks || 12,
-                        subjectName: subjectName || "core java",
-                        topicName: topicName || "basics",
+                        uniqueStudentId: uniqueStudentId,
+                        obtainedMarks: row.obtainedMarks || 0,
+                        totalMarks: row.totalMarks || 12,
+                        subjectName: row.subjectName || "core java",
+                        topicName: row.topicName || "basics",
                         conducted_date: conducted_date,
-                        testName: testName,
+                        testName: row.testName,
                         createdAt: new Date(),
                         updatedAt: new Date(),
                     });
@@ -99,12 +108,12 @@ const uploadTestResults = async (req, res) => {
             skippedRecords,
         });
 
+        console.log('---------------------------------------');
     } catch (error) {
         console.error("Error processing file:", error);
         res.status(500).json({ message: "Internal server error", error });
     }
 };
-
 
 
 const getAttendedStudentsByBatch = async (req, res) => {
