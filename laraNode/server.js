@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const db = require('./models')
+const db = require('./models'); // Import  Sequelize models
 const app = express();
 
 
@@ -11,9 +11,9 @@ app.use(express.urlencoded({ extended: true }));
 
 const corsOptions = {
     // origin: 'http://localhost:3000',
-    origin: 'http://localhost:5173',
+    // origin: 'http://localhost:5173',
     // origin: 'https://www.laragrooming.com',
-    // origin: ['https://www.laragrooming.com', 'https://laragrooming.com'],
+    origin: ['https://www.laragrooming.com', 'https://laragrooming.com'],
     // origin: ['https://www.laragrooming.com', 'http://localhost:3000'],
     // optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
   };
