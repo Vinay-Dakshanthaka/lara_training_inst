@@ -19,7 +19,7 @@ const AllStudentsWeeklyTestResults = () => {
         const fetchResults = async () => {
             try {
                 const response = await axios.get(`${baseURL}/api/weekly-test/getAllIndividualStudentResultsForTest/${wt_id}`);
-                // console.log("response status : ", response)
+                console.log("response status-------------------------------- : ", response)
                 const modifiedResults = response.data.student_results.map(student => ({
                     ...student,
                     obtained_marks: 

@@ -168,6 +168,8 @@ const WeeklyTestAttendedStudentsList = () => {
         const response = await axios.get(
           `${baseURL}/api/weekly-test/getQuestionAnswerDataByStudentId/${wt_id}/${student_id}`
         );
+
+        
         const questions = response.data.questions;
 
         for (const question of questions) {

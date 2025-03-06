@@ -73,6 +73,11 @@ weeklyTestRouter.get('/getAllIndividualStudentResultsForTest/:wt_id',  weeklyTes
 weeklyTestRouter.delete('/deleteinternaltests/:wt_id', weeklyTestController.deleteinternaltests);
 
 
+weeklyTestRouter.post('/checkAndSubmitTest/', weeklyTestController.checkAndSubmitTest);
+
+weeklyTestRouter.put('/updateEvaluationStatus/', weeklyTestController.updateEvaluationStatus);
+
+
 // weeklyTestRouter.post('/upload-questions', upload.single('file'), async (req, res) => {
 //     const { wt_id, topic_id } = req.body;
 //     const filePath = req.file.path;

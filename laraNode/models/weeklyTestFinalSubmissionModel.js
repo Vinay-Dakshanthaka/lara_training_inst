@@ -75,7 +75,12 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: false, // Default to false, assumes attended outside unless verified
             comment: "True if student attended from institute"
-        }
+        },
+        evaluation: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false // Default to false, meaning not yet finalized
+        },
     });
 
     return WeeklyTestFinalSubmission;
@@ -86,3 +91,7 @@ module.exports = (sequelize, DataTypes) => {
 // ADD COLUMN latitude DECIMAL(9,6) NULL,
 // ADD COLUMN longitude DECIMAL(9,6) NULL,
 // ADD COLUMN attended_in_institute BOOLEAN NOT NULL DEFAULT FALSE;
+
+
+// ALTER TABLE laradb.weeklytestfinalsubmissions
+// ADD COLUMN evaluation BOOLEAN DEFAULT false;
