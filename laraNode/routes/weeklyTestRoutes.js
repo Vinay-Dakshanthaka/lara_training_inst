@@ -77,6 +77,11 @@ weeklyTestRouter.post('/checkAndSubmitTest/', weeklyTestController.checkAndSubmi
 
 weeklyTestRouter.put('/updateEvaluationStatus/', weeklyTestController.updateEvaluationStatus);
 
+weeklyTestRouter.put('/updateShowAnswersStatus/', weeklyTestController.updateShowAnswersStatus);
+
+weeklyTestRouter.put('/isResultsVisible/', weeklyTestController.isResultsVisible);
+
+
 
 // weeklyTestRouter.post('/upload-questions', upload.single('file'), async (req, res) => {
 //     const { wt_id, topic_id } = req.body;

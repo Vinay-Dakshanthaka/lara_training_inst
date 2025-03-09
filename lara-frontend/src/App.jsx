@@ -81,6 +81,8 @@ import AssignBatches from './components/internalTests/AssignBatchs';
 import AssignBatchsTowt from './components/weeklyTest/AssignBatchsTowt';
 import TestResults from './components/admin/TestResults';
 import StudentQuestionAnswer from './components/weeklyTest/weeklyTestStudentAnswerSubmission/evaluvation/StudentQuestionAnswer';
+import AddNewQuestiontoInternalTest from './components/internalTests/AddNewQuestiontoInternalTest';
+import StudentInternalTestDetails from './components/internalTests/StudentInternalTestDetails';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -143,6 +145,7 @@ const App = () => {
             <Route path="/add-questions-tolink/:test_id" element={<AddQuestionsToLink />} />
             <Route path="/assign-questions-internal-test/:internal_test_id" element={<AssignQuestionsToInternalTestLink />} />
             <Route path="/add-questions-internal-test/:internal_test_id" element={<AddQuestionToInternalTest />} />
+            <Route path="/add-question/:internal_test_id" element={<AddNewQuestiontoInternalTest />} />
             <Route path="/add-new-questions/:test_id" element={<AddQuestion />} />
             <Route path="/upload-excel-link/:test_id" element={<UploadQuestionsToLink />} />
             <Route path="/upload-excel-internal-test-link/:internal_test_id" element={<UploadQuestionsToInternalTestLink />} />
@@ -162,6 +165,8 @@ const App = () => {
             <Route path='/upload-questoins-weekly-test/:wt_id' element={<UploadWeeklyTestQuestions />} />
             <Route path='/testResults/:id' element={<TestResults />} />
             <Route path='/weekly-test/:wt_id' element={<StudentAnswerForm />} />
+            <Route path='/internal-test-theory/:wt_id' element={<StudentAnswerForm />} />
+            {/* <Route path='/internal-test/:wt_id' element={<StudentAnswerForm />} /> */}
             <Route path='/test-answer-form/:wt_id' element={<AnswerUpdateForm />} />
             <Route path='/wt-attended-student-list/:wt_id' element={<WeeklyTestAttendedStudentsList />} />
             <Route path='/evaluvate-student-answers/:wt_id/:student_id' element={<StudentQuestionAnswer />} />

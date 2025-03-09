@@ -189,8 +189,7 @@ const StudentQuestionAnswer = () => {
   //     toast.error("There was an error during auto evaluation.");
   //   }
   // };
-  
-  const autoEvaluateAnswers = async () => {
+  const autoEvaluateAnswers = async () => { 
     let allUpdated = true;
     console.log("Starting auto evaluation of answers...");
 
@@ -211,6 +210,9 @@ const StudentQuestionAnswer = () => {
             const comment = isCorrect ? "Correct Answer" : "Incorrect Answer";
 
             try {
+                // 2-second delay before evaluating the next question
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
                 await axios.put(
                     `${baseURL}/api/weekly-test/updateMarksAndCommentByStudentId/${wt_id}/${student_id}/${item.question_id}`,
                     { marks, comment }
@@ -222,7 +224,7 @@ const StudentQuestionAnswer = () => {
 
                 // Check if error status is 403 (Final evaluation already done)
                 if (error.response && error.response.status === 403) {
-                    toast.error("Final evaluation is already done. Cannot update marks and comments.");
+                    toast.error("Excluded from auto evaluation...");
                 } else {
                     toast.error("Error updating marks and comments.");
                 }
@@ -238,6 +240,57 @@ const StudentQuestionAnswer = () => {
         toast.error("There was an error during auto evaluation.");
     }
 };
+
+
+  
+//   const autoEvaluateAnswers = async () => {
+//     let allUpdated = true;
+//     console.log("Starting auto evaluation of answers...");
+
+//     for (const item of answeredQuestions) {
+//         console.log(`Processing question ID ${item.question_id}`);
+//         const studentAnswer = item.studentAnswer.answer;
+//         const correctAnswer = correctAnswers[item.question_id];
+//         const answerKeyword = answerKeywords[item.question_id];
+
+//         if (studentAnswer && correctAnswer) {
+//             const studentVector = tokenizeAndVectorize(studentAnswer);
+//             const correctVector = tokenizeAndVectorize(correctAnswer);
+//             const similarity = cosineSimilarity(studentVector, correctVector);
+
+//             const threshold = answerKeyword === "1" ? 0.8 : 0.6;
+//             const isCorrect = similarity >= threshold;
+//             const marks = isCorrect ? item.marks : 0;
+//             const comment = isCorrect ? "Correct Answer" : "Incorrect Answer";
+
+//             try {
+//                 await axios.put(
+//                     `${baseURL}/api/weekly-test/updateMarksAndCommentByStudentId/${wt_id}/${student_id}/${item.question_id}`,
+//                     { marks, comment }
+//                 );
+//                 console.log(`Successfully updated marks for question ID ${item.question_id}`);
+//             } catch (error) {
+//                 allUpdated = false;
+//                 console.error(`Error updating marks for question ID ${item.question_id}:`, error);
+
+//                 // Check if error status is 403 (Final evaluation already done)
+//                 if (error.response && error.response.status === 403) {
+//                     toast.error("Excluded from auto evalution...");
+//                 } else {
+//                     toast.error("Error updating marks and comments.");
+//                 }
+//             }
+//         }
+//     }
+
+//     if (allUpdated) {
+//         console.log("Auto evaluation completed successfully!");
+//         toast.success("Answers auto-evaluated successfully!");
+//     } else {
+//         console.error("Errors occurred during auto evaluation.");
+//         toast.error("There was an error during auto evaluation.");
+//     }
+// };
 
   
   const handleFinalEvaluation = () => {

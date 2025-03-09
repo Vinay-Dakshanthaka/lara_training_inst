@@ -4,7 +4,7 @@ import { Button, Form, Row, Col } from 'react-bootstrap';
 import { baseURL } from '../config';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const AddQuestionToInternalTest = () => {
     const [topics, setTopics] = useState([]);
@@ -18,13 +18,18 @@ const AddQuestionToInternalTest = () => {
         correct_options: []
     });
     const { internal_test_id } = useParams();
-
+    const navigate = useNavigate();  // Initialize useNavigate
     // Fetch internal test details
     const fetchInternalTestDetails = async () => {
         try {
             const response = await axios.get(`${baseURL}/api/internal-test/getInternalTestById/${internal_test_id}`);
+            console.log(response.data,"------------------datagetting")
             setInternalTestDetails(response.data.internalTest);
             setTopics(response.data.internalTest.topics);
+            // Check testtype and navigate if true
+            if (response.data.internalTest.testtype) {
+                navigate('/add-question');  // Navigate to new component if testtype is true
+            }
         } catch (error) {
             if (error.response && error.response.status === 404) {
                 toast.info('No Internal Test details found');

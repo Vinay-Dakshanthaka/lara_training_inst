@@ -28,7 +28,19 @@ module.exports = (sequelize, DataTypes) => {
         wt_description: {
             type: DataTypes.TEXT,
             allowNull: false
-        }
+        },
+         testType: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
+        isAnswerDisplayed: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false // Default to false, meaning not yet finalized
+        },
+        isResultsVisible: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false // Default to false, meaning not yet finalized
+        },
     }, {
         timestamps: true,
         tableName: 'WeeklyTests'
@@ -50,3 +62,11 @@ module.exports = (sequelize, DataTypes) => {
 
     return WeeklyTest;
 };
+
+// ALTER TABLE laradb.weeklytests 
+// ADD COLUMN testType BOOLEAN DEFAULT FALSE;
+
+// ALTER TABLE laradb.weeklytests 
+// ADD COLUMN isAnswerDisplayed BOOLEAN DEFAULT FALSE;
+// ALTER TABLE laradb.weeklytests 
+// ADD COLUMN isResultsVisible BOOLEAN DEFAULT FALSE;

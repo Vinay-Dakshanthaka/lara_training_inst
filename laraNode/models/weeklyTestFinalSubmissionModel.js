@@ -81,6 +81,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: false // Default to false, meaning not yet finalized
         },
+      
     });
 
     return WeeklyTestFinalSubmission;
@@ -95,3 +96,6 @@ module.exports = (sequelize, DataTypes) => {
 
 // ALTER TABLE laradb.weeklytestfinalsubmissions
 // ADD COLUMN evaluation BOOLEAN DEFAULT false;
+
+
+

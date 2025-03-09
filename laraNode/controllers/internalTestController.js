@@ -77,6 +77,72 @@ const createInternalTestLink = async (req, res) => {
     }
 };
 
+
+// const createInternalTestLink = async (req, res) => {
+//     try {
+//         const { 
+//             number_of_questions, 
+//             show_result, 
+//             is_active, 
+//             is_monitored, 
+//             topic_ids, 
+//             test_description, 
+//             test_date, 
+//             testType // New flag for test type
+//         } = req.body;
+
+//            console.log(req.body,"---------------------------------body")
+//            console.log(req.body.test_type,"---------------------------------testType")
+//         if (!number_of_questions || !Array.isArray(topic_ids) || topic_ids.length === 0) {
+//             return res.status(400).send({ message: 'Required fields are missing or invalid' });
+//         }
+
+//         // Validate that all provided topic_ids exist in the topics table
+//         const topics = await Topic.findAll({
+//             where: {
+//                 topic_id: topic_ids
+//             }
+//         });
+
+//         if (topics.length !== topic_ids.length) {
+//             return res.status(400).send({ message: 'One or more topic IDs are invalid' });
+//         }
+
+//         // Create a new InternalTest
+//         const newTest = await InternalTest.create({
+//             internal_test_link: '', // Initially empty, will be updated later
+//             number_of_questions,
+//             test_description,
+//             test_date,
+//             show_result: show_result !== undefined ? show_result : true, // Default to true if not provided
+//             is_active: is_active !== undefined ? is_active : true,       // Default to true if not provided
+//             is_monitored: is_monitored !== undefined ? is_monitored : false, // Default to false if not provided
+//             testType: req.body.test_type ,  // Ensure testType is passed correctly
+//         });
+
+//         // Generate the internal test link with the internal_test_id
+//         const internal_test_link = `${baseURL}/internal-test/${newTest.internal_test_id}`;
+//         newTest.internal_test_link = internal_test_link;
+//         await newTest.save();
+
+//         // Save the topic IDs in the InternalTestTopic table
+//         const topicPromises = topic_ids.map(topic_id =>
+//             InternalTestTopic.create({
+//                 internal_test_id: newTest.internal_test_id,
+//                 topic_id
+//             })
+//         );
+
+//         await Promise.all(topicPromises);
+
+//         console.log("Newly created internal test:", newTest);
+//         return res.status(200).send({ message: 'Internal test added successfully', newTest });
+//     } catch (error) {
+//         console.error('Error creating internal test link:', error.stack);
+//         return res.status(500).send({ message: error.message });
+//     }
+// };
+
 const updateInternalTestLink = async (req, res) => {
     try {
         const { internal_test_id } = req.params; // Assuming the internal_test_id is passed in the URL
@@ -227,6 +293,7 @@ const getInternalTestById = async (req, res) => {
             is_monitored: internalTest.is_monitored,
             created_at: internalTest.createdAt,
             updated_at: internalTest.updatedAt,
+            // testType:internalTest.testType,
             topics: internalTest.TestTopics.map(topicData => ({
                 topic_id: topicData.topic_id,
                 topic_name: topicData.InternalTestTopic ? topicData.InternalTestTopic.name : null // Access the topic name correctly based on the alias
