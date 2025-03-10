@@ -1573,88 +1573,12 @@ const getQuestionAnswerDataByStudentId = async (req, res) => {
     }
 };
 
-// const updateMarksAndCommentByStudentId = async (req, res) => {
-//     const { wt_id, student_id, question_id } = req.params;  // Receive wt_id, student_id, and wt_question_id from the request
-//     const { marks, comment } = req.body;  // Receive marks and comment from the request body
-
-//     try {
-//         // Step 1: Check if the student has already answered the question
-//         const studentAnswer = await StudentAnswer.findOne({
-//             where: {
-//                 wt_id,
-//                 student_id,
-//                 question_id
-//             }
-//         });
-
-//         // If the student has not answered the question, return an error
-//         if (!studentAnswer) {
-//             return res.status(404).send({
-//                 message: 'Student has not attempted this question yet'
-//             });
-//         }
-
-//         // Step 2: Set default value for comment if it's empty or undefined
-//         const updatedComment = comment && comment.trim() !== '' ? comment : 'N/A';
-//             const checkevalution = await WeeklyTestFinalSubmission.findOne({
-//                 where : {
-//                     wt_id,
-//                 student_id
-//                 }
-//             })
-//         // Step 3: Update the marks and comment for the question
-//         await StudentAnswer.update(
-//             {
-//                 marks,  // New marks
-//                 comment: updatedComment  // New comment with default if needed
-//             },
-//             {
-//                 where: {
-//                     wt_id,
-//                     student_id,
-//                     question_id
-//                 }
-//             }
-//         );
-
-//         return res.status(200).send({
-//             message: 'Marks and comment updated successfully'
-//         });
-
-//     } catch (error) {
-//         console.error('Error updating marks and comment:', error);
-//         return res.status(500).send({
-//             message: 'Error updating marks and comment',
-//             error: error.message
-//         });
-//     }
-// };
-
-
-
 const updateMarksAndCommentByStudentId = async (req, res) => {
-    const { wt_id, student_id, question_id } = req.params;  // Receive wt_id, student_id, and question_id from the request
+    const { wt_id, student_id, question_id } = req.params;  // Receive wt_id, student_id, and wt_question_id from the request
     const { marks, comment } = req.body;  // Receive marks and comment from the request body
-     console.log(req.body ,"-------------------------body");
-     console.log(req.params ,"-------------------------[params]");
+
     try {
-        // Step 1: Check if final evaluation is already done
-        const checkEvaluation = await WeeklyTestFinalSubmission.findOne({
-            where: {
-                wt_id,
-                student_id
-            }
-        });
-           
-        console.log(checkEvaluation,"------------------------evalutin")
-        if (checkEvaluation && checkEvaluation.evaluation === true) {
-            // If final evaluation is done, prevent further updates
-            return res.status(403).send({
-                message: 'Final evaluation is already done. Marks and comment cannot be updated.'
-            });
-        }
-            console.log("------------------------------------------")
-        // Step 2: Check if the student has already answered the question
+        // Step 1: Check if the student has already answered the question
         const studentAnswer = await StudentAnswer.findOne({
             where: {
                 wt_id,
@@ -1662,7 +1586,7 @@ const updateMarksAndCommentByStudentId = async (req, res) => {
                 question_id
             }
         });
-          
+
         // If the student has not answered the question, return an error
         if (!studentAnswer) {
             return res.status(404).send({
@@ -1670,10 +1594,15 @@ const updateMarksAndCommentByStudentId = async (req, res) => {
             });
         }
 
-        // Step 3: Set default value for comment if it's empty or undefined
+        // Step 2: Set default value for comment if it's empty or undefined
         const updatedComment = comment && comment.trim() !== '' ? comment : 'N/A';
-        console.log("------------------------------------------------")
-        // Step 4: Update the marks and comment for the question
+            // const checkevalution = await WeeklyTestFinalSubmission.findOne({
+            //     where : {
+            //         wt_id,
+            //     student_id
+            //     }
+            // })
+        // Step 3: Update the marks and comment for the question
         await StudentAnswer.update(
             {
                 marks,  // New marks
@@ -1700,6 +1629,77 @@ const updateMarksAndCommentByStudentId = async (req, res) => {
         });
     }
 };
+
+
+
+// const updateMarksAndCommentByStudentId = async (req, res) => {
+//     const { wt_id, student_id, question_id } = req.params;  // Receive wt_id, student_id, and question_id from the request
+//     const { marks, comment } = req.body;  // Receive marks and comment from the request body
+//      console.log(req.body ,"-------------------------body");
+//      console.log(req.params ,"-------------------------[params]");
+//     try {
+//         // Step 1: Check if final evaluation is already done
+//         const checkEvaluation = await WeeklyTestFinalSubmission.findOne({
+//             where: {
+//                 wt_id,
+//                 student_id
+//             }
+//         });
+           
+//         console.log(checkEvaluation,"------------------------evalutin")
+//         if (checkEvaluation && checkEvaluation.evaluation === true) {
+//             // If final evaluation is done, prevent further updates
+//             return res.status(403).send({
+//                 message: 'Final evaluation is already done. Marks and comment cannot be updated.'
+//             });
+//         }
+//             console.log("------------------------------------------")
+//         // Step 2: Check if the student has already answered the question
+//         const studentAnswer = await StudentAnswer.findOne({
+//             where: {
+//                 wt_id,
+//                 student_id,
+//                 question_id
+//             }
+//         });
+          
+//         // If the student has not answered the question, return an error
+//         if (!studentAnswer) {
+//             return res.status(404).send({
+//                 message: 'Student has not attempted this question yet'
+//             });
+//         }
+
+//         // Step 3: Set default value for comment if it's empty or undefined
+//         const updatedComment = comment && comment.trim() !== '' ? comment : 'N/A';
+//         console.log("------------------------------------------------")
+//         // Step 4: Update the marks and comment for the question
+//         await StudentAnswer.update(
+//             {
+//                 marks,  // New marks
+//                 comment: updatedComment  // New comment with default if needed
+//             },
+//             {
+//                 where: {
+//                     wt_id,
+//                     student_id,
+//                     question_id
+//                 }
+//             }
+//         );
+
+//         return res.status(200).send({
+//             message: 'Marks and comment updated successfully'
+//         });
+
+//     } catch (error) {
+//         console.error('Error updating marks and comment:', error);
+//         return res.status(500).send({
+//             message: 'Error updating marks and comment',
+//             error: error.message
+//         });
+//     }
+// };
 
 
 const getStudentDetailsByWeeklyTestId = async (req, res) => {
@@ -2842,15 +2842,15 @@ const checkAndSubmitTest = async (req, res) => {
   };
   
   const updateEvaluationStatus = async (req, res) => {
-    const { student_id, test_id, evaluation } = req.body;
-     console.log(req.body,"-----------------------------------")
+    const { student_id, test_id, evaluation,final_submission } = req.body;
+    //  console.log(req.body,"-----------------------------------req.body")
     try {
       // Check if the record exists based on student_id and wt_id
       const existingRecord = await WeeklyTestFinalSubmission.findOne({
         where: { student_id, wt_id :test_id },
       });
         
-      console.log(existingRecord,"-----------------------------------")
+    //   console.log(existingRecord,"-----------------------------------")
       if (!existingRecord) {
         return res.status(404).json({ message: "Record not found." });
       }
@@ -2858,8 +2858,9 @@ const checkAndSubmitTest = async (req, res) => {
       // Update the evaluation column based on the received value
       await existingRecord.update({
         evaluation: evaluation === true ? 1 : 0,
+        final_submission: final_submission === true ? 1 : 0,
       });
-  
+      console.log(existingRecord,"-----exsiting")
       return res.status(200).json({
         message: "Evaluation status updated successfully.",
         result: existingRecord,
@@ -2980,6 +2981,30 @@ const getShowAnswersStatus = async (req, res) => {
     }
 };
 
+// Fetch all details for weeklytestfinalsubmissions by wt_id and student_id
+const getWeeklyTestFinalSubmissionDetails = async (req, res) => {
+    const { wt_id, student_id } = req.params;
+
+    try {
+        const submissions = await WeeklyTestFinalSubmission.findAll({
+            where: {
+                wt_id,
+                student_id
+            }
+        });
+
+        if (submissions.length === 0) {
+            return res.status(404).json({ message: 'No submissions found for the given wt_id and student_id' });
+        }
+
+        res.status(200).json(submissions);
+    } catch (error) {
+        console.error('Error fetching submissions:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
 module.exports = {
     createWeeklyTestLink,
     updateWeeklyTest,
@@ -3018,4 +3043,5 @@ module.exports = {
     updateShowAnswersStatus,
     isResultsVisible,
     getShowAnswersStatus,
+    getWeeklyTestFinalSubmissionDetails,
 }

@@ -81,6 +81,8 @@ weeklyTestRouter.put('/updateShowAnswersStatus/', weeklyTestController.updateSho
 
 weeklyTestRouter.put('/isResultsVisible/', weeklyTestController.isResultsVisible);
 
+weeklyTestRouter.get('/getWeeklyTestFinalSubmissionDetails/:wt_id/:student_id', weeklyTestController.getWeeklyTestFinalSubmissionDetails);
+
 
 
 // weeklyTestRouter.post('/upload-questions', upload.single('file'), async (req, res) => {
