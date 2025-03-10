@@ -643,7 +643,7 @@ const WeeklyTestList = () => {
                                 </td>
                                     <td>
                                     <Form.Check
-                                        type="checkbox"
+                                         type="checkbox"
                                         checked={test.isResultsVisible} // Correct property for checkbox status
                                         onChange={() => handleShowResultChange(test)} // Trigger toggle on change
                                         label={test.isResultsVisible ? 'Show Results' : 'Hide Results'} // Dynamic label based on state
@@ -655,6 +655,7 @@ const WeeklyTestList = () => {
                                      onClick={() => deassignTestLink(test.wt_id)}
                                      >
                                      <BsTrash />
+                  
                                     </button></td>
                                     
                                 </tr>

@@ -117,7 +117,7 @@ import { baseURL } from '../../config';
 import Paginate from '../../common/Paginate';
 import { toast } from 'react-toastify';
 import { cosineSimilarity, tokenizeAndVectorize } from './evaluvation/autoEvaluvateUtils';
-import {  BsCheckCircleFill, BsXCircleFill } from 'react-icons/bs';
+import { BsCheckCircleFill, BsXCircleFill } from 'react-icons/bs';
 
 const WeeklyTestAttendedStudentsList = () => {
   const { wt_id } = useParams();
@@ -127,7 +127,11 @@ const WeeklyTestAttendedStudentsList = () => {
   const [selectedStudents, setSelectedStudents] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
+  const [loadingEvaluations, setLoadingEvaluations] = useState(
+    selectedStudents.map(() => false)
+  );
+
 
   useEffect(() => {
     const fetchStudentEvaluationStatus = async () => {
@@ -154,72 +158,100 @@ const WeeklyTestAttendedStudentsList = () => {
   const handleSelectAll = () => {
     setSelectedStudents(selectedStudents.length === students.length ? [] : students.map((s) => s.student_id));
   };
+
   const autoEvaluateAnswers = async () => {
     if (selectedStudents.length === 0) {
       toast.error("Please select at least one student to evaluate.");
       return;
     }
-
-    for (const student_id of selectedStudents) {
+  
+    for (let i = 0; i < selectedStudents.length; i++) {
+      const student_id = selectedStudents[i];
       const student = students.find((s) => s.student_id === student_id);
-      const studentName = student ? student.student_name : `Student ${student_id}`; // Fallback if name isn't found
-
+      const studentName = student ? student.student_name : `Student ${student_id}`;
+  
+      // Set loading state for the current student
+      setLoadingEvaluations((prevState) => {
+        const newState = [...prevState];
+        newState[i] = true;
+        return newState;
+      });
+  
       try {
         const response = await axios.get(
           `${baseURL}/api/weekly-test/getQuestionAnswerDataByStudentId/${wt_id}/${student_id}`
         );
-
-        
+  
         const questions = response.data.questions;
-
+  
+        // Process each question one by one
         for (const question of questions) {
-          const correctAnswerResponse = await axios.get(
-            `${baseURL}/api/weekly-test/getCorrectAnswerForQuestion/${question.question_id}`
-          );
-          const correctAnswer = correctAnswerResponse.data.answer;
-          const studentAnswer = question.studentAnswer?.answer || "";
-          const keywords = correctAnswerResponse.data.keywords;
-
-          console.log("answers : : ", keywords);
-
-          // Convert answers to vectorized representations
-          const correctAnswerVector = tokenizeAndVectorize(correctAnswer);
-          const studentAnswerVector = tokenizeAndVectorize(studentAnswer);
-
-          // Calculate similarity
-          const similarity = cosineSimilarity(correctAnswerVector, studentAnswerVector);
-          console.log("similarity:", similarity);
-
-          // Set threshold based on keywords
-          const threshold = keywords === "1" ? 0.8 : 0.6;
-          const isCorrect = similarity >= threshold;
-
-
-          const marks = isCorrect ? question.marks : 0;
-          const comment = isCorrect ? `Correct Answer` : `Incorrect Answer`;
-
           try {
+            const correctAnswerResponse = await axios.get(
+              `${baseURL}/api/weekly-test/getCorrectAnswerForQuestion/${question.question_id}`
+            );
+  
+            if (!correctAnswerResponse.data.answer) {
+              toast.warning(`Skipped question ${question.question_id} for ${studentName} as no correct answer is uploaded.`);
+              continue; // Skip this question
+            }
+  
+            const correctAnswer = correctAnswerResponse.data.answer;
+            const studentAnswer = question.studentAnswer?.answer || "";
+            const keywords = correctAnswerResponse.data.keywords;
+  
+            console.log("answers:", keywords);
+  
+            // Convert answers to vectorized representations
+            const correctAnswerVector = tokenizeAndVectorize(correctAnswer);
+            const studentAnswerVector = tokenizeAndVectorize(studentAnswer);
+  
+            // Calculate similarity
+            const similarity = cosineSimilarity(correctAnswerVector, studentAnswerVector);
+            console.log("similarity:", similarity);
+  
+            // Set threshold based on keywords
+            const threshold = keywords === "1" ? 0.8 : 0.6;
+            const isCorrect = similarity >= threshold;
+  
+            console.log("Threshold:", threshold);
+            console.log("isCorrect:", isCorrect);
+  
+            const marks = isCorrect ? question.marks : 0;
+            const comment = isCorrect ? `Correct Answer` : `Incorrect Answer`;
+  
+            // Update marks and comment for the current question
             await axios.put(
               `${baseURL}/api/weekly-test/updateMarksAndCommentByStudentId/${wt_id}/${student_id}/${question.question_id}`,
               { marks, comment }
             );
+            console.log("Marks updated successfully!!");
           } catch (error) {
-            console.error("failed to update marks ", error)
+            console.error(`Failed to process question ${question.question_id} for ${studentName}`, error);
+            continue; // Skip this question and move to the next one
           }
         }
-
-
-        // await axios.put(`${baseURL}/api/weekly-test/updateEvaluationStatus/${wt_id}/${student_id}`, {
-        //   is_evaluation_done: true,
-        // });
-
+  
+        // Once all questions are processed, update evaluation status
+        await axios.put(
+          `${baseURL}/api/weekly-test/updateEvaluationStatus/${wt_id}/${student_id}`,
+          { is_evaluation_done: true }
+        );
+  
         toast.success(`Evaluation completed for ${studentName}`);
       } catch (error) {
         console.error(`Error evaluating ${studentName}:`, error);
-        toast.error(`Error evaluating ${studentName}`);
+        toast.error(`Partial: ${studentName} `);
       }
+  
+      // Set loading state to false after processing the current student
+      setLoadingEvaluations((prevState) => {
+        const newState = [...prevState];
+        newState[i] = false; // Set loading for this student to false
+        return newState;
+      });
     }
-
+  
     setStudents((prev) =>
       prev.map((s) =>
         selectedStudents.includes(s.student_id) ? { ...s, is_evaluation_done: true } : s
@@ -291,12 +323,14 @@ const WeeklyTestAttendedStudentsList = () => {
               <td>{student.student_name}</td>
               <td>{student.student_email}</td>
               <td>{student.student_phone}</td>
-              <td className='text-center'>{student.attended_in_institute ? (<><BsCheckCircleFill className='text-success h4'/></>) : ( <><BsXCircleFill className='text-danger'  /></>) }</td>
+              <td className='text-center'>{student.attended_in_institute ? (<><BsCheckCircleFill className='text-success h4' /></>) : (<><BsXCircleFill className='text-danger' /></>)}</td>
               <td>
                 <Link to={`/evaluvate-student-answers/${wt_id}/${student.student_id}`}>Evaluate</Link>
               </td>
               <td>
-                {student.is_evaluation_done ? (
+                {loadingEvaluations[students.findIndex((s) => s.student_id === student.student_id)] ? (
+                  <Spinner animation="border" size="sm" />  // Show spinner while loading
+                ) : student.is_evaluation_done ? (
                   <Badge bg="success">Evaluation Done</Badge>
                 ) : (
                   <OverlayTrigger placement="top" overlay={<Tooltip>Evaluation pending</Tooltip>}>
