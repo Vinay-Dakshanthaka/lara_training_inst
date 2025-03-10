@@ -4,7 +4,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Form, Button, Row, Col } from 'react-bootstrap';
 import { baseURL } from '../config';
-import SubjectTopicSelector from './SubjectTopicSelector';
+import SubjectTopicSelector from '../../components/weeklyTest/SubjectTopicSelector';
 
 const CreateWeeklyTest = () => {
     const [formData, setFormData] = useState({
@@ -12,9 +12,10 @@ const CreateWeeklyTest = () => {
         test_date: '',
         is_active: true,
         is_monitored: false,
-        wt_description: ''
+        wt_description: '',
+        testType: ''  // Initialize testType here
     });
-    
+
     const [selectedTopics, setSelectedTopics] = useState([]);
 
     const handleChange = (e) => {
@@ -27,7 +28,7 @@ const CreateWeeklyTest = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         const requestData = {
             ...formData,
             topic_ids: selectedTopics,
@@ -45,7 +46,8 @@ const CreateWeeklyTest = () => {
                 test_date: '',
                 is_active: true,
                 is_monitored: false,
-                wt_description: ''
+                wt_description: '',
+                testType: ''
             });
             setSelectedTopics([]);
         } catch (error) {
@@ -75,6 +77,27 @@ const CreateWeeklyTest = () => {
                         required
                     />
                 </Form.Group>
+
+                {/* Test Type Selection */}
+                <div className="mt-4">
+                    <h5>Select Test Type</h5>
+                    <Form.Check
+                        type="radio"
+                        label="internal"
+                        name="testType"
+                        value="internal"
+                        checked={formData.testType === 'internal'}
+                        onChange={(e) => setFormData({ ...formData, testType: e.target.value })}
+                    />
+                    <Form.Check
+                        type="radio"
+                        label="weekly"
+                        name="testType"
+                        value="weekly"
+                        checked={formData.testType === 'weekly'}
+                        onChange={(e) => setFormData({ ...formData, testType: e.target.value })}
+                    />
+                </div>
 
                 <Form.Group controlId="test_date" className="mt-3">
                     <Form.Label>Test Date</Form.Label>

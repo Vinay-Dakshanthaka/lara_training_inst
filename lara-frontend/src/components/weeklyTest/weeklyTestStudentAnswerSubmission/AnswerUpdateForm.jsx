@@ -83,7 +83,7 @@ const AnswerUpdateForm = () => {
 
             if (response.status === 200) {
                 toast.success('Answer updated successfully!');
-                console.log(response);
+                // console.log(response);
             } else if (response.status === 201) {
                 toast.success('Answer saved successfully!');
                 console.log(response);

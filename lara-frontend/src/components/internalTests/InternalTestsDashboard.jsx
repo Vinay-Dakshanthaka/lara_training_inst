@@ -9,6 +9,9 @@ import CreateWeeklyTest from '../weeklyTest/CreateWeeklyTest';
 import WeeklyTestList from '../weeklyTest/WeeklyTestList';
 import EvaluvateWeeklyTest from '../weeklyTest/EvaluvateWeeklyTest';
 import AllStudentsWeeklyTestPerformance from '../weeklyTest/weeklyTestStudentAnswerSubmission/AllStudentsWeeklyTestPerformance';
+import InternalTestList from './InternalTestList';
+import EvaluateInterTest from './EvaluvateInternalTest';
+import EvaluateInternalTest from './EvaluvateInternalTest';
 
 const InternalTestsDashboard = () => {
     const [activeComponent, setActiveComponent] = useState('AllTests');
@@ -32,6 +35,10 @@ const InternalTestsDashboard = () => {
                 return <EvaluvateWeeklyTest />;
             case 'AllStudentsWeeklyTestPerformance':
                 return <AllStudentsWeeklyTestPerformance />;
+            case 'InternalTestList':
+                return <InternalTestList />;
+            case 'EvaluvateInternalTest':
+                return <EvaluateInternalTest />;
             default:
                 return <AllInternalTests />;
         }
@@ -183,6 +190,22 @@ const InternalTestsDashboard = () => {
                                 className={activeComponent === 'AllStudentsWeeklyTestPerformance' ? 'active' : ''}
                             >
                                 Student Performance Weekly Test
+                            </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link
+                                eventKey="InternalTestList"
+                                className={activeComponent === 'InternalTestList' ? 'active' : ''}
+                            >
+                                InternalTestList
+                            </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link
+                                eventKey="EvaluvateInternalTest"
+                                className={activeComponent === 'EvaluvateInternalTest' ? 'active' : ''}
+                            >
+                               Evaluvate InternalTests
                             </Nav.Link>
                         </Nav.Item>
                     </Nav>

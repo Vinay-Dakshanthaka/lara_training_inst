@@ -34,8 +34,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE,
             allowNull: true, 
             defaultValue: null
-        }
-    }, {
+        },
+       
+    }, 
+    
+    {
         timestamps: true,
         tableName: 'Internaltests'
     });
@@ -50,3 +53,5 @@ module.exports = (sequelize, DataTypes) => {
 
     return InternalTest;
 };
+
+
