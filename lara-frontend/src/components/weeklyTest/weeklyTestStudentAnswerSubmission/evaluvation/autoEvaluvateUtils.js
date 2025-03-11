@@ -1,12 +1,63 @@
-import DOMPurify from "dompurify";
+// import DOMPurify from "dompurify";
 
-// cosine similarity
-export function cosineSimilarity(vec1, vec2) {
-    const dotProduct = vec1.reduce((sum, val, i) => sum + val * (vec2[i] || 0), 0);
-    const magnitude1 = Math.sqrt(vec1.reduce((sum, val) => sum + val ** 2, 0));
-    const magnitude2 = Math.sqrt(vec2.reduce((sum, val) => sum + val ** 2, 0));
-    return magnitude1 && magnitude2 ? dotProduct / (magnitude1 * magnitude2) : 0;
-  }
+// // cosine similarity
+// export function cosineSimilarity(vec1, vec2) {
+//     const dotProduct = vec1.reduce((sum, val, i) => sum + val * (vec2[i] || 0), 0);
+//     const magnitude1 = Math.sqrt(vec1.reduce((sum, val) => sum + val ** 2, 0));
+//     const magnitude2 = Math.sqrt(vec2.reduce((sum, val) => sum + val ** 2, 0));
+//     return magnitude1 && magnitude2 ? dotProduct / (magnitude1 * magnitude2) : 0;
+//   }
+ 
+
+// export function tokenizeAndVectorize(text) {
+//     // Function to sanitize and strip HTML tags + inline styles
+//     function sanitizeAndStripHtml(html) {
+//       console.log("Original HTML Input:", html);
+  
+//       // Sanitize HTML to remove malicious content
+//       const cleanHtml = DOMPurify.sanitize(html, {
+//         ALLOWED_TAGS: ["b", "i", "u", "p", "br", "strong", "em"], // Keeps minimal formatting
+//         ALLOWED_ATTRS: {} // Removes all attributes including inline styles
+//       });
+  
+//       console.log("Sanitized HTML (Without Inline Styles):", cleanHtml);
+  
+//       // Convert HTML to plain text
+//       const doc = new DOMParser().parseFromString(cleanHtml, "text/html");
+//       const plainText = doc.body.textContent || "";
+  
+//       console.log("Extracted Plain Text:", plainText);
+//       return plainText;
+//     }
+  
+//     // List of stop words to exclude from tokenization
+//     const stopWords = new Set([
+//       "is", "the", "in", "and", "of", "to", "a", "for", "on", "it", "this", "that", "by", "with", "as", "at", "from"
+//     ]);
+  
+//     const plainText = sanitizeAndStripHtml(text); // Process the input HTML
+//     const words = plainText
+//       .toLowerCase()                      // Convert text to lowercase
+//       .replace(/[^a-z0-9\s]/g, "")        // Remove non-alphanumeric characters except spaces
+//       .split(/\s+/);                      // Split by one or more whitespace characters
+  
+//     console.log("Tokenized Words (Before Stop Word Removal):", words);
+  
+//     // Filter out stop words from the tokenized words
+//     const filteredWords = words.filter(word => !stopWords.has(word));
+  
+//     console.log("Filtered Words (No Stop Words):", filteredWords);
+  
+//     // Create a word frequency vector (count the occurrences of each word)
+//     const wordCount = {};
+//     filteredWords.forEach((word) => {
+//       if (word) wordCount[word] = (wordCount[word] || 0) + 1;
+//     });
+  
+//     console.log("Word Frequency Vector (After Stop Word Removal):", wordCount);
+//     return Object.values(wordCount);
+//   }
+  
   
 //    vectorization
 //   export function tokenizeAndVectorize(text) {
@@ -44,59 +95,83 @@ export function cosineSimilarity(vec1, vec2) {
   
 //     return Object.values(wordCount);
 //   }
-  
-
-  
 
 
+import DOMPurify from "dompurify";
 
+// Cosine similarity function
+export function cosineSimilarity(vec1, vec2) {
+  const dotProduct = vec1.reduce((sum, val, i) => sum + val * (vec2[i] || 0), 0);
+  const magnitude1 = Math.sqrt(vec1.reduce((sum, val) => sum + val ** 2, 0));
+  const magnitude2 = Math.sqrt(vec2.reduce((sum, val) => sum + val ** 2, 0));
+  return magnitude1 && magnitude2 ? dotProduct / (magnitude1 * magnitude2) : 0;
+}
+
+// Tokenization and vectorization
 export function tokenizeAndVectorize(text) {
-    // Function to sanitize and strip HTML tags + inline styles
-    function sanitizeAndStripHtml(html) {
+  // Function to sanitize and strip HTML tags + inline styles
+  function sanitizeAndStripHtml(html) {
       console.log("Original HTML Input:", html);
-  
+
       // Sanitize HTML to remove malicious content
       const cleanHtml = DOMPurify.sanitize(html, {
-        ALLOWED_TAGS: ["b", "i", "u", "p", "br", "strong", "em"], // Keeps minimal formatting
-        ALLOWED_ATTRS: {} // Removes all attributes including inline styles
+          ALLOWED_TAGS: ["b", "i", "u", "p", "br", "strong", "em"], // Keeps minimal formatting
+          ALLOWED_ATTRS: {} // Removes all attributes including inline styles
       });
-  
+
       console.log("Sanitized HTML (Without Inline Styles):", cleanHtml);
-  
+
       // Convert HTML to plain text
       const doc = new DOMParser().parseFromString(cleanHtml, "text/html");
       const plainText = doc.body.textContent || "";
-  
+
       console.log("Extracted Plain Text:", plainText);
       return plainText;
-    }
-  
-    // List of stop words to exclude from tokenization
-    const stopWords = new Set([
+  }
+
+  // List of stop words to exclude from tokenization
+  const stopWords = new Set([
       "is", "the", "in", "and", "of", "to", "a", "for", "on", "it", "this", "that", "by", "with", "as", "at", "from"
-    ]);
-  
-    const plainText = sanitizeAndStripHtml(text); // Process the input HTML
-    const words = plainText
+  ]);
+
+  const plainText = sanitizeAndStripHtml(text); // Process the input HTML
+  const words = plainText
       .toLowerCase()                      // Convert text to lowercase
       .replace(/[^a-z0-9\s]/g, "")        // Remove non-alphanumeric characters except spaces
       .split(/\s+/);                      // Split by one or more whitespace characters
-  
-    console.log("Tokenized Words (Before Stop Word Removal):", words);
-  
-    // Filter out stop words from the tokenized words
-    const filteredWords = words.filter(word => !stopWords.has(word));
-  
-    console.log("Filtered Words (No Stop Words):", filteredWords);
-  
-    // Create a word frequency vector (count the occurrences of each word)
-    const wordCount = {};
-    filteredWords.forEach((word) => {
+
+  console.log("Tokenized Words (Before Stop Word Removal):", words);
+
+  // Filter out stop words from the tokenized words
+  const filteredWords = words.filter(word => !stopWords.has(word));
+
+  console.log("Filtered Words (No Stop Words):", filteredWords);
+
+  // Create a word frequency vector (count the occurrences of each word)
+  const wordCount = {};
+  filteredWords.forEach((word) => {
       if (word) wordCount[word] = (wordCount[word] || 0) + 1;
-    });
-  
-    console.log("Word Frequency Vector (After Stop Word Removal):", wordCount);
-    return Object.values(wordCount);
+  });
+
+  console.log("Word Frequency Vector (After Stop Word Removal):", wordCount);
+  return Object.values(wordCount);
+}
+
+// Compare two answers and return similarity score
+export function compareAnswers(answer1, answer2) {
+  // If both answers are single words, compare them directly
+  if (answer1.split(" ").length === 1 && answer2.split(" ").length === 1) {
+      console.log("Single Word Comparison:");
+      return answer1.toLowerCase() === answer2.toLowerCase() ? 1 : 0;
   }
   
-  
+  // Tokenize and vectorize answers if they are longer than a single word
+  const vec1 = tokenizeAndVectorize(answer1);
+  const vec2 = tokenizeAndVectorize(answer2);
+
+  // Get cosine similarity score for longer answers
+  const similarity = cosineSimilarity(vec1, vec2);
+
+  console.log("Cosine Similarity:", similarity);
+  return similarity;
+}

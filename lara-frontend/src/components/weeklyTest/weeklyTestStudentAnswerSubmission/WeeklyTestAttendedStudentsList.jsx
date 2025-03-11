@@ -241,7 +241,7 @@ const WeeklyTestAttendedStudentsList = () => {
         toast.success(`Evaluation completed for ${studentName}`);
       } catch (error) {
         console.error(`Error evaluating ${studentName}:`, error);
-        toast.error(`Partial: ${studentName} `);
+        toast.error(`Unable to complete evaluating for student: ${studentName}`);
       }
   
       // Set loading state to false after processing the current student
