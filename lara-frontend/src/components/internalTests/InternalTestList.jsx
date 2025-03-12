@@ -386,7 +386,8 @@ const InternalTestList = () => {
                             <th>Edit Question</th>
                             <th>Upload Question</th>
                             <th>Provide Answer</th>
-                            <th>Answer Visibility</th>
+                            <th>Answer Visibility Status</th>
+                            <th>Results Visibility Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>

@@ -56,11 +56,11 @@ const BatchWiseStudents = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      console.log(selectedBatches,"--------------------------selectedbacthes")
+      // console.log(selectedBatches,"--------------------------selectedbacthes")
       const response = await axios.post(`${baseURL}/api/student/getStudentsByBatches`, {
         batchNames: selectedBatches
       }, config);
-       console.log(response.data,"-------------------------------------studentsbacths")
+      //  console.log(response.data,"-------------------------------------studentsbacths")
       setStudents(response.data.students);
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -102,7 +102,7 @@ const BatchWiseStudents = () => {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone Number</th>
-                <th>Batches</th>
+                {/* <th>Batches</th> */}
               </tr>
             </thead>
             <tbody>
@@ -114,13 +114,13 @@ const BatchWiseStudents = () => {
                     <td>{student.name}</td>
                     <td>{student.email}</td>
                     <td>{student.phoneNumber}</td>
-                    <td>
+                    {/* <td>
                       <ul>
                         {student.batches.map(batch => (
                           <li key={batch.batch_id}>{batch.batch_name}</li>
                         ))}
                       </ul>
-                    </td>
+                    </td> */}
                   </tr>
                 )
               ))}
