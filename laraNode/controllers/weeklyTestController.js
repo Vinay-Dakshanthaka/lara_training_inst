@@ -1745,7 +1745,6 @@ const getStudentDetailsByWeeklyTestId = async (req, res) => {
                 let questionDetails;
                 try {
                     questionDetails = await getQuestionDetailsByIdHandler(answer.wt_question_id);
-                    console.log("ilakjdfkjfdljsdfjasdfadsjlf========")
                 } catch (error) {
                     questionDetails = {
                         question_id: answer.wt_question_id,

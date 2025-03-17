@@ -1211,7 +1211,7 @@ const PlacementTest = () => {
                 <>
                     <div className="container mt-5">
                         {/* Camera monitoring */}
-                        {isMonitored && <OnlineTestMonitoring isCameraOn={isMonitored} style={{ marginLeft: '80%', marginTop: '-8rem', position: 'fixed' }} />}
+                        {isMonitored && <OnlineTestMonitoring isCameraOn={isMonitored} style={{ marginLeft: '75%', marginTop: '-4rem', position: 'fixed' }} />}
 
                         <h2>{
                             testDetails ? (

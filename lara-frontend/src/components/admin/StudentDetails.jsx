@@ -335,7 +335,7 @@ const StudentDetails = () => {
             <th>Phone Number</th>
             <th>Batches</th>
             <th>Add to Batch</th>
-            <th>Test Results</th>
+            {/* <th>Test Results</th> */}
           </tr>
         </thead>
         <tbody>
@@ -366,7 +366,7 @@ const StudentDetails = () => {
               <td>
                 <button className='btn btn-primary' onClick={() => handleAddToBatch(student)}>Add to Batch</button>
               </td>
-              <td> <button className='btn btn-primary' onClick={() => handleTestResults(student)}>View Results</button></td>
+              {/* <td> <button className='btn btn-primary' onClick={() => handleTestResults(student)}>View Results</button></td> */}
             
             </tr>
           ))}

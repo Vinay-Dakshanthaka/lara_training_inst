@@ -360,8 +360,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { Button, Form, Container, Row, Col, Card, Collapse } from "react-bootstrap";
-import { toast,ToastContainer } from "react-toastify";
+import { Button, Form, Container, Row, Col, Card, Collapse, ToastContainer } from "react-bootstrap";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { baseURL } from "../../../config";
 import StudentDetailsByWeeklyTestId from "../../StudentDetailsByWeeklyTestId";
@@ -376,8 +376,9 @@ const StudentQuestionAnswer = () => {
   const [updatedComment, setUpdatedComment] = useState({});
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
   const [showUnanswered, setShowUnanswered] = useState(false);
+  const [isAutoEvaluation, setIsAutoEvaluation] = useState()
+
   const questionRefs = useRef([]);
-  const [evaluation, setIsFinalSubmitted] = useState(false);
 
   useEffect(() => {
     axios
@@ -459,7 +460,6 @@ const StudentQuestionAnswer = () => {
       });
   };
 
- 
   const handleScrollToQuestion = (index) => {
     setActiveQuestionIndex(index);
     questionRefs.current[index].scrollIntoView({ behavior: "smooth" });
@@ -469,120 +469,67 @@ const StudentQuestionAnswer = () => {
   const answeredQuestions = questionsWithAnswers.filter(
     (item) => item.studentAnswer && item.studentAnswer.answer && item.studentAnswer.answer !== "Not Attempted"
   );
+
+  const [loadingQuestions, setLoadingQuestions] = useState(
+    answeredQuestions.map(() => false)
+  );
+
   const unansweredQuestions = questionsWithAnswers.filter(
     (item) => !item.studentAnswer || !item.studentAnswer.answer
   );
 
-  useEffect(() => {
-  axios.get(`${baseURL}/api/weekly-test/getWeeklyTestFinalSubmissionDetails/${wt_id}/${student_id}`)
-    .then((response) => {
-      setIsFinalSubmitted(response.data[0].evaluation);
-    })
-    .catch((error) => {
-      console.error("Error fetching final submission status:", error);
-      toast.error("Error checking final submission status.");
-    });
-}, [wt_id, student_id]);
 
-
- 
-  // const autoEvaluateAnswers = async () => {
-  //   try {
-  //     // Check if final submission is already done
-  //     const response = await axios.get(`${baseURL}/api/weekly-test/getWeeklyTestFinalSubmissionDetails/${wt_id}/${student_id}`);
-  //     const evaluation = response.data[0].evaluation; // Assuming API returns { isSubmitted: true/false }
-      
-  //     console.log(evaluation, "-------------------------finalsubmitted");
-  //     console.log(response.data, "-------------------------data");
-  
-  //     if (evaluation) {
-  //       toast.error("Final evalution already done. Cannot re-evaluate.");
-  //       return;
-  //     }
-  
-  //     let allUpdated = true;
-  //     console.log("Starting auto evaluation of answers...");
-  
-  //     // Loop through the answered questions and evaluate them
-  //     for (const item of answeredQuestions) {
-  //       console.log(`Processing question ID ${item.question_id}`);
-  //       const studentAnswer = item.studentAnswer.answer;
-  //       const correctAnswer = correctAnswers[item.question_id];
-  //       const answerKeyword = answerKeywords[item.question_id];
-  
-  //       if (studentAnswer && correctAnswer) {
-  //         const studentVector = tokenizeAndVectorize(studentAnswer);
-  //         const correctVector = tokenizeAndVectorize(correctAnswer);
-  //         const similarity = cosineSimilarity(studentVector, correctVector);
-  
-  //         const threshold = answerKeyword === "1" ? 0.8 : 0.6;
-  //         const isCorrect = similarity >= threshold;
-  //         const marks = isCorrect ? item.marks : 0;
-  //         const comment = isCorrect ? "Correct Answer" : "Incorrect Answer";
-  
-  //         try {
-  //           // 2-second delay before evaluating the next question
-  //           await new Promise(resolve => setTimeout(resolve, 2000));
-  
-  //           await axios.put(
-  //             `${baseURL}/api/weekly-test/updateMarksAndCommentByStudentId/${wt_id}/${student_id}/${item.question_id}`,
-  //             { marks, comment }
-  //           );
-  //           console.log(`Successfully updated marks for question ID ${item.question_id}`);
-  //         } catch (error) {
-  //           allUpdated = false;
-  //           console.error(`Error updating marks for question ID ${item.question_id}:`, error);
-  
-  //           if (error.response && error.response.status === 403) {
-  //             toast.error("Final submission already done. Cannot re-evaluate.");
-  //             return;  // Stop further processing if final submission is detected
-  //           } else {
-  //             toast.error("Error updating marks and comments.");
-  //           }
-  //         }
-  //       }
-  //     }
-  
-  //     if (allUpdated) {
-  //       console.log("Auto evaluation completed successfully!");
-  //       toast.success("Answers auto-evaluated successfully!");
-  //     } else {
-  //       console.error("Errors occurred during auto evaluation.");
-  //       toast.error("There was an error during auto evaluation.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching final submission status:", error);
-  //     toast.error("Error checking final submission status.");
-  //   }
-  // };
-  
   const autoEvaluateAnswers = async () => {
-    if (evaluation) {
-      toast.error("Final evaluation already done. Cannot re-evaluate.");
+
+    try {
+      const response = await axios.get(`${baseURL}/api/weekly-test/getWeeklyTestFinalSubmissionDetails/${wt_id}/${student_id}`);
+      const isFinalEvaluation = response.data[0].evaluation
+      console.log("final : ", response.data[0].evaluation)
+      setIsAutoEvaluation(isFinalEvaluation);
+
+    } catch (error) {
+      console.error("Error while fetcing final evaluation status : ", error)
+    }
+
+    console.log("auto : ", isAutoEvaluation)
+    if (isAutoEvaluation) {
+      toast.error("Manual evaluation has been done. So Excluded from Auto-evaluation.");
       return;
     }
-  
+
     let allUpdated = true;
     console.log("Starting auto evaluation of answers...");
-  
-    for (const item of answeredQuestions) {
+
+    for (let i = 0; i < answeredQuestions.length; i++) {
+      const item = answeredQuestions[i];
       console.log(`Processing question ID ${item.question_id}`);
       const studentAnswer = item.studentAnswer.answer;
       const correctAnswer = correctAnswers[item.question_id];
       const answerKeyword = answerKeywords[item.question_id];
-  
+
+      // Set loading state for the current question
+      setLoadingQuestions(prevState => {
+        const newState = [...prevState];
+        newState[i] = true; // Set the current question as loading
+        return newState;
+      });
+
       if (studentAnswer && correctAnswer) {
         const studentVector = tokenizeAndVectorize(studentAnswer);
         const correctVector = tokenizeAndVectorize(correctAnswer);
         const similarity = cosineSimilarity(studentVector, correctVector);
-  
         const threshold = answerKeyword === "1" ? 0.8 : 0.6;
         const isCorrect = similarity >= threshold;
         const marks = isCorrect ? item.marks : 0;
         const comment = isCorrect ? "Correct Answer" : "Incorrect Answer";
-  
+
+        console.log("Threshold:", threshold);
+        console.log("isCorrect:", isCorrect);
+
         try {
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Delay for smoother updates
+          // 2-second delay before evaluating the next question
+          await new Promise(resolve => setTimeout(resolve, 2000));
+
           await axios.put(
             `${baseURL}/api/weekly-test/updateMarksAndCommentByStudentId/${wt_id}/${student_id}/${item.question_id}`,
             { marks, comment }
@@ -591,26 +538,40 @@ const StudentQuestionAnswer = () => {
         } catch (error) {
           allUpdated = false;
           console.error(`Error updating marks for question ID ${item.question_id}:`, error);
-          toast.error("Error updating marks and comments.");
+
+          // Check if error status is 403 (Final evaluation already done)
+          if (error.response && error.response.status === 403) {
+            toast.error("Excluded from auto evaluation...");
+          } else {
+            toast.error("Error updating marks and comments.");
+          }
         }
       }
+
+      // Set loading state to false after processing the current question
+      setLoadingQuestions(prevState => {
+        const newState = [...prevState];
+        newState[i] = false; // Set the current question as not loading
+        return newState;
+      });
     }
-  
+
     if (allUpdated) {
+      console.log("Auto evaluation completed successfully!");
       toast.success("Answers auto-evaluated successfully!");
     } else {
+      console.error("Errors occurred during auto evaluation.");
       toast.error("There was an error during auto evaluation.");
     }
   };
-  
+
 
   const handleFinalEvaluation = () => {
     axios
       .put(`${baseURL}/api/weekly-test/updateEvaluationStatus`, {
         student_id,
         test_id: wt_id,
-        evaluation: true, // Sending true to update evaluation status to 1
-        final_submission:true,
+        evaluation: true,
       })
       .then(() => {
         toast.success("Final Evaluation Completed Successfully!");
@@ -619,24 +580,24 @@ const StudentQuestionAnswer = () => {
         toast.error("Error completing final evaluation.");
       });
   };
-  
+
   return (
     <Container fluid className="my-4">
       <Row>
         <Col md={9} className="overflow-auto" style={{ maxHeight: "100vh" }}>
           <StudentDetailsByWeeklyTestId />
           <Button variant="primary" onClick={autoEvaluateAnswers} className="my-3 mx-3" title="Automated Evaluation">
-            Automated Evaluation 
+            Automated Evaluation
           </Button>
-         <Button
-  variant="success"
-  onClick={handleFinalEvaluation}
-  className="my-3 mx-3"
-  title="Final Evaluation"
-  
->
-  Final Evaluation
-</Button>
+
+          <Button
+            variant="success"
+            onClick={handleFinalEvaluation}
+            className="my-3 mx-3"
+            title="Final Evaluation"
+          >
+            Final Evaluation
+          </Button>
 
           <ToastContainer />
           <h2 className="mb-4">Student Answer Details</h2>
@@ -746,8 +707,6 @@ const StudentQuestionAnswer = () => {
               )}
             </div>
           </Collapse>
-
-          
         </Col>
 
         <Col md={3} className="overflow-auto" style={{ maxHeight: "100vh" }}>
@@ -759,8 +718,9 @@ const StudentQuestionAnswer = () => {
                     variant={index === activeQuestionIndex ? "primary" : item.studentAnswer.marks ? "success" : "warning"}
                     onClick={() => handleScrollToQuestion(index)}
                     className="text-nowrap"
+                    disabled={loadingQuestions[index]}
                   >
-                    Q{index + 1}
+                    {loadingQuestions[index] ? "Evaluating..." : `Q${index + 1}`}
                   </Button>
                 </Col>
               ))}
