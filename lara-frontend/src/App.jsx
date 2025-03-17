@@ -83,6 +83,9 @@ import TestResults from './components/admin/TestResults';
 import StudentQuestionAnswer from './components/weeklyTest/weeklyTestStudentAnswerSubmission/evaluvation/StudentQuestionAnswer';
 import AddNewQuestiontoInternalTest from './components/internalTests/AddNewQuestiontoInternalTest';
 import StudentInternalTestDetails from './components/internalTests/StudentInternalTestDetails';
+import AddDescriptiveTestQuestion from './components/weeklyTest/AddDescriptiveTestQuestion';
+import FetchDescrtiptiveTestQuestionEdit from './components/descriptiveTest/FetchDescrtiptiveTestQuestionEdit';
+import StudentDescriptiveAnswerForm from './components/descriptiveTest/StudentDescriptiveAnswerForm';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -160,12 +163,15 @@ const App = () => {
             <Route path='/weekly-test' element={<CreateWeeklyTest />} />
             <Route path='/update-weekly-test/:wt_id' element={<UpdateWeeklyTest />} />
             <Route path='/add-questoin-weekly-test/:wt_id' element={<AddWeeklyTestQuestion />} />
+            <Route path='/add-questoin-descriptive-test/:placement_test_id' element={<AddDescriptiveTestQuestion />} />
             <Route path='/fetch-questoins-weekly-test/:wt_id' element={<QuestionsByWeeklyTestId />} />
+            <Route path='/fetch-questoins-descriptive-test/:placement_test_id' element={<FetchDescrtiptiveTestQuestionEdit />} />
             <Route path='/edit-weekly-test-question/:question_id' element={<EditWeeklyTestQuestion />} />
             <Route path='/upload-questoins-weekly-test/:wt_id' element={<UploadWeeklyTestQuestions />} />
             <Route path='/testResults/:id' element={<TestResults />} />
             <Route path='/weekly-test/:wt_id' element={<StudentAnswerForm />} />
             <Route path='/internal-test-theory/:wt_id' element={<StudentAnswerForm />} />
+            <Route path='/descriptive-test/:placement_test_id' element={<StudentDescriptiveAnswerForm />} />
             {/* <Route path='/internal-test/:wt_id' element={<StudentAnswerForm />} /> */}
             <Route path='/test-answer-form/:wt_id' element={<AnswerUpdateForm />} />
             <Route path='/wt-attended-student-list/:wt_id' element={<WeeklyTestAttendedStudentsList />} />

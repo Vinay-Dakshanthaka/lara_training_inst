@@ -41,6 +41,8 @@ const CreateWeeklyTest = () => {
             };
             const response = await axios.post(`${baseURL}/api/weekly-test/createWeeklyTestLink`, requestData, config);
             toast.success(response.data.message);
+            toast.success("Please assign created test link to their respective batch in Test list tab");
+            
             setFormData({
                 no_of_questions: '',
                 test_date: '',
@@ -58,7 +60,7 @@ const CreateWeeklyTest = () => {
 
     return (
         <div className="container mt-4">
-            <h3>Create Weekly Test</h3>
+            <h3>Create Descriptive Test</h3>
             <Form onSubmit={handleSubmit}>
                 <SubjectTopicSelector
                     selectedTopics={selectedTopics}
@@ -83,7 +85,7 @@ const CreateWeeklyTest = () => {
                     <h5>Select Test Type</h5>
                     <Form.Check
                         type="radio"
-                        label="internal"
+                        label="Daily Descriptive test"
                         name="testType"
                         value="internal"
                         checked={formData.testType === 'internal'}
@@ -91,7 +93,7 @@ const CreateWeeklyTest = () => {
                     />
                     <Form.Check
                         type="radio"
-                        label="weekly"
+                        label="Weekly Descriptive test"
                         name="testType"
                         value="weekly"
                         checked={formData.testType === 'weekly'}

@@ -105,7 +105,7 @@ module.exports = (sequelize, DataTypes) => {
         whatsAppChannelLink: {
             type: DataTypes.STRING,
             allowNull: true,
-            field: 'whatsAppChannelLink' // Explicitly map to the database column name
+            field: 'whatsAppChannelLink' 
         },
         test_title: {
             type: DataTypes.STRING,
@@ -114,7 +114,12 @@ module.exports = (sequelize, DataTypes) => {
         certificate_name: {
             type: DataTypes.STRING,
             allowNull: true 
-        }
+        },
+        isDescriptiveTest: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true 
+        },
+
 
     }, {
         timestamps: true,
@@ -127,7 +132,12 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'placement_test_id',
             as: 'CumulativeQuestions'
         });
+        PlacementTest.hasMany(models.PlacementTestWeeklyQuestionMapping, {
+            foreignKey: 'placement_test_id',
+            as: 'WeeklyTestQuestions'
+        });
     };
+
 
     return PlacementTest;
 };
@@ -153,3 +163,6 @@ module.exports = (sequelize, DataTypes) => {
 
 // ALTER table laradb.placementtests 
 // add column issue_certificate BOOLEAN DEFAULT TRUE;
+
+// ALTER table laradb.placementtests 
+// add column isDescriptiveTest BOOLEAN DEFAULT false;

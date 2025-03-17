@@ -48,6 +48,12 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'wt_question_id',
             as: 'TestMappings'  // Alias for the association
         });
+
+        WeeklyTestQuestion.hasMany(models.PlacementTestWeeklyQuestionMapping, {
+            foreignKey: 'wt_question_id',
+            as: 'PlacementTestMappings'
+        });
+        
     };
     
 

@@ -203,35 +203,29 @@ const ActiveWeeklyTests = () => {
   useEffect(() => {
     const fetchTests = async () => {
       try {
-        // Fetch student and active tests
         const { data } = await axios.get(
           `${baseURL}/api/weekly-test/getStudentAndActiveTestsWithAttendance`,
           config
         );
+        console.log("Fetched Data:", data);
+  
         setStudentDetails(data.student);
-        // console.log(data, "-------------------------------data");
-
-        // Filter tests where testType is false
-        const filteredTests = data.active_tests.filter((test) => test.testType === false);
-
-        // Fetch obtained marks and final submission status
+  
+        // Directly use active_tests
         const testsWithMarks = await Promise.all(
-          filteredTests.map(async (test) => {
+          data.active_tests.map(async (test) => {
             const response = await axios.get(
               `${baseURL}/api/weekly-test/getAllIndividualStudentResultsForTest/${test.test_id}`
             );
-            // console.log(response.data,"------------------------------")
-           const  isAnswerDisplayed = response.data.weekly_test.isAnswerDisplayed;
-           const  isResultsVisible = response.data.weekly_test.isResultsVisible;
-          
+  
+            const isAnswerDisplayed = response.data.weekly_test.isAnswerDisplayed;
+            const isResultsVisible = response.data.weekly_test.isResultsVisible;
             const studentResults = response.data.student_results;
             const studentResult = studentResults.find(
               (result) => result.student_id === data.student.student_id
             );
-
-            // Check final submission status
+  
             let finalSubmission = false;
-           
             if (studentResult) {
               const submissionResponse = await axios.post(
                 `${baseURL}/api/weekly-test/checkAndSubmitTest`,
@@ -240,25 +234,22 @@ const ActiveWeeklyTests = () => {
                   wt_id: test.test_id,
                 }
               );
-
-              // console.log(submissionResponse,"--------------------submissions");
+  
               finalSubmission = submissionResponse.data.result?.final_submission || false;
-              
-
             }
-
+  
             return {
               ...test,
               has_attended: !!studentResult,
               obtained_marks: studentResult?.obtained_marks ?? null,
               total_available_marks: studentResult?.total_available_marks ?? 0,
               final_submission: finalSubmission,
-              isAnswerDisplayed:isAnswerDisplayed,
-              isResultsVisible:isResultsVisible,
+              isAnswerDisplayed: isAnswerDisplayed,
+              isResultsVisible: isResultsVisible,
             };
           })
         );
-
+  
         const sortedTests = testsWithMarks.sort((a, b) => b.test_id - a.test_id);
         setActiveTests(sortedTests);
       } catch (error) {
@@ -267,9 +258,10 @@ const ActiveWeeklyTests = () => {
         setLoading(false);
       }
     };
-
+  
     fetchTests();
   }, [token]);
+  
 
   const indexOfLastTest = currentPage * testsPerPage;
   const indexOfFirstTest = indexOfLastTest - testsPerPage;

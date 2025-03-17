@@ -23,6 +23,8 @@ import { ToastContainer } from 'react-toastify';
 import TransactionDetails from './TransactionDetails';
 import UpdateStudentEmail from './UpdateStudentEmail';
 import PaperBasedTestResults from './PaperBasedTestResults';
+import CreateDescriptiveTestLink from '../descriptiveTest/CreateDescriptiveTestLink';
+import DescriptiveTestList from '../descriptiveTest/DescriptiveTestList';
 
 const AdminDashboard = () => {
   const [selectedOption, setSelectedOption] = useState('studentDetails');
@@ -103,6 +105,12 @@ const AdminDashboard = () => {
         </Tab>
         <Tab eventKey="paperBasedTestResults" title="Upload Test Resuts">
           <PaperBasedTestResults />
+        </Tab>
+        <Tab eventKey="createDescriptiveTestLink" title="Create Descriptive Test Link">
+          <CreateDescriptiveTestLink />
+        </Tab>
+        <Tab eventKey="descriptiveTestList" title="Descriptive Test List">
+          <DescriptiveTestList />
         </Tab>
       </Tabs>
     </div>

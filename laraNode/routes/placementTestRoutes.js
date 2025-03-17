@@ -42,6 +42,8 @@ placementTestRoute.post('/save-placement-test-student', placementTestContoller.s
 
 placementTestRoute.get('/get-all-placement-tests', placementTestContoller.getAllPlacementTests);
 
+placementTestRoute.get('/get-all-placement-tests-descriptive', placementTestContoller.getAllPlacementTestsDescriptive);
+
 placementTestRoute.get('/getAllPlacementTestsByCreator',verifyToken, placementTestContoller.getAllPlacementTestsByCreator);
 
 placementTestRoute.post('/fetchTestTopicIdsAndQnNums', placementTestContoller.fetchTestTopicIdsAndQnNums);
@@ -74,6 +76,11 @@ placementTestRoute.post('/saveOneQuestionAndAddToLink', placementTestContoller.s
 placementTestRoute.post('/getTopicsByPlacementTestId', placementTestContoller.getTopicsByPlacementTestId);
 
 placementTestRoute.post('/getPlacementTestById', placementTestContoller.getPlacementTestById);
+
+//-------- descriptive test for without registeration requirement in the app --------------
+
+placementTestRoute.post('/createDescriptiveTestLink',verifyToken, placementTestContoller.createDescriptiveTestLink);
+
 
 // placementTestRoute.post('/upload-questions-link', upload.single('file'), async (req, res) => {
 //     const topic_id = req.query.topic_id;

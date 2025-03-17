@@ -18,6 +18,8 @@ const OptionsTable = db.Option;
 const { baseURL } = require('./baseURLConfig');
 const PlacementTestCreator = db.PlacementTestCreator;
 const StudentWhatsAppLinks = db.StudentWhatsAppLinks;
+const WeeklyTestQuestion = db.WeeklyTestQuestion;
+const PlacementTestWeeklyQuestionMapping = db.PlacementTestWeeklyQuestionMapping;
 
 
 const jwtSecret = process.env.JWT_SECRET;
@@ -1130,6 +1132,9 @@ const getPlacementTestById = async (req, res) => {
 const getAllPlacementTests = async (req, res) => {
     try {
         const placementTests = await PlacementTest.findAll({
+            where: {
+                isDescriptiveTest: false 
+            },
             include: [
                 {
                     model: PlacementTestTopic,
@@ -1137,13 +1142,66 @@ const getAllPlacementTests = async (req, res) => {
                     include: [
                         {
                             model: Topic,
-                            as: 'PlacementTestTopic', // Use the correct alias
+                            as: 'PlacementTestTopic', 
                             attributes: ['topic_id', 'createdAt', 'updatedAt']
                         }
                     ]
                 }
             ]
-        });
+        });        
+
+        if (!placementTests || placementTests.length === 0) {
+            return res.status(404).send({ message: 'No placement tests found' });
+        }
+
+        const formattedTests = placementTests.map(test => ({
+            placement_test_id: test.placement_test_id,
+            test_link: test.test_link,
+            number_of_questions: test.number_of_questions,
+            description: test.description,
+            start_time: test.start_time,
+            end_time: test.end_time,
+            show_result: test.show_result,
+            test_title: test.test_title,
+            certificate_name: test.certificate_name,
+            created_at: test.createdAt,
+            updated_at: test.updatedAt,
+            is_Active: test.is_Active,
+            is_Monitored: test.is_Monitored,
+            topics: test.TestTopics.map(testTopic => ({
+                topic_id: testTopic.PlacementTestTopic.topic_id,
+                createdAt: testTopic.PlacementTestTopic.createdAt,
+                updatedAt: testTopic.PlacementTestTopic.updatedAt
+            }))
+        }));
+
+        return res.status(200).send({ message: 'Placement tests retrieved successfully', placementTests: formattedTests });
+    } catch (error) {
+        console.error('Error retrieving placement tests:', error);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+const getAllPlacementTestsDescriptive = async (req, res) => {
+    try {
+        const placementTests = await PlacementTest.findAll({
+            where: {
+                isDescriptiveTest: true 
+            },
+            include: [
+                {
+                    model: PlacementTestTopic,
+                    as: 'TestTopics',
+                    include: [
+                        {
+                            model: Topic,
+                            as: 'PlacementTestTopic', 
+                            attributes: ['topic_id', 'createdAt', 'updatedAt']
+                        }
+                    ]
+                }
+            ]
+        });        
 
         if (!placementTests || placementTests.length === 0) {
             return res.status(404).send({ message: 'No placement tests found' });
@@ -2264,6 +2322,93 @@ const uploadAndAssignQuestionsByExcelTopics = async (filePath, link_topic_ids, n
     }
 };
 
+const createDescriptiveTestLink = async (req, res) => {
+    try {
+        const {
+            number_of_questions,
+            description,
+            start_time,
+            end_time,
+            show_result,
+            topic_ids,
+            is_Monitored,
+            channel_link,
+            test_title,
+            certificate_name,
+            issue_certificate,
+        } = req.body;
+
+        console.log(req.body, "------------------------------------");
+
+        // Get studentId from the request (assuming it's set via middleware or is part of the request)
+        const studentId = req.studentId;
+
+        if (!number_of_questions || !start_time || !end_time || !Array.isArray(topic_ids) || topic_ids.length === 0) {
+            return res.status(400).send({ message: 'Required fields are missing or invalid' });
+        }
+
+        console.log("WhatsApp channel link :: ", channel_link);
+
+        // Validate that all provided topic_ids exist in the topics table
+        const topics = await Topic.findAll({
+            where: { topic_id: topic_ids },
+        });
+
+        if (topics.length !== topic_ids.length) {
+            return res.status(400).send({ message: 'One or more topic IDs are invalid' });
+        }
+        console.log("-------------------------------------------------------");
+
+        // Create a new PlacementTest with isDescriptiveTest set to true
+        const newTest = await PlacementTest.create({
+            test_link: '', // Initially empty, will be updated later
+            number_of_questions,
+            description,
+            test_title,
+            certificate_name,
+            whatsAppChannelLink: channel_link || null,
+            start_time, // Store as string
+            end_time, // Store as string
+            show_result: show_result !== undefined ? show_result : true,
+            is_Monitored: is_Monitored !== undefined ? is_Monitored : false,
+            issue_certificate: issue_certificate !== undefined ? issue_certificate : false,
+            isDescriptiveTest: true, // Set this as true for descriptive tests
+        });
+
+        console.log(newTest, "-----------------------newtest");
+
+        // Generate the descriptive test link
+        const test_link = `${baseURL}/descriptive-test/${newTest.placement_test_id}`;
+        newTest.test_link = test_link;
+        await newTest.save();
+
+        // Save the topic IDs in the PlacementTestTopic table
+        const topicPromises = topic_ids.map(topic_id =>
+            PlacementTestTopic.create({
+                placement_test_id: newTest.placement_test_id,
+                topic_id,
+            })
+        );
+
+        await Promise.all(topicPromises);
+
+        // Distribute questions among the selected topics (this section will be removed as no question mapping is required)
+
+        // Save the PlacementTestCreator entry to record who created the test
+        await PlacementTestCreator.create({
+            student_id: studentId,
+            placement_test_id: newTest.placement_test_id,
+        });
+
+        return res.status(200).send({ message: 'Descriptive placement test added successfully', newTest });
+    } catch (error) {
+        console.error('Error creating descriptive placement test link:', error.stack);
+        console.log("Error while creating the descriptive placement test link:", error);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+
 
 
 
@@ -2301,4 +2446,6 @@ module.exports = {
     saveOneQuestionAndAddToLink,
     uploadAndAssignQuestionsByExcelTopics,
     updateStudentEmail,
+    createDescriptiveTestLink,
+    getAllPlacementTestsDescriptive,
 }
