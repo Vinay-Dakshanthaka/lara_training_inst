@@ -14,6 +14,9 @@ const StudentAnswer = db.StudentAnswer;
 const WeeklyTestFinalSubmission = db.WeeklyTestFinalSubmission;
 const {  BatchTestLinks } = require('../models'); 
 const weeklyTestFinalSubmissionModel = require('../models/weeklyTestFinalSubmissionModel');
+const PlacementTest = require('../models/placementTestModel');
+const PlacementTestTopic = require('../models/placementTestTopicModel');
+const PlacementTestWeeklyQuestionMapping = require('../models/PlacementTestWeeklyQuestionMappingModel');
 
 // const createWeeklyTestLink = async (req, res) => {
 //     try {
@@ -3002,6 +3005,327 @@ const getWeeklyTestFinalSubmissionDetails = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+const getAllDescriptivePlacementTests = async (req, res) => {
+    try {
+        // Find all Placement Tests where isDescriptiveTest is true, including associated topics
+        const tests = await db.PlacementTest.findAll({
+            where: {
+                isDescriptiveTest: true  
+            },
+            include: [
+                {
+                    model: db.PlacementTestTopic,
+                    as: 'TestTopics',  // Alias for the PlacementTestTopic association
+                    include: [
+                        {
+                            model: db.Topic,
+                            as: 'PlacementTestTopic'  // Alias for the Topic association within PlacementTestTopic
+                        }
+                    ]
+                }
+            ]
+        });
+        console.log("tests ------->>", tests)
+
+        if (!tests || tests.length === 0) {
+            return res.status(404).send({ message: 'No descriptive placement tests found' });
+        }
+        console.log('tests ', tests)
+
+        console.log("All descriptive placement tests fetched", tests);
+        return res.status(200).send({ message: 'Descriptive placement tests fetched successfully', tests });
+    } catch (error) {
+        console.error('Error fetching descriptive placement tests:', error);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+
+const savePlacementTestQuestionHandler = async (req, res) => {
+    try {
+        const { questionData, placement_test_id } = req.body;
+
+        console.log(req.body, "----------------------------body");
+
+        // Extract necessary fields
+        const { wt_question_keywords } = questionData;
+        console.log(questionData, "-----------------------------questiondata");
+
+        // Save the question and mapping
+        const result = await savePlacementTestQuestionWithMapping(questionData, placement_test_id);
+
+        if (result.success) {
+            const wt_question_id = result.newQuestion?.dataValues?.wt_question_id;
+
+            if (wt_question_id) {
+                console.log("🔍 Mapping question to PlacementTest:", placement_test_id, wt_question_id);
+
+                await db.PlacementTestWeeklyQuestionMapping.create({
+                    placement_test_id,
+                    wt_question_id
+                }, { 
+                    fields: ["placement_test_id", "wt_question_id"]  
+                });
+
+                console.log("✅ Question mapped successfully.");
+
+                if (wt_question_keywords) { 
+                    console.log("🔍 Inserting keywords:", wt_question_keywords);
+
+                    await db.WeeklyTestQuestionAnswer.create({
+                        wt_question_id: wt_question_id,
+                        keywords: wt_question_keywords?.toString(),
+                    }, { 
+                        fields: ["wt_question_id", "keywords"]  
+                    });
+
+                    console.log("✅ Answer saved successfully.");
+                }
+            } else {
+                return res.status(404).send({ message: "Skipping mapping as no question ID is available" });
+            }
+
+            return res.status(200).send({ 
+                message: result.message, 
+                question: result.newQuestion 
+            });
+        } else {
+            return res.status(500).send({ message: result.message, error: result.error });
+        }
+    } catch (error) {
+        console.error("❌ Error saving placement test question:", error);
+        return res.status(500).send({ message: "Internal server error", error: error.message });
+    }
+};
+
+const getDescriptiveTestById = async (req, res) => {
+    try {
+        const { placement_test_id } = req.params;
+
+        // Find the test by its primary key (placement_test_id), including associated topics via WeeklyTestQuestion
+        const test = await db.PlacementTest.findByPk(placement_test_id, {
+            include: [
+                {
+                    model: db.PlacementTestTopic,  // Assuming this is your correct alias
+                    as: 'TestTopics',
+                    include: [
+                        {
+                            model: db.Topic,
+                            as: 'PlacementTestTopic'  // Alias for the Topic association within PlacementTestTopic
+                        }
+                    ]
+                },
+                {
+                    model: db.PlacementTestWeeklyQuestionMapping,  // The mapping model between PlacementTest and WeeklyTestQuestion
+                    as: 'WeeklyTestQuestions',  // Alias for the association
+                    include: [
+                        {
+                            model: db.WeeklyTestQuestion,  // WeeklyTestQuestion model
+                            as: 'WeeklyTestQuestion',  // Alias for WeeklyTestQuestion association
+                            include: [
+                                {
+                                    model: db.Topic,  // Including the Topic model
+                                    as: 'TopicDetails'  // Alias for the Topic association inside WeeklyTestQuestion
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!test) {
+            return res.status(404).send({ message: 'Placement test not found' });
+        }
+
+        console.log("Placement test fetched", test);
+        return res.status(200).send({ message: 'Placement test fetched successfully', test });
+    } catch (error) {
+        console.error('Error fetching placement test:', error);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+const savePlacementTestQuestionWithMapping = async (questionData, placement_test_id) => {
+    const { wt_question_description, marks, minutes, topic_id } = questionData;
+
+    try {
+        // Step 1: Save the question to the WeeklyTestQuestion table
+        const newQuestion = await db.WeeklyTestQuestion.create({
+            wt_question_description,
+            marks,
+            minutes,
+            topic_id
+        });
+
+        // Step 2: Save the mapping to PlacementTestWeeklyQuestionMapping table
+        await db.PlacementTestWeeklyQuestionMapping.create({
+            placement_test_id,  // The test ID passed to the function
+            wt_question_id: newQuestion.wt_question_id  // The ID of the newly created question
+        });
+
+        return { success: true, message: 'Question saved and assigned to the placement test successfully', newQuestion };
+    } catch (error) {
+        console.error('❌ Error saving question and mapping:', error);
+        return { success: false, message: 'Error saving question or mapping', error };
+    }
+};
+
+const getQuestionsByPlacementTestId = async (req, res) => {
+    const { placement_test_id } = req.params;
+
+    try {
+        // Step 1: Get all the question IDs from the PlacementTestWeeklyQuestionMapping table
+        const questionMappings = await db.PlacementTestWeeklyQuestionMapping.findAll({
+            where: { placement_test_id },
+            attributes: ['wt_question_id'] // Only select the question IDs
+        });
+
+        console.log(questionMappings, "-------------------------- questionMappings");
+
+        // Check if any questions are associated with the placement test
+        if (!questionMappings || questionMappings.length === 0) {
+            return res.status(404).send({ message: 'No questions found for this placement test' });
+        }
+
+        // Extract the question IDs from the mappings
+        const questionIds = questionMappings.map(mapping => mapping.dataValues.wt_question_id);
+
+        console.log(questionIds, "---------------------- questionIds");
+
+        // Step 2: Fetch the questions from the WeeklyTestQuestion table using the IDs
+        const questions = await db.WeeklyTestQuestion.findAll({
+            where: {
+                wt_question_id: questionIds
+            },
+            include: [
+                {
+                    model: db.Topic, // Include the Topic details
+                    as: 'TopicDetails',
+                    attributes: ['name']
+                },
+                {
+                    model: WeeklyTestQuestionAnswer,
+                    as: 'TestQuestionAnswerDetails', // Updated alias
+                    attributes: ['keywords'] // Fetch only keywords
+                }
+            ]
+        });
+
+        console.log(questions, "---------------------------------- questions");
+
+        // Calculate total marks
+        const totalMarks = questions.reduce((total, question) => total + question.marks, 0);
+
+        return res.status(200).send({
+            message: 'Questions fetched successfully',
+            totalMarks,
+            questions
+        });
+
+    } catch (error) {
+        console.error('❌ Error fetching questions by placement test ID:', error);
+        return res.status(500).send({
+            message: 'Error fetching questions',
+            error: error.message
+        });
+    }
+};
+
+const savePlacementTestAnswer = async (req, res) => {
+    try {
+        const student_id = req.studentId;
+        const { placement_test_id, answers } = req.body;
+        console.log('Student ID:', student_id);
+
+        // Validate the input fields
+        if (!placement_test_id || !student_id || !Array.isArray(answers) || answers.length === 0) {
+            return res.status(400).send({ message: 'Required fields are missing or invalid' });
+        }
+
+        console.log("Inside savePlacementTestAnswer -------");
+
+        // Validate that the placement test and student exist
+        const placementTest = await PlacementTest.findByPk(placement_test_id);
+        if (!placementTest) {
+            return res.status(404).send({ message: 'Placement test not found' });
+        }
+
+        const student = await PlacementTestStudent.findByPk(student_id);
+        if (!student) {
+            return res.status(404).send({ message: 'Student not found' });
+        }
+
+        // Check if the student has made the final submission for this placement test
+        const finalSubmission = await PlacementTestFinalSubmission.findOne({
+            where: {
+                placement_test_id,
+                placement_test_student_id: student_id
+            }
+        });
+
+        if (finalSubmission && finalSubmission.final_submission) {
+            return res.status(403).send({
+                message: 'You have already made the final submission for this test. No further updates are allowed.'
+            });
+        }
+
+        // Process each answer provided by the student
+        const answerPromises = answers.map(async (answerObj) => {
+            const { question_id, answer, marks, comment } = answerObj;
+
+            // Validate that the question is associated with this placement test using the mapping table
+            const mapping = await PlacementTestQuestionMapping.findOne({
+                where: {
+                    question_id,
+                    placement_test_id
+                }
+            });
+
+            if (!mapping) {
+                throw new Error(`Question with ID ${question_id} is not associated with the placement test ${placement_test_id}`);
+            }
+
+            // Check if a PlacementTestAnswer already exists for the given student_id, placement_test_id, and question_id
+            const existingAnswer = await PlacementTestAnswer.findOne({
+                where: {
+                    placement_test_id,
+                    placement_test_student_id: student_id,
+                    question_id
+                }
+            });
+
+            if (existingAnswer) {
+                // Update the existing answer with the new answer, marks, and comment
+                return existingAnswer.update({
+                    answer,
+                    marks: marks || null,  // Marks can be optional
+                    comment: comment || null  // Comments can also be optional
+                });
+            }
+
+            // Create a new PlacementTestAnswer entry if no existing answer is found
+            return PlacementTestAnswer.create({
+                placement_test_id,
+                placement_test_student_id: student_id,
+                question_id,
+                answer,
+                marks: marks || null,  // Marks can be optional
+                comment: comment || null  // Comments can also be optional
+            });
+        });
+
+        // Wait for all the answers to be saved or updated
+        await Promise.all(answerPromises);
+
+        return res.status(200).send({ message: 'Answers saved/updated successfully' });
+    } catch (error) {
+        console.error('Error saving placement test answers:', error.stack);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+
 
 
 module.exports = {
@@ -3043,4 +3367,9 @@ module.exports = {
     isResultsVisible,
     getShowAnswersStatus,
     getWeeklyTestFinalSubmissionDetails,
+    getAllDescriptivePlacementTests,
+    savePlacementTestQuestionHandler,
+    getDescriptiveTestById,
+    getQuestionsByPlacementTestId,
+    savePlacementTestAnswer,
 }

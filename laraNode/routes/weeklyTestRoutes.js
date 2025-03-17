@@ -84,6 +84,14 @@ weeklyTestRouter.put('/isResultsVisible/', weeklyTestController.isResultsVisible
 weeklyTestRouter.get('/getWeeklyTestFinalSubmissionDetails/:wt_id/:student_id', weeklyTestController.getWeeklyTestFinalSubmissionDetails);
 
 
+weeklyTestRouter.get('/getAllDescriptivePlacementTests',  weeklyTestController.getAllDescriptivePlacementTests);
+
+weeklyTestRouter.post('/savePlacementTestQuestionHandler',  weeklyTestController.savePlacementTestQuestionHandler);
+
+weeklyTestRouter.get('/getDescriptiveTestById/:placement_test_id',  weeklyTestController.getDescriptiveTestById);
+
+weeklyTestRouter.get('/getQuestionsByPlacementTestId/:placement_test_id',  weeklyTestController.getQuestionsByPlacementTestId);
+
 
 // weeklyTestRouter.post('/upload-questions', upload.single('file'), async (req, res) => {
 //     const { wt_id, topic_id } = req.body;

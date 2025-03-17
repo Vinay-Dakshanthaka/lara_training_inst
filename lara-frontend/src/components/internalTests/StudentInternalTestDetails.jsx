@@ -25,26 +25,26 @@
 //             if (!token) {
 //                 throw new Error("No token provided.");
 //             }
-    
+
 //             const config = {
 //                 headers: {
 //                     Authorization: `Bearer ${token}`,
 //                 },
 //             };
-    
+
 //             const response = await axios.get(`${baseURL}/api/internal-test/getStudentInternalTestDetails`, config);
-    
+
 //             console.log("API Response:", response.data); // Debugging log
-    
+
 //             if (!response.data || !response.data.internalTests) {
 //                 throw new Error("Invalid response structure");
 //             }
-    
+
 //             const formattedTests = response.data.internalTests.map(test => ({
 //                 ...test,
 //                 formatted_date: new Date(test.test_date).toISOString().split('T')[0]
 //             }));
-    
+
 //             setTests(formattedTests);
 //         } catch (error) {
 //             console.error('Error fetching test details:', error);
@@ -186,10 +186,10 @@ const StudentInternalTestDetails = () => {
                         const studentResult = response.data.student_results.find(
                             (result) => result.student_id === studentid
                         );
-                        const  isAnswerDisplayed = response.data.weekly_test.isAnswerDisplayed;
-                        const  isResultsVisible = response.data.weekly_test.isResultsVisible;
+                        const isAnswerDisplayed = response.data.weekly_test.isAnswerDisplayed;
+                        const isResultsVisible = response.data.weekly_test.isResultsVisible;
                         let finalSubmission = false;
-                      
+
                         if (studentResult) {
                             const submissionResponse = await axios.post(
                                 `${baseURL}/api/weekly-test/checkAndSubmitTest`,
@@ -208,8 +208,8 @@ const StudentInternalTestDetails = () => {
                             obtained_marks: studentResult?.obtained_marks ?? "Pending",
                             total_available_marks: studentResult?.total_available_marks ?? "N/A",
                             final_submission: finalSubmission,
-                            isAnswerDisplayed:isAnswerDisplayed,
-                            isResultsVisible:isResultsVisible,
+                            isAnswerDisplayed: isAnswerDisplayed,
+                            isResultsVisible: isResultsVisible,
                         };
                     })
             );
@@ -259,27 +259,26 @@ const StudentInternalTestDetails = () => {
                             <td colSpan="6" className="text-center">No active tests available.</td>
                         </tr>
                     ) : (
-                        currentTests.map((test) => (
-                            <tr key={test.test_id || test.internal_test_id}>
+                        currentTests.map((test, index) => (
+                            <tr key={`${test.test_id || test.internal_test_id}-${index}`}>
                                 <td>
                                     <a href={test.test_link || test.internal_test_link} target="_blank">
                                         {test.test_description}
                                     </a>
                                 </td>
                                 <td>
-                            {test.test_date 
-                                ? new Date(test.test_date).toLocaleDateString('en-US', { day: 'numeric', month: 'numeric', year: 'numeric' }) 
-                                : new Date(test.formatted_date).toLocaleDateString('en-US', { day: 'numeric', month: 'numeric', year: 'numeric' })}
-                            </td>
-
+                                    {test.test_date
+                                        ? new Date(test.test_date).toLocaleDateString('en-US', { day: 'numeric', month: 'numeric', year: 'numeric' })
+                                        : new Date(test.formatted_date).toLocaleDateString('en-US', { day: 'numeric', month: 'numeric', year: 'numeric' })}
+                                </td>
                                 <td>
                                     {test.testType === "weekly"
                                         ? test.final_submission
                                             ? test.total_available_marks
                                             : "-"
                                         : test.attended
-                                        ? test.attended.total_marks
-                                        : "-"}
+                                            ? test.attended.total_marks
+                                            : "-"}
                                 </td>
                                 <td>
                                     {test.testType === "weekly"
@@ -287,8 +286,8 @@ const StudentInternalTestDetails = () => {
                                             ? test.obtained_marks
                                             : "-"
                                         : test.attended
-                                        ? test.attended.marks_obtained
-                                        : "-"}
+                                            ? test.attended.marks_obtained
+                                            : "-"}
                                 </td>
                                 <td>
                                     <Badge bg={
@@ -297,20 +296,20 @@ const StudentInternalTestDetails = () => {
                                                 ? "primary"
                                                 : test.has_attended ? "warning" : "danger"
                                             : test.attended
-                                            ? "success"
-                                            : "danger"
+                                                ? "success"
+                                                : "danger"
                                     }>
                                         {test.testType === "weekly"
                                             ? test.final_submission
                                                 ? "Submitted"
-                                                : test.has_attended? "pending" :"Not Attended"
+                                                : test.has_attended ? "pending" : "Not Attended"
                                             : test.attended
-                                            ? "Attended"
-                                            : "Not Attended"}
+                                                ? "Attended"
+                                                : "Not Attended"}
                                     </Badge>
                                 </td>
                                 <td>
-                                    {test.testType === "weekly" && test.final_submission && test.isAnswerDisplayed? (
+                                    {test.testType === "weekly" && test.final_submission && test.isAnswerDisplayed ? (
                                         <Link
                                             to={`weeklytest-detailed-summary/${test.test_id}`}
                                             className="btn btn-outline-info">
@@ -326,6 +325,7 @@ const StudentInternalTestDetails = () => {
                         ))
                     )}
                 </tbody>
+
             </Table>
 
             <Paginate

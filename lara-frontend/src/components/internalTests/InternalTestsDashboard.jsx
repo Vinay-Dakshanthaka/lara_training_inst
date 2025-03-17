@@ -47,7 +47,7 @@ const InternalTestsDashboard = () => {
     return (
         <Container fluid className="shadow  my-3 responsive overflow-auto" style={{ overflow: 'auto' }}>
             <Row>
-                <Col xs={12} md={2} id="sidebar-wrapper" className="bg-light">
+                <Col xs={12} md={3} id="sidebar-wrapper" className="bg-light">
                     <Navbar expand="md" className="bg-light d-md-none">
                         <Navbar.Brand href="#">Internal Tests</Navbar.Brand>
                         <Navbar.Toggle
@@ -67,13 +67,12 @@ const InternalTestsDashboard = () => {
                                     setShow(false);
                                 }}
                             >
-
                                 <Nav.Item>
                                     <Nav.Link
                                         eventKey="AllTests"
                                         className={activeComponent === 'AllTests' ? 'active' : ''}
                                     >
-                                        All Test Links
+                                        MCQ Test(Internal) Links
                                     </Nav.Link>
                                 </Nav.Item>
                                 <Nav.Item>
@@ -81,7 +80,7 @@ const InternalTestsDashboard = () => {
                                         eventKey="createInternalTest"
                                         className={activeComponent === 'createInternalTest' ? 'active' : ''}
                                     >
-                                        Create Internal Test
+                                        Create Internal(MCQ) Test
                                     </Nav.Link>
                                 </Nav.Item>
                                 <Nav.Item>
@@ -89,7 +88,7 @@ const InternalTestsDashboard = () => {
                                         eventKey="AllStudentsPerformance"
                                         className={activeComponent === 'AllStudentsPerformance' ? 'active' : ''}
                                     >
-                                        Students Performance
+                                        Students Performance (for MCQ internal)
                                     </Nav.Link>
                                 </Nav.Item>
                                 <Nav.Item>
@@ -97,15 +96,32 @@ const InternalTestsDashboard = () => {
                                         eventKey="CreateWeeklyTest"
                                         className={activeComponent === 'CreateWeeklyTest' ? 'active' : ''}
                                     >
-                                        Create Weekly test Link
+                                        Create Descriptive test
                                     </Nav.Link>
                                 </Nav.Item>
+                                <Nav.Item>
+                                    <Nav.Link
+                                        eventKey="InternalTestList"
+                                        className={activeComponent === 'InternalTestList' ? 'active' : ''}
+                                    >
+                                         Daily Descriptive test list
+                                    </Nav.Link>
+                                </Nav.Item>
+                                <Nav.Item>
+                                    <Nav.Link
+                                        eventKey="EvaluvateInternalTest"
+                                        className={activeComponent === 'EvaluvateInternalTest' ? 'active' : ''}
+                                    >
+                                        Evaluvate InternalTests
+                                    </Nav.Link>
+                                </Nav.Item>
+
                                 <Nav.Item>
                                     <Nav.Link
                                         eventKey="WeeklyTestList"
                                         className={activeComponent === 'WeeklyTestList' ? 'active' : ''}
                                     >
-                                        Weekly Test List
+                                        Weekly Descriptive test list
                                     </Nav.Link>
                                 </Nav.Item>
                                 <Nav.Item>
@@ -141,7 +157,7 @@ const InternalTestsDashboard = () => {
                                 eventKey="AllTests"
                                 className={activeComponent === 'AllTests' ? 'active' : ''}
                             >
-                                All Test Links
+                                MCQ Test(Internal) Links
                             </Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
@@ -149,7 +165,7 @@ const InternalTestsDashboard = () => {
                                 eventKey="createInternalTest"
                                 className={activeComponent === 'createInternalTest' ? 'active' : ''}
                             >
-                                Create Internal Test
+                                Create Internal(MCQ) Test
                             </Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
@@ -157,7 +173,7 @@ const InternalTestsDashboard = () => {
                                 eventKey="AllStudentsPerformance"
                                 className={activeComponent === 'AllStudentsPerformance' ? 'active' : ''}
                             >
-                                Students Performance
+                                Students Performance (for MCQ internal)
                             </Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
@@ -165,31 +181,7 @@ const InternalTestsDashboard = () => {
                                 eventKey="CreateWeeklyTest"
                                 className={activeComponent === 'CreateWeeklyTest' ? 'active' : ''}
                             >
-                                Create Weekly test Link
-                            </Nav.Link>
-                        </Nav.Item>
-                        <Nav.Item>
-                            <Nav.Link
-                                eventKey="WeeklyTestList"
-                                className={activeComponent === 'WeeklyTestList' ? 'active' : ''}
-                            >
-                                Weekly Test List
-                            </Nav.Link>
-                        </Nav.Item>
-                        <Nav.Item>
-                            <Nav.Link
-                                eventKey="EvaluvateWeeklyTest"
-                                className={activeComponent === 'EvaluvateWeeklyTest' ? 'active' : ''}
-                            >
-                                Evaluvate Weekly Test
-                            </Nav.Link>
-                        </Nav.Item>
-                        <Nav.Item>
-                            <Nav.Link
-                                eventKey="AllStudentsWeeklyTestPerformance"
-                                className={activeComponent === 'AllStudentsWeeklyTestPerformance' ? 'active' : ''}
-                            >
-                                Student Performance Weekly Test
+                                Create Descriptive test link (Weekly / Daily)
                             </Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
@@ -197,7 +189,7 @@ const InternalTestsDashboard = () => {
                                 eventKey="InternalTestList"
                                 className={activeComponent === 'InternalTestList' ? 'active' : ''}
                             >
-                                InternalTestList
+                                Daily Descriptive test list
                             </Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
@@ -205,12 +197,38 @@ const InternalTestsDashboard = () => {
                                 eventKey="EvaluvateInternalTest"
                                 className={activeComponent === 'EvaluvateInternalTest' ? 'active' : ''}
                             >
-                               Evaluvate InternalTests
+                                Evaluvate Daily Descriptive test
                             </Nav.Link>
                         </Nav.Item>
+
+                        <Nav.Item>
+                            <Nav.Link
+                                eventKey="WeeklyTestList"
+                                className={activeComponent === 'WeeklyTestList' ? 'active' : ''}
+                            >
+                                 Weekly Descriptive test list
+                            </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link
+                                eventKey="EvaluvateWeeklyTest"
+                                className={activeComponent === 'EvaluvateWeeklyTest' ? 'active' : ''}
+                            >
+                                Evaluvate Weekly Descriptive test
+                            </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link
+                                eventKey="AllStudentsWeeklyTestPerformance"
+                                className={activeComponent === 'AllStudentsWeeklyTestPerformance' ? 'active' : ''}
+                            >
+                                Student Performance Weekly Descriptive Test
+                            </Nav.Link>
+                        </Nav.Item>
+
                     </Nav>
                 </Col>
-                <Col xs={12} md={10} id="page-content-wrapper" style={{ maxWidth: '100%' }}>
+                <Col xs={12} md={9} id="page-content-wrapper" style={{ maxWidth: '100%' }}>
                     <div className="container-fluid">
                         {renderComponent()}
                     </div>

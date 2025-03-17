@@ -203,6 +203,7 @@ db.WhatsAppChannelLinks = require('./whatsAppChannelLinksModel.js')(sequelize, D
 db.PlacementTestCreator = require('./placementTestCreator.js')(sequelize, DataTypes);
 db.StudentWhatsAppLinks = require('./StudentWhatsAppLinks.js')(sequelize, DataTypes);
 db.PaperBasedTestResults = require('./paperBasedTestResults.js')(sequelize,DataTypes);
+db.PlacementTestWeeklyQuestionMapping  = require('./PlacementTestWeeklyQuestionMappingModel.js')(sequelize,DataTypes);
 
 
 db.Student.hasMany(db.PaperBasedTestResults, { foreignKey: 'studentId' });
