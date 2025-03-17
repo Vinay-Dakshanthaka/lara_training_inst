@@ -252,7 +252,9 @@ const DescriptiveTestList = () => {
                             <th>Camera Monitoring</th>
                             <th>Update Details</th>
                             <th>Add Question</th>
-
+                            <th>Edit Question</th>
+                            <th>Upload Question</th>
+                            <th>Provide Answer</th>
                             <th>Activate Link</th>
                         </tr>
                     </thead>
@@ -304,9 +306,16 @@ const DescriptiveTestList = () => {
                                 <td>
                                     <Link to={`/add-questoin-descriptive-test/${test.placement_test_id}`}>Add Question</Link>
                                 </td>
+                                
                                 <td>
                                     <Link to={`/fetch-questoins-descriptive-test/${test.placement_test_id}`}>Edit Questions</Link>
                                 </td>
+                                 <td>
+                                <Link to={`/upload-questoins-weekly-test/${test.wt_id}`}>Upload Questions</Link>
+                                </td>
+                                 <td>
+                                 <Link to={`/test-answer-form/${test.wt_id}`}>Provide answer</Link>
+                                 </td>
                                 <td>
                                     <button
                                         className={`btn ${test.is_Active ? 'btn-success' : 'btn-danger'}`}

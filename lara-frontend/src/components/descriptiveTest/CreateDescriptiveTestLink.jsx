@@ -231,12 +231,12 @@ const CreateDescriptiveTestLink = () => {
                     <p style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#007bff' }}>{newTestLink}</p>
                     <p className="fw-bolder">
                         To add questions to this link,
-                        <Link to="/test-links"> click here</Link>.
+                        <Link to="/descriptive-test-links"> click here</Link>.
                     </p>
                 </div>
             )}
 
-            <h3 className="text-center">Create Test Link</h3>
+            <h3 className="text-center">Create Descriptive Test Link</h3>
 
             <Form.Group controlId="formSubject" className="mt-4" style={{ maxWidth: '400px' }}>
                 <Form.Label>Select Subject</Form.Label>

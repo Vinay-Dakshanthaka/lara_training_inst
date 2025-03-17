@@ -60,7 +60,7 @@ const CreateWeeklyTest = () => {
 
     return (
         <div className="container mt-4">
-            <h3>Create Descriptive Test</h3>
+            <h3>Create Test Link</h3>
             <Form onSubmit={handleSubmit}>
                 <SubjectTopicSelector
                     selectedTopics={selectedTopics}

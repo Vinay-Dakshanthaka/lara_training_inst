@@ -86,6 +86,7 @@ import StudentInternalTestDetails from './components/internalTests/StudentIntern
 import AddDescriptiveTestQuestion from './components/weeklyTest/AddDescriptiveTestQuestion';
 import FetchDescrtiptiveTestQuestionEdit from './components/descriptiveTest/FetchDescrtiptiveTestQuestionEdit';
 import StudentDescriptiveAnswerForm from './components/descriptiveTest/StudentDescriptiveAnswerForm';
+import DescriptiveTestList from './components/descriptiveTest/DescriptiveTestList';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -156,6 +157,7 @@ const App = () => {
             <Route path="/detailed-internal-result/:internal_test_id" element={<DetailedInternalTestResult />} />
             <Route path="/edit-internal-quesitons/:internal_test_id" element={<EditTestInternalTestLinkQuestions />} />
             <Route path="/test-links" element={<AllPlacementTests />} />
+            <Route path="/descriptive-test-links" element={<DescriptiveTestList />} />
             <Route path="/student-performance/:student_id" element={<StudentPerformanceForAdmin />} />
             {/* <Route path="/add-question" element={<AddQuestion />} /> */}
             {/* <Route path="/profile" element={<Profile />} /> */}
