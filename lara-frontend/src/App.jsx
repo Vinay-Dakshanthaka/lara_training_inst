@@ -86,6 +86,7 @@ import StudentInternalTestDetails from './components/internalTests/StudentIntern
 import AddDescriptiveTestQuestion from './components/weeklyTest/AddDescriptiveTestQuestion';
 import FetchDescrtiptiveTestQuestionEdit from './components/descriptiveTest/FetchDescrtiptiveTestQuestionEdit';
 import StudentDescriptiveAnswerForm from './components/descriptiveTest/StudentDescriptiveAnswerForm';
+import AnswerUpdateFormDescriptiveQuestions from './components/descriptiveTest/AnswerUpdateFormDescriptiveQuestions';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -174,6 +175,7 @@ const App = () => {
             <Route path='/descriptive-test/:placement_test_id' element={<StudentDescriptiveAnswerForm />} />
             {/* <Route path='/internal-test/:wt_id' element={<StudentAnswerForm />} /> */}
             <Route path='/test-answer-form/:wt_id' element={<AnswerUpdateForm />} />
+            <Route path='//update-answer-descriptive-question/:placement_test_id' element={<AnswerUpdateFormDescriptiveQuestions />} />
             <Route path='/wt-attended-student-list/:wt_id' element={<WeeklyTestAttendedStudentsList />} />
             <Route path='/evaluvate-student-answers/:wt_id/:student_id' element={<StudentQuestionAnswer />} />
             <Route path='studentHome/weeklytest-detailed-summary/:wt_id' element={<WeeklyTestStudentDetailedSummary />} />

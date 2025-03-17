@@ -95,6 +95,7 @@ const DescriptiveTestData = () => {
       try {
         const response = await axios.get(`${baseURL}/api/weekly-test/getDescriptiveTestById/${placement_test_id}`);
         setTestDetails(response.data.test);
+        console.log("test Destails" , response.data);
         setLoading(false);
       } catch (error) {
         setError(error.message);
@@ -119,14 +120,14 @@ const DescriptiveTestData = () => {
 
   // Extracting topic names into a comma-separated string
 //   const topicNames = testDetails.TestWeekly.map(topicItem => topicItem.TopicAssociation.name).join(', ');
-const topicNames = testDetails.TestTopics?.map(topic => topic.TopicAssociation?.name).join(', ') || 'No topics assigned';
+const topicNames = testDetails.TestTopics?.map(topic => topic.PlacementTestTopic?.name).join(', ') || 'No topics assigned';
 
   return (
     <Container className="mt-4">
       {/* Display the test description */}
       <h4 className='text-center '>{testDetails.description}</h4>
 
-      {/* Display the associated topics */}
+      
       {/* <h5>Topics</h5> */}
       {topicNames ? (
         <p className='lead fw-bold'><span className='fw-bolder'>Topics : </span>{topicNames}</p>

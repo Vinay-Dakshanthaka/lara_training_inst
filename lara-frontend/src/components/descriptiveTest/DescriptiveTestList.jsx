@@ -308,6 +308,9 @@ const DescriptiveTestList = () => {
                                     <Link to={`/fetch-questoins-descriptive-test/${test.placement_test_id}`}>Edit Questions</Link>
                                 </td>
                                 <td>
+                                    <Link to={`/update-answer-descriptive-question/${test.placement_test_id}`}> Provide Answers</Link>
+                                </td>
+                                <td>
                                     <button
                                         className={`btn ${test.is_Active ? 'btn-success' : 'btn-danger'}`}
                                         onClick={() => toggleLinkStatus(test.placement_test_id, test.is_Active)}
