@@ -14,8 +14,13 @@ const StudentAnswer = db.StudentAnswer;
 const WeeklyTestFinalSubmission = db.WeeklyTestFinalSubmission;
 const {  BatchTestLinks } = require('../models'); 
 const weeklyTestFinalSubmissionModel = require('../models/weeklyTestFinalSubmissionModel');
-const PlacementTest = require('../models/placementTestModel');
+// const PlacementTest = require('../models/placementTestModel');
+const { PlacementTest,Weeklytestquestionmapping } = require('../models');
+
 const PlacementTestTopic = require('../models/placementTestTopicModel');
+const WeekltTestQuestions = require('../models/weeklyTestQuestionsModel');
+const WeekltTests = require('../models/weeklyTestModel');
+// const Weeklytestquestionmapping = require('../models/weeklyTestQuestionMapping');
 const PlacementTestWeeklyQuestionMapping = require('../models/PlacementTestWeeklyQuestionMappingModel');
 
 // const createWeeklyTestLink = async (req, res) => {
@@ -623,7 +628,7 @@ const deleteQuestionById = async (req, res) => {
 
 const getQuestionsByTopicId = async (req, res) => {
     const { topic_id } = req.params;
-
+     console.log(req.param,"-------------------------------------")
     try {
         const questions = await WeeklyTestQuestion.findAll({
             where: { topic_id },
@@ -664,6 +669,8 @@ const getQuestionsByTopicId = async (req, res) => {
         });
     }
 };
+
+
 
 const assignQuestionsToTest = async (questionIds, wt_id) => {
     try {
@@ -3181,7 +3188,7 @@ const getQuestionsByPlacementTestId = async (req, res) => {
             attributes: ['wt_question_id'] // Only select the question IDs
         });
 
-        console.log(questionMappings, "-------------------------- questionMappings");
+        // console.log(questionMappings, "-------------------------- questionMappings");
 
         // Check if any questions are associated with the placement test
         if (!questionMappings || questionMappings.length === 0) {
@@ -3191,7 +3198,7 @@ const getQuestionsByPlacementTestId = async (req, res) => {
         // Extract the question IDs from the mappings
         const questionIds = questionMappings.map(mapping => mapping.dataValues.wt_question_id);
 
-        console.log(questionIds, "---------------------- questionIds");
+        // console.log(questionIds, "---------------------- questionIds");
 
         // Step 2: Fetch the questions from the WeeklyTestQuestion table using the IDs
         const questions = await db.WeeklyTestQuestion.findAll({
@@ -3212,7 +3219,7 @@ const getQuestionsByPlacementTestId = async (req, res) => {
             ]
         });
 
-        console.log(questions, "---------------------------------- questions");
+        // console.log(questions, "---------------------------------- questions");
 
         // Calculate total marks
         const totalMarks = questions.reduce((total, question) => total + question.marks, 0);
@@ -3325,6 +3332,55 @@ const savePlacementTestAnswer = async (req, res) => {
     }
 };
 
+const assignQuestionsToPlacementTest = async (req, res) => {
+    const { placement_test_id, question_ids } = req.body;
+    //   console.log(req.body,"------------------------req body assignQuestionsToPlacementTest")
+   try {
+        // Validate if placement_test_id and question_ids are provided
+        if (!placement_test_id || !question_ids || question_ids.length === 0) {
+            return res.status(400).send({ message: 'Placement test ID and question IDs are required.' });
+        }
+  
+        // Check if placement_test_id exists in PlacementTest table
+        const test = await db.PlacementTest.findByPk(placement_test_id);
+     
+        if (!test) {
+            return res.status(404).send({ message: `Placement test with ID ${placement_test_id} not found.` });
+        }
+
+        // Check which question_ids are already assigned to the placement test
+        const existingAssignments = await  db.PlacementTestWeeklyQuestionMapping.findAll({
+            where: { placement_test_id : placement_test_id },
+            attributes: ['wt_question_id']
+        });
+          console.log(existingAssignments,"--------------------------existing")
+        const assignedQuestionIds = existingAssignments.map(a => a.wt_question_id);
+
+        // Filter out already assigned question_ids
+        const newQuestionIds = question_ids.filter(id => !assignedQuestionIds.includes(id));
+
+        if (newQuestionIds.length === 0) {
+            return res.status(200).send({ message: 'The selected questions are already exists' });
+        }
+
+        // Create an array of objects to bulk create entries in CumulativeQuestionPlacementTest
+        const assignments = newQuestionIds.map(question_id => ({
+            wt_question_id: question_id,
+            placement_test_id: placement_test_id
+        }));
+           console.log(assignments,"----------------assignemnst")
+        // Bulk create entries in the CumulativeQuestionPlacementTest table
+        const createdAssignments = await db.PlacementTestWeeklyQuestionMapping.bulkCreate(assignments);
+
+        return res.status(200).send({
+            message: 'Questions assigned to placement test successfully.',
+            assignments: createdAssignments
+        });
+    } catch (error) {
+        return res.status(500).send({ message: error.message });
+    }
+};
+
 
 
 
@@ -3372,4 +3428,5 @@ module.exports = {
     getDescriptiveTestById,
     getQuestionsByPlacementTestId,
     savePlacementTestAnswer,
+    assignQuestionsToPlacementTest
 }

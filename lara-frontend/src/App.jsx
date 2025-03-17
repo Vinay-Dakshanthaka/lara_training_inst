@@ -86,11 +86,15 @@ import StudentInternalTestDetails from './components/internalTests/StudentIntern
 import AddDescriptiveTestQuestion from './components/weeklyTest/AddDescriptiveTestQuestion';
 import FetchDescrtiptiveTestQuestionEdit from './components/descriptiveTest/FetchDescrtiptiveTestQuestionEdit';
 import StudentDescriptiveAnswerForm from './components/descriptiveTest/StudentDescriptiveAnswerForm';
+import AnswerUpdateFormDescriptiveQuestions from './components/descriptiveTest/AnswerUpdateFormDescriptiveQuestions';
 import DescriptiveTestList from './components/descriptiveTest/DescriptiveTestList';
+import AddExistingDescriptiveQuestions from './components/descriptiveTest/AddExistingDescriptiveQuestions';
+import UploadDescriptiveQuestions from './components/descriptiveTest/UploadDescriptiveQuestions';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
 const App = () => {
+
 
   return (
     <Router>
@@ -170,12 +174,14 @@ const App = () => {
             <Route path='/fetch-questoins-descriptive-test/:placement_test_id' element={<FetchDescrtiptiveTestQuestionEdit />} />
             <Route path='/edit-weekly-test-question/:question_id' element={<EditWeeklyTestQuestion />} />
             <Route path='/upload-questoins-weekly-test/:wt_id' element={<UploadWeeklyTestQuestions />} />
+            <Route path='/upload-questions-descriptive-test/:placement_test_id' element={<UploadDescriptiveQuestions />} />
             <Route path='/testResults/:id' element={<TestResults />} />
             <Route path='/weekly-test/:wt_id' element={<StudentAnswerForm />} />
             <Route path='/internal-test-theory/:wt_id' element={<StudentAnswerForm />} />
             <Route path='/descriptive-test/:placement_test_id' element={<StudentDescriptiveAnswerForm />} />
             {/* <Route path='/internal-test/:wt_id' element={<StudentAnswerForm />} /> */}
             <Route path='/test-answer-form/:wt_id' element={<AnswerUpdateForm />} />
+            <Route path='/update-answer-descriptive-question/:placement_test_id' element={<AnswerUpdateFormDescriptiveQuestions />} />
             <Route path='/wt-attended-student-list/:wt_id' element={<WeeklyTestAttendedStudentsList />} />
             <Route path='/evaluvate-student-answers/:wt_id/:student_id' element={<StudentQuestionAnswer />} />
             <Route path='studentHome/weeklytest-detailed-summary/:wt_id' element={<WeeklyTestStudentDetailedSummary />} />
@@ -185,6 +191,7 @@ const App = () => {
             <Route path='/external-test-results' element={<ExternalStudentsResults />} />
             <Route path="batch-details/:internal_test_id" element={<AssignBatches />} />
             <Route path="batch-details-wt/:wt_id" element={<AssignBatchsTowt />} />
+            <Route path="add-questions-descriptive-test-link/:test_id" element={<AddExistingDescriptiveQuestions />} />
 
           </Routes>
         </div>

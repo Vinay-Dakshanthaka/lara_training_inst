@@ -8,7 +8,7 @@ import BackButton from '../BackButton';
 import { Container, Form, Button } from 'react-bootstrap';
 
 const UploadWeeklyTestQuestions = () => {
-    const { wt_id } = useParams();  // Get the wt_id from the URL
+    const { placement_test_id } = useParams();  // Get the wt_id from the URL
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [topics, setTopics] = useState([]); // For dropdown topics
@@ -18,18 +18,23 @@ const UploadWeeklyTestQuestions = () => {
 
     // Fetch weekly test details and associated topics
     useEffect(() => {
-        const fetchTestDetailsAndTopics = async () => {
-            try {
-                const response = await axios.get(`${baseURL}/api/weekly-test/getWeeklyTestById/${wt_id}`);
-                setTestDetails(response.data.test); // Set weekly test details
-                setTopics(response.data.test.TestWeekly); // Set associated topics
-            } catch (error) {
-                setError(error.message);
-            }
+        const fetchTestDetails = async () => {
+          try {
+            const response = await axios.get(
+              `${baseURL}/api/weekly-test/getDescriptiveTestById/${placement_test_id}`
+            );
+            console.log(response.data,"----------------------------dat")
+            setTestDetails(response.data.test);
+            setLoading(false);
+          } catch (error) {
+            setError(error.message);
+            setLoading(false);
+          }
         };
-        fetchTestDetailsAndTopics();
-    }, [wt_id]);
-
+    
+        fetchTestDetails();
+      }, [placement_test_id]);
+    
     // Handle file change
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -95,10 +100,11 @@ const UploadWeeklyTestQuestions = () => {
 
     return (
         <>
-            <Container className='my-3'>
+        
+                    <Container className='my-3'>
                 <BackButton />
                 <h3>Upload Weekly Test Questions</h3>
-                
+               
                 {/* Display Weekly Test Details */}
                 {testDetails && (
                     <>

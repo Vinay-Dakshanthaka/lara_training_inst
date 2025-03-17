@@ -92,6 +92,8 @@ weeklyTestRouter.get('/getDescriptiveTestById/:placement_test_id',  weeklyTestCo
 
 weeklyTestRouter.get('/getQuestionsByPlacementTestId/:placement_test_id',  weeklyTestController.getQuestionsByPlacementTestId);
 
+weeklyTestRouter.post('/assignQuestionsToPlacementTest',  weeklyTestController.assignQuestionsToPlacementTest);
+
 
 // weeklyTestRouter.post('/upload-questions', upload.single('file'), async (req, res) => {
 //     const { wt_id, topic_id } = req.body;

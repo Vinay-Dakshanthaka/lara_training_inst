@@ -13,6 +13,8 @@ const verifyToken = require('../middleware/authMiddleware');
 const uploadQuestionImage = multer({ dest: 'cumulative_question_images/' });
 const nodemailer = require('nodemailer');
 const logoPath = path.join(__dirname, 'laralogo.png');
+const XLSX = require('xlsx');
+const db = require('../models');
 
 placementTestRoute.post('/create-test-link', verifyToken,  placementTestContoller.createPlacementTestLink);
 
@@ -258,6 +260,109 @@ placementTestRoute.post(
         }
     }
 );
+
+
+// placementTestRoute.post('/upload-questions', upload.single('file'), async (req, res) => {
+//     const {placement_test_id, topic_id } = req.body;
+//     const filePath = req.file.path;
+
+//     if (!placement_test_id || !topic_id) {
+//         return res.status(400).send({ message: "Test ID (wt_id) and Topic ID (topic_id) are required." });
+//     }
+
+//     try {
+        
+//         const workbook = XLSX.readFile(filePath);
+//         const sheetName = workbook.SheetNames[0];
+//         const sheet = workbook.Sheets[sheetName];
+
+//         const data = XLSX.utils.sheet_to_json(sheet); // Get data from the sheet as JSON
+
+//         if (data.length === 0) {
+//             return res.status(400).send({ message: "No data found in the uploaded file." });
+//         }
+
+//         for (const row of data) {
+//             const { wt_question_description, marks, minutes} = row;
+
+//             const wt_question = await db.WeeklyTestQuestion.create({
+//                 wt_question_description: wt_question_description,
+//                 marks: marks,
+//                 minutes: minutes,
+//                 topic_id: topic_id,
+//             });
+
+           
+//             // if (wt_question && keywords) {
+             
+//             //     await db.WeeklyTestQuestionAnswer.create({
+//             //         wt_question_id: wt_question.dataValues.wt_question_id,
+//             //         keywords: keywords || "ntg", 
+//             //         createdAt: new Date(),
+//             //         updatedAt: new Date(),
+//             //     });
+//             // }
+
+
+//         }
+
+//         res.status(200).send({ message: "Excel data processed and questions assigned successfully." });
+//     } catch (error) {
+//         console.error("Error processing the Excel file:", error);
+//         res.status(500).send({ message: "Error processing the Excel file." });
+//     }
+// });
+
+placementTestRoute.post('/upload-questions', upload.single('file'), async (req, res) => {
+    const { placement_test_id, topic_id } = req.body;
+    const filePath = req.file.path;
+
+    if (!placement_test_id || !topic_id) {
+        return res.status(400).send({ message: "Test ID (placement_test_id) and Topic ID (topic_id) are required." });
+    }
+
+    try {
+        const workbook = XLSX.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+
+        const data = XLSX.utils.sheet_to_json(sheet); // Convert sheet data to JSON
+
+        if (data.length === 0) {
+            return res.status(400).send({ message: "No data found in the uploaded file." });
+        }
+
+        const createdQuestions = []; // Store created question IDs
+
+        for (const row of data) {
+            const { wt_question_description, marks, minutes } = row;
+
+            // Store question in WeeklyTestQuestion table
+            const wt_question = await db.WeeklyTestQuestion.create({
+                wt_question_description,
+                marks,
+                minutes,
+                topic_id,
+            });
+
+            // Store question ID for mapping
+            createdQuestions.push(wt_question.dataValues.wt_question_id);
+        }
+
+        // Insert mapping records in placementtestweeklyquestionmapping
+        for (const question_id of createdQuestions) {
+            await db.PlacementTestWeeklyQuestionMapping.create({
+                placement_test_id,
+                wt_question_id: question_id,
+            });
+        }
+
+        res.status(200).send({ message: "Questions uploaded and mapped successfully." });
+    } catch (error) {
+        console.error("Error processing the Excel file:", error);
+        res.status(500).send({ message: "Error processing the Excel file." });
+    }
+});
 
 
 module.exports = placementTestRoute;

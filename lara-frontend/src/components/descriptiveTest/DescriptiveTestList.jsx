@@ -251,6 +251,7 @@ const DescriptiveTestList = () => {
                             <th>Number of Questions</th>
                             <th>Camera Monitoring</th>
                             <th>Update Details</th>
+                            <th>Add Existing Questions</th>
                             <th>Add Question</th>
                             <th>Edit Question</th>
                             <th>Upload Question</th>
@@ -302,7 +303,11 @@ const DescriptiveTestList = () => {
                                         Update details
                                     </button>
                                 </td>
-
+                                <td>
+                                    <Link to={`/add-questions-descriptive-test-link/${test.placement_test_id}`}>
+                                        Add Existing Questions
+                                    </Link>
+                                    </td>
                                 <td>
                                     <Link to={`/add-questoin-descriptive-test/${test.placement_test_id}`}>Add Question</Link>
                                 </td>
@@ -311,11 +316,12 @@ const DescriptiveTestList = () => {
                                     <Link to={`/fetch-questoins-descriptive-test/${test.placement_test_id}`}>Edit Questions</Link>
                                 </td>
                                  <td>
-                                <Link to={`/upload-questoins-weekly-test/${test.wt_id}`}>Upload Questions</Link>
+                                <Link to={`/upload-questions-descriptive-test/${test.placement_test_id}`}>Upload Questions</Link>
                                 </td>
-                                 <td>
-                                 <Link to={`/test-answer-form/${test.wt_id}`}>Provide answer</Link>
-                                 </td>
+    
+                                <td>
+                                    <Link to={`/update-answer-descriptive-question/${test.placement_test_id}`}> Provide Answers</Link>
+                                </td>
                                 <td>
                                     <button
                                         className={`btn ${test.is_Active ? 'btn-success' : 'btn-danger'}`}

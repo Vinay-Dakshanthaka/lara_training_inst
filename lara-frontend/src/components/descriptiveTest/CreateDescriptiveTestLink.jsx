@@ -264,7 +264,7 @@ const CreateDescriptiveTestLink = () => {
                             <div className="col-md-3 col-sm-6 col-12" key={topic.topic_id}>
                                 <Form.Check
                                     type="checkbox"
-                                    label={`${topic.name} (${topic.question_count} questions)`}
+                                    label={`${topic.name} `}
                                     checked={selectedTopics.includes(topic.topic_id)}
                                     onChange={() => handleTopicChange(topic.topic_id)}
                                 />
