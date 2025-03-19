@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     PlacementTestWeeklyQuestionMapping.associate = (models) => {
         PlacementTestWeeklyQuestionMapping.belongsTo(models.PlacementTest, {
             foreignKey: 'placement_test_id',
-            as: 'PlacementTest'
+            as: 'Placementtests'
         });
 
         PlacementTestWeeklyQuestionMapping.belongsTo(models.WeeklyTestQuestion, {
