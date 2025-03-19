@@ -264,12 +264,12 @@ const StudentDescriptiveAnswerForm = () => {
       const response = await axios.put(`${baseURL}/api/weekly-test/getPlacementTestFinalSubmissionDetails/${placement_test_id}/${placement_test_student_id}`);
       const isFinalEvaluation = response.data[0].evaluation;
       console.log("Final evaluation: ", isFinalEvaluation);
-      setIsAutoEvaluation(isFinalEvaluation);
+      // setIsAutoEvaluation(isFinalEvaluation);
 
-      if (isFinalEvaluation) {
-        toast.error("Manual evaluation has been done. Excluded from auto-evaluation.");
-        return;
-      }
+      // if (isFinalEvaluation) {
+      //   toast.error("Manual evaluation has been done. Excluded from auto-evaluation.");
+      //   return;
+      // }
 
       let allUpdated = true;
       console.log("Starting auto-evaluation of answers...");
