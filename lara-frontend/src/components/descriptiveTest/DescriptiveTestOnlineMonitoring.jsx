@@ -126,7 +126,7 @@ import { useNavigate } from 'react-router-dom';
 import { FilesetResolver } from '@mediapipe/tasks-vision';
 import { ObjectDetector } from '@mediapipe/tasks-vision';
 
-const OnlineTestMonitoring = ({ style, isCameraOn }) => {
+const DescriptiveTestOnlineMonitoring = ({ style, isCameraOn }) => {
   const [detector, setDetector] = useState(null);
   const [video, setVideo] = useState(null);
   const [toastId, setToastId] = useState(null);
@@ -278,10 +278,10 @@ const OnlineTestMonitoring = ({ style, isCameraOn }) => {
 
   return (
     <div>
-      <video ref={videoRef} id="video" width="240" height="240" style={{ ...style }} />
-      <canvas ref={canvasRef} width="320" height="240" style={{ marginLeft: '20%' }} />
+      <video ref={videoRef} id="video" width="100" height="100" style={{ ...style }} />
+      <canvas ref={canvasRef} width="0" height="0" style={{ marginLeft: '20%' }} />
     </div>
   );
 };
 
-export default OnlineTestMonitoring;
+export default DescriptiveTestOnlineMonitoring;

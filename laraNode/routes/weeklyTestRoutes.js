@@ -92,6 +92,24 @@ weeklyTestRouter.get('/getDescriptiveTestById/:placement_test_id',  weeklyTestCo
 
 weeklyTestRouter.get('/getQuestionsByPlacementTestId/:placement_test_id',  weeklyTestController.getQuestionsByPlacementTestId);
 
+weeklyTestRouter.post('/savePlacementTestStudentAnswer',  weeklyTestController.savePlacementTestStudentAnswer);
+
+weeklyTestRouter.post('/savePlacementTestFinalSubmission',  weeklyTestController.savePlacementTestFinalSubmission);
+
+weeklyTestRouter.post('/getPlacementTestStudentAnswer/:placement_test_id/:question_id',  weeklyTestController.getPlacementTestStudentAnswer);
+
+weeklyTestRouter.get('/getPlacementTestAnswerDataByStudentId/:placement_test_id/:placement_test_student_id',  weeklyTestController.getPlacementTestAnswerDataByStudentId);
+
+weeklyTestRouter.put('/updatePlacementTestMarksAndCommentByStudentId/:placement_test_id/:placement_test_student_id/:question_id',  weeklyTestController.updatePlacementTestMarksAndCommentByStudentId);
+
+weeklyTestRouter.get('/getPlacementTestStudentAndTestDetailsByStudentId/:placement_test_id/:placement_test_student_id',  weeklyTestController.getPlacementTestStudentAndTestDetailsByStudentId);
+
+weeklyTestRouter.put('/updatePlacementTestEvaluationStatus',  weeklyTestController.updatePlacementTestEvaluationStatus); 
+
+weeklyTestRouter.put('/getPlacementTestFinalSubmissionDetails/:placement_test_id/:placement_test_student_id',  weeklyTestController.getPlacementTestFinalSubmissionDetails); 
+
+weeklyTestRouter.get('/getAllIndividualStudentResultsForDescriptivePlacementTest/:placement_test_id',  weeklyTestController.getAllIndividualStudentResultsForDescriptivePlacementTest); 
+
 
 // weeklyTestRouter.post('/upload-questions', upload.single('file'), async (req, res) => {
 //     const { wt_id, topic_id } = req.body;

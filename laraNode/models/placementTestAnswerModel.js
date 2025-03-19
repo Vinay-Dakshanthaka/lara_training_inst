@@ -25,8 +25,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'PlacementTestQuestions',
-                key: 'question_id'
+                model: 'weeklytestquestions',
+                key: 'wt_question_id'
             }
         },
         answer: {

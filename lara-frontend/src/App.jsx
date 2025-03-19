@@ -87,6 +87,8 @@ import AddDescriptiveTestQuestion from './components/weeklyTest/AddDescriptiveTe
 import FetchDescrtiptiveTestQuestionEdit from './components/descriptiveTest/FetchDescrtiptiveTestQuestionEdit';
 import StudentDescriptiveAnswerForm from './components/descriptiveTest/StudentDescriptiveAnswerForm';
 import AnswerUpdateFormDescriptiveQuestions from './components/descriptiveTest/AnswerUpdateFormDescriptiveQuestions';
+import DescriptiveTestAutoEvaluation from './components/descriptiveTest/DescriptiveTestAutoEvaluation';
+import AllStudentsDescriptivePlacementTestResults from './components/descriptiveTest/AllStudentsDescriptivePlacementTestResults';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -175,9 +177,10 @@ const App = () => {
             <Route path='/descriptive-test/:placement_test_id' element={<StudentDescriptiveAnswerForm />} />
             {/* <Route path='/internal-test/:wt_id' element={<StudentAnswerForm />} /> */}
             <Route path='/test-answer-form/:wt_id' element={<AnswerUpdateForm />} />
-            <Route path='//update-answer-descriptive-question/:placement_test_id' element={<AnswerUpdateFormDescriptiveQuestions />} />
+            <Route path='/update-answer-descriptive-question/:placement_test_id' element={<AnswerUpdateFormDescriptiveQuestions />} />
             <Route path='/wt-attended-student-list/:wt_id' element={<WeeklyTestAttendedStudentsList />} />
             <Route path='/evaluvate-student-answers/:wt_id/:student_id' element={<StudentQuestionAnswer />} />
+            <Route path='/descriptive-test-resulst/:placement_test_id/:placement_test_student_id' element={<DescriptiveTestAutoEvaluation />} />
             <Route path='studentHome/weeklytest-detailed-summary/:wt_id' element={<WeeklyTestStudentDetailedSummary />} />
             <Route path='studentHome/weekly-test-results/:wt_id' element={<AllStudentsWeeklyTestResults />} />
             <Route path='weekly-test-student-performance/:student_id' element={<WeeklyTestPerformanceForAdmin />} />
@@ -185,6 +188,7 @@ const App = () => {
             <Route path='/external-test-results' element={<ExternalStudentsResults />} />
             <Route path="batch-details/:internal_test_id" element={<AssignBatches />} />
             <Route path="batch-details-wt/:wt_id" element={<AssignBatchsTowt />} />
+            <Route path="/descriptive-test-results/:placement_test_id" element={<AllStudentsDescriptivePlacementTestResults />} />
 
           </Routes>
         </div>

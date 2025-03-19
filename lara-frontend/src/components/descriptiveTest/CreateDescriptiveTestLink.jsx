@@ -229,10 +229,10 @@ const CreateDescriptiveTestLink = () => {
                 <div className="mt-4 p-3 card" style={{ border: '1px solid #007bff', borderRadius: '5px', backgroundColor: '#e9ecef' }}>
                     <h5>Link Created Successfully:</h5>
                     <p style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#007bff' }}>{newTestLink}</p>
-                    <p className="fw-bolder">
+                    {/* <p className="fw-bolder">
                         To add questions to this link,
                         <Link to="/test-links"> click here</Link>.
-                    </p>
+                    </p> */}
                 </div>
             )}
 

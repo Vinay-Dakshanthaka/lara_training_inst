@@ -241,7 +241,7 @@ const DescriptiveTestList = () => {
                     {alert.message}
                 </Alert>
             )}
-            <h2>All Placement Tests</h2>
+            <h2>Descriptive Test List</h2>
             <div className="table-responsive">
                 <Table className="table table-bordered">
                     <thead>
@@ -251,8 +251,8 @@ const DescriptiveTestList = () => {
                             <th>Number of Questions</th>
                             <th>Camera Monitoring</th>
                             <th>Update Details</th>
+                            <th>Results</th>
                             <th>Add Question</th>
-
                             <th>Activate Link</th>
                         </tr>
                     </thead>
@@ -300,7 +300,9 @@ const DescriptiveTestList = () => {
                                         Update details
                                     </button>
                                 </td>
-
+                                <td>
+                                    <Link to={`/descriptive-test-results/${test.placement_test_id}`}>Results</Link>
+                                </td>
                                 <td>
                                     <Link to={`/add-questoin-descriptive-test/${test.placement_test_id}`}>Add Question</Link>
                                 </td>

@@ -204,6 +204,9 @@ db.PlacementTestCreator = require('./placementTestCreator.js')(sequelize, DataTy
 db.StudentWhatsAppLinks = require('./StudentWhatsAppLinks.js')(sequelize, DataTypes);
 db.PaperBasedTestResults = require('./paperBasedTestResults.js')(sequelize,DataTypes);
 db.PlacementTestWeeklyQuestionMapping  = require('./PlacementTestWeeklyQuestionMappingModel.js')(sequelize,DataTypes);
+db.PlacementTestStudentAnswer  = require('./placementTestAnswerModel.js')(sequelize,DataTypes);
+db.PlacementTestFinalSubmission  = require('./placementTestFinalSubmission.js')(sequelize,DataTypes);
+db.PlacementTestAnswer  = require('./placementTestAnswerModel.js')(sequelize,DataTypes);
 
 
 db.Student.hasMany(db.PaperBasedTestResults, { foreignKey: 'studentId' });
@@ -406,6 +409,17 @@ db.PlacementTestResult.belongsTo(db.PlacementTestStudent, {
     onDelete: 'CASCADE',
     as: 'TestResultStudent' // Unique alias for the association
 });
+
+db.PlacementTestAnswer.belongsTo(db.PlacementTestStudent, {
+    foreignKey: 'placement_test_student_id', 
+    as: 'StudentFromPlacementTest' 
+});
+
+db.PlacementTestStudent.hasMany(db.PlacementTestAnswer, {
+    foreignKey: 'placement_test_student_id',
+    as: 'AnswersOfPlacementTestStudent'
+});
+
 
 
 // Associations for InternalTest

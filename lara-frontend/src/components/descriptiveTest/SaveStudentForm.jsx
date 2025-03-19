@@ -50,6 +50,8 @@ const SaveStudentForm = () => {
                 toast.success("Details saved successfully. Proceed to the test.");
                 setPlacementTestStudentId(student.placement_test_student_id);
                 setModalOpen(false);
+                console.log("Student Data Placement test :", student)
+                localStorage.setItem('placement_test_student_id',student.placement_test_student_id)
             } else {
                 setSaveError("Failed to save student data. Please try again.");
             }

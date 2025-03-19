@@ -11,6 +11,9 @@ import WeeklyTestRules from '../weeklyTest/weeklyTestStudentAnswerSubmission/Wee
 import PaginationControls from '../weeklyTest/weeklyTestStudentAnswerSubmission/PaginationControls';
 import DescriptiveTestData from './DescriptiveTestData';
 import SaveStudentForm from './SaveStudentForm';
+import { cosineSimilarity, tokenizeAndVectorize } from '../weeklyTest/weeklyTestStudentAnswerSubmission/evaluvation/autoEvaluvateUtils';
+import './StudentDescriptiveAnswerForm.css'
+import DescriptiveTestOnlineMonitoring from './DescriptiveTestOnlineMonitoring';
 
 const StudentDescriptiveAnswerForm = () => {
   const { placement_test_id } = useParams();
@@ -22,9 +25,36 @@ const StudentDescriptiveAnswerForm = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(-1); // Show rules page first
   const [finalSubmissionLoading, setFinalSubmissionLoading] = useState(false);
+  const [evaluationLoading, setEvaluationLoading] = useState(false);
+  const [evaluationCompleted, setEvaluationCompleted] = useState(false);
   const [totalMarks, setTotalMarks] = useState(null);
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const [locationAllowed, setLocationAllowed] = useState(false);
+  const [isAutoEvaluation, setIsAutoEvaluation] = useState();
+  const [questionsWithAnswers, setQuestionsWithAnswers] = useState([]);
+  const [correctAnswers, setCorrectAnswers] = useState({});
+  const [answerKeywords, setAnswerKeywords] = useState({});
+  const [loadingQuestions, setLoadingQuestions] = useState([]);
+  const [testDetails, setTestDetails] = useState(null);
+  const [isMonitored, setIsMonitored] = useState(false)
+
+
+
+
+  const placement_test_student_id = localStorage.getItem('placement_test_student_id');
+
+  const fetchTestDetails = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/api/weekly-test/getDescriptiveTestById/${placement_test_id}`);
+      setTestDetails(response.data.test);
+      console.log("test details", response.data.test.is_Monitored);
+      setIsMonitored(response.data.test.is_Monitored)
+      setLoading(false);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
 
   // Ask for location permission
   useEffect(() => {
@@ -58,6 +88,43 @@ const StudentDescriptiveAnswerForm = () => {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    axios
+      .get(`${baseURL}/api/weekly-test/getPlacementTestAnswerDataByStudentId/${placement_test_id}/${placement_test_student_id}`)
+      .then((response) => {
+        const questions = response.data.questions;
+        setQuestionsWithAnswers(questions);
+
+        questions.forEach((question) => {
+          fetchCorrectAnswer(question.question_id);
+        });
+      })
+      .catch(() => {
+        toast.error("Error fetching data");
+      });
+  }, [placement_test_id, placement_test_student_id]);
+  useEffect(() => {
+    // Fetch the data after the auto-evaluation is done
+    if (isAutoEvaluation) {
+      axios
+        .get(`${baseURL}/api/weekly-test/getPlacementTestAnswerDataByStudentId/${placement_test_id}/${placement_test_student_id}`)
+        .then((response) => {
+          const questions = response.data.questions;
+          setQuestionsWithAnswers(questions);
+          questions.forEach((question) => {
+            fetchCorrectAnswer(question.question_id);
+          });
+        })
+        .catch(() => {
+          toast.error("Error fetching data");
+        });
+    }
+  }, [isAutoEvaluation]);
+
+  const answeredQuestions = questionsWithAnswers.filter(
+    (item) => item.studentAnswer && item.studentAnswer.answer && item.studentAnswer.answer !== "Not Attempted"
+  );
+
   // Fetch questions
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -86,9 +153,11 @@ const StudentDescriptiveAnswerForm = () => {
       if (questions.length > 0 && currentPage >= 0) {
         const currentQuestion = questions[currentPage];
         try {
-          const token = localStorage.getItem('token');
-          const config = { headers: { Authorization: `Bearer ${token}` } };
-          const response = await axios.get(`${baseURL}/api/weekly-test/getStudentAnswer/${wt_id}/${currentQuestion.wt_question_id}`, config);
+
+
+          const response = await axios.post(`${baseURL}/api/weekly-test/getPlacementTestStudentAnswer/${placement_test_id}/${currentQuestion.wt_question_id}`, {
+            placement_test_student_id
+          });
           if (response.data.answer) {
             setAnswers((prevAnswers) => ({
               ...prevAnswers,
@@ -100,10 +169,13 @@ const StudentDescriptiveAnswerForm = () => {
             }));
           }
         } catch (error) {
+          console.log("error fetching previous answer : ", error)
           console.error(`Error fetching existing answer: ${error.message}`);
         }
       }
     };
+
+    fetchTestDetails();
 
     fetchExistingAnswer();
   }, [currentPage, questions, placement_test_id]);
@@ -120,13 +192,13 @@ const StudentDescriptiveAnswerForm = () => {
     e.preventDefault();
     const answerArray = [{ question_id: Number(questionId), answer: answers[questionId] || '' }];
     try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.post(`${baseURL}/api/weekly-test/saveStudentAnswer`, { wt_id, answers: answerArray }, config);
+
+      await axios.post(`${baseURL}/api/weekly-test/savePlacementTestStudentAnswer`, { placement_test_student_id, answers: answerArray, placement_test_id });
       toast.success('Answer saved successfully!');
       setSavedAnswers((prevSaved) => ({ ...prevSaved, [questionId]: true }));
       sessionStorage.removeItem('unsavedAnswers');
     } catch (error) {
+      console.error("erroro saving student answer : ", error)
       toast.error(`Error saving answer: ${error.response?.data?.message || error.message}`);
     }
   };
@@ -140,21 +212,135 @@ const StudentDescriptiveAnswerForm = () => {
 
     try {
       setFinalSubmissionLoading(true);
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      await axios.post(`${baseURL}/api/weekly-test/saveFinalSubmission`, {
-        wt_id,
+      await axios.post(`${baseURL}/api/weekly-test/savePlacementTestFinalSubmission`, {
+        placement_test_student_id,
+        placement_test_id,
         latitude: location.latitude,
         longitude: location.longitude,
-      }, config);
+      });
 
       toast.success('Final submission saved successfully!');
       setFinalSubmissionLoading(false);
       sessionStorage.removeItem('unsavedAnswers');
+
+      // Trigger auto-evaluation after submission
+      await autoEvaluateAnswers();
+
+      setEvaluationCompleted(true);  // Mark evaluation as completed
+      setIsMonitored(false)
+      setTimeout(() => {
+        navigate(`/descriptive-test-resulst/${placement_test_id}/${placement_test_student_id}`);
+      }, 3000);
     } catch (error) {
+      console.log("Error while final Submission : ", error);
       toast.error(`Error saving final submission: ${error.response?.data?.message || error.message}`);
       setFinalSubmissionLoading(false);
+    }
+  };
+
+  const fetchCorrectAnswer = (question_id) => {
+    axios
+      .get(`${baseURL}/api/weekly-test/getCorrectAnswerForQuestion/${question_id}`)
+      .then((response) => {
+        setCorrectAnswers((prev) => ({
+          ...prev,
+          [question_id]: response.data.answer,
+        }));
+        setAnswerKeywords((prev) => ({
+          ...prev,
+          [question_id]: response.data.keywords, // Storing keywords
+        }));
+      })
+      .catch(() => {
+        toast.error("Error fetching correct answer.");
+      });
+  };
+
+  const autoEvaluateAnswers = async () => {
+    setEvaluationLoading(true);  // Start loading animation
+
+    try {
+      const response = await axios.put(`${baseURL}/api/weekly-test/getPlacementTestFinalSubmissionDetails/${placement_test_id}/${placement_test_student_id}`);
+      const isFinalEvaluation = response.data[0].evaluation;
+      console.log("Final evaluation: ", isFinalEvaluation);
+      setIsAutoEvaluation(isFinalEvaluation);
+
+      if (isFinalEvaluation) {
+        toast.error("Manual evaluation has been done. Excluded from auto-evaluation.");
+        return;
+      }
+
+      let allUpdated = true;
+      console.log("Starting auto-evaluation of answers...");
+
+      for (let i = 0; i < answeredQuestions.length; i++) {
+        const item = answeredQuestions[i];
+        console.log(`Processing question ID ${item.question_id}`);
+        const studentAnswer = item.studentAnswer.answer;
+        const correctAnswer = correctAnswers[item.question_id];
+        const answerKeyword = answerKeywords[item.question_id];
+
+        setLoadingQuestions(prevState => {
+          const newState = [...prevState];
+          newState[i] = true;
+          return newState;
+        });
+
+        if (studentAnswer && correctAnswer) {
+          const studentVector = tokenizeAndVectorize(studentAnswer);
+          const correctVector = tokenizeAndVectorize(correctAnswer);
+          const similarity = cosineSimilarity(studentVector, correctVector);
+          const threshold = answerKeyword === "1" ? 0.8 : 0.6;
+          const isCorrect = similarity >= threshold;
+          const marks = isCorrect ? item.marks : 0;
+          const comment = isCorrect ? "Correct Answer" : "Incorrect Answer";
+          console.log("Student answer : ", studentAnswer)
+          console.log("correct answer : ", correctAnswer)
+          console.log("Similarity: ", similarity);
+          console.log("Threshold:", threshold);
+          console.log("isCorrect:", isCorrect);
+
+          try {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+
+            const response = await axios.put(
+              `${baseURL}/api/weekly-test/updatePlacementTestMarksAndCommentByStudentId/${placement_test_id}/${placement_test_student_id}/${item.question_id}`,
+              { marks, comment }
+            );
+            console.log(`Successfully updated marks for question ID ${item.question_id}`);
+          } catch (error) {
+            allUpdated = false;
+            console.error(`Error updating marks for question ID ${item.question_id}:`, error);
+            if (error.response && error.response.status === 403) {
+              toast.error("Excluded from auto-evaluation...");
+            } else {
+              toast.error("Error updating marks and comments.");
+            }
+          }
+        }
+
+        setLoadingQuestions(prevState => {
+          const newState = [...prevState];
+          newState[i] = false;
+          return newState;
+        });
+      }
+
+      if (allUpdated) {
+        console.log("Auto evaluation completed successfully!");
+        toast.success("Evaluation done!");
+        setIsMonitored(false)
+      } else {
+        console.error("Errors occurred during auto evaluation.");
+        toast.error("There was an error during auto evaluation.");
+      }
+    } catch (error) {
+      console.error("Error fetching evaluation status or auto-evaluation:", error);
+      toast.error("Error during auto-evaluation.");
+    } finally {
+      setEvaluationLoading(false);  // End loading animation
     }
   };
 
@@ -168,12 +354,27 @@ const StudentDescriptiveAnswerForm = () => {
     );
   }
 
-  if (loading) return <p>Loading questions...</p>;
+  if (loading) return <p>Loading questions....</p>;
   if (error) return <p>Error fetching questions: {error}</p>;
 
   return (
-    <Container className="my-4" style={{ minHeight: '100vh' }}>
-        <SaveStudentForm />
+    <Container className="" style={{ minHeight: '100vh', position: 'relative' }}>
+      <SaveStudentForm />
+      {isMonitored && (
+        <DescriptiveTestOnlineMonitoring
+          isCameraOn={isMonitored}
+          style={{
+            position: 'fixed',
+            top: '10%',
+            left: '90%',
+            zIndex: 1000,
+            opacity: 0.8,
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            borderRadius: '50%',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',  // Optional shadow for visibility
+          }}
+        />
+      )}
       <h5>Total Marks: {totalMarks}</h5>
       <DescriptiveTestData />
       <ToastContainer />
@@ -192,14 +393,56 @@ const StudentDescriptiveAnswerForm = () => {
             )}
           </Col>
           <Col lg={3} md={4} style={{ maxHeight: '100vh', overflowY: 'auto' }}>
-            <PaginationControls currentPage={currentPage} handlePreviousPage={() => setCurrentPage(currentPage - 1)}
-              handleNextPage={() => setCurrentPage(currentPage + 1)} totalQuestions={questions.length} />
-            <QuestionButtons questions={questions} savedAnswers={savedAnswers} handlePageChange={setCurrentPage} />
-            <FinalSubmissionButton handleFinalSubmission={handleFinalSubmission} finalSubmissionLoading={finalSubmissionLoading} />
+            <PaginationControls
+              currentPage={currentPage}
+              handlePreviousPage={() => setCurrentPage(currentPage - 1)}
+              handleNextPage={() => setCurrentPage(currentPage + 1)}
+              totalQuestions={questions.length}
+            />
+            <QuestionButtons
+              questions={questions}
+              savedAnswers={savedAnswers}
+              handlePageChange={setCurrentPage}
+            />
+
+            {finalSubmissionLoading || evaluationLoading ? (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(0, 0, 0, 0.4)', // Dim the background
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 9999, // Ensure the spinner is above other elements
+                }}
+              >
+                <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <p
+                  style={{
+                    marginTop: '20px',
+                    fontSize: '18px',
+                    color: '#fff',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Evaluating answers... Please wait.
+                </p>
+              </div>
+            ) : (
+              <FinalSubmissionButton handleFinalSubmission={handleFinalSubmission} finalSubmissionLoading={finalSubmissionLoading} />
+            )}
           </Col>
         </Row>
       )}
     </Container>
+
   );
 };
 

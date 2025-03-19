@@ -12,11 +12,15 @@ const WeeklyTestQuestionMapping = db.WeeklyTestQuestionMapping;
 const Student = db.Student;
 const StudentAnswer = db.StudentAnswer;
 const WeeklyTestFinalSubmission = db.WeeklyTestFinalSubmission;
-const {  BatchTestLinks } = require('../models'); 
+const { BatchTestLinks } = require('../models');
 const weeklyTestFinalSubmissionModel = require('../models/weeklyTestFinalSubmissionModel');
 const PlacementTest = require('../models/placementTestModel');
 const PlacementTestTopic = require('../models/placementTestTopicModel');
 const PlacementTestWeeklyQuestionMapping = require('../models/PlacementTestWeeklyQuestionMappingModel');
+const PlacementTestStudentAnswer = db.PlacementTestStudentAnswer;
+const PlacementTestFinalSubmission = db.PlacementTestFinalSubmission;
+const PlacementTestStudent = db.PlacementTestStudent;
+
 
 // const createWeeklyTestLink = async (req, res) => {
 //     try {
@@ -112,7 +116,7 @@ const createWeeklyTestLink = async (req, res) => {
         });
 
         // Generate the appropriate test link based on testType
-        const testLink = testTypeValue === 1 
+        const testLink = testTypeValue === 1
             ? `${baseURL}/internal-test-theory/${newTest.wt_id}`
             : `${baseURL}/weekly-test/${newTest.wt_id}`;
 
@@ -251,36 +255,36 @@ const getAllWeeklyTests = async (req, res) => {
 const saveQuestionHandler = async (req, res) => {
     try {
         const { questionData, wt_id } = req.body;
-      
-            console.log(req.body,"----------------------------body")
+
+        console.log(req.body, "----------------------------body")
         // Extract necessary fields
         const { wt_question_keywords } = questionData;
-         console.log(questionData,"-----------------------------questiondata")
+        console.log(questionData, "-----------------------------questiondata")
         // Save the question and mapping
         const result = await saveWeeklyTestQuestionWithMapping(questionData, wt_id);
-       
+
         if (result.success) {
             const wt_question_id = result.newQuestion?.dataValues?.wt_question_id;
-           
-            if (wt_question_id && wt_question_keywords) { 
+
+            if (wt_question_id && wt_question_keywords) {
                 console.log("🔍 Inserting keywords:", wt_question_keywords);
 
                 const keywords = await db.WeeklyTestQuestionAnswer.create({
                     wt_question_id: wt_question_id,
-                    keywords: wt_question_keywords?.toString() ,
-                }, { 
-                    fields: ["wt_question_id", "keywords"]  
+                    keywords: wt_question_keywords?.toString(),
+                }, {
+                    fields: ["wt_question_id", "keywords"]
                 });
 
                 console.log("✅ Answer saved successfully.", keywords);
             } else {
-                return res.status(404).send({ message:"Skipping answer saving as no question ID is available" });
+                return res.status(404).send({ message: "Skipping answer saving as no question ID is available" });
                 // console.log("⚠ Skipping answer saving as no question ID is available.");
             }
 
-            return res.status(200).send({ 
-                message: result.message, 
-                question: result.newQuestion 
+            return res.status(200).send({
+                message: result.message,
+                question: result.newQuestion
             });
         } else {
             return res.status(500).send({ message: result.message, error: result.error });
@@ -300,7 +304,7 @@ const saveQuestionHandler = async (req, res) => {
 //       console.log(questionData,"----------------------------questiondata");
 //     // Call the service function to save the question and mapping
 //     const result = await saveWeeklyTestQuestionWithMapping(questionData, wt_id);
-   
+
 //     // Return the appropriate response based on the result
 //     if (result.success) {
 //         return res.status(201).send({ message: result.message, question: result.newQuestion });
@@ -393,7 +397,7 @@ const getQuestionsByWeeklyTestId = async (req, res) => {
             attributes: ['wt_question_id']  // Only select the question IDs
         });
 
-        console.log(questionMappings,"--------------------------questionmapping")
+        console.log(questionMappings, "--------------------------questionmapping")
 
         // Check if any questions are associated with the test
         if (!questionMappings || questionMappings.length === 0) {
@@ -404,7 +408,7 @@ const getQuestionsByWeeklyTestId = async (req, res) => {
         // const questionIds = questionMappings.map(mapping => mapping.wt_question_id);
         const questionIds = questionMappings.map(mapping => mapping.dataValues.wt_question_id);
 
-        console.log(questionIds,"----------------------questionids")
+        console.log(questionIds, "----------------------questionids")
 
 
         // Step 2: Fetch the questions from the WeeklyTestQuestion table using the IDs
@@ -419,16 +423,16 @@ const getQuestionsByWeeklyTestId = async (req, res) => {
                     attributes: ['name']
                 },
                 {
-                    model: WeeklyTestQuestionAnswer,  
+                    model: WeeklyTestQuestionAnswer,
                     as: 'TestQuestionAnswerDetails',  // Updated alias
                     attributes: ['keywords']  // Fetch only keywords
                 }
             ],
-        
+
         });
-               
-           
-           console.log(questions,"----------------------------------questions")
+
+
+        console.log(questions, "----------------------------------questions")
         // Calculate total marks
         const totalMarks = questions.reduce((total, question) => total + question.marks, 0);
 
@@ -515,9 +519,9 @@ const getQuestionById = async (req, res) => {
                     model: Topic,  // Include the Topic details
                     as: 'TopicDetails',
                     attributes: ['name']
-                },{
-                    model: WeeklyTestQuestionAnswer,  
-                    as: 'TestQuestionAnswerDetails',  
+                }, {
+                    model: WeeklyTestQuestionAnswer,
+                    as: 'TestQuestionAnswerDetails',
                     attributes: ['keywords']
                 }
             ]
@@ -599,13 +603,13 @@ const deleteQuestionById = async (req, res) => {
         await WeeklyTestQuestionMapping.destroy({
             where: { wt_question_id }
         });
-        
+
         await StudentAnswer.destroy({
-            where : {question_id : wt_question_id}
+            where: { question_id: wt_question_id }
         })
         // Step 3: Delete the question from WeeklyTestQuestion table
         await WeeklyTestQuestion.destroy({
-            where: { wt_question_id}
+            where: { wt_question_id }
         });
 
         // Return success message after deletion
@@ -629,19 +633,19 @@ const getQuestionsByTopicId = async (req, res) => {
             where: { topic_id },
             include: [
                 {
-                    model: WeeklyTestQuestionMapping,  
-                    as: 'TestMappings',  
+                    model: WeeklyTestQuestionMapping,
+                    as: 'TestMappings',
                     include: [
                         {
-                            model: WeeklyTest,  
-                            as: 'WeeklyTest', 
+                            model: WeeklyTest,
+                            as: 'WeeklyTest',
                             attributes: ['wt_id', 'wt_description', 'test_date']
                         }
                     ]
                 },
                 {
-                    model: Topic,  
-                    as: 'TopicDetails',  
+                    model: Topic,
+                    as: 'TopicDetails',
                     attributes: ['name']
                 }
             ]
@@ -756,7 +760,7 @@ const assignQuestionsToTestHandler = async (req, res) => {
 //         // Validate and convert marks and minutes to integers
 //         const questionMarks = parseInt(marks, 10);
 //         const questionMinutes = parseInt(minutes, 10);
-        
+
 //         if (isNaN(questionMarks) || isNaN(questionMinutes)) {
 //             console.warn(`Invalid marks or minutes value for question "${wt_question_description}":`, marks, minutes);
 //             continue; // Skip this row if marks or minutes are invalid
@@ -1113,11 +1117,11 @@ const saveFinalSubmission = async (req, res) => {
             }
 
             // Update the existing record to set final_submission to true and store location (if provided)
-            await finalSubmission.update({ 
-                final_submission: true, 
-                latitude: latitude || finalSubmission.latitude, 
-                longitude: longitude || finalSubmission.longitude, 
-                attended_in_institute 
+            await finalSubmission.update({
+                final_submission: true,
+                latitude: latitude || finalSubmission.latitude,
+                longitude: longitude || finalSubmission.longitude,
+                attended_in_institute
             });
         } else {
             // Create a new final submission entry
@@ -1150,8 +1154,8 @@ const isWithinRange = (lat1, lon1, lat2, lon2, maxDistanceMeters) => {
     const dLon = toRadians(lon2 - lon1);
 
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     const distance = R * c; // Distance in meters
@@ -1238,7 +1242,7 @@ const getStudentAnswer = async (req, res) => {
 // };
 
 const updateQuestionHandler = async (req, res) => {
-    const { question_id } = req.params;  
+    const { question_id } = req.params;
     const { wt_question_description, marks, minutes, keywords } = req.body;
 
     try {
@@ -1554,7 +1558,7 @@ const getQuestionAnswerDataByStudentId = async (req, res) => {
 
             return {
                 question_id: questionId,
-                question_text: question.wt_question_description,  
+                question_text: question.wt_question_description,
                 marks: question.marks,
                 minutes: question.minutes,
                 topic: question.TopicDetails ? question.TopicDetails.name : null,  // Include topic details
@@ -1599,12 +1603,12 @@ const updateMarksAndCommentByStudentId = async (req, res) => {
 
         // Step 2: Set default value for comment if it's empty or undefined
         const updatedComment = comment && comment.trim() !== '' ? comment : 'N/A';
-            // const checkevalution = await WeeklyTestFinalSubmission.findOne({
-            //     where : {
-            //         wt_id,
-            //     student_id
-            //     }
-            // })
+        // const checkevalution = await WeeklyTestFinalSubmission.findOne({
+        //     where : {
+        //         wt_id,
+        //     student_id
+        //     }
+        // })
         // Step 3: Update the marks and comment for the question
         await StudentAnswer.update(
             {
@@ -1648,7 +1652,7 @@ const updateMarksAndCommentByStudentId = async (req, res) => {
 //                 student_id
 //             }
 //         });
-           
+
 //         console.log(checkEvaluation,"------------------------evalutin")
 //         if (checkEvaluation && checkEvaluation.evaluation === true) {
 //             // If final evaluation is done, prevent further updates
@@ -1665,7 +1669,7 @@ const updateMarksAndCommentByStudentId = async (req, res) => {
 //                 question_id
 //             }
 //         });
-          
+
 //         // If the student has not answered the question, return an error
 //         if (!studentAnswer) {
 //             return res.status(404).send({
@@ -2009,7 +2013,7 @@ const getStudentAndTestDetailsByStudentId = async (req, res) => {
             where: {
                 id: student_id
             },
-            attributes: ['id', 'name', 'email', 'phoneNumber']  // Adjust attributes as per your Student model
+            attributes: ['id', 'name', 'email', 'phoneNumber']
         });
 
         // If no student is found
@@ -2098,7 +2102,7 @@ const getAllActiveWeeklyTests = async (req, res) => {
 
 
 const getStudentAndActiveTestsWithAttendance = async (req, res) => {
-    const studentId = req.studentId;  
+    const studentId = req.studentId;
 
     try {
         // Step 1: Fetch student's batch
@@ -2129,7 +2133,7 @@ const getStudentAndActiveTestsWithAttendance = async (req, res) => {
                 }
             ]
         });
-        
+
 
         if (!activeTests || activeTests.length === 0) {
             return res.status(404).send({ message: 'No active weekly tests found for this batch' });
@@ -2209,8 +2213,8 @@ const getStudentAndActiveTestsWithAttendance = async (req, res) => {
                 test_date: new Date(test.test_date).toLocaleDateString(),
                 test_description: test.wt_description,
                 has_attended: !!studentAttendance,
-                testType : test.testType,
-                is_active:test.is_active,
+                testType: test.testType,
+                is_active: test.is_active,
                 // obtained_marks: studentAttendance ? obtainedMarks : null,
                 // total_available_marks: totalAvailableMarks
             };
@@ -2250,7 +2254,7 @@ const getStudentAndActiveTestsWithAttendance = async (req, res) => {
 
 
 const getStudentsWeeklyTestDetailedSummary = async (req, res) => {
-    const { wt_id} = req.params;  // Receive wt_id 
+    const { wt_id } = req.params;  // Receive wt_id 
     const student_id = req.studentId;
     try {
         // Step 1: Get all the question IDs associated with the provided wt_id
@@ -2338,7 +2342,7 @@ const getAllStudentResultsForWeeklyTest = async (req, res) => {
     try {
         // Step 1: Fetch the details of the weekly test
         const weeklyTest = await WeeklyTest.findByPk(wt_id);
-        
+
         if (!weeklyTest) {
             return res.status(404).send({ message: 'Weekly test not found' });
         }
@@ -2351,7 +2355,7 @@ const getAllStudentResultsForWeeklyTest = async (req, res) => {
             include: [
                 {
                     model: Student,
-                    as:'Student',
+                    as: 'Student',
                     attributes: ['id', 'name', 'email', 'phoneNumber']
                 }
             ]
@@ -2547,7 +2551,7 @@ const getAllIndividualStudentResultsForTest = async (req, res) => {
         });
 
         const totalAvailableMarks = questions.reduce((total, question) => total + (Number(question.marks) || 0), 0);
-          console.log(totalAvailableMarks,"----------------totalAvailableMarks")
+        console.log(totalAvailableMarks, "----------------totalAvailableMarks")
         // Step 3: Fetch student answers
         const studentAnswers = await StudentAnswer.findAll({
             where: { wt_id },
@@ -2622,9 +2626,9 @@ const getAllIndividualStudentResultsForTest = async (req, res) => {
                 test_link: weeklyTest.wt_link,
                 test_date: new Date(weeklyTest.test_date).toLocaleDateString(),
                 test_description: weeklyTest.wt_description,
-                testType:weeklyTest.testType,
-                isAnswerDisplayed:weeklyTest.isAnswerDisplayed,
-                isResultsVisible:weeklyTest.isResultsVisible,
+                testType: weeklyTest.testType,
+                isAnswerDisplayed: weeklyTest.isAnswerDisplayed,
+                isResultsVisible: weeklyTest.isResultsVisible,
                 total_available_marks: totalAvailableMarks, // Displaying total marks before exam
             },
             student_results: resultsFormatted
@@ -2709,7 +2713,7 @@ const getStudentAndActiveTestsWithAttendanceForAdmin = async (req, res) => {
 
             // Mark whether the student attended or not
             const hasAttended = studentAttendance ? true : false;
-              
+
             return {
                 test_id: test.wt_id,
                 test_link: test.wt_link,
@@ -2733,7 +2737,7 @@ const getStudentAndActiveTestsWithAttendanceForAdmin = async (req, res) => {
         if (!student) {
             return res.status(404).send({ message: 'Student not found' });
         }
-               
+
 
         // Step 5: Count number of tests attended by the student
         const attendedTestsCount = testsWithAttendance.filter(test => test.has_attended).length;
@@ -2749,7 +2753,7 @@ const getStudentAndActiveTestsWithAttendanceForAdmin = async (req, res) => {
                 attended_tests_count: attendedTestsCount  // Add the count of attended tests
             },
             active_tests: testsWithAttendance,
-           
+
         });
 
     } catch (error) {
@@ -2816,68 +2820,68 @@ const checkAndSubmitTest = async (req, res) => {
     const { student_id, wt_id } = req.body;
     //   console.log(req.body,"---------------------------------")
     try {
-      // Check if the record exists based on student_id and wt_id
-      const existingRecord = await WeeklyTestFinalSubmission.findOne({
-        where: { student_id, wt_id },
-      });
-  
-      // If no record is found
-      if (!existingRecord) {
-        return res.status(200).json({ message: "Test not submitted." });
-      }
-  
-      // Check if the test is already submitted
-      if (existingRecord.final_submission) {
-        return res.status(200).json({
-          message: "Test already submitted.",
-          result: existingRecord,
+        // Check if the record exists based on student_id and wt_id
+        const existingRecord = await WeeklyTestFinalSubmission.findOne({
+            where: { student_id, wt_id },
         });
-      }
-      
+
+        // If no record is found
+        if (!existingRecord) {
+            return res.status(200).json({ message: "Test not submitted." });
+        }
+
+        // Check if the test is already submitted
+        if (existingRecord.final_submission) {
+            return res.status(200).json({
+                message: "Test already submitted.",
+                result: existingRecord,
+            });
+        }
+
     } catch (error) {
-      console.error("Error checking or submitting test:", error);
-      return res.status(500).json({
-        message: "Internal server error while checking test submission.",
-        error: error.message,
-      });
+        console.error("Error checking or submitting test:", error);
+        return res.status(500).json({
+            message: "Internal server error while checking test submission.",
+            error: error.message,
+        });
     }
-  };
-  
-  const updateEvaluationStatus = async (req, res) => {
-    const { student_id, test_id, evaluation,final_submission } = req.body;
+};
+
+const updateEvaluationStatus = async (req, res) => {
+    const { student_id, test_id, evaluation, final_submission } = req.body;
     //  console.log(req.body,"-----------------------------------req.body")
     try {
-      // Check if the record exists based on student_id and wt_id
-      const existingRecord = await WeeklyTestFinalSubmission.findOne({
-        where: { student_id, wt_id :test_id },
-      });
-        
-    //   console.log(existingRecord,"-----------------------------------")
-      if (!existingRecord) {
-        return res.status(404).json({ message: "Record not found." });
-      }
-  
-      // Update the evaluation column based on the received value
-      await existingRecord.update({
-        evaluation: evaluation === true ? 1 : 0,
-        final_submission: final_submission === true ? 1 : 0,
-      });
-      console.log(existingRecord,"-----exsiting")
-      return res.status(200).json({
-        message: "Evaluation status updated successfully.",
-        result: existingRecord,
-      });
-    } catch (error) {
-      console.error("Error updating evaluation status:", error);
-      return res.status(500).json({
-        message: "Internal server error.",
-        error: error.message,
-      });
-    }
-  };
+        // Check if the record exists based on student_id and wt_id
+        const existingRecord = await WeeklyTestFinalSubmission.findOne({
+            where: { student_id, wt_id: test_id },
+        });
 
-  // Update isshowanswers status
-  const updateShowAnswersStatus = async (req, res) => {
+        //   console.log(existingRecord,"-----------------------------------")
+        if (!existingRecord) {
+            return res.status(404).json({ message: "Record not found." });
+        }
+
+        // Update the evaluation column based on the received value
+        await existingRecord.update({
+            evaluation: evaluation === true ? 1 : 0,
+            final_submission: final_submission === true ? 1 : 0,
+        });
+        console.log(existingRecord, "-----exsiting")
+        return res.status(200).json({
+            message: "Evaluation status updated successfully.",
+            result: existingRecord,
+        });
+    } catch (error) {
+        console.error("Error updating evaluation status:", error);
+        return res.status(500).json({
+            message: "Internal server error.",
+            error: error.message,
+        });
+    }
+};
+
+// Update isshowanswers status
+const updateShowAnswersStatus = async (req, res) => {
     try {
         const { wt_id, isAnswerDisplayed } = req.body;
         // console.log(req.body, "---------------------body");
@@ -2912,7 +2916,7 @@ const checkAndSubmitTest = async (req, res) => {
         return res.status(500).json({ message: "Internal server error." });
     }
 };
-  const isResultsVisible = async (req, res) => {
+const isResultsVisible = async (req, res) => {
     try {
         const { wt_id, isResultsVisible } = req.body;
         // console.log(req.body, "---------------------body");
@@ -3010,7 +3014,7 @@ const getAllDescriptivePlacementTests = async (req, res) => {
         // Find all Placement Tests where isDescriptiveTest is true, including associated topics
         const tests = await db.PlacementTest.findAll({
             where: {
-                isDescriptiveTest: true  
+                isDescriptiveTest: true
             },
             include: [
                 {
@@ -3045,7 +3049,7 @@ const savePlacementTestQuestionHandler = async (req, res) => {
     try {
         const { questionData, placement_test_id } = req.body;
 
-        console.log(req.body, "----------------------------body");
+        // console.log(req.body, "----------------------------body");
 
         // Extract necessary fields
         const { wt_question_keywords } = questionData;
@@ -3063,20 +3067,20 @@ const savePlacementTestQuestionHandler = async (req, res) => {
                 await db.PlacementTestWeeklyQuestionMapping.create({
                     placement_test_id,
                     wt_question_id
-                }, { 
-                    fields: ["placement_test_id", "wt_question_id"]  
+                }, {
+                    fields: ["placement_test_id", "wt_question_id"]
                 });
 
                 console.log("✅ Question mapped successfully.");
 
-                if (wt_question_keywords) { 
+                if (wt_question_keywords) {
                     console.log("🔍 Inserting keywords:", wt_question_keywords);
 
                     await db.WeeklyTestQuestionAnswer.create({
                         wt_question_id: wt_question_id,
                         keywords: wt_question_keywords?.toString(),
-                    }, { 
-                        fields: ["wt_question_id", "keywords"]  
+                    }, {
+                        fields: ["wt_question_id", "keywords"]
                     });
 
                     console.log("✅ Answer saved successfully.");
@@ -3085,9 +3089,9 @@ const savePlacementTestQuestionHandler = async (req, res) => {
                 return res.status(404).send({ message: "Skipping mapping as no question ID is available" });
             }
 
-            return res.status(200).send({ 
-                message: result.message, 
-                question: result.newQuestion 
+            return res.status(200).send({
+                message: result.message,
+                question: result.newQuestion
             });
         } else {
             return res.status(500).send({ message: result.message, error: result.error });
@@ -3275,7 +3279,7 @@ const savePlacementTestAnswer = async (req, res) => {
             const { question_id, answer, marks, comment } = answerObj;
 
             // Validate that the question is associated with this placement test using the mapping table
-            const mapping = await PlacementTestQuestionMapping.findOne({
+            const mapping = await db.PlacementTestWeeklyQuestionMapping.findOne({
                 where: {
                     question_id,
                     placement_test_id
@@ -3305,7 +3309,7 @@ const savePlacementTestAnswer = async (req, res) => {
             }
 
             // Create a new PlacementTestAnswer entry if no existing answer is found
-            return PlacementTestAnswer.create({
+            return db.PlacementTestStudentAnswer.create({
                 placement_test_id,
                 placement_test_student_id: student_id,
                 question_id,
@@ -3322,6 +3326,629 @@ const savePlacementTestAnswer = async (req, res) => {
     } catch (error) {
         console.error('Error saving placement test answers:', error.stack);
         return res.status(500).send({ message: error.message });
+    }
+};
+
+
+const savePlacementTestStudentAnswer = async (req, res) => {
+    try {
+        const { placement_test_student_id, placement_test_id, answers } = req.body;
+        console.log('Placement Test Student ID:', placement_test_student_id);
+
+        // Validate the input fields
+        if (!placement_test_id || !placement_test_student_id || !Array.isArray(answers) || answers.length === 0) {
+            return res.status(400).send({ message: 'Required fields are missing or invalid' });
+        }
+
+        console.log("Inside savePlacementTestStudentAnswer -------");
+
+        // Validate that the placement test and student exist
+        const placementTest = await db.PlacementTest.findByPk(placement_test_id);
+        if (!placementTest) {
+            return res.status(404).send({ message: 'Placement test not found' });
+        }
+
+        const student = await db.PlacementTestStudent.findByPk(placement_test_student_id);
+        if (!student) {
+            return res.status(404).send({ message: 'Placement test student not found' });
+        }
+
+        // Check if the student has made the final submission for this test
+        const finalSubmission = await db.PlacementTestFinalSubmission.findOne({
+            where: {
+                placement_test_id,
+                placement_test_student_id
+            }
+        });
+
+        if (finalSubmission && finalSubmission.final_submission) {
+            return res.status(403).send({
+                message: 'You have already made the final submission for this test. No further updates are allowed.'
+            });
+        }
+
+        // Process each answer provided by the student
+        const answerPromises = answers.map(async (answerObj) => {
+            const { question_id, answer, marks, comment } = answerObj;
+
+            // Validate that the question is associated with this placement test
+            const mapping = await db.PlacementTestWeeklyQuestionMapping.findOne({
+                where: {
+                    wt_question_id: question_id,
+                    placement_test_id
+                }
+            });
+
+            if (!mapping) {
+                throw new Error(`Question with ID ${question_id} is not associated with the placement test ${placement_test_id}`);
+            }
+
+            // Check if a PlacementTestStudentAnswer already exists for the given student, test, and question
+            const existingAnswer = await PlacementTestStudentAnswer.findOne({
+                where: {
+                    placement_test_id,
+                    placement_test_student_id,
+                    question_id
+                }
+            });
+
+            if (existingAnswer) {
+                // Update the existing answer with the new data
+                return existingAnswer.update({
+                    answer,
+                    marks: marks || null,  // Marks can be optional
+                    comment: comment || null  // Comments can also be optional
+                });
+            }
+
+            // Create a new PlacementTestStudentAnswer entry if no existing answer is found
+            return PlacementTestStudentAnswer.create({
+                placement_test_id,
+                placement_test_student_id,
+                question_id,
+                answer,
+                marks: marks || null,  // Marks can be optional
+                comment: comment || null  // Comments can also be optional
+            });
+        });
+
+        // Wait for all the answers to be saved or updated
+        await Promise.all(answerPromises);
+
+        return res.status(200).send({ message: 'Answers saved/updated successfully' });
+    } catch (error) {
+        console.error('Error saving placement test student answers:', error.stack);
+        return res.status(500).send({ message: error.message });
+    }
+};
+
+const savePlacementTestFinalSubmission = async (req, res) => {
+    try {
+        const { placement_test_student_id, placement_test_id, latitude, longitude } = req.body;
+
+        // Validate input fields
+        if (!placement_test_id || !placement_test_student_id) {
+            return res.status(400).send({ message: 'Placement test ID and student ID are required' });
+        }
+
+        // Validate that the placement test exists
+        const placementTest = await db.PlacementTest.findByPk(placement_test_id);
+        if (!placementTest) {
+            return res.status(404).send({ message: 'Placement test not found' });
+        }
+
+        // Check if there's already a final submission for this student and placement test
+        const finalSubmission = await PlacementTestFinalSubmission.findOne({
+            where: {
+                placement_test_id,
+                placement_test_student_id
+            }
+        });
+
+        // Default values for location tracking
+        let attended_in_institute = false;
+
+        // If location is shared, validate it
+        if (latitude && longitude) {
+            const instituteLatitude = 12.916758;  // Lara Institute coordinates
+            const instituteLongitude = 77.611898;
+            const allowedRangeMeters = 200; // Allow 200m range for institute attendance
+
+            // Round latitude and longitude to 1 decimal place for comparison
+            const roundedLatitude = parseFloat(latitude).toFixed(1);
+            const roundedLongitude = parseFloat(longitude).toFixed(1);
+            const roundedInstituteLatitude = instituteLatitude.toFixed(1);
+            const roundedInstituteLongitude = instituteLongitude.toFixed(1);
+
+            console.log(`Received Location: ${roundedLatitude}, ${roundedLongitude}`);
+            console.log(`Institute Location: ${roundedInstituteLatitude}, ${roundedInstituteLongitude}`);
+
+            // Compare rounded values
+            attended_in_institute =
+                roundedLatitude === roundedInstituteLatitude &&
+                roundedLongitude === roundedInstituteLongitude;
+        }
+
+        if (finalSubmission) {
+            // If final submission already exists and is set to true, don't allow further submissions
+            if (finalSubmission.final_submission) {
+                return res.status(403).send({ message: 'Final submission has already been made. No changes allowed.' });
+            }
+
+            // Update the existing record to set final_submission to true and store location (if provided)
+            await finalSubmission.update({
+                final_submission: true,
+                latitude: latitude || finalSubmission.latitude,
+                longitude: longitude || finalSubmission.longitude,
+                attended_in_institute
+            });
+        } else {
+            // Create a new final submission entry
+            await PlacementTestFinalSubmission.create({
+                placement_test_id,
+                placement_test_student_id,
+                final_submission: true,
+                latitude: latitude || null,
+                longitude: longitude || null,
+                attended_in_institute
+            });
+        }
+
+        return res.status(200).send({ message: 'Final submission saved successfully', attended_in_institute });
+    } catch (error) {
+        console.error('Error saving placement test final submission:', error.stack);
+        return res.status(500).send({ message: 'An error occurred while saving the final submission' });
+    }
+};
+
+const getPlacementTestStudentAnswer = async (req, res) => {
+    try {
+        console.log("------------------------------Fetching existing answer--------------------------------------------")
+        const { placement_test_student_id } = req.body;
+        const { placement_test_id, question_id } = req.params;
+
+        // Validate input fields
+        if (!placement_test_id || !placement_test_student_id || !question_id) {
+            return res.status(400).send({ message: 'Required fields are missing or invalid' });
+        }
+
+        // Check if the placement test exists
+        const placementTest = await db.PlacementTest.findByPk(placement_test_id);
+        if (!placementTest) {
+            return res.status(404).send({ message: 'Placement test not found' });
+        }
+
+        // Check if the question is associated with this placement test using the mapping table
+        const mapping = await db.PlacementTestWeeklyQuestionMapping.findOne({
+            where: {
+                wt_question_id: question_id,
+                placement_test_id
+            }
+        });
+
+        if (!mapping) {
+            return res.status(404).send({ message: `Question with ID ${question_id} is not associated with the placement test ${placement_test_id}` });
+        }
+
+        // Fetch the student's answer for the particular question
+        const studentAnswer = await db.PlacementTestStudentAnswer.findOne({
+            where: {
+                placement_test_id,
+                placement_test_student_id,
+                question_id
+            }
+        });
+
+        if (!studentAnswer) {
+            return res.status(200).send({
+                message: 'No answer provided yet',
+                answer: null
+            });
+        }
+
+        // Return the student's answer along with optional marks and comment
+        return res.status(200).send({
+            message: 'Answer fetched successfully',
+            answer: studentAnswer.answer,
+            marks: studentAnswer.marks || null,
+            comment: studentAnswer.comment || null
+        });
+    } catch (error) {
+        console.error('Error fetching placement test answer:', error.stack);
+        return res.status(500).send({ message: 'An error occurred while fetching the answer' });
+    }
+};
+
+const getPlacementTestAnswerDataByStudentId = async (req, res) => {
+    const { placement_test_id, placement_test_student_id } = req.params;  // Receive placement_test_id and student_id from the request
+
+    try {
+        // Step 1: Get all the question IDs associated with the provided placement_test_id
+        const questionMappings = await db.PlacementTestWeeklyQuestionMapping.findAll({
+            where: { placement_test_id },
+            attributes: ['wt_question_id']  // Only select the question IDs
+        });
+
+        // If no question mappings found
+        if (!questionMappings || questionMappings.length === 0) {
+            return res.status(404).send({ message: 'No questions found for this placement test' });
+        }
+
+        // Extract question IDs
+        const questionIds = questionMappings.map(mapping => mapping.wt_question_id);
+
+        // Step 2: Fetch questions along with associated topic details
+        const questions = await WeeklyTestQuestion.findAll({
+            where: {
+                wt_question_id: questionIds
+            },
+            include: [
+                {
+                    model: Topic,  // Include topic details in the query
+                    as: 'TopicDetails',  // Alias used in associations
+                    attributes: ['name']  // Include topic name
+                }
+            ]
+        });
+
+        // Step 3: For each question, get the answer provided by the given student
+        const questionsWithAnswers = await Promise.all(questions.map(async (question) => {
+            const questionId = question.wt_question_id;
+
+            // Get the student's answer for this particular question
+            const studentAnswer = await db.PlacementTestStudentAnswer.findOne({
+                where: {
+                    placement_test_id,
+                    question_id: questionId,
+                    placement_test_student_id: placement_test_student_id
+                },
+                attributes: ['answer', 'marks', 'comment']
+            });
+
+            // If no answer exists for this question by this student, mark it as "Not Attempted"
+            const answerData = studentAnswer ? {
+                placement_test_student_id,
+                answer: studentAnswer.answer,
+                marks: studentAnswer.marks,
+                comment: studentAnswer.comment
+            } : {
+                placement_test_student_id,
+                answer: "Not Attempted",
+                marks: null,
+                comment: null
+            };
+
+            return {
+                question_id: questionId,
+                question_text: question.wt_question_description,
+                marks: question.marks,
+                minutes: question.minutes,
+                topic: question.TopicDetails ? question.TopicDetails.name : null,  // Include topic details
+                studentAnswer: answerData  // Send only the student's answer for this question
+            };
+        }));
+
+        return res.status(200).send({
+            message: 'Placement test questions and answers fetched successfully',
+            questions: questionsWithAnswers
+        });
+
+    } catch (error) {
+        console.error('Error fetching placement test questions and answers:', error);
+        return res.status(500).send({
+            message: 'Error fetching placement test questions and answers',
+            error: error.message
+        });
+    }
+};
+
+const updatePlacementTestMarksAndCommentByStudentId = async (req, res) => {
+    const { placement_test_id, placement_test_student_id, question_id } = req.params; // Receive placement_test_id, placement_test_student_id, and question_id from request
+    const { marks, comment } = req.body; // Receive marks and comment from the request body
+
+    try {
+        // Step 1: Check if the student has already answered the question
+        const studentAnswer = await db.PlacementTestStudentAnswer.findOne({
+            where: {
+                placement_test_id,
+                placement_test_student_id,
+                question_id
+            }
+        });
+
+        // If the student has not answered the question, return an error
+        if (!studentAnswer) {
+            return res.status(404).send({
+                message: 'Student has not attempted this question yet'
+            });
+        }
+
+        // Step 2: Set default value for comment if it's empty or undefined
+        const updatedComment = comment && comment.trim() !== '' ? comment : 'N/A';
+
+        // Step 3: Update the marks and comment for the question
+        await db.PlacementTestStudentAnswer.update(
+            {
+                marks,  // New marks
+                comment: updatedComment  // New comment with default if needed
+            },
+            {
+                where: {
+                    placement_test_id,
+                    placement_test_student_id,
+                    question_id
+                }
+            }
+        );
+
+        return res.status(200).send({
+            message: 'Marks and comment updated successfully'
+        });
+
+    } catch (error) {
+        console.error('Error updating marks and comment:', error);
+        return res.status(500).send({
+            message: 'Error updating marks and comment',
+            error: error.message
+        });
+    }
+};
+
+const getPlacementTestStudentAndTestDetailsByStudentId = async (req, res) => {
+    const { placement_test_id, placement_test_student_id } = req.params; // Receive placement_test_id and placement_test_student_id from the request
+
+    try {
+        // Step 1: Fetch student details from PlacementTestStudent table
+        const student = await PlacementTestStudent.findOne({
+            where: {
+                placement_test_student_id
+            },
+            attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number', 'university_name', 'college_name']
+        });
+
+        // If no student is found
+        if (!student) {
+            return res.status(404).send({ message: 'Student not found' });
+        }
+
+        // Step 2: Fetch test details from PlacementTest table
+        const test = await db.PlacementTest.findOne({
+            where: {
+                placement_test_id
+            },
+            attributes: ['placement_test_id', 'test_link', 'test_title', 'start_time', 'end_time', 'description', 'show_result', 'is_Active', 'issue_certificate', 'whatsAppChannelLink']
+        });
+
+        // If no test is found
+        if (!test) {
+            return res.status(404).send({ message: 'Test not found' });
+        }
+
+        // Step 3: Send student details and test details in the response
+        return res.status(200).send({
+            message: 'Student and test details fetched successfully',
+            student: {
+                student_id: student.placement_test_student_id,
+                student_name: student.student_name,
+                student_email: student.email,
+                student_phone: student.phone_number,
+                university_name: student.university_name,
+                college_name: student.college_name
+            },
+            test: {
+                test_id: test.placement_test_id,
+                test_link: test.test_link,
+                test_title: test.test_title,
+                start_time: test.start_time,
+                end_time: test.end_time,
+                description: test.description,
+                show_result: test.show_result,
+                is_active: test.is_Active,
+                issue_certificate: test.issue_certificate,
+                whatsapp_channel_link: test.whatsAppChannelLink
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching student and test details:', error);
+        return res.status(500).send({
+            message: 'Error fetching student and test details',
+            error: error.message
+        });
+    }
+};
+
+const updatePlacementTestEvaluationStatus = async (req, res) => {
+    const { placement_test_student_id, placement_test_id, evaluation, final_submission } = req.body;
+
+    try {
+        // Check if the record exists based on placement_test_student_id and placement_test_id
+        const existingRecord = await PlacementTestFinalSubmission.findOne({
+            where: { placement_test_student_id, placement_test_id },
+        });
+
+        if (!existingRecord) {
+            return res.status(404).json({ message: "Record not found." });
+        }
+
+        // Update the evaluation and final_submission columns
+        await existingRecord.update({
+            evaluation: evaluation === true ? 1 : 0,
+            final_submission: final_submission === true ? 1 : 0,
+        });
+
+        return res.status(200).json({
+            message: "Evaluation status updated successfully.",
+            result: existingRecord,
+        });
+    } catch (error) {
+        console.error("Error updating evaluation status:", error);
+        return res.status(500).json({
+            message: "Internal server error.",
+            error: error.message,
+        });
+    }
+};
+
+const getPlacementTestFinalSubmissionDetails = async (req, res) => {
+    const { placement_test_id, placement_test_student_id } = req.params;
+
+    try {
+        const submissions = await PlacementTestFinalSubmission.findAll({
+            where: {
+                placement_test_id,
+                placement_test_student_id
+            }
+        });
+
+        if (submissions.length === 0) {
+            return res.status(404).json({ message: 'No submissions found for the given placement_test_id and placement_test_student_id' });
+        }
+
+        res.status(200).json(submissions);
+    } catch (error) {
+        console.error('Error fetching submissions:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+const getAllIndividualStudentResultsForDescriptivePlacementTest = async (req, res) => {
+    const { placement_test_id } = req.params;
+
+    try {
+        // Step 1: Fetch the placement test details
+        const placementTest = await db.PlacementTest.findByPk(placement_test_id, {
+            include: [
+                {
+                    model: db.PlacementTestWeeklyQuestionMapping,
+                    as: 'WeeklyTestQuestions',
+                    include: [
+                        {
+                            model: db.WeeklyTestQuestion,
+                            as: 'WeeklyTestQuestion'
+                        }
+                    ]
+                },
+                {
+                    model: db.PlacementTestTopic,
+                    as: 'TestTopics',
+                    include: [
+                        {
+                            model: db.Topic, // Assuming Topic model is defined
+                            as: 'PlacementTestTopic'
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!placementTest) {
+            return res.status(404).send({ message: 'Placement test not found' });
+        }
+
+        // Step 2: Calculate total available marks for the test
+        const questionMappings = await db.PlacementTestWeeklyQuestionMapping.findAll({
+            where: { placement_test_id },
+            attributes: ['wt_question_id']
+        });
+
+        const questionIds = questionMappings.map(mapping => mapping.wt_question_id);
+
+        const questions = await WeeklyTestQuestion.findAll({
+            where: { wt_question_id: questionIds },
+            attributes: ['wt_question_id', 'marks']
+        });
+
+        const totalAvailableMarks = questions.reduce((total, question) => total + (Number(question.marks) || 0), 0);
+
+        // Step 3: Fetch student answers
+        const studentAnswers = await db.PlacementTestAnswer.findAll({
+            where: { placement_test_id },
+            include: [
+                {
+                    model: db.PlacementTestStudent,
+                    as: 'StudentFromPlacementTest', 
+                    attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number']
+                }
+            ]
+        });
+
+        console.log("Student Answers :::::::::::::: ", studentAnswers)
+
+
+        // Step 4: Fetch PlacementTestFinalSubmission details for students
+        const finalSubmissions = await db.PlacementTestFinalSubmission.findAll({
+            where: { placement_test_id },
+            attributes: ['placement_test_student_id', 'final_submission', 'latitude', 'longitude', 'attended_in_institute']
+        });
+
+        // Convert final submissions into a lookup object
+        const finalSubmissionsMap = {};
+        finalSubmissions.forEach(sub => {
+            finalSubmissionsMap[sub.student_id] = {
+                final_submission: sub.final_submission,
+                latitude: sub.latitude,
+                longitude: sub.longitude,
+                attended_in_institute: sub.attended_in_institute
+            };
+        });
+
+        // Step 5: Calculate student marks
+        const studentResults = studentAnswers.reduce((acc, answer) => {
+            const studentId = answer.student_id;
+            if (!acc[studentId]) {
+                acc[studentId] = {
+                    student_id: answer.StudentFromPlacementTest?.id, // Use optional chaining
+                    student_name: answer.StudentFromPlacementTest?.student_name,
+                    student_email: answer.StudentFromPlacementTest?.email,
+                    student_phone: answer.StudentFromPlacementTest?.phone_number,
+                    obtained_marks: 0,
+                    final_submission: false, // Default value
+                    latitude: null,
+                    longitude: null,
+                    attended_in_institute: false,
+                };
+            }
+
+            if (answer.marks !== null) {
+                acc[studentId].obtained_marks += Number(answer.marks) || 0;
+            }
+
+            // Add final submission details if available
+            if (finalSubmissionsMap[studentId]) {
+                acc[studentId] = {
+                    ...acc[studentId],
+                    ...finalSubmissionsMap[studentId] // Merge submission details
+                };
+            }
+
+            return acc;
+        }, {});
+
+        const resultsFormatted = Object.values(studentResults).map(result => ({
+            ...result,
+            total_available_marks: totalAvailableMarks
+        }));
+
+        return res.status(200).send({
+            message: 'Individual student results fetched successfully for the placement test',
+            placement_test: {
+                test_id: placementTest.placement_test_id,
+                test_date: new Date(placementTest.start_time).toLocaleDateString(),
+                test_description: placementTest.description,
+                test_title: placementTest.test_title,
+                total_available_marks: totalAvailableMarks,
+            },
+            student_results: resultsFormatted
+        });
+
+    } catch (error) {
+        console.error('Error fetching individual student results for placement test:', error);
+        return res.status(500).send({
+            message: 'Error fetching individual student results for placement test',
+            error: error.message
+        });
     }
 };
 
@@ -3347,8 +3974,8 @@ module.exports = {
     saveFinalSubmission,
     saveAnswerFortheQuestion,
     getCorrectAnswerForQuestion,
-    getStudentAnswerAndQuestion,  
-    getQuestionAnswerDataByStudentId, 
+    getStudentAnswerAndQuestion,
+    getQuestionAnswerDataByStudentId,
     getStudentDetailsByWeeklyTestId,
     getStudentEvaluationStatusByWeeklyTestId,
     getUniqueStudentsByWeeklyTestId,
@@ -3372,4 +3999,13 @@ module.exports = {
     getDescriptiveTestById,
     getQuestionsByPlacementTestId,
     savePlacementTestAnswer,
+    savePlacementTestStudentAnswer,
+    savePlacementTestFinalSubmission,
+    getPlacementTestStudentAnswer,
+    getPlacementTestAnswerDataByStudentId,
+    updatePlacementTestMarksAndCommentByStudentId,
+    getPlacementTestStudentAndTestDetailsByStudentId,
+    updatePlacementTestEvaluationStatus,
+    getPlacementTestFinalSubmissionDetails,
+    getAllIndividualStudentResultsForDescriptivePlacementTest,
 }
