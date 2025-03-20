@@ -95,8 +95,6 @@ const DescriptiveTestData = () => {
       try {
         const response = await axios.get(`${baseURL}/api/weekly-test/getDescriptiveTestById/${placement_test_id}`);
         setTestDetails(response.data.test);
-        console.log("test details", response.data.test.is_Monitored);
-        setIsMonitored(response.data.test.is_Monitored)
         setLoading(false);
       } catch (error) {
         setError(error.message);

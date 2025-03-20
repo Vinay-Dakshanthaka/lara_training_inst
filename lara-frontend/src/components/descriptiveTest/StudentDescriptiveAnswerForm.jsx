@@ -154,7 +154,6 @@ const StudentDescriptiveAnswerForm = () => {
         const currentQuestion = questions[currentPage];
         try {
 
-
           const response = await axios.post(`${baseURL}/api/weekly-test/getPlacementTestStudentAnswer/${placement_test_id}/${currentQuestion.wt_question_id}`, {
             placement_test_student_id
           });
@@ -213,6 +212,7 @@ const StudentDescriptiveAnswerForm = () => {
     try {
       setFinalSubmissionLoading(true);
 
+      // Save the final submission
       await axios.post(`${baseURL}/api/weekly-test/savePlacementTestFinalSubmission`, {
         placement_test_student_id,
         placement_test_id,
@@ -221,23 +221,56 @@ const StudentDescriptiveAnswerForm = () => {
       });
 
       toast.success('Final submission saved successfully!');
-      setFinalSubmissionLoading(false);
       sessionStorage.removeItem('unsavedAnswers');
 
-      // Trigger auto-evaluation after submission
+      // **Fetch existing answers AFTER the final submission is saved**
+      await fetchExistingAnswers();
+
+      // **Trigger auto-evaluation after fetching answers**
       await autoEvaluateAnswers();
 
       setEvaluationCompleted(true);  // Mark evaluation as completed
-      setIsMonitored(false)
+      setIsMonitored(false);
+
       setTimeout(() => {
         navigate(`/descriptive-test-resulst/${placement_test_id}/${placement_test_student_id}`);
       }, 3000);
     } catch (error) {
       console.log("Error while final Submission : ", error);
       toast.error(`Error saving final submission: ${error.response?.data?.message || error.message}`);
+    } finally {
       setFinalSubmissionLoading(false);
     }
   };
+
+
+  // **Helper function to fetch existing answers before evaluation**
+  const fetchExistingAnswers = async () => {
+    if (questions.length > 0) {
+      // Fetch answers for all questions
+      for (const question of questions) {
+        try {
+          const response = await axios.post(
+            `${baseURL}/api/weekly-test/getPlacementTestStudentAnswer/${placement_test_id}/${question.wt_question_id}`,
+            { placement_test_student_id }
+          );
+          if (response.data.answer) {
+            setAnswers((prevAnswers) => ({
+              ...prevAnswers,
+              [question.wt_question_id]: response.data.answer,
+            }));
+            setSavedAnswers((prevSaved) => ({
+              ...prevSaved,
+              [question.wt_question_id]: true,
+            }));
+          }
+        } catch (error) {
+          console.log(`Error fetching existing answer for question ${question.wt_question_id}:`, error);
+        }
+      }
+    }
+  };
+
 
   const fetchCorrectAnswer = (question_id) => {
     axios
@@ -264,22 +297,21 @@ const StudentDescriptiveAnswerForm = () => {
       const response = await axios.put(`${baseURL}/api/weekly-test/getPlacementTestFinalSubmissionDetails/${placement_test_id}/${placement_test_student_id}`);
       const isFinalEvaluation = response.data[0].evaluation;
       console.log("Final evaluation: ", isFinalEvaluation);
-      // setIsAutoEvaluation(isFinalEvaluation);
+      setIsAutoEvaluation(isFinalEvaluation);
 
-      // if (isFinalEvaluation) {
-      //   toast.error("Manual evaluation has been done. Excluded from auto-evaluation.");
-      //   return;
-      // }
+      if (isFinalEvaluation) {
+        toast.error("Manual evaluation has been done. Excluded from auto-evaluation.");
+        return;
+      }
 
       let allUpdated = true;
       console.log("Starting auto-evaluation of answers...");
 
-      for (let i = 0; i < answeredQuestions.length; i++) {
-        const item = answeredQuestions[i];
-        console.log(`Processing question ID ${item.question_id}`);
-        const studentAnswer = item.studentAnswer.answer;
-        const correctAnswer = correctAnswers[item.question_id];
-        const answerKeyword = answerKeywords[item.question_id];
+      for (let i = 0; i < questions.length; i++) {
+        const question = questions[i];
+        const studentAnswer = answers[question.wt_question_id];  // Fetch the student's answer
+        const correctAnswer = correctAnswers[question.wt_question_id];
+        const answerKeyword = answerKeywords[question.wt_question_id];
 
         setLoadingQuestions(prevState => {
           const newState = [...prevState];
@@ -291,12 +323,12 @@ const StudentDescriptiveAnswerForm = () => {
           const studentVector = tokenizeAndVectorize(studentAnswer);
           const correctVector = tokenizeAndVectorize(correctAnswer);
           const similarity = cosineSimilarity(studentVector, correctVector);
-          const threshold = answerKeyword === "1" ? 0.8 : 0.6;
+          const threshold = answerKeyword === "1" ? 0.7 : 0.4;
           const isCorrect = similarity >= threshold;
-          const marks = isCorrect ? item.marks : 0;
+          const marks = isCorrect ? question.marks : 0;
           const comment = isCorrect ? "Correct Answer" : "Incorrect Answer";
-          console.log("Student answer : ", studentAnswer)
-          console.log("correct answer : ", correctAnswer)
+          console.log("Student answer: ", studentAnswer);
+          console.log("Correct answer: ", correctAnswer);
           console.log("Similarity: ", similarity);
           console.log("Threshold:", threshold);
           console.log("isCorrect:", isCorrect);
@@ -304,15 +336,14 @@ const StudentDescriptiveAnswerForm = () => {
           try {
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-
-            const response = await axios.put(
-              `${baseURL}/api/weekly-test/updatePlacementTestMarksAndCommentByStudentId/${placement_test_id}/${placement_test_student_id}/${item.question_id}`,
+            const updateResponse = await axios.put(
+              `${baseURL}/api/weekly-test/updatePlacementTestMarksAndCommentByStudentId/${placement_test_id}/${placement_test_student_id}/${question.wt_question_id}`,
               { marks, comment }
             );
-            console.log(`Successfully updated marks for question ID ${item.question_id}`);
+            console.log(`Successfully updated marks for question ID ${question.wt_question_id}`);
           } catch (error) {
             allUpdated = false;
-            console.error(`Error updating marks for question ID ${item.question_id}:`, error);
+            console.error(`Error updating marks for question ID ${question.wt_question_id}:`, error);
             if (error.response && error.response.status === 403) {
               toast.error("Excluded from auto-evaluation...");
             } else {
@@ -329,12 +360,12 @@ const StudentDescriptiveAnswerForm = () => {
       }
 
       if (allUpdated) {
-        console.log("Auto evaluation completed successfully!");
+        console.log("Auto-evaluation completed successfully!");
         toast.success("Evaluation done!");
-        setIsMonitored(false)
+        setIsMonitored(false);
       } else {
-        console.error("Errors occurred during auto evaluation.");
-        toast.error("There was an error during auto evaluation.");
+        console.error("Errors occurred during auto-evaluation.");
+        toast.error("There was an error during auto-evaluation.");
       }
     } catch (error) {
       console.error("Error fetching evaluation status or auto-evaluation:", error);
@@ -343,6 +374,7 @@ const StudentDescriptiveAnswerForm = () => {
       setEvaluationLoading(false);  // End loading animation
     }
   };
+
 
   if (!locationAllowed) {
     return (
@@ -402,6 +434,7 @@ const StudentDescriptiveAnswerForm = () => {
             <QuestionButtons
               questions={questions}
               savedAnswers={savedAnswers}
+              currentPage={currentPage}
               handlePageChange={setCurrentPage}
             />
 

@@ -147,8 +147,8 @@ const DescriptiveTestAutoEvaluation = () => {
                                 testDetails={testDetails}
                                 marksForCertificate={obtainedMarks}
                                 totalMarks={totalMarks}
-                                logoUrl={logoUrl} 
-                                qrCodeUrl={qrCodeUrl} 
+                                logoUrl={logoUrl}
+                                qrCodeUrl={qrCodeUrl}
                             />
                         ) : (
                             <div>Loading...</div>
@@ -248,11 +248,13 @@ const DescriptiveTestAutoEvaluation = () => {
                                 <Col xs={6} key={index} className="mb-2 d-flex justify-content-center">
                                     <Button
                                         variant={
-                                            item.studentAnswer?.marks
-                                                ? "success"
-                                                : item.studentAnswer?.marks === 0
-                                                    ? "danger"
-                                                    : "secondary"
+                                            index === activeQuestionIndex
+                                                ? "primary" // Blue color for the active question button
+                                                : item.studentAnswer?.marks
+                                                    ? "success"
+                                                    : item.studentAnswer?.marks === 0
+                                                        ? "danger"
+                                                        : "secondary"
                                         }
                                         onClick={() => handleScrollToQuestion(index)}
                                         className="text-nowrap"
@@ -262,6 +264,7 @@ const DescriptiveTestAutoEvaluation = () => {
                                 </Col>
                             ))}
                         </Row>
+
                     </div>
                 </Col>
             </Row>

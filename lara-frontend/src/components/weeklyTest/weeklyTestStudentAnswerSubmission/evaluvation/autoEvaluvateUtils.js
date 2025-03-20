@@ -138,11 +138,36 @@ export function cosineSimilarity(keywords1, keywords2) {
 }
 
 export function compareAnswers(studentAnswer, correctAnswer) {
-  const studentKeywords = tokenizeAndExtractKeywords(studentAnswer);
-  const correctKeywords = tokenizeAndExtractKeywords(correctAnswer);
+  // Clean the answers by sanitizing the code formatting
+  const sanitizedStudentAnswer = sanitizeCode(studentAnswer);
+  const sanitizedCorrectAnswer = sanitizeCode(correctAnswer);
 
+  // Tokenize and vectorize the sanitized answers
+  const studentKeywords = tokenizeAndVectorize(sanitizedStudentAnswer);
+  const correctKeywords = tokenizeAndVectorize(sanitizedCorrectAnswer);
+
+  // If either answer has no keywords, return 0 (no similarity)
   if (studentKeywords.length === 0 || correctKeywords.length === 0) return 0;
 
+  // Perform the cosine similarity comparison
   return cosineSimilarity(studentKeywords, correctKeywords);
+}
+
+
+export function sanitizeCode(text) {
+  // Remove HTML tags except the ones we need (like <br>, <p>, etc.)
+  const cleanHtml = DOMPurify.sanitize(text, {
+    ALLOWED_TAGS: ["p", "br", "b", "i", "u", "strong", "em"],
+    ALLOWED_ATTRS: {}
+  });
+
+  // Replace <br> tags with a space, and strip all other HTML tags
+  let sanitizedText = cleanHtml.replace(/<br\s*\/?>/g, " "); // Replace <br> with a space
+  sanitizedText = sanitizedText.replace(/<\/?p>/g, ""); // Remove <p> tags
+
+  // Normalize multiple spaces or line breaks to a single space
+  sanitizedText = sanitizedText.replace(/\s+/g, " ").trim();
+
+  return sanitizedText;
 }
 
