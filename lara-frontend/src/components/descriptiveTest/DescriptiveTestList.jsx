@@ -158,7 +158,7 @@ const DescriptiveTestList = () => {
             );
             setPlacementTests(updatedTests);
             if (updatedStatus) {
-                alert('Camera monitoring for this test is turned on');
+                toast.success("Camera Monitoring On", )
             }
         } catch (error) {
             console.error('Error updating monitored status:', error);
@@ -254,6 +254,8 @@ const DescriptiveTestList = () => {
                             <th>Results</th>
                             <th>Add Question</th>
                             <th>Activate Link</th>
+                            <th>Provide Answers</th>
+                            <th>Activate / Deactivate</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -311,6 +313,9 @@ const DescriptiveTestList = () => {
                                 </td>
                                 <td>
                                     <Link to={`/update-answer-descriptive-question/${test.placement_test_id}`}> Provide Answers</Link>
+                                </td>
+                                <td>
+                                    <Link to={`/descriptive-test-attended-std/${test.placement_test_id}`}>Evaluate</Link>
                                 </td>
                                 <td>
                                     <button

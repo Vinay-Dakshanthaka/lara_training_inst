@@ -237,7 +237,7 @@ const StudentDescriptiveAnswerForm = () => {
       }, 3000);
     } catch (error) {
       console.log("Error while final Submission : ", error);
-      toast.error(`Error saving final submission: ${error.response?.data?.message || error.message}`);
+      toast.error(` ${error.response?.data?.message || error.message}`);
     } finally {
       setFinalSubmissionLoading(false);
     }
@@ -403,7 +403,7 @@ const StudentDescriptiveAnswerForm = () => {
             opacity: 0.8,
             backgroundColor: 'rgba(255, 255, 255, 0.7)',
             borderRadius: '50%',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',  // Optional shadow for visibility
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',  
           }}
         />
       )}
@@ -446,12 +446,12 @@ const StudentDescriptiveAnswerForm = () => {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  backgroundColor: 'rgba(0, 0, 0, 0.4)', // Dim the background
+                  backgroundColor: 'rgba(0, 0, 0, 0.4)',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  zIndex: 9999, // Ensure the spinner is above other elements
+                  zIndex: 9999, 
                 }}
               >
                 <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>

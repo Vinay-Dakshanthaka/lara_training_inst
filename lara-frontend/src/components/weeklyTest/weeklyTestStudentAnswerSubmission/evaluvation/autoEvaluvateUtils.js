@@ -102,25 +102,45 @@ import DOMPurify from "dompurify";
 // Cosine similarity function
 export function tokenizeAndVectorize(text) {
   function sanitizeAndStripHtml(html) {
-      const cleanHtml = DOMPurify.sanitize(html, {
-          ALLOWED_TAGS: [],
-          ALLOWED_ATTRS: {}
-      });
-      const doc = new DOMParser().parseFromString(cleanHtml, "text/html");
-      return doc.body.textContent || "";
+    const cleanHtml = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: [], // Removes all HTML tags
+      ALLOWED_ATTRS: {}
+    });
+    const doc = new DOMParser().parseFromString(cleanHtml, "text/html");
+    const plainText = doc.body.textContent || "";
+    // console.log("Cleaned HTML:", plainText); 
+    return plainText;
   }
 
   const stopWords = new Set([
-      "is", "the", "in", "and", "of", "to", "a", "for", "on", "it", "this",
-      "that", "by", "with", "as", "at", "from", "or", "an", "be", "but",
-      "if", "not", "are", "were", "can", "may", "so", "has", "have", "do"
+    "is", "the", "in", "and", "of", "to", "a", "for", "on", "it", "this",
+    "that", "by", "with", "as", "at", "from", "or", "an", "be", "but",
+    "if", "not", "are", "were", "can", "may", "so", "has", "have", "do"
   ]);
 
-  const plainText = sanitizeAndStripHtml(text);
+  // Sanitize and strip HTML
+  let plainText = sanitizeAndStripHtml(text);
+
+  plainText = plainText.replace(/\s*([.,!?;(){}[\]:'"-])\s*/g, "$1"); 
+
+  plainText = plainText.replace(/\s+/g, " ").trim();  // Normalize spaces (only one space between words)
+
+  // Tokenize the text: convert to lowercase, remove non-alphanumeric characters (except for space and punctuation)
+  // const words = plainText.toLowerCase()
+  //   .replace(/[^a-z0-9\s,!?;(){}[\]:'"-]/g, "") // Remove all special characters except punctuation marks
+  //   .split(/\s+/)
+  //   .filter(word => word && !stopWords.has(word));
+
+  // console.log("Tokenized Words:", words); // Log the tokenized words for analysis
+
   const words = plainText.toLowerCase()
-      .replace(/[^a-z0-9\s]/g, "")
-      .split(/\s+/)
-      .filter(word => word && !stopWords.has(word));
+  .replace(/[^a-z0-9\s,!?;(){}[\]:'"-]/g, "") 
+  .replace(/\s+/g, ' ')  
+  .trim()  
+  .split(' ')  
+  .filter(word => word && !stopWords.has(word));
+
+// console.log("Tokenized Words:", words); 
 
   return [...new Set(words)];
 }
@@ -138,36 +158,17 @@ export function cosineSimilarity(keywords1, keywords2) {
 }
 
 export function compareAnswers(studentAnswer, correctAnswer) {
-  // Clean the answers by sanitizing the code formatting
-  const sanitizedStudentAnswer = sanitizeCode(studentAnswer);
-  const sanitizedCorrectAnswer = sanitizeCode(correctAnswer);
+  const studentKeywords = tokenizeAndVectorize(studentAnswer);
+  const correctKeywords = tokenizeAndVectorize(correctAnswer);
 
-  // Tokenize and vectorize the sanitized answers
-  const studentKeywords = tokenizeAndVectorize(sanitizedStudentAnswer);
-  const correctKeywords = tokenizeAndVectorize(sanitizedCorrectAnswer);
+  // console.log("Student Keywords:", studentKeywords); 
+  // console.log("Correct Keywords:", correctKeywords); 
 
-  // If either answer has no keywords, return 0 (no similarity)
   if (studentKeywords.length === 0 || correctKeywords.length === 0) return 0;
 
-  // Perform the cosine similarity comparison
-  return cosineSimilarity(studentKeywords, correctKeywords);
+  const similarity = cosineSimilarity(studentKeywords, correctKeywords);
+
+  // console.log("Cosine Similarity:", similarity); 
+
+  return similarity;
 }
-
-
-export function sanitizeCode(text) {
-  // Remove HTML tags except the ones we need (like <br>, <p>, etc.)
-  const cleanHtml = DOMPurify.sanitize(text, {
-    ALLOWED_TAGS: ["p", "br", "b", "i", "u", "strong", "em"],
-    ALLOWED_ATTRS: {}
-  });
-
-  // Replace <br> tags with a space, and strip all other HTML tags
-  let sanitizedText = cleanHtml.replace(/<br\s*\/?>/g, " "); // Replace <br> with a space
-  sanitizedText = sanitizedText.replace(/<\/?p>/g, ""); // Remove <p> tags
-
-  // Normalize multiple spaces or line breaks to a single space
-  sanitizedText = sanitizedText.replace(/\s+/g, " ").trim();
-
-  return sanitizedText;
-}
-

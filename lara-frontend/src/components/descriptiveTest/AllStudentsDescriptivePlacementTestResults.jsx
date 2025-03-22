@@ -19,12 +19,13 @@ const AllStudentsDescriptivePlacementTestResults = () => {
         const fetchResults = async () => {
             try {
                 const response = await axios.get(`${baseURL}/api/weekly-test/getAllIndividualStudentResultsForDescriptivePlacementTest/${placement_test_id}`);
-                console.log("response status-------------------------------- : ", response)
 
                 const modifiedResults = response.data.student_results.map(student => ({
                     ...student,
-                    obtained_marks: student.obtained_marks || 0 // Default to 0 if obtained_marks is not available
+                    obtained_marks: student.obtained_marks || 0 
                 }));
+
+                
 
                 setResults(response.data);
                 setFilteredResults(modifiedResults);

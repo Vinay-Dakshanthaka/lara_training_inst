@@ -1,126 +1,15 @@
-// import React, { useEffect, useState } from 'react';
-// import { Link, useParams } from 'react-router-dom';
-// import axios from 'axios';
-// import { Table, Container, Alert, Spinner, Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
-// import { baseURL } from '../../config'; 
-// import Paginate from '../../common/Paginate'; 
-
-// const WeeklyTestAttendedStudentsList = () => {
-//   const { wt_id } = useParams(); 
-//   const [students, setStudents] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-
-//   // Pagination state
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const itemsPerPage = 2;
-
-//   useEffect(() => {
-//     const fetchStudentEvaluationStatus = async () => {
-//       try {
-//         const response = await axios.get(`${baseURL}/api/weekly-test/getStudentEvaluationStatusByWeeklyTestId/${wt_id}`);
-//         setStudents(response.data.students);
-//       } catch (error) {
-//         setError('Failed to fetch student details.');
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchStudentEvaluationStatus();
-//   }, [wt_id]);
-
-//   if (loading) {
-//     return (
-//       <Container className="my-4">
-//         <Spinner animation="border" role="status">
-//           <span className="visually-hidden">Loading...</span>
-//         </Spinner>
-//       </Container>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <Container className="my-4">
-//         <Alert variant="danger">{error}</Alert>
-//       </Container>
-//     );
-//   }
-
-//   // Pagination Logic
-//   const indexOfLastStudent = currentPage * itemsPerPage;
-//   const indexOfFirstStudent = indexOfLastStudent - itemsPerPage;
-//   const currentStudents = students.slice(indexOfFirstStudent, indexOfLastStudent);
-
-//   return (
-//     <Container className="my-4">
-//       <h2 className="mb-4">Student Details</h2>
-//       <Table striped bordered hover responsive>
-//         <thead>
-//           <tr>  
-//             <th>#</th>
-//             <th>Student Name</th>
-//             <th>Email</th>
-//             <th>Phone Number</th>
-//             <th>Evaluate</th>
-//             <th>Evaluation Status</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {currentStudents.map((student, index) => (
-//             <tr key={student.student_id}>
-//               <td>{indexOfFirstStudent + index + 1}</td>
-//               <td>{student.student_name}</td>
-//               <td>{student.student_email}</td>
-//               <td>{student.student_phone}</td>
-//               <td>
-//                 <Link to={`/evaluvate-student-answers/${wt_id}/${student.student_id}`}>Evaluate</Link>
-//               </td>
-//               <td>
-//                 {student.is_evaluation_done ? (
-//                   <Badge bg="success">Evaluation Done</Badge>
-//                 ) : (
-//                   <OverlayTrigger
-//                     placement="top"
-//                     overlay={<Tooltip>Evaluation not fully completed for this student</Tooltip>}
-//                   >
-//                     <Badge bg="danger">Evaluation Pending</Badge>
-//                   </OverlayTrigger>
-//                 )}
-//               </td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </Table>
-
-//       {/* Pagination Component */}
-//       <Paginate
-//         currentPage={currentPage}
-//         totalItems={students.length}
-//         itemsPerPage={itemsPerPage}
-//         onPageChange={setCurrentPage}  // Update the page number when a new page is selected
-//       />
-//     </Container>
-//   );
-// };
-
-// export default WeeklyTestAttendedStudentsList;
-
-
-
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Table, Container, Alert, Spinner, Badge, OverlayTrigger, Tooltip, Button, Form } from 'react-bootstrap';
-import { baseURL } from '../../config';
-import Paginate from '../../common/Paginate';
 import { toast } from 'react-toastify';
-import { cosineSimilarity, tokenizeAndVectorize } from './evaluvation/autoEvaluvateUtils';
 import { BsCheckCircleFill, BsXCircleFill } from 'react-icons/bs';
+import { baseURL } from '../config';
+import { cosineSimilarity, tokenizeAndVectorize } from '../weeklyTest/weeklyTestStudentAnswerSubmission/evaluvation/autoEvaluvateUtils';
+import Paginate from '../common/Paginate';
 
-const WeeklyTestAttendedStudentsList = () => {
-  const { wt_id } = useParams();
+const DescriptiveTestAttendedStudentList = () => {
+  const { placement_test_id } = useParams();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -136,19 +25,21 @@ const WeeklyTestAttendedStudentsList = () => {
   useEffect(() => {
     const fetchStudentEvaluationStatus = async () => {
       try {
-        const response = await axios.get(`${baseURL}/api/weekly-test/getStudentEvaluationStatusByWeeklyTestId/${wt_id}`);
+        const response = await axios.get(`${baseURL}/api/weekly-test/getStudentEvaluationStatusByPlacementTestId/${placement_test_id}`);
         setStudents(response.data.students);
+        console.log("Students details : ",response.data.students)
         // console.log("response status : ", response)
       } catch (error) {
         setError('Failed to fetch student details.');
-        console.log("Error fetching evaluation status : ", error)
       } finally {
         setLoading(false);
       }
     };
 
     fetchStudentEvaluationStatus();
-  }, [wt_id]);
+  }, [placement_test_id]);
+
+//   console.log("selected student id : ", selectedStudents)
 
   const handleSelectStudent = (student_id) => {
     setSelectedStudents((prev) =>
@@ -170,6 +61,7 @@ const WeeklyTestAttendedStudentsList = () => {
       const student_id = selectedStudents[i];
       const student = students.find((s) => s.student_id === student_id);
       const studentName = student ? student.student_name : `Student ${student_id}`;
+     
   
       // Set loading state for the current student
       setLoadingEvaluations((prevState) => {
@@ -180,7 +72,7 @@ const WeeklyTestAttendedStudentsList = () => {
   
       try {
         const response = await axios.get(
-          `${baseURL}/api/weekly-test/getQuestionAnswerDataByStudentId/${wt_id}/${student_id}`
+          `${baseURL}/api/weekly-test/getPlacementTestAnswerDataByStudentId/${placement_test_id}/${student_id}`
         );
   
         const questions = response.data.questions;
@@ -212,7 +104,7 @@ const WeeklyTestAttendedStudentsList = () => {
             console.log("similarity:", similarity);
   
             // Set threshold based on keywords
-            const threshold = keywords === "1" ? 0.8 : 0.6;
+            const threshold = keywords === "1" ? 0.7 : 0.4;
             const isCorrect = similarity >= threshold;
   
             console.log("Threshold:", threshold);
@@ -220,10 +112,10 @@ const WeeklyTestAttendedStudentsList = () => {
   
             const marks = isCorrect ? question.marks : 0;
             const comment = isCorrect ? `Correct Answer` : `Incorrect Answer`;
-  
+            await new Promise(resolve => setTimeout(resolve, 2000));
             // Update marks and comment for the current question
             await axios.put(
-              `${baseURL}/api/weekly-test/updateMarksAndCommentByStudentId/${wt_id}/${student_id}/${question.question_id}`,
+              `${baseURL}/api/weekly-test/updatePlacementTestMarksAndCommentByStudentId/${placement_test_id}/${student_id}/${question.question_id}`,
               { marks, comment }
             );
             console.log("Marks updated successfully!!");
@@ -235,7 +127,7 @@ const WeeklyTestAttendedStudentsList = () => {
   
         // Once all questions are processed, update evaluation status
         await axios.put(
-          `${baseURL}/api/weekly-test/updateEvaluationStatus/${wt_id}/${student_id}`,
+          `${baseURL}/api/weekly-test/updateEvaluationStatus/${placement_test_id}/${student_id}`,
           { is_evaluation_done: true }
         );
   
@@ -326,7 +218,7 @@ const WeeklyTestAttendedStudentsList = () => {
               <td>{student.student_phone}</td>
               <td className='text-center'>{student.attended_in_institute ? (<><BsCheckCircleFill className='text-success h4' /></>) : (<><BsXCircleFill className='text-danger' /></>)}</td>
               <td>
-                <Link to={`/evaluvate-student-answers/${wt_id}/${student.student_id}`}>Evaluate</Link>
+                <Link to={`/evaluvate-descriptive-test/${placement_test_id}/${student.student_id}`}>Evaluate</Link>
               </td>
               <td>
                 {loadingEvaluations[students.findIndex((s) => s.student_id === student.student_id)] ? (
@@ -354,4 +246,4 @@ const WeeklyTestAttendedStudentsList = () => {
   );
 };
 
-export default WeeklyTestAttendedStudentsList;
+export default DescriptiveTestAttendedStudentList;

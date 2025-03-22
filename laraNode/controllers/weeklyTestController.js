@@ -3817,37 +3817,14 @@ const getAllIndividualStudentResultsForDescriptivePlacementTest = async (req, re
     const { placement_test_id } = req.params;
 
     try {
-        // Step 1: Fetch the placement test details
-        const placementTest = await db.PlacementTest.findByPk(placement_test_id, {
-            include: [
-                {
-                    model: db.PlacementTestWeeklyQuestionMapping,
-                    as: 'WeeklyTestQuestions',
-                    include: [
-                        {
-                            model: db.WeeklyTestQuestion,
-                            as: 'WeeklyTestQuestion'
-                        }
-                    ]
-                },
-                {
-                    model: db.PlacementTestTopic,
-                    as: 'TestTopics',
-                    include: [
-                        {
-                            model: db.Topic, // Assuming Topic model is defined
-                            as: 'PlacementTestTopic'
-                        }
-                    ]
-                }
-            ]
-        });
+        // Fetch the placement test details
+        const placementTest = await db.PlacementTest.findByPk(placement_test_id);
 
         if (!placementTest) {
             return res.status(404).send({ message: 'Placement test not found' });
         }
 
-        // Step 2: Calculate total available marks for the test
+        // Calculate total available marks for the test
         const questionMappings = await db.PlacementTestWeeklyQuestionMapping.findAll({
             where: { placement_test_id },
             attributes: ['wt_question_id']
@@ -3855,84 +3832,73 @@ const getAllIndividualStudentResultsForDescriptivePlacementTest = async (req, re
 
         const questionIds = questionMappings.map(mapping => mapping.wt_question_id);
 
-        const questions = await WeeklyTestQuestion.findAll({
+        const questions = await db.WeeklyTestQuestion.findAll({
             where: { wt_question_id: questionIds },
             attributes: ['wt_question_id', 'marks']
         });
 
         const totalAvailableMarks = questions.reduce((total, question) => total + (Number(question.marks) || 0), 0);
 
-        // Step 3: Fetch student answers
+        // Fetch student answers and placement test students
         const studentAnswers = await db.PlacementTestAnswer.findAll({
             where: { placement_test_id },
             include: [
                 {
                     model: db.PlacementTestStudent,
-                    as: 'StudentFromPlacementTest', 
+                    as: 'StudentFromPlacementTest',
                     attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number']
                 }
             ]
         });
 
-        console.log("Student Answers :::::::::::::: ", studentAnswers)
-
-
-        // Step 4: Fetch PlacementTestFinalSubmission details for students
+        // Fetch students with final submissions who attended the test
         const finalSubmissions = await db.PlacementTestFinalSubmission.findAll({
-            where: { placement_test_id },
+            where: { placement_test_id, final_submission: true },
             attributes: ['placement_test_student_id', 'final_submission', 'latitude', 'longitude', 'attended_in_institute']
         });
 
-        // Convert final submissions into a lookup object
-        const finalSubmissionsMap = {};
-        finalSubmissions.forEach(sub => {
-            finalSubmissionsMap[sub.student_id] = {
+        const finalSubmissionsMap = finalSubmissions.reduce((acc, sub) => {
+            acc[sub.placement_test_student_id] = {
                 final_submission: sub.final_submission,
                 latitude: sub.latitude,
                 longitude: sub.longitude,
                 attended_in_institute: sub.attended_in_institute
             };
-        });
-
-        // Step 5: Calculate student marks
-        const studentResults = studentAnswers.reduce((acc, answer) => {
-            const studentId = answer.student_id;
-            if (!acc[studentId]) {
-                acc[studentId] = {
-                    student_id: answer.StudentFromPlacementTest?.id, // Use optional chaining
-                    student_name: answer.StudentFromPlacementTest?.student_name,
-                    student_email: answer.StudentFromPlacementTest?.email,
-                    student_phone: answer.StudentFromPlacementTest?.phone_number,
-                    obtained_marks: 0,
-                    final_submission: false, // Default value
-                    latitude: null,
-                    longitude: null,
-                    attended_in_institute: false,
-                };
-            }
-
-            if (answer.marks !== null) {
-                acc[studentId].obtained_marks += Number(answer.marks) || 0;
-            }
-
-            // Add final submission details if available
-            if (finalSubmissionsMap[studentId]) {
-                acc[studentId] = {
-                    ...acc[studentId],
-                    ...finalSubmissionsMap[studentId] // Merge submission details
-                };
-            }
-
             return acc;
         }, {});
 
+        // Calculate student marks and build results
+        const studentResults = {};
+
+        studentAnswers.forEach(answer => {
+            const studentId = answer.StudentFromPlacementTest?.placement_test_student_id;
+
+            if (finalSubmissionsMap[studentId]) {
+                if (!studentResults[studentId]) {
+                    studentResults[studentId] = {
+                        student_id: studentId,
+                        student_name: answer.StudentFromPlacementTest?.student_name,
+                        student_email: answer.StudentFromPlacementTest?.email,
+                        student_phone: answer.StudentFromPlacementTest?.phone_number,
+                        obtained_marks: 0,
+                        ...finalSubmissionsMap[studentId]  // Merge submission details
+                    };
+                }
+
+                if (answer.marks !== null) {
+                    studentResults[studentId].obtained_marks += Number(answer.marks) || 0;
+                }
+            }
+        });
+
+        // Format the result
         const resultsFormatted = Object.values(studentResults).map(result => ({
             ...result,
             total_available_marks: totalAvailableMarks
         }));
 
         return res.status(200).send({
-            message: 'Individual student results fetched successfully for the placement test',
+            message: 'All student results fetched successfully for the placement test',
             placement_test: {
                 test_id: placementTest.placement_test_id,
                 test_date: new Date(placementTest.start_time).toLocaleDateString(),
@@ -3952,6 +3918,73 @@ const getAllIndividualStudentResultsForDescriptivePlacementTest = async (req, re
     }
 };
 
+
+const getStudentEvaluationStatusByPlacementTestId = async (req, res) => {
+    const { placement_test_id } = req.params; // Receive placement_test_id from the request
+
+    try {
+        // Step 1: Get all unique student IDs who attended and finalized the placement test
+        const finalSubmissions = await PlacementTestFinalSubmission.findAll({
+            where: { placement_test_id, final_submission: true },
+            attributes: ['placement_test_student_id', 'latitude', 'longitude', 'attended_in_institute']
+        });
+
+        // Extract student IDs who have finalized their submission
+        const studentIdsArray = finalSubmissions.map(sub => sub.placement_test_student_id);
+
+        // If no final submissions found for this test
+        if (!studentIdsArray.length) {
+            return res.status(404).send({ message: 'No students with final submission found for this placement test' });
+        }
+
+        // Step 2: Fetch student details
+        const students = await PlacementTestStudent.findAll({
+            where: { placement_test_student_id: studentIdsArray },
+            attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number']
+        });
+
+        // Step 3: Fetch all student answers for this placement test in one go
+        const studentAnswers = await PlacementTestStudentAnswer.findAll({
+            where: { placement_test_id, placement_test_student_id: studentIdsArray },
+            attributes: ['placement_test_student_id', 'marks', 'comment']
+        });
+
+        // Step 4: Process student data
+        const studentsWithEvaluationStatus = students.map(student => {
+            // Get all answers for the student
+            const answers = studentAnswers.filter(ans => ans.placement_test_student_id === student.placement_test_student_id);
+
+            // Check if all answers have marks and comments
+            const isEvaluationDone = answers.every(ans => ans.marks !== null && ans.comment !== null);
+
+            // Find final submission details for location info
+            const finalSubmission = finalSubmissions.find(sub => sub.student_id === student.id);
+
+            return {
+                student_id: student.placement_test_student_id,
+                student_name: student.student_name,
+                student_email: student.email,
+                student_phone: student.phone_number,
+                is_evaluation_done: isEvaluationDone,
+                attended_in_institute: finalSubmission?.attended_in_institute || false,
+                latitude: finalSubmission?.latitude || null,
+                longitude: finalSubmission?.longitude || null
+            };
+        });
+
+        return res.status(200).send({
+            message: 'Placement test student evaluation status fetched successfully',
+            students: studentsWithEvaluationStatus
+        });
+
+    } catch (error) {
+        console.error('Error fetching placement test student evaluation status:', error);
+        return res.status(500).send({
+            message: 'Error fetching placement test student evaluation status',
+            error: error.message
+        });
+    }
+};
 
 
 
@@ -4008,4 +4041,5 @@ module.exports = {
     updatePlacementTestEvaluationStatus,
     getPlacementTestFinalSubmissionDetails,
     getAllIndividualStudentResultsForDescriptivePlacementTest,
+    getStudentEvaluationStatusByPlacementTestId,
 }

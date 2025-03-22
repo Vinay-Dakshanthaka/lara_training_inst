@@ -89,6 +89,8 @@ import StudentDescriptiveAnswerForm from './components/descriptiveTest/StudentDe
 import AnswerUpdateFormDescriptiveQuestions from './components/descriptiveTest/AnswerUpdateFormDescriptiveQuestions';
 import DescriptiveTestAutoEvaluation from './components/descriptiveTest/DescriptiveTestAutoEvaluation';
 import AllStudentsDescriptivePlacementTestResults from './components/descriptiveTest/AllStudentsDescriptivePlacementTestResults';
+import DescriptiveTestAttendedStudentList from './components/descriptiveTest/DescriptiveTestAttendedStudentList';
+import ManualDescriptiveTestEvaluation from './components/descriptiveTest/ManualDescriptiveTestEvaluation';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -179,8 +181,10 @@ const App = () => {
             <Route path='/test-answer-form/:wt_id' element={<AnswerUpdateForm />} />
             <Route path='/update-answer-descriptive-question/:placement_test_id' element={<AnswerUpdateFormDescriptiveQuestions />} />
             <Route path='/wt-attended-student-list/:wt_id' element={<WeeklyTestAttendedStudentsList />} />
+            <Route path='/descriptive-test-attended-std/:placement_test_id' element={<DescriptiveTestAttendedStudentList />} />
             <Route path='/evaluvate-student-answers/:wt_id/:student_id' element={<StudentQuestionAnswer />} />
             <Route path='/descriptive-test-resulst/:placement_test_id/:placement_test_student_id' element={<DescriptiveTestAutoEvaluation />} />
+            <Route path='/evaluvate-descriptive-test/:placement_test_id/:placement_test_student_id' element={<ManualDescriptiveTestEvaluation />} />
             <Route path='studentHome/weeklytest-detailed-summary/:wt_id' element={<WeeklyTestStudentDetailedSummary />} />
             <Route path='studentHome/weekly-test-results/:wt_id' element={<AllStudentsWeeklyTestResults />} />
             <Route path='weekly-test-student-performance/:student_id' element={<WeeklyTestPerformanceForAdmin />} />

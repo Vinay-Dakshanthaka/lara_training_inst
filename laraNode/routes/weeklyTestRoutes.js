@@ -110,6 +110,8 @@ weeklyTestRouter.put('/getPlacementTestFinalSubmissionDetails/:placement_test_id
 
 weeklyTestRouter.get('/getAllIndividualStudentResultsForDescriptivePlacementTest/:placement_test_id',  weeklyTestController.getAllIndividualStudentResultsForDescriptivePlacementTest); 
 
+weeklyTestRouter.get('/getStudentEvaluationStatusByPlacementTestId/:placement_test_id',  weeklyTestController.getStudentEvaluationStatusByPlacementTestId); 
+
 
 // weeklyTestRouter.post('/upload-questions', upload.single('file'), async (req, res) => {
 //     const { wt_id, topic_id } = req.body;

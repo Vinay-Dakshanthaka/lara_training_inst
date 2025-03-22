@@ -119,6 +119,8 @@ const DescriptiveTestAutoEvaluation = () => {
         setObtainedMarks(obtained);
     }, [questionsWithAnswers]);
 
+    // console.log(`total marks :${totalMarks} : obtained marks : ${obtainedMarks}`)
+
     useEffect(() => {
         // Fetch student and test details
         axios
@@ -157,7 +159,7 @@ const DescriptiveTestAutoEvaluation = () => {
                     <ToastContainer />
                     <h2 className="mb-4">Detailed Result</h2>
                     {/* <h5>Total Marks: {totalMarks} | Obtained Marks: {obtainedMarks}</h5> */}
-                    <h3 className="d-flex justify-content-between align-items-center text-primary" style={{ fontWeight: 'bold', }}>
+                    <h3 className="d-flex justify-content-between align-items-center text-primary my-3 py-3" style={{ fontWeight: 'bold', }}>
                         <span>Total Marks:</span>
                         <span className="text-secondary">{totalMarks}</span>
                         <span>|</span>
@@ -181,7 +183,7 @@ const DescriptiveTestAutoEvaluation = () => {
                             >
                                 <Card.Body>
                                     <Card.Subtitle className="mb-2 text-muted">Topic: {item.topic || "N/A"}</Card.Subtitle>
-                                    <pre style={{ whiteSpace: "pre-wrap" }}>Question: {item.question_text}</pre>
+                                    <pre style={{ whiteSpace: "pre-wrap" }}>Question: {index} : {item.question_text}</pre>
 
                                     <p><strong>Marks: </strong>{item.marks}</p>
 
