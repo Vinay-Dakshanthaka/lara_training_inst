@@ -231,7 +231,7 @@ const AttendedStudentDetails = () => {
           </thead>
           <tbody>
             {getPagedData().map((student, index) => (
-              <tr key={student.studentId}>
+              <tr key={index}>
                 <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td>{student.name}</td>
                 <td>{student.totalTests}</td>

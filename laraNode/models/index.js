@@ -337,7 +337,7 @@ db.Batch.belongsToMany(db.Student, {
 // Corrected Associations
 db.CumulativeQuestion.belongsTo(db.Topic, {
     foreignKey: 'topic_id',
-    as: 'QuestionTopic' // Unique alias for the association
+    as: 'QuestionTopic'
 });
 db.CumulativeQuestion.belongsTo(db.PlacementTest, {
     foreignKey: 'test_id',

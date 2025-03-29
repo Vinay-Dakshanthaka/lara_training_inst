@@ -46,7 +46,6 @@ const saveSubject = async (req, res) => {
     }
 }
 
-
 const updateSubject = async (req, res) => {
     try {
         // Fetch the user's role from the database using the user's ID

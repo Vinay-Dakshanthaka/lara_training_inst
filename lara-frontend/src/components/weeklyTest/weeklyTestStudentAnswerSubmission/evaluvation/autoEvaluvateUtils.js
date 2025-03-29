@@ -100,6 +100,43 @@
 import DOMPurify from "dompurify";
 
 // Cosine similarity function
+// export function tokenizeAndVectorize(text) {
+//   function sanitizeAndStripHtml(html) {
+//     const cleanHtml = DOMPurify.sanitize(html, {
+//       ALLOWED_TAGS: [], // Removes all HTML tags
+//       ALLOWED_ATTRS: {}
+//     });
+//     const doc = new DOMParser().parseFromString(cleanHtml, "text/html");
+//     const plainText = doc.body.textContent || "";
+//     // console.log("Cleaned HTML:", plainText); 
+//     return plainText;
+//   }
+
+//   const stopWords = new Set([
+//     "is", "the", "in", "and", "of", "to", "a", "for", "on", "it", "this",
+//     "that", "by", "with", "as", "at", "from", "or", "an", "be", "but",
+//     "if", "not", "are", "were", "can", "may", "so", "has", "have", "do"
+//   ]);
+
+//   // Sanitize and strip HTML
+//   let plainText = sanitizeAndStripHtml(text);
+
+//   plainText = plainText.replace(/\s*([.,!?;(){}[\]:'"-])\s*/g, "$1"); 
+
+//   plainText = plainText.replace(/\s+/g, " ").trim();  // Normalize spaces (only one space between words)
+
+//   const words = plainText.toLowerCase()
+//   .replace(/[^a-z0-9\s,!?;(){}[\]:'"-]/g, "") 
+//   .replace(/\s+/g, ' ')  
+//   .trim()  
+//   .split(' ')  
+//   .filter(word => word && !stopWords.has(word));
+
+
+//   return [...new Set(words)];
+// }
+
+
 export function tokenizeAndVectorize(text) {
   function sanitizeAndStripHtml(html) {
     const cleanHtml = DOMPurify.sanitize(html, {
@@ -125,22 +162,15 @@ export function tokenizeAndVectorize(text) {
 
   plainText = plainText.replace(/\s+/g, " ").trim();  // Normalize spaces (only one space between words)
 
-  // Tokenize the text: convert to lowercase, remove non-alphanumeric characters (except for space and punctuation)
-  // const words = plainText.toLowerCase()
-  //   .replace(/[^a-z0-9\s,!?;(){}[\]:'"-]/g, "") // Remove all special characters except punctuation marks
-  //   .split(/\s+/)
-  //   .filter(word => word && !stopWords.has(word));
-
-  // console.log("Tokenized Words:", words); // Log the tokenized words for analysis
+  // Replace commas with spaces and clean up any unwanted characters
+  plainText = plainText.replace(/,/g, ' ');  // Replaces all commas with spaces
 
   const words = plainText.toLowerCase()
-  .replace(/[^a-z0-9\s,!?;(){}[\]:'"-]/g, "") 
-  .replace(/\s+/g, ' ')  
-  .trim()  
-  .split(' ')  
-  .filter(word => word && !stopWords.has(word));
-
-// console.log("Tokenized Words:", words); 
+  .replace(/[^a-z0-9\s!?;(){}[\]:'"-]/g, "") // Removes unwanted characters
+  .replace(/\s+/g, ' ')  // Normalize spaces (only one space between words)
+  .trim()  // Remove leading/trailing spaces
+  .split(' ')  // Split into words
+  .filter(word => word && !stopWords.has(word)); // Filter out stop words
 
   return [...new Set(words)];
 }

@@ -16,7 +16,7 @@ const Attendance = () => {
   const [searchEmail, setSearchEmail] = useState('');
   const [searchName, setSearchName] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Adjust based on your requirement
+  const itemsPerPage = 5; 
 
 
   useEffect(() => {
