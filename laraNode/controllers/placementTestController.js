@@ -420,7 +420,7 @@ const createPlacementTestLink = async (req, res) => {
             show_result: show_result !== undefined ? show_result : true, // Default to true if not provided
             is_Monitored: is_Monitored !== undefined ? is_Monitored : false, // Default to false if not provided
             issue_certificate: issue_certificate !== undefined ? issue_certificate : false, // Default to false if not provided
-            college_id, // Link to the college (optional)
+            college_id: college_id || 0,
         });
         console.log(newTest, "-----------------------newtest");
 
