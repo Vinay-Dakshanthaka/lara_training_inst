@@ -106,7 +106,15 @@ placementTestRoute.post('/assignBranchesToCollegeNoTestId', placementTestContoll
 
 placementTestRoute.get('/getAssignedBranchesToCollege/:college_id', placementTestContoller.getAssignedBranchesToCollege);
 
+placementTestRoute.post('/createUniversity', placementTestContoller.createUniversity);
 
+placementTestRoute.get('/getAllUniversities', placementTestContoller.getAllUniversities);
+
+placementTestRoute.get('/getUniversityById/:id', placementTestContoller.getUniversityById);
+
+placementTestRoute.put('/updateUniversity/:id', placementTestContoller.updateUniversity);
+
+placementTestRoute.delete('/deleteUniversity/:id', placementTestContoller.deleteUniversity);
 
 
 // placementTestRoute.post('/upload-questions-link', upload.single('file'), async (req, res) => {

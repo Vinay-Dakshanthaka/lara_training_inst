@@ -127,6 +127,14 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'college_id'
             }
         },
+        university_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'Universities',
+                key: 'university_id'
+            }
+        },
     }, {
         timestamps: true,
         tableName: 'Placementtests'
@@ -137,6 +145,10 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'college_id',
             as: 'College'
         });
+        PlacementTest.belongsTo(models.University, {
+            foreignKey: 'university_id',
+            as: 'University'
+        });        
         PlacementTest.belongsToMany(models.Branch, {
             through: 'PlacementTestBranch',
             foreignKey: 'placement_test_id',
@@ -186,3 +198,6 @@ module.exports = (sequelize, DataTypes) => {
 
 // ALTER TABLE laradb.placementtests
 // ADD COLUMN college_id INT NOT NULL;
+
+// ALTER TABLE laradb.placementtests
+// ADD COLUMN university_id INT;

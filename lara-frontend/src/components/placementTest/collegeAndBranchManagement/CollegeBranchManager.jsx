@@ -6,6 +6,8 @@ import CollegeTable from './CollegeTable';
 import BranchTable from './BranchTable';
 import AssignBranches from './AssignBranches';
 import { baseURL } from '../../config';
+import UniversityTable from './UniversityTable';
+import UniversityForm from './UniversityForm';
 
 const CollegeBranchManager = () => {
     const [activeTab, setActiveTab] = useState('colleges');
@@ -14,6 +16,25 @@ const CollegeBranchManager = () => {
     const [collegeIdToUpdate, setCollegeIdToUpdate] = useState(null);
     const [branchIdToUpdate, setBranchIdToUpdate] = useState(null);
     const [assignedBranches, setAssignedBranches] = useState({}); // To store branches for each college
+
+    const [universities, setUniversities] = useState([]);
+    const [universityToEdit, setUniversityToEdit] = useState(null);
+
+    const fetchUniversities = async () => {
+        const res = await axios.get(`${baseURL}/api/placement-test/getAllUniversities`);
+        setUniversities(res.data);
+    };
+
+    const deleteUniversity = async (id) => {
+        try {
+            await axios.delete(`${baseURL}/api/placement-test/deleteUniversity/${id}`);
+            fetchUniversities();
+        } catch (err) {
+            toast.error('Error deleting university');
+            console.error(err);
+        }
+    };
+
 
     // Fetch Colleges and Branches
     const fetchColleges = async () => {
@@ -38,6 +59,11 @@ const CollegeBranchManager = () => {
         fetchColleges();
         fetchBranches();
     }, []);
+    useEffect(() => {
+        if (activeTab === 'universities') {
+            fetchUniversities();
+        }
+    }, [activeTab]);
 
     return (
         <div className="container mt-5">
@@ -69,6 +95,15 @@ const CollegeBranchManager = () => {
                         Assign Branches
                     </button>
                 </li>
+                <li className="nav-item">
+                    <button
+                        className={`nav-link ${activeTab === 'universities' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('universities')}
+                    >
+                        Universities
+                    </button>
+                </li>
+
             </ul>
 
             {/* Render active tab components */}
@@ -93,7 +128,7 @@ const CollegeBranchManager = () => {
 
             {activeTab === 'branches' && (
                 <>
-                    <BranchForm branchIdToUpdate={branchIdToUpdate} fetchBranches={fetchBranches} setBranchIdToUpdate={setBranchIdToUpdate}/>
+                    <BranchForm branchIdToUpdate={branchIdToUpdate} fetchBranches={fetchBranches} setBranchIdToUpdate={setBranchIdToUpdate} />
                     <BranchTable branches={branches} onEdit={setBranchIdToUpdate} onDelete={fetchBranches} />
                 </>
             )}
@@ -101,6 +136,22 @@ const CollegeBranchManager = () => {
             {activeTab === 'assignBranches' && (
                 <AssignBranches colleges={colleges} branches={branches} fetchAssignedBranches={fetchAssignedBranches} />
             )}
+
+            {activeTab === 'universities' && (
+                <>
+                    <UniversityForm
+                        universityToEdit={universityToEdit}
+                        fetchUniversities={fetchUniversities}
+                        setUniversityToEdit={setUniversityToEdit}
+                    />
+                    <UniversityTable
+                        universities={universities}
+                        onEdit={setUniversityToEdit}
+                        onDelete={deleteUniversity}
+                    />
+                </>
+            )}
+
         </div>
     );
 };

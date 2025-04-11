@@ -3,25 +3,28 @@ import axios from 'axios';
 import { baseURL } from '../../config';
 
 const SelectCollegeBranches = ({ onSelectionChange }) => {
+    const [universities, setUniversities] = useState([]);
     const [colleges, setColleges] = useState([]);
     const [branches, setBranches] = useState([]);
+
+    const [selectedUniversityId, setSelectedUniversityId] = useState('');
     const [selectedCollegeId, setSelectedCollegeId] = useState('');
     const [assignedBranches, setAssignedBranches] = useState([]);
     const [selectedBranchIds, setSelectedBranchIds] = useState([]);
 
     useEffect(() => {
-        const fetchColleges = async () => {
-            const res = await axios.get(`${baseURL}/api/placement-test/getAllColleges`);
-            setColleges(res.data);
+        const fetchData = async () => {
+            const [uniRes, collegeRes, branchRes] = await Promise.all([
+                axios.get(`${baseURL}/api/placement-test/getAllUniversities`),
+                axios.get(`${baseURL}/api/placement-test/getAllColleges`),
+                axios.get(`${baseURL}/api/placement-test/getAllBranches`)
+            ]);
+            setUniversities(uniRes.data);
+            setColleges(collegeRes.data);
+            setBranches(branchRes.data);
         };
 
-        const fetchBranches = async () => {
-            const res = await axios.get(`${baseURL}/api/placement-test/getAllBranches`);
-            setBranches(res.data);
-        };
-
-        fetchColleges();
-        fetchBranches();
+        fetchData();
     }, []);
 
     useEffect(() => {
@@ -30,7 +33,7 @@ const SelectCollegeBranches = ({ onSelectionChange }) => {
                 const res = await axios.get(`${baseURL}/api/placement-test/getAssignedBranchesToCollege/${selectedCollegeId}`);
                 const branchIds = res.data.map(b => b.branch_id);
                 setAssignedBranches(branchIds);
-                setSelectedBranchIds(branchIds); // Pre-check assigned ones
+                setSelectedBranchIds(branchIds);
             } else {
                 setAssignedBranches([]);
                 setSelectedBranchIds([]);
@@ -40,6 +43,16 @@ const SelectCollegeBranches = ({ onSelectionChange }) => {
         fetchAssigned();
     }, [selectedCollegeId]);
 
+    useEffect(() => {
+        if (onSelectionChange) {
+            onSelectionChange({
+                universityId: selectedUniversityId || null,
+                collegeId: selectedCollegeId || null,
+                branchIds: selectedBranchIds
+            });
+        }
+    }, [selectedUniversityId, selectedCollegeId, selectedBranchIds]);
+
     const handleBranchChange = (branchId) => {
         setSelectedBranchIds(prev =>
             prev.includes(branchId)
@@ -48,11 +61,24 @@ const SelectCollegeBranches = ({ onSelectionChange }) => {
         );
     };
 
-    if (onSelectionChange) {
-        onSelectionChange({ collegeId: selectedCollegeId, branchIds: selectedBranchIds });
-    }
     return (
         <div className="mb-4">
+            <div className="mb-3">
+                <label className="form-label fw-bold">Select University:</label>
+                <select
+                    className="form-select"
+                    value={selectedUniversityId}
+                    onChange={(e) => setSelectedUniversityId(e.target.value)}
+                >
+                    <option value="">-- Choose University    --</option>
+                    {universities.map((uni) => (
+                        <option key={uni.university_id} value={uni.university_id}>
+                            {uni.university_name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
             <div className="mb-3">
                 <label className="form-label fw-bold">Select College:</label>
                 <select
@@ -71,7 +97,7 @@ const SelectCollegeBranches = ({ onSelectionChange }) => {
 
             {selectedCollegeId && (
                 <div className="mb-3">
-                    <label className="form-label fw-bold">Assigned Branches:</label>
+                    <label className="form-label fw-bold">Select Branches:</label>
                     <div className="d-flex flex-wrap gap-2">
                         {branches.map((branch) => (
                             <div className="form-check" key={branch.branch_id}>

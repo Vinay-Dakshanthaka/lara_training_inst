@@ -24,6 +24,7 @@ const College = db.College;
 const Branch = db.Branch;
 const CollegeBranch = db.CollegeBranch;
 const PlacementTestBranch = db.PlacementTestBranch;
+const University = db.University;
 
 
 const jwtSecret = process.env.JWT_SECRET;
@@ -382,7 +383,8 @@ const createPlacementTestLink = async (req, res) => {
             certificate_name,
             issue_certificate,
             college_id,  // college_id (optional)
-            branch_ids  // branch_ids (optional, array of branch IDs)
+            branch_ids, // branch_ids (optional, array of branch IDs)
+            university_id, // optional
         } = req.body;
 
         console.log(req.body, "------------------------------------");
@@ -421,6 +423,7 @@ const createPlacementTestLink = async (req, res) => {
             is_Monitored: is_Monitored !== undefined ? is_Monitored : false, // Default to false if not provided
             issue_certificate: issue_certificate !== undefined ? issue_certificate : false, // Default to false if not provided
             college_id: college_id || 0,
+            university_id: university_id || null,
         });
         console.log(newTest, "-----------------------newtest");
 
@@ -982,9 +985,14 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
                 },
                 {
                     model: Branch,
-                    as: 'Branches', // This uses the association defined in PlacementTest model
+                    as: 'Branches', 
                     attributes: ['branch_id', 'branch_name'],
-                    through: { attributes: [] } // Don't include join table metadata
+                    through: { attributes: [] } 
+                },
+                {
+                    model: University,
+                    as: 'University',  
+                    attributes: ['university_id', 'university_name']  
                 }
             ],
             attributes: [
@@ -1017,6 +1025,10 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
             college: placementTest.College ? {
                 college_id: placementTest.College.college_id,
                 college_name: placementTest.College.college_name
+            } : null,
+            university: placementTest.University ? {
+                university_id: placementTest.University.university_id,
+                university_name: placementTest.University.university_name
             } : null,
             branches: placementTest.Branches.map(branch => ({
                 branch_id: branch.branch_id,
@@ -1583,20 +1595,17 @@ const savePlacementTestStudent = async (req, res) => {
     try {
         const { name, email, phone_number, placement_test_id, university_name, college_name } = req.body;
 
-        // Check if all required fields are provided
-        if (!name || !email || !phone_number || !placement_test_id, !university_name || !college_name) {
+        if (!name || !email || !phone_number || !placement_test_id || !university_name || !college_name) {
             return res.status(400).send({ message: 'Required fields are missing or invalid' });
         }
 
-        // Check if the email already exists in the PlacementTestStudent table
+        // Check if the student already exists
         const existingStudent = await PlacementTestStudent.findOne({
-            where: {
-                email
-            }
+            where: { email }
         });
 
         if (existingStudent) {
-            // Check if the student has already taken this specific test
+            // Check if they already took this test
             const existingResult = await PlacementTestResult.findOne({
                 where: {
                     placement_test_id,
@@ -1606,12 +1615,29 @@ const savePlacementTestStudent = async (req, res) => {
 
             if (existingResult) {
                 return res.status(403).send({ message: 'You have already attended this test.' });
-            } else {
-                return res.status(200).send({ message: 'Student details already exist', existingStudent });
             }
+
+            // Update fields if different
+            const updatedFields = {};
+            if (!existingStudent.student_name || existingStudent.student_name !== name) {
+                updatedFields.student_name = name;
+            }
+            if (!existingStudent.university_name || existingStudent.university_name !== university_name) {
+                updatedFields.university_name = university_name;
+            }
+            if (!existingStudent.college_name || existingStudent.college_name !== college_name) {
+                updatedFields.college_name = college_name;
+            }
+
+            // Only update if there are changes
+            if (Object.keys(updatedFields).length > 0) {
+                await existingStudent.update(updatedFields);
+            }
+
+            return res.status(200).send({ message: 'Student details already exist (updated if needed)', existingStudent });
         }
 
-        // Create the new student record
+        // Create new student if not exists
         const newStudent = await PlacementTestStudent.create({
             student_name: name,
             email,
@@ -1621,7 +1647,9 @@ const savePlacementTestStudent = async (req, res) => {
         });
 
         return res.status(200).send({ message: 'Student details saved successfully', newStudent });
+
     } catch (error) {
+        console.error('Error saving student:', error);
         return res.status(500).send({ message: error.message });
     }
 };
@@ -2843,6 +2871,139 @@ const getAssignedBranchesToCollege = async (req, res) => {
 };
 
 
+const assignCollegeToUniversity = async (req, res) => {
+    try {
+        const { college_id, university_id } = req.body;
+
+        // Validate input
+        if (!college_id || !university_id) {
+            return res.status(400).json({ message: 'Both college_id and university_id are required' });
+        }
+
+        // Check if the university exists
+        const university = await University.findByPk(university_id);
+        if (!university) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        // Check if the college exists
+        const college = await College.findByPk(college_id);
+        if (!college) {
+            return res.status(404).json({ message: 'College not found' });
+        }
+
+        // Assign the college to the university
+        college.university_id = university_id;
+        await college.save();
+
+        return res.status(200).json({
+            message: 'College successfully assigned to university',
+            college_id: college.college_id,
+            university_id: university.university_id,
+            university_name: university.university_name
+        });
+    } catch (error) {
+        console.error('Error assigning college to university:', error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+const createUniversity = async (req, res) => {
+    try {
+        const { university_name } = req.body;
+
+        if (!university_name) {
+            return res.status(400).json({ message: 'University name is required' });
+        }
+
+        const newUniversity = await University.create({ university_name });
+        return res.status(201).json(newUniversity);
+    } catch (error) {
+        console.error('Error creating university:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const getAllUniversities = async (req, res) => {
+    try {
+        const universities = await University.findAll({
+            include: {
+                model: College,
+                as: 'Colleges',
+                attributes: ['college_id', 'college_name']
+            }
+        });
+        return res.status(200).json(universities);
+    } catch (error) {
+        console.error('Error fetching universities:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const getUniversityById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const university = await University.findOne({
+            where: { university_id: id },
+            include: {
+                model: College,
+                as: 'Colleges',
+                attributes: ['college_id', 'college_name']
+            }
+        });
+
+        if (!university) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        return res.status(200).json(university);
+    } catch (error) {
+        console.error('Error fetching university:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const updateUniversity = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { university_name } = req.body;
+
+        const university = await University.findByPk(id);
+        if (!university) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        university.university_name = university_name || university.university_name;
+        await university.save();
+
+        return res.status(200).json(university);
+    } catch (error) {
+        console.error('Error updating university:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const deleteUniversity = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const deleted = await University.destroy({ where: { university_id: id } });
+
+        if (!deleted) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        return res.status(200).json({ message: 'University deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting university:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+
+
 module.exports = {
     createPlacementTestLink,
     savePlacementTestStudent,
@@ -2895,5 +3056,13 @@ module.exports = {
     assignBranchesToCollegeNoTestId,
     assignBranchesToCollege,
     getAssignedBranchesToCollege,
+
+    assignCollegeToUniversity,
+    createUniversity,
+    getUniversityById,
+    getAllUniversities, 
+    updateUniversity, 
+    deleteUniversity,
+
 
 }

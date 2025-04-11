@@ -1,3 +1,4 @@
+// models/College.js
 module.exports = (sequelize, DataTypes) => {
     const College = sequelize.define('College', {
         college_id: {
@@ -8,6 +9,16 @@ module.exports = (sequelize, DataTypes) => {
         college_name: {
             type: DataTypes.STRING,
             allowNull: false
+        },
+        university_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true, 
+            references: {
+                model: 'Universities',
+                key: 'university_id'
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'SET NULL'
         }
     }, {
         timestamps: true,
@@ -15,11 +26,17 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     College.associate = (models) => {
+        College.belongsTo(models.University, {
+            foreignKey: 'university_id',
+            as: 'University'
+        });
+
         College.belongsToMany(models.Branch, {
             through: 'CollegeBranch',
             foreignKey: 'college_id',
             as: 'Branches'
         });
+
         College.hasMany(models.PlacementTest, {
             foreignKey: 'college_id',
             as: 'PlacementTests'

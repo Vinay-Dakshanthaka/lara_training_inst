@@ -32,6 +32,7 @@ const CreateTestLink = () => {
 
     const [selectedCollegeId, setSelectedCollegeId] = useState('');
     const [selectedBranchIds, setSelectedBranchIds] = useState([]);
+    const [selectedUniversityId, setSelectedUniversityId] = useState(null);
 
 
     const navigate = useNavigate();
@@ -206,6 +207,7 @@ const CreateTestLink = () => {
                     issue_certificate: isIssueCertificate,
                     college_id: selectedCollegeId,
                     branch_ids: selectedBranchIds,
+                    university_id: selectedUniversityId || null,
                 },
                 config
             );
@@ -244,7 +246,8 @@ const CreateTestLink = () => {
             <h3 className="text-center">Create Test Link</h3>
 
             <SelectCollegeBranches
-                onSelectionChange={({ collegeId, branchIds }) => {
+                onSelectionChange={({ universityId, collegeId, branchIds }) => {
+                    setSelectedUniversityId(universityId);
                     setSelectedCollegeId(collegeId);
                     setSelectedBranchIds(branchIds);
                 }}

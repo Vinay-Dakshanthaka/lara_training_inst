@@ -218,6 +218,7 @@ db.College = require('./collegeModel.js')(sequelize,DataTypes);
 db.Branch = require('./branchModel.js')(sequelize,DataTypes);
 db.CollegeBranch = require('./collegeBranchModel.js')(sequelize,DataTypes);
 db.PlacementTestBranch = require('./placementTestBranchModel.js')(sequelize,DataTypes);
+db.University = require('./UniversityModel.js')(sequelize,DataTypes);
 
 
 // Define associations  

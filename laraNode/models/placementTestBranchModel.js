@@ -19,12 +19,12 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         timestamps: false,
         tableName: 'PlacementTestBranch',
-        indexes: [
-            {
-                unique: true,
-                fields: ['placement_test_id', 'branch_id']
-            }
-        ]
+        // indexes: [
+        //     {
+        //         unique: true,
+        //         fields: ['placement_test_id', 'branch_id']
+        //     }
+        // ]
     });
 
     return PlacementTestBranch;
