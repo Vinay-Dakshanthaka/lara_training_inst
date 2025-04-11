@@ -609,86 +609,86 @@ const PlacementTest = () => {
 
     //code to prevent open new tab and opening the context menu 
 
-    // useEffect(() => {
-    //     const handleVisibilityChange = async () => {
-    //         if (!showSummary && document.hidden) {
-    //             setIsCameraOn(false);
-    //             setIsMonitored(false);
-    //             setAutoSubmit(true);
-    //             await handleSubmitTest();
-    //             navigate('/malpractice-detected');
-    //         }
-    //     };
+    useEffect(() => {
+        const handleVisibilityChange = async () => {
+            if (!showSummary && document.hidden) {
+                setIsCameraOn(false);
+                setIsMonitored(false);
+                setAutoSubmit(true);
+                await handleSubmitTest();
+                navigate('/malpractice-detected');
+            }
+        };
 
-    //     const handlePopState = async () => {
-    //         if (!showSummary) {
-    //             setAutoSubmit(true);
-    //             await handleSubmitTest();
-    //             navigate('/malpractice-detected');
-    //         }
-    //     };
+        const handlePopState = async () => {
+            if (!showSummary) {
+                setAutoSubmit(true);
+                await handleSubmitTest();
+                navigate('/malpractice-detected');
+            }
+        };
 
-    //     const setupListeners = () => {
-    //         document.addEventListener("visibilitychange", handleVisibilityChange);
-    //         window.addEventListener("popstate", handlePopState);
-    //     };
+        const setupListeners = () => {
+            document.addEventListener("visibilitychange", handleVisibilityChange);
+            window.addEventListener("popstate", handlePopState);
+        };
 
-    //     const cleanupListeners = () => {
-    //         document.removeEventListener("visibilitychange", handleVisibilityChange);
-    //         window.removeEventListener("popstate", handlePopState);
-    //     };
+        const cleanupListeners = () => {
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+            window.removeEventListener("popstate", handlePopState);
+        };
 
-    //     setupListeners();
+        setupListeners();
 
-    //     return () => {
-    //         cleanupListeners();
-    //     };
-    // }, [navigate, showSummary]);
+        return () => {
+            cleanupListeners();
+        };
+    }, [navigate, showSummary]);
 
-    // useEffect(() => {
-    //     const disableRightClick = (event) => {
-    //         event.preventDefault();
-    //     };
+    useEffect(() => {
+        const disableRightClick = (event) => {
+            event.preventDefault();
+        };
 
-    //     const disableDevTools = (event) => {
-    //         // Block F12
-    //         if (event.key === "F12") {
-    //             event.preventDefault();
-    //         }
-    //         // Block Ctrl + Shift + I
-    //         if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === "I") {
-    //             event.preventDefault();
-    //         }
-    //     };
+        const disableDevTools = (event) => {
+            // Block F12
+            if (event.key === "F12") {
+                event.preventDefault();
+            }
+            // Block Ctrl + Shift + I
+            if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === "I") {
+                event.preventDefault();
+            }
+        };
 
-    //     const disableSelection = (event) => {
-    //         event.preventDefault();
-    //     };
+        const disableSelection = (event) => {
+            event.preventDefault();
+        };
 
-    //     const disableCopy = (event) => {
-    //         event.preventDefault();
-    //     };
+        const disableCopy = (event) => {
+            event.preventDefault();
+        };
 
-    //     const setupListeners = () => {
-    //         document.addEventListener("contextmenu", disableRightClick); // Disable right-click
-    //         document.addEventListener("keydown", disableDevTools); // Block dev tools
-    //         document.addEventListener("selectstart", disableSelection); // Disable text selection
-    //         document.addEventListener("copy", disableCopy); // Disable copying
-    //     };
+        const setupListeners = () => {
+            document.addEventListener("contextmenu", disableRightClick); // Disable right-click
+            document.addEventListener("keydown", disableDevTools); // Block dev tools
+            document.addEventListener("selectstart", disableSelection); // Disable text selection
+            document.addEventListener("copy", disableCopy); // Disable copying
+        };
 
-    //     const cleanupListeners = () => {
-    //         document.removeEventListener("contextmenu", disableRightClick);
-    //         document.removeEventListener("keydown", disableDevTools);
-    //         document.removeEventListener("selectstart", disableSelection);
-    //         document.removeEventListener("copy", disableCopy);
-    //     };
+        const cleanupListeners = () => {
+            document.removeEventListener("contextmenu", disableRightClick);
+            document.removeEventListener("keydown", disableDevTools);
+            document.removeEventListener("selectstart", disableSelection);
+            document.removeEventListener("copy", disableCopy);
+        };
 
-    //     setupListeners();
+        setupListeners();
 
-    //     return () => {
-    //         cleanupListeners();
-    //     };
-    // }, []);
+        return () => {
+            cleanupListeners();
+        };
+    }, []);
     // code to prevent open new tab and opening the context menu ends 
 
     useEffect(() => {
