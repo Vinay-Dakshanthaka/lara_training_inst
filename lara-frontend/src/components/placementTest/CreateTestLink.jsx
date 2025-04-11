@@ -5,6 +5,7 @@ import axios from 'axios';
 import { baseURL } from '../config';
 import WhatsAppChannelDropdown from './WhatsAppChannelDropdown';
 import SaveWhatsAppChannelModal from './SaveWhatsAppChannelModal';
+import CollegeBranchManager from './collegeAndBranchManagement/CollegeBranchManager';
 
 const CreateTestLink = () => {
     const [subjects, setSubjects] = useState([]);
@@ -19,10 +20,10 @@ const CreateTestLink = () => {
     const [endTime, setEndTime] = useState('');
     const [description, setDescription] = useState('');
     const [showResult, setShowResult] = useState(true);
-    const [isMonitored, setIsMonitored] = useState(false); // State for isMonitored
-    const [isIssueCertificate, setIsIssueCertificate] = useState(false); // State for provide certificate
-    const [newTestLink, setNewTestLink] = useState(''); // New state for test link
-    const [alert, setAlert] = useState({ show: false, message: '', variant: '' }); // State for Bootstrap alerts
+    const [isMonitored, setIsMonitored] = useState(false); 
+    const [isIssueCertificate, setIsIssueCertificate] = useState(false); 
+    const [newTestLink, setNewTestLink] = useState(''); 
+    const [alert, setAlert] = useState({ show: false, message: '', variant: '' }); 
     const [testTitle, setTestTitle] = useState('');
     const [channelLink, setChannelLink] = useState('');
     const [certificateName, setCertificateName] = useState('');
@@ -395,6 +396,8 @@ const CreateTestLink = () => {
             <Button className="btn btn-success mt-4 w-100" onClick={handleCreateLink}>
                 Create Test Link
             </Button>
+
+            <CollegeBranchManager />
         </div>
 
     );

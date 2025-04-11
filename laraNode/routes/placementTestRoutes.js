@@ -82,6 +82,29 @@ placementTestRoute.post('/getPlacementTestById', placementTestContoller.getPlace
 placementTestRoute.post('/createDescriptiveTestLink',verifyToken, placementTestContoller.createDescriptiveTestLink);
 
 
+placementTestRoute.post('/createCollege', placementTestContoller.createCollege);
+
+placementTestRoute.get('/getAllColleges', placementTestContoller.getAllColleges);
+
+placementTestRoute.put('/updateCollege/:id', placementTestContoller.updateCollege);
+
+placementTestRoute.delete('/deleteCollege/:id', placementTestContoller.deleteCollege);
+
+placementTestRoute.post('/createBranch', placementTestContoller.createBranch);
+
+placementTestRoute.get('/getAllBranches', placementTestContoller.getAllBranches);
+
+placementTestRoute.put('/updateBranch/:id', placementTestContoller.updateBranch);
+
+placementTestRoute.delete('/deleteBranch/:id', placementTestContoller.deleteBranch);
+
+placementTestRoute.post('/assignBranchesToCollegeNoTestId', placementTestContoller.assignBranchesToCollegeNoTestId);
+
+placementTestRoute.get('/getAssignedBranchesToCollege/:college_id', placementTestContoller.getAssignedBranchesToCollege);
+
+
+
+
 // placementTestRoute.post('/upload-questions-link', upload.single('file'), async (req, res) => {
 //     const topic_id = req.query.topic_id;
 //     const placement_test_id = req.query.placement_test_id; // Add placement_test_id if needed

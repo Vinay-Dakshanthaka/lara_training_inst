@@ -105,28 +105,43 @@ module.exports = (sequelize, DataTypes) => {
         whatsAppChannelLink: {
             type: DataTypes.STRING,
             allowNull: true,
-            field: 'whatsAppChannelLink' 
+            field: 'whatsAppChannelLink'
         },
         test_title: {
             type: DataTypes.STRING,
-            allowNull: true 
+            allowNull: true
         },
         certificate_name: {
             type: DataTypes.STRING,
-            allowNull: true 
+            allowNull: true
         },
         isDescriptiveTest: {
             type: DataTypes.BOOLEAN,
-            allowNull: true 
+            allowNull: true
         },
-
-
+        college_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'Colleges',
+                key: 'college_id'
+            }
+        },
     }, {
         timestamps: true,
         tableName: 'Placementtests'
     });
 
     PlacementTest.associate = (models) => {
+        PlacementTest.belongsTo(models.College, {
+            foreignKey: 'college_id',
+            as: 'College'
+        });
+        PlacementTest.belongsToMany(models.Branch, {
+            through: 'CollegeBranch',  
+            foreignKey: 'placement_test_id',
+            as: 'Branches'
+        });
         PlacementTest.belongsToMany(models.CumulativeQuestion, {
             through: 'CQPlacementTest',
             foreignKey: 'placement_test_id',
@@ -152,7 +167,7 @@ module.exports = (sequelize, DataTypes) => {
 // SET SQL_SAFE_UPDATES = 0;
 
 // UPDATE laradb.Placementtests
-// SET 
+// SET
 //     whatsAppChannelLink = 'https://whatsapp.com/channel/0029Var9Wub30LKJP7fK7y06',
 //     test_title = 'Test';
 
@@ -161,8 +176,8 @@ module.exports = (sequelize, DataTypes) => {
 
 
 
-// ALTER table laradb.placementtests 
+// ALTER table laradb.placementtests
 // add column issue_certificate BOOLEAN DEFAULT TRUE;
 
-// ALTER table laradb.placementtests 
+// ALTER table laradb.placementtests
 // add column isDescriptiveTest BOOLEAN DEFAULT false;

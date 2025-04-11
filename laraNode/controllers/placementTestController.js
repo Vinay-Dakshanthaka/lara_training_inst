@@ -20,6 +20,9 @@ const PlacementTestCreator = db.PlacementTestCreator;
 const StudentWhatsAppLinks = db.StudentWhatsAppLinks;
 const WeeklyTestQuestion = db.WeeklyTestQuestion;
 const PlacementTestWeeklyQuestionMapping = db.PlacementTestWeeklyQuestionMapping;
+const College = db.College;
+const Branch = db.Branch;
+const CollegeBranch = db.CollegeBranch;
 
 
 const jwtSecret = process.env.JWT_SECRET;
@@ -255,6 +258,114 @@ const jwtSecret = process.env.JWT_SECRET;
 //     }
 // };
 
+// const createPlacementTestLink = async (req, res) => {
+//     try {
+//         const {
+//             number_of_questions,
+//             description,
+//             start_time,
+//             end_time,
+//             show_result,
+//             topic_ids,
+//             is_Monitored,
+//             channel_link,
+//             test_title,
+//             certificate_name,
+//             issue_certificate,
+//         } = req.body;
+
+//         console.log(req.body, "------------------------------------")
+//         // Get studentId from the request (assuming it's set via middleware or is part of the request)
+//         const studentId = req.studentId;
+
+//         if (!number_of_questions || !start_time || !end_time || !Array.isArray(topic_ids) || topic_ids.length === 0) {
+//             return res.status(400).send({ message: 'Required fields are missing or invalid' });
+//         }
+
+//         console.log("WhatsApp channel link :: ", channel_link);
+
+//         // Validate that all provided topic_ids exist in the topics table
+//         const topics = await Topic.findAll({
+//             where: { topic_id: topic_ids },
+//         });
+
+//         if (topics.length !== topic_ids.length) {
+//             return res.status(400).send({ message: 'One or more topic IDs are invalid' });
+//         }
+//         console.log("-------------------------------------------------------")
+//         // Create a new PlacementTest
+//         const newTest = await PlacementTest.create({
+//             test_link: '', // Initially empty, will be updated later
+//             number_of_questions,
+//             description,
+//             test_title,
+//             certificate_name,
+//             whatsAppChannelLink: channel_link || null, // Save the link directly in the table
+//             start_time, // Store as string
+//             end_time, // Store as string
+//             show_result: show_result !== undefined ? show_result : true, // Default to true if not provided
+//             is_Monitored: is_Monitored !== undefined ? is_Monitored : false, // Default to false if not provided
+//             issue_certificate: issue_certificate !== undefined ? issue_certificate : false, // Default to false if not provided
+//         });
+//         console.log(newTest, "-----------------------newtest")
+//         // Generate the test link with the placement_test_id
+//         const test_link = `${baseURL}/test/${newTest.placement_test_id}`;
+//         newTest.test_link = test_link;
+//         await newTest.save();
+
+//         // Save the topic IDs in the PlacementTestTopic table
+//         const topicPromises = topic_ids.map(topic_id =>
+//             PlacementTestTopic.create({
+//                 placement_test_id: newTest.placement_test_id,
+//                 topic_id,
+//             })
+//         );
+
+//         await Promise.all(topicPromises);
+
+//         // Distribute questions among the selected topics
+//         const questionsPerTopic = Math.floor(number_of_questions / topic_ids.length);
+//         const remainderQuestions = number_of_questions % topic_ids.length;
+
+//         for (let i = 0; i < topic_ids.length; i++) {
+//             const topicId = topic_ids[i];
+//             let questionsToFetch = questionsPerTopic;
+
+//             if (i < remainderQuestions) {
+//                 questionsToFetch += 1;
+//             }
+
+//             // Fetch and associate questions with the test
+//             const questions = await CumulativeQuestion.findAll({
+//                 where: {
+//                     topic_id: topicId,
+//                     test_id: null, // Only fetch questions not yet associated with any test
+//                 },
+//                 limit: questionsToFetch,
+//                 order: db.sequelize.random(),
+//             });
+
+//             for (const question of questions) {
+//                 await question.update({ test_id: newTest.placement_test_id });
+//             }
+//         }
+
+//         // Save the PlacementTestCreator entry to record who created the test
+//         await PlacementTestCreator.create({
+//             student_id: studentId,  // Get the student ID from the request
+//             placement_test_id: newTest.placement_test_id  // ID of the newly created test
+//         });
+
+//         return res.status(200).send({ message: 'Placement test added successfully', newTest });
+//     } catch (error) {
+//         console.error('Error creating placement test link:', error.stack);
+//         console.log("Error while creating the placement test link :", error);
+//         return res.status(500).send({ message: error.message });
+//     }
+// };
+
+
+
 const createPlacementTestLink = async (req, res) => {
     try {
         const {
@@ -269,12 +380,16 @@ const createPlacementTestLink = async (req, res) => {
             test_title,
             certificate_name,
             issue_certificate,
+            college_id,  // college_id (optional)
+            branch_ids  // branch_ids (optional, array of branch IDs)
         } = req.body;
 
-            console.log(req.body,"------------------------------------")
+        console.log(req.body, "------------------------------------");
+
         // Get studentId from the request (assuming it's set via middleware or is part of the request)
         const studentId = req.studentId;
 
+        // Validate required fields for the test creation process
         if (!number_of_questions || !start_time || !end_time || !Array.isArray(topic_ids) || topic_ids.length === 0) {
             return res.status(400).send({ message: 'Required fields are missing or invalid' });
         }
@@ -289,7 +404,8 @@ const createPlacementTestLink = async (req, res) => {
         if (topics.length !== topic_ids.length) {
             return res.status(400).send({ message: 'One or more topic IDs are invalid' });
         }
-        console.log("-------------------------------------------------------")
+        console.log("-------------------------------------------------------");
+
         // Create a new PlacementTest
         const newTest = await PlacementTest.create({
             test_link: '', // Initially empty, will be updated later
@@ -303,8 +419,10 @@ const createPlacementTestLink = async (req, res) => {
             show_result: show_result !== undefined ? show_result : true, // Default to true if not provided
             is_Monitored: is_Monitored !== undefined ? is_Monitored : false, // Default to false if not provided
             issue_certificate: issue_certificate !== undefined ? issue_certificate : false, // Default to false if not provided
+            college_id, // Link to the college (optional)
         });
-          console.log(newTest,"-----------------------newtest")
+        console.log(newTest, "-----------------------newtest");
+
         // Generate the test link with the placement_test_id
         const test_link = `${baseURL}/test/${newTest.placement_test_id}`;
         newTest.test_link = test_link;
@@ -317,7 +435,6 @@ const createPlacementTestLink = async (req, res) => {
                 topic_id,
             })
         );
-
         await Promise.all(topicPromises);
 
         // Distribute questions among the selected topics
@@ -349,17 +466,32 @@ const createPlacementTestLink = async (req, res) => {
 
         // Save the PlacementTestCreator entry to record who created the test
         await PlacementTestCreator.create({
-            student_id: studentId,  // Get the student ID from the request
-            placement_test_id: newTest.placement_test_id  // ID of the newly created test
+            student_id: studentId,  
+            placement_test_id: newTest.placement_test_id 
         });
 
-        return res.status(200).send({ message: 'Placement test added successfully', newTest });
+        // Check if college_id and branch_ids are provided, and if so, link them
+        if (college_id && Array.isArray(branch_ids) && branch_ids.length > 0) {
+            const branchPromises = branch_ids.map(async (branch_id) => {
+                
+                await CollegeBranch.create({
+                    college_id, 
+                    branch_id,  
+                    placement_test_id: newTest.placement_test_id, 
+                });
+            });
+
+            await Promise.all(branchPromises);
+        }
+
+        return res.status(200).send({ message: 'Placement test added successfully and assigned to branches', newTest });
     } catch (error) {
         console.error('Error creating placement test link:', error.stack);
         console.log("Error while creating the placement test link :", error);
         return res.status(500).send({ message: error.message });
     }
 };
+
 
 const updatePlacementTest = async (req, res) => {
     try {
@@ -396,7 +528,7 @@ const updatePlacementTest = async (req, res) => {
         placementTest.test_title = test_title || placementTest.test_title;
         placementTest.certificate_name = certificate_name || placementTest.certificate_name;
         placementTest.whatsAppChannelLink = channel_link || placementTest.whatsAppChannelLink;
-        
+
         // Save the updated placement test
         await placementTest.save();
 
@@ -809,7 +941,7 @@ const decryptTestId = (encryptedTestId) => {
 
 const fetchTestTopicIdsAndQnNums = async (req, res) => {
     try {
-        const { encrypted_test_id } = req.body; // Assuming you receive the encrypted test ID
+        const { encrypted_test_id } = req.body; 
 
         if (!encrypted_test_id) {
             return res.status(400).send({ message: 'Encrypted Test ID is required' });
@@ -843,7 +975,7 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
 
         // Fetch number_of_questions from PlacementTest table
         const placementTest = await PlacementTest.findByPk(encrypted_test_id, {
-            attributes: ['number_of_questions', 'show_result', 'is_Monitored', 'whatsAppChannelLink', 'test_title', 'certificate_name','issue_certificate'] // Only fetch number_of_questions
+            attributes: ['number_of_questions', 'show_result', 'is_Monitored', 'whatsAppChannelLink', 'test_title', 'certificate_name', 'issue_certificate'] // Only fetch number_of_questions
         });
 
         if (!placementTest) {
@@ -1011,7 +1143,7 @@ const getPlacementTestResultsByEmail = async (req, res) => {
         // Find the student by email
         const placementStudent = await PlacementTestStudent.findOne({
             where: { email },
-            attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number','university_name','college_name'], // Add necessary student attributes
+            attributes: ['placement_test_student_id', 'student_name', 'email', 'phone_number', 'university_name', 'college_name'], // Add necessary student attributes
         });
 
         if (!placementStudent) {
@@ -1026,9 +1158,9 @@ const getPlacementTestResultsByEmail = async (req, res) => {
             attributes: ['placement_test_id', 'marks_obtained', 'total_marks', 'createdAt'], // Customize fields as needed
             include: [
                 {
-                    model: PlacementTest, 
-                    as:'PlacementTest',
-                    attributes: ['test_title', 'start_time','certificate_name'], 
+                    model: PlacementTest,
+                    as: 'PlacementTest',
+                    attributes: ['test_title', 'start_time', 'certificate_name'],
                 },
             ],
             order: [['createdAt', 'DESC']], // Optional: order by most recent results
@@ -1133,7 +1265,7 @@ const getAllPlacementTests = async (req, res) => {
     try {
         const placementTests = await PlacementTest.findAll({
             where: {
-                isDescriptiveTest: false 
+                isDescriptiveTest: false
             },
             include: [
                 {
@@ -1142,13 +1274,13 @@ const getAllPlacementTests = async (req, res) => {
                     include: [
                         {
                             model: Topic,
-                            as: 'PlacementTestTopic', 
+                            as: 'PlacementTestTopic',
                             attributes: ['topic_id', 'createdAt', 'updatedAt']
                         }
                     ]
                 }
             ]
-        });        
+        });
 
         if (!placementTests || placementTests.length === 0) {
             return res.status(404).send({ message: 'No placement tests found' });
@@ -1186,7 +1318,7 @@ const getAllPlacementTestsDescriptive = async (req, res) => {
     try {
         const placementTests = await PlacementTest.findAll({
             where: {
-                isDescriptiveTest: true 
+                isDescriptiveTest: true
             },
             include: [
                 {
@@ -1195,13 +1327,13 @@ const getAllPlacementTestsDescriptive = async (req, res) => {
                     include: [
                         {
                             model: Topic,
-                            as: 'PlacementTestTopic', 
+                            as: 'PlacementTestTopic',
                             attributes: ['topic_id', 'createdAt', 'updatedAt']
                         }
                     ]
                 }
             ]
-        });        
+        });
 
         if (!placementTests || placementTests.length === 0) {
             return res.status(404).send({ message: 'No placement tests found' });
@@ -1661,7 +1793,7 @@ const disableLink = async (req, res) => {
         res.status(200).send({ message: 'Test link status updated successfully' });
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: 'An error occurred while updating test link status' });
+        return res.status(500).send({ message: 'An error occurred while updating test link status' });
     }
 };
 
@@ -2411,6 +2543,243 @@ const createDescriptiveTestLink = async (req, res) => {
 
 
 
+const createCollege = async (req, res) => {
+    try {
+        const { college_name } = req.body;
+
+        if (!college_name) {
+            return res.status(400).json({ message: 'College name is required' });
+        }
+
+        const newCollege = await College.create({ college_name });
+        return res.status(201).json(newCollege);
+    } catch (error) {
+        console.error('Error creating college:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+
+const getAllColleges = async (req, res) => {
+    try {
+        const colleges = await College.findAll({
+            include: {
+                model: Branch,
+                as: 'Branches',
+                through: { attributes: [] } 
+            }
+        });
+        return res.status(200).json(colleges);
+    } catch (error) {
+        console.error('Error fetching colleges:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+
+const updateCollege = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { college_name } = req.body;
+
+        const college = await College.findByPk(id);
+        if (!college) return res.status(404).json({ message: 'College not found' });
+
+        college.college_name = college_name || college.college_name;
+        await college.save();
+
+        return res.status(200).json(college);
+    } catch (error) {
+        console.error('Error updating college:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const deleteCollege = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const deleted = await College.destroy({ where: { college_id: id } });
+
+        if (!deleted) return res.status(404).json({ message: 'College not found' });
+
+        return res.status(200).json({ message: 'College deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting college:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+
+const createBranch = async (req, res) => {
+    try {
+        const { branch_name } = req.body;
+
+        if (!branch_name) {
+            return res.status(400).json({ message: 'Branch name is required' });
+        }
+
+        const newBranch = await Branch.create({ branch_name });
+        return res.status(201).json(newBranch);
+    } catch (error) {
+        console.error('Error creating branch:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const getAllBranches = async (req, res) => {
+    try {
+        const branches = await Branch.findAll({
+            include: {
+                model: College,
+                as: 'Colleges',
+                through: { attributes: [] } 
+            }
+        });
+        return res.status(200).json(branches);
+    } catch (error) {
+        console.error('Error fetching branches:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const updateBranch = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { branch_name } = req.body;
+
+        const branch = await Branch.findByPk(id);
+        if (!branch) return res.status(404).json({ message: 'Branch not found' });
+
+        branch.branch_name = branch_name || branch.branch_name;
+        await branch.save();
+
+        return res.status(200).json(branch);
+    } catch (error) {
+        console.error('Error updating branch:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const deleteBranch = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const deleted = await Branch.destroy({ where: { branch_id: id } });
+
+        if (!deleted) return res.status(404).json({ message: 'Branch not found' });
+
+        return res.status(200).json({ message: 'Branch deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting branch:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+
+const assignBranchesToCollege = async (req, res) => {
+    try {
+        const { college_id, branch_ids, placement_test_id } = req.body;
+
+        if (!college_id || !Array.isArray(branch_ids) || branch_ids.length === 0) {
+            return res.status(400).json({ message: 'college_id and branch_ids[] are required' });
+        }
+
+        // Optional: check if college exists
+        const college = await College.findByPk(college_id);
+        if (!college) return res.status(404).json({ message: 'College not found' });
+
+        // Optional: check if all branches exist
+        const existingBranches = await Branch.findAll({ where: { branch_id: branch_ids } });
+        if (existingBranches.length !== branch_ids.length) {
+            return res.status(400).json({ message: 'One or more branch IDs are invalid' });
+        }
+
+        // Create or update records in CollegeBranch table
+        const insertData = branch_ids.map(branch_id => ({
+            college_id,
+            branch_id,
+            placement_test_id: placement_test_id || null
+        }));
+
+        await CollegeBranch.bulkCreate(insertData, {
+            updateOnDuplicate: ['placement_test_id']
+        });
+
+        return res.status(200).json({ message: 'Branches assigned to college successfully' });
+
+    } catch (error) {
+        console.error('Error assigning branches to college:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const assignBranchesToCollegeNoTestId = async (req, res) => {
+    try {
+        const { college_id, branch_ids } = req.body;
+
+        if (!college_id || !Array.isArray(branch_ids) || branch_ids.length === 0) {
+            return res.status(400).json({ message: 'Invalid input' });
+        }
+
+        // Create a mapping in the CollegeBranch table
+        const assignments = branch_ids.map(branch_id => ({
+            college_id,
+            branch_id,
+            placement_test_id: null 
+        }));
+
+        // Insert the assignments
+        await CollegeBranch.bulkCreate(assignments);
+
+        return res.status(200).json({ message: 'Branches assigned to college successfully' });
+    } catch (error) {
+        console.error('Error assigning branches:', error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+const getAssignedBranchesToCollege = async (req, res) => {
+    try {
+        const { college_id } = req.params;
+
+        // Validate college_id
+        if (!college_id) {
+            return res.status(400).json({ message: 'College ID is required' });
+        }
+
+        // Fetch the branches assigned to the given college_id
+        const assignments = await CollegeBranch.findAll({
+            where: { college_id },
+            include: [
+                {
+                    model: Branch,  
+                    as: 'Branch',  // Correct alias used for Branch (from College model's association)
+                    attributes: ['branch_id', 'branch_name']  
+                }
+            ]
+        });
+
+        if (assignments.length === 0) {
+            return res.status(404).json({ message: 'No branches assigned to this college' });
+        }
+
+        // Map over assignments and extract branch information
+        const assignedBranches = assignments.map(assignment => ({
+            branch_id: assignment.Branch.branch_id,  // Correctly reference the alias 'Branch'
+            branch_name: assignment.Branch.branch_name
+        }));
+
+        return res.status(200).json(assignedBranches);
+    } catch (error) {
+        console.error('Error fetching assigned branches:', error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
 
 module.exports = {
     createPlacementTestLink,
@@ -2448,4 +2817,19 @@ module.exports = {
     updateStudentEmail,
     createDescriptiveTestLink,
     getAllPlacementTestsDescriptive,
+
+    createCollege, 
+    updateCollege, 
+    getAllColleges, 
+    deleteCollege, 
+
+    createBranch, 
+    updateBranch, 
+    getAllBranches, 
+    deleteBranch, 
+
+    assignBranchesToCollegeNoTestId,
+    assignBranchesToCollege,
+    getAssignedBranchesToCollege,
+
 }

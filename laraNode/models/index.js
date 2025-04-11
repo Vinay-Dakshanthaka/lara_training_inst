@@ -214,6 +214,10 @@ db.PaperBasedTestResults.belongsTo(db.Student, { foreignKey: 'studentId' });
 db.BatchTestLinks = require('./batchTestLinkModel.js')(sequelize,DataTypes);
 db.Transaction = require('./transactionModel.js')(sequelize,DataTypes);
 
+db.College = require('./collegeModel.js')(sequelize,DataTypes);
+db.Branch = require('./branchModel.js')(sequelize,DataTypes);
+db.CollegeBranch = require('./collegeBranchModel.js')(sequelize,DataTypes);
+
 
 // Define associations  
 db.Student.hasOne(db.Profile, {
