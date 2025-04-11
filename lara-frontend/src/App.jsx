@@ -91,6 +91,7 @@ import DescriptiveTestAutoEvaluation from './components/descriptiveTest/Descript
 import AllStudentsDescriptivePlacementTestResults from './components/descriptiveTest/AllStudentsDescriptivePlacementTestResults';
 import DescriptiveTestAttendedStudentList from './components/descriptiveTest/DescriptiveTestAttendedStudentList';
 import ManualDescriptiveTestEvaluation from './components/descriptiveTest/ManualDescriptiveTestEvaluation';
+import CollegeBranchManager from './components/placementTest/collegeAndBranchManagement/CollegeBranchManager';
 // import StudentAnswerForm from './components/weeklyTest/StudentAnswerFormDuplicate';
 
 
@@ -141,6 +142,7 @@ const App = () => {
             <Route path="/internal-test/:test_id" element={<InternalTest />} />
             <Route path="/malpractice-detected" element={<PlacementTestError />} />
             <Route path="/create-test-link" element={<CreateTestLink />} />
+            <Route path="/add-college-branch" element={<CollegeBranchManager />} />
             <Route path="/updateStudentEmail" element={<UpdateStudentEmail />} />
             <Route path="/paperBasedTestResults" element={<PaperBasedTestResults />} />
             {/* <Route path="/paper-excel" element={<PaperBasedExcelSheet />} /> */}

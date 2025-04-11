@@ -74,7 +74,13 @@ const CollegeBranchManager = () => {
             {/* Render active tab components */}
             {activeTab === 'colleges' && (
                 <>
-                    <CollegeForm collegeIdToUpdate={collegeIdToUpdate} fetchColleges={fetchColleges} />
+                    {/* <CollegeForm collegeIdToUpdate={collegeIdToUpdate} fetchColleges={fetchColleges} /> */}
+                    <CollegeForm
+                        collegeIdToUpdate={collegeIdToUpdate}
+                        selectedCollege={colleges.find(c => c.college_id === collegeIdToUpdate)}
+                        fetchColleges={fetchColleges}
+                        setCollegeIdToUpdate={setCollegeIdToUpdate}
+                    />
                     <CollegeTable
                         colleges={colleges}
                         assignedBranches={assignedBranches}
@@ -87,7 +93,7 @@ const CollegeBranchManager = () => {
 
             {activeTab === 'branches' && (
                 <>
-                    <BranchForm branchIdToUpdate={branchIdToUpdate} fetchBranches={fetchBranches} />
+                    <BranchForm branchIdToUpdate={branchIdToUpdate} fetchBranches={fetchBranches} setBranchIdToUpdate={setBranchIdToUpdate}/>
                     <BranchTable branches={branches} onEdit={setBranchIdToUpdate} onDelete={fetchBranches} />
                 </>
             )}

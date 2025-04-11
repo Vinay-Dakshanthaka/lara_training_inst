@@ -6,6 +6,7 @@ import { baseURL } from '../config';
 import WhatsAppChannelDropdown from './WhatsAppChannelDropdown';
 import SaveWhatsAppChannelModal from './SaveWhatsAppChannelModal';
 import CollegeBranchManager from './collegeAndBranchManagement/CollegeBranchManager';
+import SelectCollegeBranches from './collegeAndBranchManagement/SelectCollegeBranches';
 
 const CreateTestLink = () => {
     const [subjects, setSubjects] = useState([]);
@@ -20,14 +21,18 @@ const CreateTestLink = () => {
     const [endTime, setEndTime] = useState('');
     const [description, setDescription] = useState('');
     const [showResult, setShowResult] = useState(true);
-    const [isMonitored, setIsMonitored] = useState(false); 
-    const [isIssueCertificate, setIsIssueCertificate] = useState(false); 
-    const [newTestLink, setNewTestLink] = useState(''); 
-    const [alert, setAlert] = useState({ show: false, message: '', variant: '' }); 
+    const [isMonitored, setIsMonitored] = useState(false);
+    const [isIssueCertificate, setIsIssueCertificate] = useState(false);
+    const [newTestLink, setNewTestLink] = useState('');
+    const [alert, setAlert] = useState({ show: false, message: '', variant: '' });
     const [testTitle, setTestTitle] = useState('');
     const [channelLink, setChannelLink] = useState('');
     const [certificateName, setCertificateName] = useState('');
     const [showModal, setShowModal] = useState(false);
+
+    const [selectedCollegeId, setSelectedCollegeId] = useState('');
+    const [selectedBranchIds, setSelectedBranchIds] = useState([]);
+
 
     const navigate = useNavigate();
 
@@ -194,29 +199,27 @@ const CreateTestLink = () => {
                     end_time: endTime,
                     show_result: showResult,
                     topic_ids: selectedTopics,
-                    is_Monitored: isMonitored, // Send isMonitored to the backend
+                    is_Monitored: isMonitored,
                     test_title: testTitle,
                     channel_link: channelLink,
                     certificate_name: certificateName,
-                    issue_certificate:isIssueCertificate
+                    issue_certificate: isIssueCertificate,
+                    college_id: selectedCollegeId,
+                    branch_ids: selectedBranchIds,
                 },
                 config
             );
-            console.log(response.data,"---------------------------");
-            // Set the test link in state
+
             setNewTestLink(response.data.newTest.test_link);
             setAlert({ show: true, message: 'Link Created Successfully', variant: 'success' });
-
-            // Scroll to the top of the page
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (error) {
             console.error('Error creating test link:', error);
             setAlert({ show: true, message: 'Something went wrong!!', variant: 'danger' });
-
-            // Scroll to the top of the page for the error alert
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
+
 
 
     return (
@@ -239,6 +242,16 @@ const CreateTestLink = () => {
             )}
 
             <h3 className="text-center">Create Test Link</h3>
+
+            <SelectCollegeBranches
+                onSelectionChange={({ collegeId, branchIds }) => {
+                    setSelectedCollegeId(collegeId);
+                    setSelectedBranchIds(branchIds);
+                }}
+            />
+
+            <Link to='/add-college-branch' className='btn btn-success my-3'>Add new College and branch</Link>
+
 
             <Form.Group controlId="formSubject" className="mt-4" style={{ maxWidth: '400px' }}>
                 <Form.Label>Select Subject</Form.Label>
@@ -299,10 +312,10 @@ const CreateTestLink = () => {
             </Form.Group>
 
             <div className="row">
-            <div className='col-auto'>
-                <WhatsAppChannelDropdown onSelectChannel={handleChannelSelect} />
-                <Link to='/add-whatsApp-link' className='btn btn-success my-3'>Add WhatsApp Channel</Link>
-            </div>
+                <div className='col-auto'>
+                    <WhatsAppChannelDropdown onSelectChannel={handleChannelSelect} />
+                    <Link to='/add-whatsApp-link' className='btn btn-success my-3'>Add WhatsApp Channel</Link>
+                </div>
             </div>
 
 
@@ -397,7 +410,6 @@ const CreateTestLink = () => {
                 Create Test Link
             </Button>
 
-            <CollegeBranchManager />
         </div>
 
     );

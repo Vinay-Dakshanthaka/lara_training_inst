@@ -16,15 +16,19 @@ module.exports = (sequelize, DataTypes) => {
 
     Branch.associate = (models) => {
         Branch.belongsToMany(models.College, {
-            through: 'CollegeBranch',
+            through: 'CollegeBranch', // This still handles college-branch mapping
             foreignKey: 'branch_id',
             as: 'Colleges'
         });
-        Branch.hasMany(models.PlacementTest, {
+    
+        // NEW: BRANCH <-> PLACEMENTTEST
+        Branch.belongsToMany(models.PlacementTest, {
+            through: 'PlacementTestBranch',
             foreignKey: 'branch_id',
+            otherKey: 'placement_test_id',
             as: 'PlacementTests'
         });
-    };
+    };    
 
     return Branch;
 };

@@ -86,6 +86,8 @@ placementTestRoute.post('/createCollege', placementTestContoller.createCollege);
 
 placementTestRoute.get('/getAllColleges', placementTestContoller.getAllColleges);
 
+placementTestRoute.get('/getCollegeById/:id', placementTestContoller.getCollegeById);
+
 placementTestRoute.put('/updateCollege/:id', placementTestContoller.updateCollege);
 
 placementTestRoute.delete('/deleteCollege/:id', placementTestContoller.deleteCollege);
@@ -93,6 +95,8 @@ placementTestRoute.delete('/deleteCollege/:id', placementTestContoller.deleteCol
 placementTestRoute.post('/createBranch', placementTestContoller.createBranch);
 
 placementTestRoute.get('/getAllBranches', placementTestContoller.getAllBranches);
+
+placementTestRoute.get('/getBranchById/:id', placementTestContoller.getBranchById);
 
 placementTestRoute.put('/updateBranch/:id', placementTestContoller.updateBranch);
 

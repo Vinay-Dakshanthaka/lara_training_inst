@@ -40,10 +40,12 @@ const AssignBranches = ({ colleges, branches, fetchAssignedBranches }) => {
                     college_id: selectedCollege,
                     branch_ids: unassignedBranchIds,
                 });
-                toast.success('Branches assigned successfully');
-                fetchAssignedBranches(selectedCollege); // Refresh the assigned branches
+                // toast.success('Branches assigned successfully');
+                alert('Branches added to college Successfully')
+                fetchAssignedBranches(selectedCollege); 
             } catch (error) {
-                toast.error('Error assigning branches');
+                // toast.error('Error assigning branches');
+                alert('Unable to add the branches to college. Pleas try again.')
                 console.error(error);
             }
         } else {

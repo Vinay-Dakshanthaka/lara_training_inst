@@ -698,7 +698,12 @@ const PlacementTest = () => {
                     encrypted_test_id: test_id,
                 });
                 console.log("Fetch test details ", response1.data)
-                setTestDetails(response1.data)
+                setTestDetails({
+                    ...response1.data,
+                    college_name: response1.data.college?.college_name, 
+                    branches: response1.data.branches, 
+                });
+                
                 const { topic_ids, number_of_questions, show_result, is_Monitored, whatsAppChannelLink, test_title, certificate_name, issue_certificate } = response1.data;
                 setIsTestActive(true);
                 setShowResult(show_result);
@@ -739,6 +744,7 @@ const PlacementTest = () => {
 
                 setLoading(false);
             } catch (error) {
+                console.error("error fethcing test details : ", error)
                 if (error.response) {
                     if (error.response.status === 403) {
                         setLoading(false)
@@ -1129,7 +1135,8 @@ const PlacementTest = () => {
         try {
             const studentData = {
                 ...formData,
-                placement_test_id: test_id, // Include placement_test_id in the formData
+                college_name: testDetails.college_name || formData.college_name,
+                placement_test_id: test_id, 
             };
             console.log(studentData, "----------------------student");
             const response = await axios.post(`${baseURL}/api/placement-test/save-placement-test-student`, studentData);
@@ -1477,6 +1484,7 @@ const PlacementTest = () => {
                                                         required
                                                     />
                                                 </Form.Group>
+
                                                 <Form.Group controlId="email" className="mt-2">
                                                     <Form.Label>Email</Form.Label>
                                                     <Form.Control
@@ -1487,6 +1495,7 @@ const PlacementTest = () => {
                                                         required
                                                     />
                                                 </Form.Group>
+
                                                 <Form.Group controlId="phone_number" className="mt-2">
                                                     <Form.Label>Phone Number</Form.Label>
                                                     <Form.Control
@@ -1497,6 +1506,7 @@ const PlacementTest = () => {
                                                         required
                                                     />
                                                 </Form.Group>
+
                                                 <Form.Group controlId="university_name" className="mt-2">
                                                     <Form.Label>University Name</Form.Label>
                                                     <Form.Control
@@ -1506,16 +1516,51 @@ const PlacementTest = () => {
                                                         onChange={handleChange}
                                                     />
                                                 </Form.Group>
+
+                                                {/* Conditional College Field */}
                                                 <Form.Group controlId="college_name" className="mt-2">
                                                     <Form.Label>College Name</Form.Label>
                                                     <Form.Control
                                                         type="text"
                                                         name="college_name"
-                                                        value={formData.college_name}
+                                                        value={testDetails.college_name || formData.college_name}
                                                         onChange={handleChange}
+                                                        readOnly={!!testDetails.college_name}
                                                     />
                                                 </Form.Group>
+
+                                                {/* Conditional Branch Display */}
+                                                {testDetails.branches && testDetails.branches.length === 1 ? (
+                                                    <Form.Group controlId="branch_name" className="mt-2">
+                                                        <Form.Label>Branch</Form.Label>
+                                                        <Form.Control
+                                                            type="text"
+                                                            value={testDetails.branches[0].branch_name}
+                                                            readOnly
+                                                        />
+                                                    </Form.Group>
+                                                ) : testDetails.branches && testDetails.branches.length > 1 ? (
+                                                    <Form.Group controlId="branch_name" className="mt-2">
+                                                        <Form.Label>Select Branch</Form.Label>
+                                                        <Form.Control
+                                                            as="select"
+                                                            value={formData.branch_name}
+                                                            onChange={(e) =>
+                                                                setFormData({ ...formData, branch_name: e.target.value })
+                                                            }
+                                                        >
+                                                            <option value="">-- Select Branch --</option>
+                                                            {testDetails.branches.map((branch) => (
+                                                                <option key={branch.branch_id} value={branch.branch_name}>
+                                                                    {branch.branch_name}
+                                                                </option>
+                                                            ))}
+                                                        </Form.Control>
+                                                    </Form.Group>
+                                                ) : null}
+
                                                 {saveError && <p className="text-danger mt-2">{saveError}</p>}
+
                                                 <Button
                                                     variant="primary"
                                                     type="submit"
@@ -1525,6 +1570,7 @@ const PlacementTest = () => {
                                                     {savingStudent ? "Saving..." : "Submit"}
                                                 </Button>
                                             </Form>
+
                                         </div>
                                     </div>
 
@@ -1566,7 +1612,7 @@ const PlacementTest = () => {
                 </>
             ) : (
                 <>
-                <TestNotActiveYet />
+                    <TestNotActiveYet />
                 </>
             )}
         </>

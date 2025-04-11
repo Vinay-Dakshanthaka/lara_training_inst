@@ -138,8 +138,9 @@ module.exports = (sequelize, DataTypes) => {
             as: 'College'
         });
         PlacementTest.belongsToMany(models.Branch, {
-            through: 'CollegeBranch',  
+            through: 'PlacementTestBranch',
             foreignKey: 'placement_test_id',
+            otherKey: 'branch_id',
             as: 'Branches'
         });
         PlacementTest.belongsToMany(models.CumulativeQuestion, {
@@ -181,3 +182,7 @@ module.exports = (sequelize, DataTypes) => {
 
 // ALTER table laradb.placementtests
 // add column isDescriptiveTest BOOLEAN DEFAULT false;
+
+
+// ALTER TABLE laradb.placementtests
+// ADD COLUMN college_id INT NOT NULL;

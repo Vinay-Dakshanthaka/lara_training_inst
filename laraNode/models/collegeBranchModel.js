@@ -16,17 +16,10 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'branch_id'
             }
         },
-        placement_test_id: { 
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            references: {
-                model: 'Placementtests',
-                key: 'placement_test_id'
-            }
-        }
     }, {
         timestamps: false,
-        tableName: 'CollegeBranches'
+        tableName: 'CollegeBranches',
+
     });
 
     CollegeBranch.associate = (models) => {

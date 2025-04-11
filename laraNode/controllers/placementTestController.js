@@ -23,6 +23,7 @@ const PlacementTestWeeklyQuestionMapping = db.PlacementTestWeeklyQuestionMapping
 const College = db.College;
 const Branch = db.Branch;
 const CollegeBranch = db.CollegeBranch;
+const PlacementTestBranch = db.PlacementTestBranch;
 
 
 const jwtSecret = process.env.JWT_SECRET;
@@ -472,17 +473,26 @@ const createPlacementTestLink = async (req, res) => {
 
         // Check if college_id and branch_ids are provided, and if so, link them
         if (college_id && Array.isArray(branch_ids) && branch_ids.length > 0) {
-            const branchPromises = branch_ids.map(async (branch_id) => {
-                
-                await CollegeBranch.create({
-                    college_id, 
-                    branch_id,  
-                    placement_test_id: newTest.placement_test_id, 
-                });
+            // Optional: Validate if those branches belong to this college via CollegeBranch table
+            const validBranches = await CollegeBranch.findAll({
+                where: {
+                    college_id,
+                    branch_id: branch_ids
+                }
             });
-
-            await Promise.all(branchPromises);
+        
+            const validBranchIds = validBranches.map(cb => cb.branch_id);
+        
+            // Now create the many-to-many mapping
+            const ptbPromises = validBranchIds.map(branch_id =>
+                PlacementTestBranch.create({
+                    placement_test_id: newTest.placement_test_id,
+                    branch_id
+                })
+            );
+            await Promise.all(ptbPromises);
         }
+        
 
         return res.status(200).send({ message: 'Placement test added successfully and assigned to branches', newTest });
     } catch (error) {
@@ -949,33 +959,43 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
 
         const activeTest = await PlacementTest.findByPk(encrypted_test_id);
         if (!activeTest) {
-            return res.status(404).send({ message: "Test Not Found" })
+            return res.status(404).send({ message: "Test Not Found" });
         }
-        // console.log('ACtive test ', activeTest)
-        if (!activeTest.is_Active) {
-            return res.status(403).send({ message: "Access Forbidden" })
-        }
-        // // Decrypt the test ID
-        // let test_id;
-        // try {
-        //     test_id = decryptTestId(encrypted_test_id);
-        // } catch (error) {
-        //     console.error('Error decrypting test ID:', error.stack);
-        //     return res.status(400).send({ message: 'Invalid encrypted Test ID' });
-        // }
 
-        // Fetch all topic IDs associated with the decrypted test_id from PlacementTestTopic
+        if (!activeTest.is_Active) {
+            return res.status(403).send({ message: "Access Forbidden" });
+        }
+
+        // Fetch topics
         const placementTestTopics = await PlacementTestTopic.findAll({
-            where: {
-                // placement_test_id: test_id
-                placement_test_id: encrypted_test_id
-            },
-            attributes: ['topic_id'] // Only fetch topic_id
+            where: { placement_test_id: encrypted_test_id },
+            attributes: ['topic_id']
         });
 
-        // Fetch number_of_questions from PlacementTest table
+        // Fetch test info along with college and branch associations
         const placementTest = await PlacementTest.findByPk(encrypted_test_id, {
-            attributes: ['number_of_questions', 'show_result', 'is_Monitored', 'whatsAppChannelLink', 'test_title', 'certificate_name', 'issue_certificate'] // Only fetch number_of_questions
+            include: [
+                {
+                    model: College,
+                    as: 'College',
+                    attributes: ['college_id', 'college_name']
+                },
+                {
+                    model: Branch,
+                    as: 'Branches', // This uses the association defined in PlacementTest model
+                    attributes: ['branch_id', 'branch_name'],
+                    through: { attributes: [] } // Don't include join table metadata
+                }
+            ],
+            attributes: [
+                'number_of_questions',
+                'show_result',
+                'is_Monitored',
+                'whatsAppChannelLink',
+                'test_title',
+                'certificate_name',
+                'issue_certificate'
+            ]
         });
 
         if (!placementTest) {
@@ -993,12 +1013,19 @@ const fetchTestTopicIdsAndQnNums = async (req, res) => {
             whatsAppChannelLink: placementTest.whatsAppChannelLink,
             test_title: placementTest.test_title,
             certificate_name: placementTest.certificate_name,
-            issue_certificate: placementTest.issue_certificate
-            // start_time: PlacementTest.start_time,
-            // end_time: PlacementTest.end_time
+            issue_certificate: placementTest.issue_certificate,
+            college: placementTest.College ? {
+                college_id: placementTest.College.college_id,
+                college_name: placementTest.College.college_name
+            } : null,
+            branches: placementTest.Branches.map(branch => ({
+                branch_id: branch.branch_id,
+                branch_name: branch.branch_name
+            }))
         });
+
     } catch (error) {
-        console.error('Error fetching test details:', error.stack);
+        console.error('Error fetching test details:', error);
         return res.status(500).send({ message: error.message });
     }
 };
@@ -2576,6 +2603,24 @@ const getAllColleges = async (req, res) => {
     }
 };
 
+const getCollegeById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const college = await College.findOne({ where: { college_id: id } });
+
+        if (!college) {
+            return res.status(404).json({ message: 'College not found' });
+        }
+
+        return res.status(200).json(college);
+    } catch (error) {
+        console.error('Error fetching college:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+
 
 const updateCollege = async (req, res) => {
     try {
@@ -2641,6 +2686,23 @@ const getAllBranches = async (req, res) => {
         return res.status(200).json(branches);
     } catch (error) {
         console.error('Error fetching branches:', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const getBranchById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const branch = await Branch.findOne({ where: { branch_id: id } });
+
+        if (!branch) {
+            return res.status(404).json({ message: 'Branch not found' });
+        }
+
+        return res.status(200).json(branch);
+    } catch (error) {
+        console.error('Error fetching Branch:', error);
         return res.status(500).json({ message: error.message });
     }
 };
@@ -2821,11 +2883,13 @@ module.exports = {
     createCollege, 
     updateCollege, 
     getAllColleges, 
+    getCollegeById,
     deleteCollege, 
 
     createBranch, 
     updateBranch, 
     getAllBranches, 
+    getBranchById,
     deleteBranch, 
 
     assignBranchesToCollegeNoTestId,

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 const CollegeTable = ({ colleges, assignedBranches, onEdit, onDelete, fetchAssignedBranches }) => {
-    // When the component mounts or a college is added/updated, fetch assigned branches for each college
     useEffect(() => {
         colleges.forEach(college => {
             if (!assignedBranches[college.college_id]) {
@@ -37,7 +36,7 @@ const CollegeTable = ({ colleges, assignedBranches, onEdit, onDelete, fetchAssig
                             )}
                         </td>
                         <td>
-                            <button className="btn btn-warning" onClick={() => onEdit(college)}>
+                            <button className="btn btn-warning mx-2" onClick={() => onEdit(college)}>
                                 Edit
                             </button>
                             <button className="btn btn-danger" onClick={() => onDelete(college.college_id)}>
